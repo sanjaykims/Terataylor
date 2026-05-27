@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ShadowingPlayer from './components/ShadowingPlayer';
 import VocabularyPanel from './components/VocabularyPanel';
 import StoryWriter from './components/StoryWriter';
 import OpinionWriter from './components/OpinionWriter';
 import GamesPanel from './components/GamesPanel';
+import ProgressDashboard from './components/ProgressDashboard';
+import { trackSession } from './lib/tracker';
 
-type MainTab = 'c1' | 'v1';
+type MainTab = 'c1' | 'v1' | 'progress';
 type C1Tab = 'shadowing' | 'vocabulary' | 'opinion' | 'games';
 type V1Tab = 'story' | 'vocabulary' | 'games';
 
@@ -13,10 +15,35 @@ const SAMPLE_TEXT = `Elephants are the largest land animals on Earth. They live 
 
 export default function App() {
   const [mainTab, setMainTab] = useState<MainTab>('c1');
-  const [c1Tab, setC1Tab] = useState<C1Tab>('shadowing');
-  const [v1Tab, setV1Tab] = useState<V1Tab>('story');
-  const [text, setText] = useState('');
+  const [c1Tab, setC1Tab]     = useState<C1Tab>('shadowing');
+  const [v1Tab, setV1Tab]     = useState<V1Tab>('story');
+  const [text, setText]       = useState('');
   const [showTextInput, setShowTextInput] = useState(true);
+
+  // Session tracking: record time spent in each feature
+  const sessionStart = useRef<number>(Date.now());
+  const currentMode    = useRef<'c1' | 'v1'>('c1');
+  const currentFeature = useRef<string>('shadowing');
+
+  const flushSession = () => {
+    const secs = (Date.now() - sessionStart.current) / 1000;
+    trackSession(currentMode.current, currentFeature.current, secs);
+    sessionStart.current = Date.now();
+  };
+
+  const switchTab = (mode: 'c1' | 'v1', feature: string) => {
+    flushSession();
+    currentMode.current    = mode;
+    currentFeature.current = feature;
+  };
+
+  // Flush session on page unload
+  useEffect(() => {
+    const handler = () => flushSession();
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const activeText = text.trim() || SAMPLE_TEXT;
 
@@ -41,45 +68,39 @@ export default function App() {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-5 space-y-5">
-        {/* Main Tab: C1 vs V1 */}
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => setMainTab('c1')}
+        {/* Main Tab */}
+        <div className="grid grid-cols-3 gap-3">
+          <button onClick={() => { flushSession(); setMainTab('c1'); }}
             className={`py-4 rounded-2xl font-bold text-base transition-all flex flex-col items-center gap-1 ${
-              mainTab === 'c1'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                : 'bg-white text-gray-500 hover:bg-gray-50 shadow-sm'
-            }`}
-          >
+              mainTab === 'c1' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-white text-gray-500 hover:bg-gray-50 shadow-sm'
+            }`}>
             <span className="text-2xl">🎧</span>
-            <span>C1 — 읽기/듣기</span>
-            <span className={`text-xs font-normal ${mainTab === 'c1' ? 'text-indigo-200' : 'text-gray-400'}`}>
-              섀도잉 · 의견 쓰기
-            </span>
+            <span className="text-sm">C1 읽기/듣기</span>
+            <span className={`text-xs font-normal ${mainTab === 'c1' ? 'text-indigo-200' : 'text-gray-400'}`}>섀도잉 · 쓰기</span>
           </button>
-          <button
-            onClick={() => setMainTab('v1')}
+          <button onClick={() => { flushSession(); setMainTab('v1'); }}
             className={`py-4 rounded-2xl font-bold text-base transition-all flex flex-col items-center gap-1 ${
-              mainTab === 'v1'
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-200'
-                : 'bg-white text-gray-500 hover:bg-gray-50 shadow-sm'
-            }`}
-          >
+              mainTab === 'v1' ? 'bg-purple-600 text-white shadow-lg shadow-purple-200' : 'bg-white text-gray-500 hover:bg-gray-50 shadow-sm'
+            }`}>
             <span className="text-2xl">📖</span>
-            <span>V1 — 소설/스토리</span>
-            <span className={`text-xs font-normal ${mainTab === 'v1' ? 'text-purple-200' : 'text-gray-400'}`}>
-              내용 이해 · 스토리 쓰기
-            </span>
+            <span className="text-sm">V1 소설</span>
+            <span className={`text-xs font-normal ${mainTab === 'v1' ? 'text-purple-200' : 'text-gray-400'}`}>이해 · 스토리</span>
+          </button>
+          <button onClick={() => { flushSession(); setMainTab('progress'); }}
+            className={`py-4 rounded-2xl font-bold text-base transition-all flex flex-col items-center gap-1 ${
+              mainTab === 'progress' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' : 'bg-white text-gray-500 hover:bg-gray-50 shadow-sm'
+            }`}>
+            <span className="text-2xl">📊</span>
+            <span className="text-sm">성장 기록</span>
+            <span className={`text-xs font-normal ${mainTab === 'progress' ? 'text-emerald-200' : 'text-gray-400'}`}>단어 · 점수</span>
           </button>
         </div>
 
         {/* Text Input */}
         {needsTextInput && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <button
-              onClick={() => setShowTextInput(!showTextInput)}
-              className="w-full px-5 py-3 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
-            >
+            <button onClick={() => setShowTextInput(!showTextInput)}
+              className="w-full px-5 py-3 flex items-center justify-between text-left hover:bg-gray-50 transition-colors">
               <span className="font-semibold text-gray-700">
                 📝 {mainTab === 'c1' ? '교재 지문 입력' : '소설 지문 입력'}
               </span>
@@ -87,9 +108,7 @@ export default function App() {
             </button>
             {showTextInput && (
               <div className="px-5 pb-5 space-y-2">
-                <textarea
-                  value={text}
-                  onChange={e => setText(e.target.value)}
+                <textarea value={text} onChange={e => setText(e.target.value)}
                   placeholder={`영어 본문을 여기에 붙여넣으세요...\n\n(입력이 없으면 샘플 지문으로 연습할 수 있어요)`}
                   className="w-full h-36 border-2 border-gray-100 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-300 focus:bg-white transition-all resize-none leading-relaxed"
                 />
@@ -98,10 +117,7 @@ export default function App() {
                     {text.trim() ? `${text.trim().split(/\s+/).length}단어 입력됨` : '샘플 지문 사용 중'}
                   </span>
                   {text && (
-                    <button
-                      onClick={() => setText('')}
-                      className="text-xs text-gray-400 hover:text-red-400 transition-colors"
-                    >
+                    <button onClick={() => setText('')} className="text-xs text-gray-400 hover:text-red-400 transition-colors">
                       지우기
                     </button>
                   )}
@@ -118,24 +134,22 @@ export default function App() {
               {([
                 { id: 'shadowing', label: '🎧 섀도잉' },
                 { id: 'vocabulary', label: '📚 단어장' },
-                { id: 'opinion', label: '✍️ 의견 쓰기' },
-                { id: 'games', label: '🎮 게임' },
+                { id: 'opinion',  label: '✍️ 의견 쓰기' },
+                { id: 'games',    label: '🎮 게임' },
               ] as { id: C1Tab; label: string }[]).map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setC1Tab(t.id)}
+                <button key={t.id}
+                  onClick={() => { switchTab('c1', t.id); setC1Tab(t.id); }}
                   className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                     c1Tab === t.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
+                  }`}>
                   {t.label}
                 </button>
               ))}
             </div>
-            {c1Tab === 'shadowing' && <ShadowingPlayer text={activeText} />}
+            {c1Tab === 'shadowing'  && <ShadowingPlayer text={activeText} />}
             {c1Tab === 'vocabulary' && <VocabularyPanel text={activeText} />}
-            {c1Tab === 'opinion' && <OpinionWriter />}
-            {c1Tab === 'games' && <GamesPanel text={activeText} />}
+            {c1Tab === 'opinion'    && <OpinionWriter />}
+            {c1Tab === 'games'      && <GamesPanel text={activeText} />}
           </>
         )}
 
@@ -144,26 +158,27 @@ export default function App() {
           <>
             <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
               {([
-                { id: 'story', label: '📖 스토리 쓰기' },
+                { id: 'story',    label: '📖 스토리 쓰기' },
                 { id: 'vocabulary', label: '📚 단어장' },
-                { id: 'games', label: '🎮 게임' },
+                { id: 'games',    label: '🎮 게임' },
               ] as { id: V1Tab; label: string }[]).map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setV1Tab(t.id)}
+                <button key={t.id}
+                  onClick={() => { switchTab('v1', t.id); setV1Tab(t.id); }}
                   className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                     v1Tab === t.id ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
+                  }`}>
                   {t.label}
                 </button>
               ))}
             </div>
-            {v1Tab === 'story' && <StoryWriter />}
+            {v1Tab === 'story'      && <StoryWriter />}
             {v1Tab === 'vocabulary' && <VocabularyPanel text={activeText} />}
-            {v1Tab === 'games' && <GamesPanel text={activeText} />}
+            {v1Tab === 'games'      && <GamesPanel text={activeText} />}
           </>
         )}
+
+        {/* Progress */}
+        {mainTab === 'progress' && <ProgressDashboard />}
       </div>
     </div>
   );

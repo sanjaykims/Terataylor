@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { extractVocabulary } from '../utils/textUtils';
+import { trackGameScore } from '../lib/tracker';
 
 const CW = 480, CH = 500;
 const SHIP_Y = CH - 65;
@@ -120,7 +121,10 @@ export default function SpaceGame({ text }: { text: string }) {
     if (phase !== 'wave_done') return;
     const t = setTimeout(() => {
       const next = gs.current.wave + 1;
-      if (next >= WAVES.length) { setPhase('win'); return; }
+      if (next >= WAVES.length) {
+        trackGameScore('space', gs.current.score, { wave: WAVES.length, details: { result: 'victory' } });
+        setPhase('win'); return;
+      }
       setupWave(next);
       setPhase('play');
       setTimeout(() => inp.current?.focus(), 50);
@@ -200,7 +204,10 @@ export default function SpaceGame({ text }: { text: string }) {
         playDeath();
         g.lives = Math.max(0, g.lives - esc.length);
         g.aliens = g.aliens.filter(a => a.y <= CH+35);
-        if (g.lives <= 0) { setPhase('over'); return; }
+        if (g.lives <= 0) {
+          trackGameScore('space', g.score, { wave: g.wave + 1, details: { result: 'game_over' } });
+          setPhase('over'); return;
+        }
       }
 
       // ── WAVE CLEAR ──

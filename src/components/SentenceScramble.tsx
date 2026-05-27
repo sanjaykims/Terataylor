@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { parseSentences } from '../utils/textUtils';
+import { trackGameScore } from '../lib/tracker';
 
 interface WordToken { id: number; word: string; }
 
@@ -78,9 +79,16 @@ export default function SentenceScramble({ text }: { text: string }) {
     setIsCorrect(correct);
     setChecked(true);
     if (correct) {
-      setScore(s => s + 10 + streak * 2);
+      const newScore = score + 10 + streak * 2;
+      setScore(newScore);
       setStreak(s => s + 1);
-      setCompleted(prev => new Set([...prev, sentIdx]));
+      setCompleted(prev => {
+        const next = new Set([...prev, sentIdx]);
+        if (next.size === sentences.length) {
+          trackGameScore('scramble', newScore, { correct: next.size, total: sentences.length });
+        }
+        return next;
+      });
     } else {
       setStreak(0);
     }

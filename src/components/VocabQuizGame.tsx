@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { extractVocabulary } from '../utils/textUtils';
+import { trackVocabResult, trackGameScore } from '../lib/tracker';
 
 interface WordDef { word: string; definition: string; }
 interface Question { word: string; correct: string; options: string[]; }
@@ -119,6 +120,7 @@ export default function VocabQuizGame({ text }: { text: string }) {
 
     const correct = option === questions[qIndex]?.correct;
     setSelected(option);
+    trackVocabResult(questions[qIndex].word, correct);
     if (correct) {
       const bonus = Math.ceil(timeLeft * 0.5);
       setScore(s => s + 10 + streak * 3 + bonus);
@@ -131,6 +133,8 @@ export default function VocabQuizGame({ text }: { text: string }) {
 
   const nextQuestion = () => {
     if (qIndex + 1 >= questions.length) {
+      const correctCount = results.filter(Boolean).length + (selected === questions[qIndex]?.correct ? 1 : 0);
+      trackGameScore('quiz', score, { correct: correctCount, total: questions.length });
       setGameState('done');
     } else {
       setSelected(null);
