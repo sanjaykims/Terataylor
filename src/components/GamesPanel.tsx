@@ -1,42 +1,35 @@
 import { useState } from 'react';
 import SentenceScramble from './SentenceScramble';
 import VocabQuizGame from './VocabQuizGame';
+import SpaceGame from './SpaceGame';
 
-type GameType = 'scramble' | 'quiz';
+type GameType = 'scramble' | 'quiz' | 'space';
+
+const TABS: { id: GameType; label: string; active: string }[] = [
+  { id: 'scramble', label: '🎮 문장 퍼즐',    active: 'bg-indigo-600 text-white shadow-sm' },
+  { id: 'quiz',     label: '⚡ 단어 퀴즈',    active: 'bg-orange-500 text-white shadow-sm' },
+  { id: 'space',    label: '🛸 우주 게임',    active: 'bg-slate-800 text-green-400 shadow-sm' },
+];
 
 export default function GamesPanel({ text }: { text: string }) {
-  const [game, setGame] = useState<GameType>('scramble');
+  const [game, setGame] = useState<GameType>('space');
 
   return (
     <div className="space-y-4">
       <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
-        <button
-          onClick={() => setGame('scramble')}
-          className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
-            game === 'scramble'
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'text-gray-500 hover:bg-gray-50'
-          }`}
-        >
-          🎮 문장 퍼즐
-        </button>
-        <button
-          onClick={() => setGame('quiz')}
-          className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
-            game === 'quiz'
-              ? 'bg-orange-500 text-white shadow-sm'
-              : 'text-gray-500 hover:bg-gray-50'
-          }`}
-        >
-          ⚡ 단어 퀴즈
-        </button>
+        {TABS.map(t => (
+          <button key={t.id} onClick={() => setGame(t.id)}
+            className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
+              game === t.id ? t.active : 'text-gray-500 hover:bg-gray-50'
+            }`}>
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      {game === 'scramble' ? (
-        <SentenceScramble text={text} />
-      ) : (
-        <VocabQuizGame text={text} />
-      )}
+      {game === 'scramble' && <SentenceScramble text={text} />}
+      {game === 'quiz'     && <VocabQuizGame text={text} />}
+      {game === 'space'    && <SpaceGame text={text} />}
     </div>
   );
 }
