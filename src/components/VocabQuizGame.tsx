@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { extractVocabulary } from '../utils/textUtils';
 import { trackVocabResult, trackGameScore } from '../lib/tracker';
+import type { VocabItem } from '../lib/types';
 
 interface WordDef { word: string; definition: string; }
 interface Question { word: string; correct: string; options: string[]; }
@@ -40,8 +41,8 @@ function buildQuestions(defs: WordDef[]): Question[] {
 
 type GameState = 'idle' | 'loading' | 'playing' | 'done';
 
-export default function VocabQuizGame({ text }: { text: string }) {
-  const vocab = extractVocabulary(text);
+export default function VocabQuizGame({ text, bookVocab }: { text: string; bookVocab?: VocabItem[] | null }) {
+  const extractedVocab = extractVocabulary(text);
   const [, setWordDefs] = useState<WordDef[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [gameState, setGameState] = useState<GameState>('idle');
@@ -92,16 +93,23 @@ export default function VocabQuizGame({ text }: { text: string }) {
 
   const startGame = async () => {
     setGameState('loading');
-    const candidates = vocab.slice(0, 10);
-    const results = await Promise.all(
-      candidates.map(v => fetchDef(v.word).then(d => d ? { word: v.word, definition: d } : null))
-    );
-    const valid = results.filter(Boolean) as WordDef[];
-    if (valid.length < 4) {
-      setGameState('idle');
-      return;
+    let defs: WordDef[];
+    if (bookVocab && bookVocab.length >= 4) {
+      // Book-provided vocab already has definitions — use directly
+      defs = bookVocab.slice(0, 8).map(v => ({ word: v.word, definition: v.definition }));
+    } else {
+      // Auto-extract from text and fetch definitions from dictionary
+      const candidates = extractedVocab.slice(0, 10);
+      const results = await Promise.all(
+        candidates.map(v => fetchDef(v.word).then(d => d ? { word: v.word, definition: d } : null))
+      );
+      const valid = results.filter(Boolean) as WordDef[];
+      if (valid.length < 4) {
+        setGameState('idle');
+        return;
+      }
+      defs = valid.slice(0, 8);
     }
-    const defs = valid.slice(0, 8);
     setWordDefs(defs);
     const qs = buildQuestions(defs);
     setQuestions(qs);
@@ -142,10 +150,10 @@ export default function VocabQuizGame({ text }: { text: string }) {
     }
   };
 
-  if (vocab.length < 4) {
+  if ((bookVocab?.length ?? 0) < 4 && extractedVocab.length < 4) {
     return (
       <div className="text-center py-12 text-gray-400 text-lg">
-        단어 퀴즈를 위해 지문을 먼저 입력해 주세요 (단어 4개 이상 필요)
+        단어 퀴즈를 위해 지문 또는 단어 사진을 먼저 업로드해 주세요 (단어 4개 이상 필요)
       </div>
     );
   }

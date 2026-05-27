@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { extractVocabulary } from '../utils/textUtils';
 import { trackGameScore } from '../lib/tracker';
+import type { VocabItem } from '../lib/types';
 
 const CW = 480, CH = 500;
 const SHIP_Y = CH - 65;
@@ -67,7 +68,7 @@ function rrect(ctx: CanvasRenderingContext2D, x:number, y:number, w:number, h:nu
   ctx.closePath();
 }
 
-export default function SpaceGame({ text }: { text: string }) {
+export default function SpaceGame({ text, bookVocab }: { text: string; bookVocab?: VocabItem[] | null }) {
   const cvs  = useRef<HTMLCanvasElement>(null);
   const inp  = useRef<HTMLInputElement>(null);
   const raf  = useRef(0);
@@ -89,6 +90,7 @@ export default function SpaceGame({ text }: { text: string }) {
   });
 
   const vocab = (() => {
+    if (bookVocab && bookVocab.length >= 6) return bookVocab.map(v => v.word);
     const w = extractVocabulary(text).map(v => v.word);
     return w.length >= 6 ? w : DEFAULT_WORDS;
   })();

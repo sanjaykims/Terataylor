@@ -2,16 +2,22 @@ import { useState } from 'react';
 import SentenceScramble from './SentenceScramble';
 import VocabQuizGame from './VocabQuizGame';
 import SpaceGame from './SpaceGame';
+import type { VocabItem } from '../lib/types';
 
 type GameType = 'scramble' | 'quiz' | 'space';
 
 const TABS: { id: GameType; label: string; active: string }[] = [
-  { id: 'scramble', label: '🎮 문장 퍼즐',    active: 'bg-indigo-600 text-white shadow-sm' },
-  { id: 'quiz',     label: '⚡ 단어 퀴즈',    active: 'bg-orange-500 text-white shadow-sm' },
-  { id: 'space',    label: '🛸 우주 게임',    active: 'bg-slate-800 text-green-400 shadow-sm' },
+  { id: 'scramble', label: '🎮 문장 퍼즐',  active: 'bg-indigo-600 text-white shadow-sm' },
+  { id: 'quiz',     label: '⚡ 단어 퀴즈',  active: 'bg-orange-500 text-white shadow-sm' },
+  { id: 'space',    label: '🛸 우주 게임',  active: 'bg-slate-800 text-green-400 shadow-sm' },
 ];
 
-export default function GamesPanel({ text }: { text: string }) {
+interface Props {
+  text: string;
+  vocab?: VocabItem[] | null;
+}
+
+export default function GamesPanel({ text, vocab }: Props) {
   const [game, setGame] = useState<GameType>('space');
 
   return (
@@ -28,8 +34,8 @@ export default function GamesPanel({ text }: { text: string }) {
       </div>
 
       {game === 'scramble' && <SentenceScramble text={text} />}
-      {game === 'quiz'     && <VocabQuizGame text={text} />}
-      {game === 'space'    && <SpaceGame text={text} />}
+      {game === 'quiz'     && <VocabQuizGame text={text} bookVocab={vocab} />}
+      {game === 'space'    && <SpaceGame text={text} bookVocab={vocab} />}
     </div>
   );
 }
