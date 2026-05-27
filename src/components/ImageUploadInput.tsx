@@ -5,8 +5,10 @@ import type { VocabItem } from '../lib/types';
 interface BaseProps {
   label: string;
   hint?: string;
+  savedSummary?: string;   // non-empty = already saved; show saved state
+  onClear?: () => void;    // called when user wants to clear saved data
 }
-interface TextProps extends BaseProps { mode: 'text'; onExtracted: (text: string) => void; }
+interface TextProps  extends BaseProps { mode: 'text';  onExtracted: (text: string)      => void; }
 interface VocabProps extends BaseProps { mode: 'vocab'; onExtracted: (items: VocabItem[]) => void; }
 type Props = TextProps | VocabProps;
 
@@ -34,7 +36,7 @@ function compressImage(file: File, maxPx = 1400): Promise<{ data: string; type: 
 }
 
 export default function ImageUploadInput(props: Props) {
-  const { mode, label, hint } = props;
+  const { mode, label, hint, savedSummary, onClear } = props;
   const [images, setImages]     = useState<ImageEntry[]>([]);
   const [status, setStatus]     = useState<'idle' | 'extracting' | 'review' | 'done'>('idle');
   const [rawText, setRawText]   = useState('');
@@ -91,6 +93,26 @@ export default function ImageUploadInput(props: Props) {
     }
     setStatus('done');
   };
+
+  // If parent already has saved data, show a compact saved banner
+  if (savedSummary) {
+    return (
+      <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+        <div>
+          <span className="text-sm font-semibold text-gray-700 mr-2">{label}</span>
+          <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+            ✓ {savedSummary}
+          </span>
+        </div>
+        <button
+          onClick={onClear}
+          className="text-xs text-gray-400 hover:text-red-500 transition-colors ml-3 shrink-0"
+          title="삭제 후 다시 업로드">
+          🗑 삭제
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
