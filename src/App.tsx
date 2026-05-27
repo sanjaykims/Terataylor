@@ -7,22 +7,22 @@ import GamesPanel from './components/GamesPanel';
 import ProgressDashboard from './components/ProgressDashboard';
 import { trackSession } from './lib/tracker';
 
-type MainTab = 'c1' | 'v1' | 'progress';
-type C1Tab = 'shadowing' | 'vocabulary' | 'opinion' | 'games';
+type MainTab = 'a2' | 'v1' | 'progress';
+type A2Tab = 'shadowing' | 'vocabulary' | 'opinion' | 'games';
 type V1Tab = 'story' | 'vocabulary' | 'games';
 
 const SAMPLE_TEXT = `Elephants are the largest land animals on Earth. They live in Africa and Asia. These animals are known for their long trunks, which they use to pick up food and drink water. Elephants are very intelligent and have excellent memories. They live in family groups called herds, led by the oldest female. Sadly, elephants are endangered because of hunting and habitat loss. We must protect these amazing creatures.`;
 
 export default function App() {
-  const [mainTab, setMainTab] = useState<MainTab>('c1');
-  const [c1Tab, setC1Tab]     = useState<C1Tab>('shadowing');
+  const [mainTab, setMainTab] = useState<MainTab>('a2');
+  const [a2Tab, setA2Tab]     = useState<A2Tab>('shadowing');
   const [v1Tab, setV1Tab]     = useState<V1Tab>('story');
   const [text, setText]       = useState('');
   const [showTextInput, setShowTextInput] = useState(true);
 
   // Session tracking: record time spent in each feature
   const sessionStart = useRef<number>(Date.now());
-  const currentMode    = useRef<'c1' | 'v1'>('c1');
+  const currentMode    = useRef<'a2' | 'v1'>('a2');
   const currentFeature = useRef<string>('shadowing');
 
   const flushSession = () => {
@@ -31,7 +31,7 @@ export default function App() {
     sessionStart.current = Date.now();
   };
 
-  const switchTab = (mode: 'c1' | 'v1', feature: string) => {
+  const switchTab = (mode: 'a2' | 'v1', feature: string) => {
     flushSession();
     currentMode.current    = mode;
     currentFeature.current = feature;
@@ -48,7 +48,7 @@ export default function App() {
   const activeText = text.trim() || SAMPLE_TEXT;
 
   const needsTextInput =
-    (mainTab === 'c1' && (c1Tab === 'shadowing' || c1Tab === 'vocabulary' || c1Tab === 'games')) ||
+    (mainTab === 'a2' && (a2Tab === 'shadowing' || a2Tab === 'vocabulary' || a2Tab === 'games')) ||
     (mainTab === 'v1' && (v1Tab === 'vocabulary' || v1Tab === 'games'));
 
   return (
@@ -70,13 +70,13 @@ export default function App() {
       <div className="max-w-4xl mx-auto px-4 py-5 space-y-5">
         {/* Main Tab */}
         <div className="grid grid-cols-3 gap-3">
-          <button onClick={() => { flushSession(); setMainTab('c1'); }}
+          <button onClick={() => { flushSession(); setMainTab('a2'); }}
             className={`py-4 rounded-2xl font-bold text-base transition-all flex flex-col items-center gap-1 ${
-              mainTab === 'c1' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-white text-gray-500 hover:bg-gray-50 shadow-sm'
+              mainTab === 'a2' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-white text-gray-500 hover:bg-gray-50 shadow-sm'
             }`}>
             <span className="text-2xl">🎧</span>
-            <span className="text-sm">C1 읽기/듣기</span>
-            <span className={`text-xs font-normal ${mainTab === 'c1' ? 'text-indigo-200' : 'text-gray-400'}`}>섀도잉 · 쓰기</span>
+            <span className="text-sm">A2 읽기/듣기</span>
+            <span className={`text-xs font-normal ${mainTab === 'a2' ? 'text-indigo-200' : 'text-gray-400'}`}>섀도잉 · 쓰기</span>
           </button>
           <button onClick={() => { flushSession(); setMainTab('v1'); }}
             className={`py-4 rounded-2xl font-bold text-base transition-all flex flex-col items-center gap-1 ${
@@ -102,7 +102,7 @@ export default function App() {
             <button onClick={() => setShowTextInput(!showTextInput)}
               className="w-full px-5 py-3 flex items-center justify-between text-left hover:bg-gray-50 transition-colors">
               <span className="font-semibold text-gray-700">
-                📝 {mainTab === 'c1' ? '교재 지문 입력' : '소설 지문 입력'}
+                📝 {mainTab === 'a2' ? '교재 지문 입력' : '소설 지문 입력'}
               </span>
               <span className="text-gray-400 text-sm">{showTextInput ? '▲ 접기' : '▼ 펼치기'}</span>
             </button>
@@ -127,8 +127,8 @@ export default function App() {
           </div>
         )}
 
-        {/* C1 Content */}
-        {mainTab === 'c1' && (
+        {/* A2 Content */}
+        {mainTab === 'a2' && (
           <>
             <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
               {([
@@ -136,20 +136,20 @@ export default function App() {
                 { id: 'vocabulary', label: '📚 단어장' },
                 { id: 'opinion',  label: '✍️ 의견 쓰기' },
                 { id: 'games',    label: '🎮 게임' },
-              ] as { id: C1Tab; label: string }[]).map(t => (
+              ] as { id: A2Tab; label: string }[]).map(t => (
                 <button key={t.id}
-                  onClick={() => { switchTab('c1', t.id); setC1Tab(t.id); }}
+                  onClick={() => { switchTab('a2', t.id); setA2Tab(t.id); }}
                   className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                    c1Tab === t.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
+                    a2Tab === t.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
                   }`}>
                   {t.label}
                 </button>
               ))}
             </div>
-            {c1Tab === 'shadowing'  && <ShadowingPlayer text={activeText} />}
-            {c1Tab === 'vocabulary' && <VocabularyPanel text={activeText} />}
-            {c1Tab === 'opinion'    && <OpinionWriter />}
-            {c1Tab === 'games'      && <GamesPanel text={activeText} />}
+            {a2Tab === 'shadowing'  && <ShadowingPlayer text={activeText} />}
+            {a2Tab === 'vocabulary' && <VocabularyPanel text={activeText} />}
+            {a2Tab === 'opinion'    && <OpinionWriter />}
+            {a2Tab === 'games'      && <GamesPanel text={activeText} />}
           </>
         )}
 

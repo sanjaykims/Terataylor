@@ -45,7 +45,7 @@ export async function trackGameScore(
 
 // ── Study session ─────────────────────────────────────────────────────────────
 export async function trackSession(
-  mode: 'c1' | 'v1',
+  mode: 'a2' | 'v1',
   feature: string,
   durationSeconds: number
 ) {
