@@ -3,10 +3,11 @@ import ShadowingPlayer from './components/ShadowingPlayer';
 import VocabularyPanel from './components/VocabularyPanel';
 import StoryWriter from './components/StoryWriter';
 import OpinionWriter from './components/OpinionWriter';
+import GamesPanel from './components/GamesPanel';
 
 type MainTab = 'c1' | 'v1';
-type C1Tab = 'shadowing' | 'vocabulary' | 'opinion';
-type V1Tab = 'story' | 'vocabulary';
+type C1Tab = 'shadowing' | 'vocabulary' | 'opinion' | 'games';
+type V1Tab = 'story' | 'vocabulary' | 'games';
 
 const SAMPLE_TEXT = `Elephants are the largest land animals on Earth. They live in Africa and Asia. These animals are known for their long trunks, which they use to pick up food and drink water. Elephants are very intelligent and have excellent memories. They live in family groups called herds, led by the oldest female. Sadly, elephants are endangered because of hunting and habitat loss. We must protect these amazing creatures.`;
 
@@ -20,8 +21,8 @@ export default function App() {
   const activeText = text.trim() || SAMPLE_TEXT;
 
   const needsTextInput =
-    (mainTab === 'c1' && (c1Tab === 'shadowing' || c1Tab === 'vocabulary')) ||
-    (mainTab === 'v1' && v1Tab === 'vocabulary');
+    (mainTab === 'c1' && (c1Tab === 'shadowing' || c1Tab === 'vocabulary' || c1Tab === 'games')) ||
+    (mainTab === 'v1' && (v1Tab === 'vocabulary' || v1Tab === 'games'));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50">
@@ -118,6 +119,7 @@ export default function App() {
                 { id: 'shadowing', label: '🎧 섀도잉' },
                 { id: 'vocabulary', label: '📚 단어장' },
                 { id: 'opinion', label: '✍️ 의견 쓰기' },
+                { id: 'games', label: '🎮 게임' },
               ] as { id: C1Tab; label: string }[]).map(t => (
                 <button
                   key={t.id}
@@ -133,6 +135,7 @@ export default function App() {
             {c1Tab === 'shadowing' && <ShadowingPlayer text={activeText} />}
             {c1Tab === 'vocabulary' && <VocabularyPanel text={activeText} />}
             {c1Tab === 'opinion' && <OpinionWriter />}
+            {c1Tab === 'games' && <GamesPanel text={activeText} />}
           </>
         )}
 
@@ -143,6 +146,7 @@ export default function App() {
               {([
                 { id: 'story', label: '📖 스토리 쓰기' },
                 { id: 'vocabulary', label: '📚 단어장' },
+                { id: 'games', label: '🎮 게임' },
               ] as { id: V1Tab; label: string }[]).map(t => (
                 <button
                   key={t.id}
@@ -157,6 +161,7 @@ export default function App() {
             </div>
             {v1Tab === 'story' && <StoryWriter />}
             {v1Tab === 'vocabulary' && <VocabularyPanel text={activeText} />}
+            {v1Tab === 'games' && <GamesPanel text={activeText} />}
           </>
         )}
       </div>
