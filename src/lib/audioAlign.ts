@@ -1,36 +1,42 @@
-// Real speech→text alignment.
-// Transcribes audio with Whisper (word-level timestamps) and aligns
-// detected words to chapter sentences by matching word CONTENT, not
-// just position fractions. This handles variable pacing, intros, and
-// Whisper omissions correctly.
+// Audio-text alignment — v4 two-pass algorithm
+//
+// Pass 1 (coarse): Whisper segment-level timestamps + anchor-word matching
+//   - Segment timestamps are computed by Whisper's neural attention, much
+//     more reliable than interpolated word-level timestamps.
+//   - Words ≥ 4 chars are used as anchors. A dual search window (greedy
+//     position + fraction-based expected position) prevents the scan from
+//     getting permanently stuck behind the real audio position.
+//   - Piecewise linear interpolation between matched anchors fills in all
+//     sentence positions.
+//
+// Pass 2 (fine): sentence-start word matching near the interpolated time
+//   - For each sentence, search a ±2 s window around the Pass-1 estimate
+//     for the sentence's first words. If a 2-of-3 word run is found, use
+//     its timestamp as the exact sentence start.
+//
+// Result: typically within half a sentence of the correct position even
+// when Whisper misses or mispronounces several words.
 
 export type AlignPhase = 'loading-model' | 'decoding' | 'transcribing' | 'aligning' | 'done';
-export interface AlignProgress {
-  phase: AlignPhase;
-  pct?: number;   // 0..100 for model download
-}
+export interface AlignProgress { phase: AlignPhase; pct?: number; }
 
-interface WordChunk { text: string; timestamp: [number, number | null] }
+interface Chunk { text: string; timestamp: [number, number | null] }
 
-// Decode any audio file to the 16 kHz mono Float32 that Whisper expects.
 async function decodeTo16kMono(buffer: ArrayBuffer): Promise<Float32Array> {
   const Ctx: typeof AudioContext =
     window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const tmp = new Ctx();
   const decoded = await tmp.decodeAudioData(buffer.slice(0));
   await tmp.close();
-
   const frames = Math.ceil(decoded.duration * 16000);
   const offline = new OfflineAudioContext(1, frames, 16000);
   const src = offline.createBufferSource();
   src.buffer = decoded;
   src.connect(offline.destination);
   src.start();
-  const rendered = await offline.startRendering();
-  return rendered.getChannelData(0);
+  return (await offline.startRendering()).getChannelData(0);
 }
 
-// Lazy singleton so the (~40 MB) model downloads only once per device.
 let transcriberPromise: Promise<unknown> | null = null;
 async function getTranscriber(onProgress: (p: AlignProgress) => void) {
   if (!transcriberPromise) {
@@ -48,16 +54,20 @@ async function getTranscriber(onProgress: (p: AlignProgress) => void) {
   return transcriberPromise;
 }
 
-// Transcribe the audio and return each detected word with its start timestamp.
-async function transcribeWords(
+const normWord = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+// Build a flat word list from Whisper segment-level output.
+// Within each segment, word times are linearly interpolated between the
+// reliable segment-level start/end times.
+async function buildAudioWordList(
   audioUrl: string,
   onProgress: (p: AlignProgress) => void,
-): Promise<Array<{ text: string; time: number }>> {
+): Promise<Array<{ norm: string; time: number }>> {
   onProgress({ phase: 'loading-model' });
   const transcriber = await getTranscriber(onProgress) as (
     audio: Float32Array,
     opts: Record<string, unknown>,
-  ) => Promise<{ chunks?: WordChunk[] }>;
+  ) => Promise<{ chunks?: Chunk[] }>;
 
   onProgress({ phase: 'decoding' });
   const res = await fetch(audioUrl);
@@ -65,109 +75,164 @@ async function transcribeWords(
 
   onProgress({ phase: 'transcribing' });
   const out = await transcriber(audio, {
-    return_timestamps: 'word',
+    return_timestamps: true,   // SEGMENT level — more reliable than 'word'
     chunk_length_s: 30,
     stride_length_s: 5,
   });
 
-  return (out.chunks ?? [])
-    .filter(c => typeof c.timestamp?.[0] === 'number' && !isNaN(c.timestamp[0]))
-    .map(c => ({ text: c.text.trim(), time: c.timestamp![0] as number }));
+  const segs = (out.chunks ?? []).filter(c => typeof c.timestamp?.[0] === 'number');
+  const result: Array<{ norm: string; time: number }> = [];
+
+  for (let si = 0; si < segs.length; si++) {
+    const words = segs[si].text.trim().split(/\s+/).map(normWord).filter(Boolean);
+    if (!words.length) continue;
+    const start = segs[si].timestamp![0] as number;
+    // Use the next segment's start as this segment's end (more accurate than Whisper's end)
+    const end = (si + 1 < segs.length && typeof segs[si + 1].timestamp?.[0] === 'number')
+      ? segs[si + 1].timestamp![0] as number
+      : start + words.length * 0.35; // ~0.35 s/word fallback
+    for (let k = 0; k < words.length; k++) {
+      result.push({ norm: words[k], time: start + (k / words.length) * (end - start) });
+    }
+  }
+  return result;
 }
 
-// Normalize a word for comparison: lowercase, alphanumeric only.
-const normWord = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+// ── Utilities ─────────────────────────────────────────────────────────────────
 
-/**
- * Content-based sentence alignment.
- *
- * Flattens all text sentences into a word list, then does a greedy
- * forward scan through the audio words: for each audio word, check if
- * it matches any of the next LOOKAHEAD text words. When a match is
- * found, record that audio timestamp for those text words and advance
- * the text pointer. Any sentence's start time = the audio time of its
- * first matched word.
- *
- * This is far more accurate than fraction-based mapping because it
- * anchors on actual spoken word content, handling variable pacing,
- * audio intros, and Whisper omissions naturally.
- */
-function contentAlignSentences(
-  sentences: string[],
-  audioWords: Array<{ text: string; time: number }>,
-): number[] {
-  if (sentences.length === 0 || audioWords.length === 0) return [];
-
-  // Flatten all text words, preserving which sentence each belongs to.
-  const textFlat: Array<{ si: number; norm: string }> = [];
-  for (let si = 0; si < sentences.length; si++) {
-    for (const w of sentences[si].split(/\s+/).filter(Boolean)) {
-      const n = normWord(w);
-      if (n) textFlat.push({ si, norm: n });
-    }
+function dedupeMonotone(pts: { pos: number; time: number }[]) {
+  const out: typeof pts = [];
+  for (const p of pts) {
+    if (!out.length || p.pos > out[out.length - 1].pos) out.push(p);
   }
-
-  const audioNorm = audioWords.map(w => normWord(w.text));
-
-  // wordTimes[i] = audio timestamp matched to textFlat[i], or -1 if unmatched.
-  const wordTimes: number[] = new Array(textFlat.length).fill(-1);
-  let ti = 0; // next unmatched text word position
-  const LOOKAHEAD = 12; // tolerate up to 12 skipped text words (Whisper omissions)
-
-  for (let ai = 0; ai < audioNorm.length && ti < textFlat.length; ai++) {
-    const aw = audioNorm[ai];
-    if (aw.length < 2) continue; // skip single-char tokens / punctuation
-
-    for (let k = 0; k < LOOKAHEAD && ti + k < textFlat.length; k++) {
-      if (textFlat[ti + k].norm === aw) {
-        // Assign this audio timestamp to every skipped text word as well.
-        for (let g = 0; g <= k; g++) {
-          if (wordTimes[ti + g] < 0) wordTimes[ti + g] = audioWords[ai].time;
-        }
-        ti = ti + k + 1;
-        break;
-      }
-    }
-  }
-
-  // Build sentence start times: first matched word of each sentence.
-  const sentenceStarts: number[] = new Array(sentences.length).fill(-1);
-  for (let i = 0; i < textFlat.length; i++) {
-    const { si } = textFlat[i];
-    if (sentenceStarts[si] < 0 && wordTimes[i] >= 0) {
-      sentenceStarts[si] = wordTimes[i];
-    }
-  }
-
-  // Fill any unmatched sentences by propagating the last known timestamp.
-  let last = audioWords[0]?.time ?? 0;
-  for (let i = 0; i < sentenceStarts.length; i++) {
-    if (sentenceStarts[i] >= 0) {
-      last = sentenceStarts[i];
-    } else {
-      sentenceStarts[i] = last;
-    }
-  }
-
-  // Enforce monotonic non-decreasing.
-  for (let i = 1; i < sentenceStarts.length; i++) {
-    if (sentenceStarts[i] < sentenceStarts[i - 1]) sentenceStarts[i] = sentenceStarts[i - 1];
-  }
-
-  return sentenceStarts;
+  return out;
 }
+
+function lerp(pts: { pos: number; time: number }[], x: number): number {
+  if (!pts.length) return 0;
+  if (x <= pts[0].pos) return pts[0].time;
+  if (x >= pts[pts.length - 1].pos) return pts[pts.length - 1].time;
+  let lo = 0, hi = pts.length - 1;
+  while (lo + 1 < hi) {
+    const mid = (lo + hi) >> 1;
+    if (pts[mid].pos <= x) lo = mid; else hi = mid;
+  }
+  const range = pts[hi].pos - pts[lo].pos;
+  return pts[lo].time + (range > 0 ? (x - pts[lo].pos) / range : 0) * (pts[hi].time - pts[lo].time);
+}
+
+// ── Main export ───────────────────────────────────────────────────────────────
 
 export async function alignChapterAudio(
   audioUrl: string,
   sentences: string[],
   onProgress: (p: AlignProgress) => void,
 ): Promise<number[]> {
-  const audioWords = await transcribeWords(audioUrl, onProgress);
+  const audioFlat = await buildAudioWordList(audioUrl, onProgress);
   onProgress({ phase: 'aligning' });
+  if (!audioFlat.length || !sentences.length) return [];
 
-  if (audioWords.length === 0 || sentences.length === 0) return [];
+  // Flat text word list with sentence indices
+  const textFlat: { si: number; norm: string }[] = [];
+  for (let si = 0; si < sentences.length; si++) {
+    for (const w of sentences[si].split(/\s+/).filter(Boolean)) {
+      const n = normWord(w);
+      if (n) textFlat.push({ si, norm: n });
+    }
+  }
+  if (!textFlat.length) return sentences.map(() => 0);
 
-  const result = contentAlignSentences(sentences, audioWords);
+  // ── Pass 1: anchor matching ───────────────────────────────────────────────
+  // For each audio word (length ≥ 4), search the text using a window that
+  // combines the greedy forward position with the fraction-based expected
+  // position. If the greedy scan has fallen far behind, jump the search start
+  // forward so it stays close to the expected position.
+  const WINDOW = 50;
+  const JUMP   = WINDOW * 2;
+  const anchors: { pos: number; time: number }[] = [];
+  let textPos = 0;
+
+  for (let ai = 0; ai < audioFlat.length; ai++) {
+    const aw = audioFlat[ai];
+    if (aw.norm.length < 4) continue;
+
+    const expectedTi = Math.round((ai / audioFlat.length) * textFlat.length);
+    const searchStart = (expectedTi - textPos > JUMP)
+      ? Math.max(textPos, expectedTi - Math.floor(WINDOW / 4))
+      : textPos;
+    const searchEnd = Math.min(
+      textFlat.length - 1,
+      Math.max(textPos + WINDOW, expectedTi + Math.floor(WINDOW / 2)),
+    );
+
+    for (let ti = searchStart; ti <= searchEnd; ti++) {
+      if (textFlat[ti].norm === aw.norm) {
+        anchors.push({ pos: ti, time: aw.time });
+        textPos = ti + 1;
+        break;
+      }
+    }
+  }
+
+  if (!anchors.length) {
+    // Fallback: proportional time across audio duration
+    const totalTime = audioFlat[audioFlat.length - 1].time;
+    return sentences.map((_, si) => (si / sentences.length) * totalTime);
+  }
+
+  // Build piecewise linear interpolation control points
+  const pts = dedupeMonotone([
+    { pos: 0,               time: anchors[0].time },
+    ...anchors,
+    { pos: textFlat.length, time: audioFlat[audioFlat.length - 1].time },
+  ]);
+
+  // Map each sentence to the interpolated time of its first text word
+  const starts = new Array(sentences.length).fill(-1);
+  for (let ti = 0; ti < textFlat.length; ti++) {
+    const si = textFlat[ti].si;
+    if (starts[si] < 0) starts[si] = lerp(pts, ti);
+  }
+  let last = audioFlat[0].time;
+  for (let i = 0; i < starts.length; i++) {
+    if (starts[i] < 0) starts[i] = last; else last = starts[i];
+  }
+  enforceMonotone(starts);
+
+  // ── Pass 2: sentence-start refinement ────────────────────────────────────
+  // For each sentence, search a ±2 s window around the Pass-1 estimate for a
+  // run of 2-of-3 first words. If found, snap the sentence start to that time.
+  const REFINE_S = 2.0;
+
+  for (let si = 0; si < sentences.length; si++) {
+    const target = starts[si];
+    const fw = sentences[si].split(/\s+/).slice(0, 3).map(normWord).filter(w => w.length >= 3);
+    if (!fw.length) continue;
+
+    const lo = audioFlat.findIndex(w => w.time >= target - REFINE_S);
+    if (lo < 0) continue;
+
+    for (let ai = lo; ai < audioFlat.length && audioFlat[ai].time <= target + REFINE_S; ai++) {
+      if (audioFlat[ai].norm !== fw[0]) continue;
+      // Check how many of the next words also match
+      let matched = 1;
+      for (let k = 1; k < fw.length && ai + k < audioFlat.length; k++) {
+        if (audioFlat[ai + k].norm === fw[k]) matched++;
+      }
+      if (matched >= Math.min(2, fw.length)) {
+        starts[si] = audioFlat[ai].time;
+        break;
+      }
+    }
+  }
+
+  enforceMonotone(starts);
   onProgress({ phase: 'done' });
-  return result;
+  return starts;
+}
+
+function enforceMonotone(arr: number[]) {
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] < arr[i - 1]) arr[i] = arr[i - 1];
+  }
 }
