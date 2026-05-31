@@ -31,7 +31,14 @@ function splitIntoChapters(pages: string[]): string[] | null {
 
   for (let i = 0; i < pages.length; i++) {
     const pageText = pages[i].trim();
-    if (pageText.length < 80) continue;
+
+    if (pageText.length < 80) {
+      // Short page — only count it if the whole page IS a chapter heading
+      // (e.g. a page that just says "One" or "Chapter 3")
+      if (CHAPTER_HEADING.test(pageText)) starts.push(i);
+      continue;
+    }
+
     const lines = pageText.split('\n').map(l => l.trim()).filter(Boolean);
     // Skip table-of-contents pages: multiple chapter headings on one page
     const headingCount = lines.filter(l => CHAPTER_HEADING.test(l)).length;
