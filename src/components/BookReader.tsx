@@ -261,6 +261,8 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const [timings,       setTimings]       = useState<number[] | null>(null);
   const [analyzing,     setAnalyzing]     = useState(false);
   const [analyzeMsg,    setAnalyzeMsg]    = useState('');
+  const [audioUploadMsg,setAudioUploadMsg]= useState('');
+  const [uploadProgress,setUploadProgress]= useState({ done: 0, total: 0 });
   const audioRef    = useRef<HTMLAudioElement>(null);
   const audioFileRef = useRef<HTMLInputElement>(null);
   const rowRefs       = useRef<(HTMLDivElement | null)[]>([]);
@@ -425,24 +427,47 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     return m ? parseInt(m[1]) : null;
   };
 
-  const handleChapterAudioUpload = async (file: File) => {
-    const guessed = chapterFromFilename(file.name);
-    const target = guessed && guessed >= 1 && guessed <= totalChapters ? guessed : selectedChapter;
+  const handleChapterAudioUpload = async (files: File[]) => {
+    if (files.length === 0) return;
     setAudioUploading(true);
     setUploadError('');
-    try {
-      if (target !== selectedChapter) { setSelectedChapter(target); await loadChapter(bookId, target); }
-      const url = await saveChapterAudio(bookId, target, file);
-      // New audio invalidates any previous alignment.
-      await deleteChapterTimings(bookId, target).catch(() => {});
-      setTimings(null);
-      setAudioUrl(`${url}?t=${Date.now()}`);
-      setActiveIdx(-1);
-    } catch (e) {
-      setUploadError(e instanceof Error ? e.message : '오디오 업로드 실패');
-    } finally {
-      setAudioUploading(false);
-      if (audioFileRef.current) audioFileRef.current.value = '';
+    setAudioUploadMsg('');
+    setUploadProgress({ done: 0, total: files.length });
+
+    const uploadedChapters: number[] = [];
+    const errors: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const guessed = chapterFromFilename(file.name);
+      const target = guessed && guessed >= 1 && guessed <= totalChapters ? guessed : selectedChapter;
+      setUploadProgress({ done: i, total: files.length });
+      try {
+        const url = await saveChapterAudio(bookId, target, file);
+        await deleteChapterTimings(bookId, target).catch(() => {});
+        uploadedChapters.push(target);
+        // Refresh current chapter's player if this file targets it.
+        if (target === selectedChapter) {
+          setTimings(null);
+          setAudioUrl(`${url}?t=${Date.now()}`);
+          setActiveIdx(-1);
+        }
+      } catch (e) {
+        errors.push(`${file.name}: ${e instanceof Error ? e.message : '업로드 실패'}`);
+      }
+      setUploadProgress({ done: i + 1, total: files.length });
+    }
+
+    setAudioUploading(false);
+    if (audioFileRef.current) audioFileRef.current.value = '';
+
+    if (errors.length > 0) {
+      setUploadError(errors.join(' | '));
+    }
+    if (uploadedChapters.length > 0) {
+      const chList = [...new Set(uploadedChapters)].sort((a, b) => a - b)
+        .map(n => `Ch.${String(n).padStart(2, '0')}`).join(', ');
+      setAudioUploadMsg(`✓ ${chList} 오디오 업로드 완료`);
     }
   };
 
@@ -699,22 +724,33 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       {/* Chapter audio — shadowing with real-time sentence highlight */}
       {!chapterLoading && enText && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              🎧 Ch.{String(selectedChapter).padStart(2, '0')} 섀도잉 오디오
+              🎧 섀도잉 오디오
             </span>
-            {audioUrl ? (
-              <button onClick={handleDeleteAudio}
-                className="text-xs text-gray-400 hover:text-red-500 transition-colors">🗑 삭제</button>
-            ) : (
+            <div className="flex items-center gap-2">
+              {audioUrl && (
+                <button onClick={handleDeleteAudio}
+                  className="text-xs text-gray-400 hover:text-red-500 transition-colors">🗑 삭제</button>
+              )}
               <button onClick={() => audioFileRef.current?.click()} disabled={audioUploading}
                 className={`px-3 py-1.5 ${bk.badge} text-white rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition-all`}>
-                {audioUploading ? '⏳ 업로드 중…' : '+ mp3 업로드'}
+                {audioUploading
+                  ? `⏳ ${uploadProgress.done}/${uploadProgress.total} 업로드 중…`
+                  : audioUrl ? '📁 추가 업로드' : '+ mp3 업로드'}
               </button>
-            )}
+            </div>
             <input ref={audioFileRef} type="file" accept="audio/mp3,audio/mpeg,audio/*" className="hidden"
-              onChange={e => { const f = e.target.files?.[0]; if (f) handleChapterAudioUpload(f); }} />
+              multiple
+              onChange={e => {
+                const files = Array.from(e.target.files ?? []);
+                if (files.length > 0) handleChapterAudioUpload(files);
+                e.target.value = '';
+              }} />
           </div>
+          {audioUploadMsg && (
+            <p className="text-xs text-emerald-600 bg-emerald-50 rounded-lg px-3 py-2">{audioUploadMsg}</p>
+          )}
 
           {audioUrl ? (
             <>
@@ -759,7 +795,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
           ) : (
             <button onClick={() => audioFileRef.current?.click()} disabled={audioUploading}
               className={`w-full border-2 border-dashed ${bk.border} rounded-xl py-3 text-xs ${bk.color} hover:opacity-80 disabled:opacity-50 transition-all`}>
-              {audioUploading ? '⏳ 업로드 중…' : '클릭해서 이 챕터 mp3 선택 (파일명에 챕터 번호가 있으면 자동 인식)'}
+              {audioUploading
+                ? `⏳ ${uploadProgress.done}/${uploadProgress.total} 업로드 중…`
+                : '클릭해서 mp3 선택 · 여러 파일 한 번에 가능 · 파일명에 챕터 번호 포함 시 자동 분류'}
             </button>
           )}
         </div>
