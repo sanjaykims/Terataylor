@@ -161,6 +161,98 @@ function lerp(pts: { pos: number; time: number }[], x: number): number {
   return pts[lo].time + (range > 0 ? (x - pts[lo].pos) / range : 0) * (pts[hi].time - pts[lo].time);
 }
 
+// ── Browser-side alignment from pre-computed word timestamps ─────────────────
+// Takes word timestamps from Deepgram (or any source) and runs the same
+// two-pass algorithm. No browser Whisper, no edge function, no timeout.
+
+export interface WordTimestamp { word: string; start: number; end: number }
+
+export function alignFromWordTimestamps(
+  words: WordTimestamp[],
+  sentences: string[],
+): number[] {
+  const audioFlat = words
+    .map(w => ({ norm: normWord(w.word), time: w.start }))
+    .filter(w => w.norm.length > 0);
+
+  if (!audioFlat.length || !sentences.length) return sentences.map(() => 0);
+
+  const textFlat: { si: number; norm: string }[] = [];
+  for (let si = 0; si < sentences.length; si++) {
+    for (const w of sentences[si].split(/\s+/).filter(Boolean)) {
+      const n = normWord(w);
+      if (n) textFlat.push({ si, norm: n });
+    }
+  }
+  if (!textFlat.length) return sentences.map(() => 0);
+
+  const WINDOW = 35, JUMP = WINDOW * 2;
+  const anchors: { pos: number; time: number }[] = [];
+  let textPos = 0;
+
+  for (let ai = 0; ai < audioFlat.length; ai++) {
+    const aw = audioFlat[ai];
+    if (aw.norm.length < 5) continue;
+    const expectedTi = Math.round((ai / audioFlat.length) * textFlat.length);
+    const searchStart = (expectedTi - textPos > JUMP)
+      ? Math.max(textPos, expectedTi - Math.floor(WINDOW / 4)) : textPos;
+    const searchEnd = Math.min(
+      textFlat.length - 1,
+      Math.max(textPos + WINDOW, expectedTi + Math.floor(WINDOW / 2)),
+    );
+    for (let ti = searchStart; ti <= searchEnd; ti++) {
+      if (textFlat[ti].norm === aw.norm) {
+        anchors.push({ pos: ti, time: aw.time });
+        textPos = ti + 1;
+        break;
+      }
+    }
+  }
+
+  if (!anchors.length) {
+    const totalTime = audioFlat[audioFlat.length - 1].time;
+    return sentences.map((_, si) => (si / sentences.length) * totalTime);
+  }
+
+  const pts = dedupeMonotone([
+    { pos: 0, time: anchors[0].time },
+    ...anchors,
+    { pos: textFlat.length, time: audioFlat[audioFlat.length - 1].time },
+  ]);
+
+  const starts = new Array<number>(sentences.length).fill(-1);
+  for (let ti = 0; ti < textFlat.length; ti++) {
+    const si = textFlat[ti].si;
+    if (starts[si] < 0) starts[si] = lerp(pts, ti);
+  }
+  let last = audioFlat[0].time;
+  for (let i = 0; i < starts.length; i++) {
+    if (starts[i] < 0) starts[i] = last; else last = starts[i];
+  }
+  enforceMonotone(starts);
+
+  // Pass 2: ±2s refinement
+  const REFINE_S = 2.0;
+  for (let si = 0; si < sentences.length; si++) {
+    const target = starts[si];
+    const fw = sentences[si].split(/\s+/).slice(0, 5).map(normWord).filter(w => w.length >= 3);
+    if (!fw.length) continue;
+    const lo = audioFlat.findIndex(w => w.time >= target - REFINE_S);
+    if (lo < 0) continue;
+    for (let ai = lo; ai < audioFlat.length && audioFlat[ai].time <= target + REFINE_S; ai++) {
+      if (audioFlat[ai].norm !== fw[0]) continue;
+      let matched = 1;
+      for (let k = 1; k < fw.length && ai + k < audioFlat.length; k++) {
+        if (audioFlat[ai + k].norm === fw[k]) matched++;
+      }
+      if (matched >= Math.min(2, fw.length)) { starts[si] = audioFlat[ai].time; break; }
+    }
+  }
+
+  enforceMonotone(starts);
+  return starts;
+}
+
 // ── Main export ───────────────────────────────────────────────────────────────
 
 export async function alignChapterAudio(

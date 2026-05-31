@@ -534,27 +534,38 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setMerging(false);
   };
 
-  // Server-side audio alignment via OpenAI Whisper (word-level timestamps).
-  // No browser inference — accurate, fast, no drift.
+  // Browser-side audio alignment via Deepgram (URL-based, no file upload).
+  // Deepgram fetches the audio directly — no edge function, no timeout.
   const handleAnalyzeAudio = async () => {
     if (!audioUrl) return;
     const sentences = enText ? splitToSentences(enText) : [];
     if (sentences.length === 0) return;
     setAnalyzing(true);
-    setAnalyzeMsg('서버에서 음성 분석 중… (30~60초 소요)');
+    setAnalyzeMsg('음성 분석 중… (파일 길이에 따라 30~90초)');
     try {
-      const { data, error } = await supabase.functions.invoke('ocr-extract', {
-        body: { mode: 'align_audio', audioUrl, sentences },
-      });
-      if (error) throw error;
-      const times: number[] = data?.starts ?? [];
-      if (times.length > 0) {
-        await saveChapterTimings(bookId, selectedChapter, times);
-        setTimings(times);
-        setAnalyzeMsg('✓ 음성 분석 완료 — 실제 발화에 맞춰 하이라이트돼요');
-      } else {
-        setAnalyzeMsg('음성을 인식하지 못했어요. 다시 시도해 주세요.');
-      }
+      const cleanUrl = audioUrl.split('?')[0]; // strip cache-buster before passing to Deepgram
+      const dgRes = await fetch(
+        'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Token ${import.meta.env.VITE_DEEPGRAM_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url: cleanUrl }),
+        },
+      );
+      if (!dgRes.ok) throw new Error(`Deepgram: ${await dgRes.text()}`);
+      const dgData = await dgRes.json() as {
+        results: { channels: [{ alternatives: [{ words: import('../lib/audioAlign').WordTimestamp[] }] }] };
+      };
+      const words = dgData.results?.channels?.[0]?.alternatives?.[0]?.words ?? [];
+      if (!words.length) throw new Error('음성을 인식하지 못했어요. 다시 시도해 주세요.');
+      const { alignFromWordTimestamps } = await import('../lib/audioAlign');
+      const times = alignFromWordTimestamps(words, sentences);
+      await saveChapterTimings(bookId, selectedChapter, times);
+      setTimings(times);
+      setAnalyzeMsg('✓ 음성 분석 완료 — 실제 발화에 맞춰 하이라이트돼요');
     } catch (e) {
       setAnalyzeMsg(e instanceof Error ? `분석 실패: ${e.message}` : '분석 실패');
     } finally {
