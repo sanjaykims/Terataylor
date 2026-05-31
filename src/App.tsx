@@ -177,6 +177,12 @@ export default function App() {
 
   const bk = BOOKS[v1Book];
 
+  // The two-column 원서 읽기 (EN/KO) benefits from the full PC width; other
+  // single-column views stay at a comfortable reading width. Mobile is full
+  // width either way.
+  const wideLayout = mainTab === 'v1' && v1Tab === 'reading';
+  const containerW = wideLayout ? 'max-w-7xl' : 'max-w-4xl';
+
   // ── Loading screen ───────────────────────────────────────────────────────
   if (!appReady) {
     return (
@@ -195,7 +201,7 @@ export default function App() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className={`${containerW} mx-auto px-4 py-3 flex items-center justify-between transition-all`}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">T</div>
             <div>
@@ -207,7 +213,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-5 space-y-5">
+      <div className={`${containerW} mx-auto px-4 py-5 space-y-5 transition-all`}>
 
         {/* ── MAIN TABS ─────────────────────────────────────────────────── */}
         <div className="grid grid-cols-3 gap-3">
