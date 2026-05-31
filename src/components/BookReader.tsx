@@ -33,6 +33,9 @@ function splitIntoChapters(pages: string[]): string[] | null {
     const pageText = pages[i].trim();
     if (pageText.length < 80) continue;
     const lines = pageText.split('\n').map(l => l.trim()).filter(Boolean);
+    // Skip table-of-contents pages: multiple chapter headings on one page
+    const headingCount = lines.filter(l => CHAPTER_HEADING.test(l)).length;
+    if (headingCount > 3) continue;
     if (lines.slice(0, 3).some(l => CHAPTER_HEADING.test(l))) {
       starts.push(i);
     }
@@ -71,9 +74,23 @@ function cleanPageText(text: string, runningHeaders: Set<string>): string {
     .split('\n')
     .map(l => l.trim())
     .filter(l => l.length > 0)
-    .filter(l => !/^\d{1,4}$/.test(l))       // bare page numbers
-    .filter(l => !runningHeaders.has(l))       // repeated header/footer lines
+    .filter(l => !/^\d{1,4}$/.test(l))        // bare page numbers
+    .filter(l => !runningHeaders.has(l))        // repeated header/footer lines
+    .filter(l => !/https?:\/\//i.test(l))      // web URLs
     .join('\n');
+}
+
+// Remove front-matter lines that may slip into chapter 1 text.
+const FRONT_MATTER_LINE = /^(table of contents|copyright|all rights reserved|dedication|published by|isbn|first published|first edition|printed in)/i;
+
+function cleanChapterText(text: string): string {
+  return text
+    .split('\n')
+    .filter(l => !FRONT_MATTER_LINE.test(l.trim()))
+    .filter(l => !/https?:\/\//i.test(l))     // belt-and-suspenders URL removal
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')               // collapse excess blank lines
+    .trim();
 }
 
 // Strip the chapter heading line(s) from the start of a chapter's text.
@@ -232,10 +249,10 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       let note: string;
 
       if (detected && detected.length >= 2) {
-        chapterTexts = detected.map(stripChapterHeading);
+        chapterTexts = detected.map(t => cleanChapterText(stripChapterHeading(t)));
         note = `${detected.length}개 챕터 감지됨`;
       } else {
-        chapterTexts = [cleanedPages.join('\n\n')];
+        chapterTexts = [cleanChapterText(cleanedPages.join('\n\n'))];
         note = '챕터를 자동 감지하지 못해 전체를 1개로 저장했어요.';
       }
 
