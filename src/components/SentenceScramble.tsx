@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { parseSentences } from '../utils/textUtils';
 import { trackGameScore } from '../lib/tracker';
+import type { VocabItem } from '../lib/types';
 
 interface WordToken { id: number; word: string; }
 
@@ -13,13 +14,18 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export default function SentenceScramble({ text }: { text: string }) {
-  const sentences = useMemo(() =>
-    parseSentences(text).filter(s => {
-      const wc = s.split(/\s+/).filter(Boolean).length;
-      return wc >= 4 && wc <= 14;
-    }), [text]);
+const isKorean = (s: string) => /[가-힣]/.test(s);
 
+interface VocabPuzzle { word: string; korean: string; sentence: string; }
+
+interface Props {
+  text: string;
+  vocab?: VocabItem[] | null;
+  selectedWords?: string[];
+}
+
+export default function SentenceScramble({ text, vocab, selectedWords }: Props) {
+  // All state declarations first
   const [sentIdx, setSentIdx] = useState(0);
   const [bank, setBank] = useState<WordToken[]>([]);
   const [placed, setPlaced] = useState<WordToken[]>([]);
@@ -29,9 +35,50 @@ export default function SentenceScramble({ text }: { text: string }) {
   const [streak, setStreak] = useState(0);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
 
+  // Build puzzle list — vocab definitions take priority over text sentences
+  const { sentences, vocabPuzzles, mode } = useMemo(() => {
+    let items = vocab?.length ? [...vocab] : [];
+    if (selectedWords?.length) {
+      const sel = new Set(selectedWords);
+      items = items.filter(v => sel.has(v.word));
+    }
+    const puzzles: VocabPuzzle[] = items
+      .filter(v => v.definition && !isKorean(v.definition))
+      .filter(v => {
+        const wc = v.definition.split(/\s+/).filter(Boolean).length;
+        return wc >= 3 && wc <= 16;
+      })
+      .map(v => ({ word: v.word, korean: v.korean ?? '', sentence: v.definition }));
+
+    if (puzzles.length >= 3) {
+      return { sentences: [] as string[], vocabPuzzles: shuffle(puzzles), mode: 'vocab' as const };
+    }
+
+    const sents = parseSentences(text).filter(s => {
+      const wc = s.split(/\s+/).filter(Boolean).length;
+      return wc >= 4 && wc <= 14;
+    });
+    return { sentences: sents, vocabPuzzles: [] as VocabPuzzle[], mode: 'text' as const };
+  }, [vocab, text, selectedWords]);
+
+  const totalCount = mode === 'vocab' ? vocabPuzzles.length : sentences.length;
+  const currentSentence = mode === 'vocab'
+    ? (vocabPuzzles[sentIdx]?.sentence ?? '')
+    : (sentences[sentIdx] ?? '');
+  const currentHint: VocabPuzzle | null = mode === 'vocab' ? (vocabPuzzles[sentIdx] ?? null) : null;
+
+  // Reset counters when puzzle source changes
   useEffect(() => {
-    if (!sentences[sentIdx]) return;
-    const words = sentences[sentIdx].split(/\s+/).filter(Boolean);
+    setSentIdx(0);
+    setScore(0);
+    setStreak(0);
+    setCompleted(new Set());
+  }, [mode, vocabPuzzles.length, sentences.length]);
+
+  // Shuffle new puzzle when sentence index or source changes
+  useEffect(() => {
+    if (!currentSentence) return;
+    const words = currentSentence.split(/\s+/).filter(Boolean);
     const tokens: WordToken[] = words.map((w, i) => ({ id: i, word: w }));
     let shuffled = shuffle(tokens);
     let attempts = 0;
@@ -47,17 +94,19 @@ export default function SentenceScramble({ text }: { text: string }) {
     setPlaced([]);
     setChecked(false);
     setIsCorrect(false);
-  }, [sentIdx, sentences]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sentIdx, mode, vocabPuzzles.length, sentences.length]);
 
-  if (sentences.length === 0) {
+  if (totalCount === 0) {
     return (
       <div className="text-center py-12 text-gray-400 text-lg">
-        지문을 입력하면 문장 퍼즐 게임이 시작돼요!
+        {vocab?.length
+          ? '단어장 단어의 영어 뜻이 없거나 너무 짧아요. 단어장에서 뜻을 먼저 불러오세요.'
+          : '지문을 입력하면 문장 퍼즐 게임이 시작돼요!'}
       </div>
     );
   }
 
-  const currentSentence = sentences[sentIdx];
   const originalWords = currentSentence.split(/\s+/).filter(Boolean);
 
   const pickWord = (token: WordToken) => {
@@ -84,8 +133,8 @@ export default function SentenceScramble({ text }: { text: string }) {
       setStreak(s => s + 1);
       setCompleted(prev => {
         const next = new Set([...prev, sentIdx]);
-        if (next.size === sentences.length) {
-          trackGameScore('scramble', newScore, { correct: next.size, total: sentences.length });
+        if (next.size === totalCount) {
+          trackGameScore('scramble', newScore, { correct: next.size, total: totalCount });
         }
         return next;
       });
@@ -94,16 +143,16 @@ export default function SentenceScramble({ text }: { text: string }) {
     }
   };
 
-  const nextSentence = () => {
-    setSentIdx(prev => (prev + 1) % sentences.length);
-  };
+  const nextSentence = () => setSentIdx(prev => (prev + 1) % totalCount);
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
         <div>
-          <div className="text-sm text-gray-500">문장 {sentIdx + 1} / {sentences.length}</div>
+          <div className="text-sm text-gray-500">
+            {mode === 'vocab' ? '단어 뜻 퍼즐' : '문장 퍼즐'} {sentIdx + 1} / {totalCount}
+          </div>
           <div className="text-xs text-gray-400">{completed.size}개 완료</div>
         </div>
         <div className="flex items-center gap-4">
@@ -117,11 +166,26 @@ export default function SentenceScramble({ text }: { text: string }) {
         </div>
       </div>
 
+      {/* Vocab hint card */}
+      {mode === 'vocab' && currentHint && (
+        <div className="bg-indigo-50 border-2 border-indigo-200 rounded-2xl px-5 py-4 flex items-center gap-4">
+          <div className="flex-1">
+            <div className="text-xl font-extrabold text-gray-800">{currentHint.word}</div>
+            {currentHint.korean && (
+              <div className="text-sm text-indigo-600 font-semibold mt-0.5">🇰🇷 {currentHint.korean}</div>
+            )}
+          </div>
+          <div className="text-gray-400 text-xs text-right leading-relaxed">
+            단어의 영어 뜻을<br/>순서대로 맞춰보세요
+          </div>
+        </div>
+      )}
+
       {/* Progress bar */}
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div
           className="bg-indigo-500 h-2 rounded-full transition-all duration-500"
-          style={{ width: `${sentences.length > 0 ? (completed.size / sentences.length) * 100 : 0}%` }}
+          style={{ width: `${totalCount > 0 ? (completed.size / totalCount) * 100 : 0}%` }}
         />
       </div>
 
@@ -132,7 +196,9 @@ export default function SentenceScramble({ text }: { text: string }) {
           : 'bg-white border-gray-200'
       }`}>
         {placed.length === 0 && (
-          <span className="text-gray-300 text-sm">아래 단어를 클릭해서 문장을 완성하세요...</span>
+          <span className="text-gray-300 text-sm">
+            {mode === 'vocab' ? '아래 단어들로 영어 뜻을 완성하세요…' : '아래 단어를 클릭해서 문장을 완성하세요…'}
+          </span>
         )}
         {placed.map((token, i) => {
           const wordCorrect = checked && token.word === originalWords[i];
@@ -205,11 +271,11 @@ export default function SentenceScramble({ text }: { text: string }) {
             onClick={nextSentence}
             className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all active:scale-95 shadow-sm"
           >
-            다음 문장 →
+            다음 →
           </button>
         )}
         <button
-          onClick={() => setSentIdx(prev => (prev - 1 + sentences.length) % sentences.length)}
+          onClick={() => setSentIdx(prev => (prev - 1 + totalCount) % totalCount)}
           className="px-4 py-3 rounded-xl bg-gray-100 text-gray-600 font-semibold hover:bg-gray-200 transition-all"
         >
           ← 이전

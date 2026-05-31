@@ -34,7 +34,7 @@ export default function GamesPanel({ text, vocab, selectedWords }: Props) {
         ))}
       </div>
 
-      {game === 'scramble' && <SentenceScramble text={text} />}
+      {game === 'scramble' && <SentenceScramble text={text} vocab={vocab} selectedWords={selectedWords} />}
       {game === 'quiz'     && <VocabQuizGame text={text} bookVocab={vocab} />}
       {game === 'space'    && <SpaceGame text={text} bookVocab={vocab} selectedWords={selectedWords} />}
     </div>
