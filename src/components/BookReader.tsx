@@ -674,18 +674,15 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
 
   const seekToSentence = (i: number) => {
     if (!audioRef.current || i >= sentenceStarts.length) return;
-    // Prefer live-corrected timing if we observed the actual start of this sentence
-    // during natural playback — it's more accurate than the stored Whisper estimate.
-    const liveT  = liveTimingsRef.current[i];
-    const base   = liveT ?? sentenceStarts[i];
-    // Seek 0.2 s before so the floor guard handles any frame-boundary undershoot.
-    audioRef.current.currentTime = Math.max(0, base - 0.2);
+    // Seek directly to the stored sentence start. Deepgram timestamps are accurate
+    // word-by-word, so there is no need to go 0.2 s early (that caused 200 ms of
+    // the previous sentence to play while highlighting the current one).
+    // seekFloorRef still protects against the tiny MP3 frame-boundary undershoot.
+    audioRef.current.currentTime = sentenceStarts[i];
     seekFloorRef.current = i;
-    prevLiveIdxRef.current = i;  // reset natural-play tracking from the new position
+    prevLiveIdxRef.current = i;
     setActiveIdx(i);
     setActiveWordIdx(0);
-    // Only call play() if paused — calling it while already playing on iOS
-    // can interrupt the seek and cause a brief stutter.
     if (audioRef.current.paused) {
       audioRef.current.play().catch(() => {});
     }
