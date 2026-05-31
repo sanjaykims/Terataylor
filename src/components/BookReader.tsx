@@ -264,10 +264,12 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const [analyzeMsg,    setAnalyzeMsg]    = useState('');
   const [audioUploadMsg,setAudioUploadMsg]= useState('');
   const [uploadProgress,setUploadProgress]= useState({ done: 0, total: 0 });
-  // After a programmatic seek, hold activeIdx at the target sentence for up to 2 wall-clock
-  // seconds so stale/intermediate timeupdate events can't jump the highlight backward.
-  // Released early if audio naturally plays forward past the seeked sentence.
-  const seekStateRef = useRef<{ idx: number; wallUntil: number } | null>(null);
+  // isSeekingRef: gates ALL timeupdate events while the browser is mid-seek
+  // (on mobile, timeupdate fires with stale currentTime values during seeking).
+  // seekFloorRef: after seek settles, prevents idx from jumping back by 1 sentence
+  // if the audio frame boundary landed a few ms before sentenceStarts[i].
+  const isSeekingRef  = useRef(false);
+  const seekFloorRef  = useRef(-1);
   const [nextChapHasAudio, setNextChapHasAudio] = useState(false);
   const [merging,       setMerging]       = useState(false);
   const [mergeMsg,      setMergeMsg]      = useState('');
@@ -590,7 +592,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     return starts;
   })();
 
-  const handleAudioTimeUpdate = () => {
+  const syncHighlight = () => {
     const t = audioRef.current?.currentTime ?? 0;
     if (sentenceStarts.length === 0) return;
 
@@ -599,72 +601,52 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       if (t >= sentenceStarts[i]) idx = i; else break;
     }
 
-    // After a programmatic seek, guard against intermediate timeupdate events
-    // (which can fire before the seek fully settles) pulling the highlight backward.
-    // We hold the seeked sentence for up to 2 wall-clock seconds, releasing only
-    // when the audio naturally plays forward into a later sentence.
-    const ss = seekStateRef.current;
-    if (ss !== null) {
-      if (Date.now() < ss.wallUntil) {
-        if (idx < ss.idx) {
-          idx = ss.idx;         // prevent backward jump during grace period
-        } else if (idx > ss.idx) {
-          seekStateRef.current = null; // audio played into a later sentence — release
-        }
-        // idx === ss.idx: still in the seeked sentence, keep grace active
-      } else {
-        seekStateRef.current = null;  // 2s elapsed — resume normal detection
-      }
+    // If audio landed a few ms before sentenceStarts[idx+1] due to MP3 frame
+    // alignment, prevent the highlight from jumping backward by one sentence.
+    if (seekFloorRef.current >= 0) {
+      if (idx < seekFloorRef.current) idx = seekFloorRef.current;
+      else seekFloorRef.current = -1;
     }
 
     setActiveIdx(idx);
 
-    // ── Word-level highlight: linear interpolation within sentence bounds ──
+    // ── Word-level highlight ──────────────────────────────────────────────
     const sentStart = sentenceStarts[idx];
     const sentEnd   = idx + 1 < sentenceStarts.length
       ? sentenceStarts[idx + 1]
       : (audioDuration || t + 5);
-    const duration  = Math.max(0.1, sentEnd - sentStart);
-    const words     = (enRows[idx] ?? '').split(/\s+/).filter(Boolean);
-    const progress  = Math.max(0, Math.min(1, (t - sentStart) / duration));
+    const words    = (enRows[idx] ?? '').split(/\s+/).filter(Boolean);
+    const progress = Math.max(0, Math.min(1, (t - sentStart) / Math.max(0.1, sentEnd - sentStart)));
     setActiveWordIdx(Math.min(Math.floor(progress * words.length), words.length - 1));
   };
 
-  // Re-sync activeIdx once the browser has finished seeking (the seeked event fires
-  // after currentTime settles, so we know exactly where the audio actually landed).
+  // Gate ALL timeupdate events while the browser is mid-seek.
+  // On mobile, timeupdate fires with stale (pre-seek) currentTime values during
+  // the seek, which would pull the highlight to the wrong sentence.
+  const handleAudioTimeUpdate = () => {
+    if (isSeekingRef.current) return;
+    syncHighlight();
+  };
+
+  const handleSeeking = () => { isSeekingRef.current = true; };
+
+  // seeked fires once currentTime has fully settled — safe to sync highlight now.
   const handleSeeked = () => {
-    const t = audioRef.current?.currentTime ?? 0;
-    if (sentenceStarts.length === 0) return;
-    let idx = 0;
-    for (let i = 0; i < sentenceStarts.length; i++) {
-      if (t >= sentenceStarts[i]) idx = i; else break;
-    }
-    const ss = seekStateRef.current;
-    if (ss !== null) {
-      // If we landed at or past the target sentence, update the floor index so the
-      // grace period tracks the correct sentence (handles VBR seek imprecision).
-      if (idx >= ss.idx) {
-        ss.idx = idx;
-      }
-      setActiveIdx(ss.idx);
-    } else {
-      setActiveIdx(idx);
-    }
-    setActiveWordIdx(0);
+    isSeekingRef.current = false;
+    syncHighlight();
   };
 
   const seekToSentence = (i: number) => {
     if (!audioRef.current || i >= sentenceStarts.length) return;
-    // Seek 150 ms before the sentence boundary so the browser frame-aligns into
-    // the sentence rather than landing a few ms past it (VBR seeking imprecision).
-    const target = Math.max(0, sentenceStarts[i] - 0.15);
-    audioRef.current.currentTime = target;
-    // Hold activeIdx at i for up to 2 wall-clock seconds regardless of timeupdate noise.
-    seekStateRef.current = { idx: i, wallUntil: Date.now() + 2000 };
+    audioRef.current.currentTime = sentenceStarts[i];
+    seekFloorRef.current = i;  // clamp against landing a few ms before sentenceStarts[i]
     setActiveIdx(i);
     setActiveWordIdx(0);
-    // Always start playing so the highlight immediately tracks forward.
-    audioRef.current.play().catch(() => {});
+    // Only call play() if paused — calling it while already playing on iOS
+    // can interrupt the seek and cause a brief stutter.
+    if (audioRef.current.paused) {
+      audioRef.current.play().catch(() => {});
+    }
   };
 
   // Keep the active sentence in view while audio plays (scroll whichever
@@ -912,8 +894,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
                 className="w-full rounded-xl"
                 onLoadedMetadata={e => setAudioDuration(e.currentTarget.duration || 0)}
                 onTimeUpdate={handleAudioTimeUpdate}
+                onSeeking={handleSeeking}
                 onSeeked={handleSeeked}
-                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); seekStateRef.current = null; }}
+                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); isSeekingRef.current = false; seekFloorRef.current = -1; }}
               />
 
               {/* Real speech alignment */}
