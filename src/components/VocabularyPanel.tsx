@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { extractVocabulary } from '../utils/textUtils';
 import { supabase } from '../lib/supabase';
 import { csGet, csSet } from '../lib/cloudStorage';
@@ -7,10 +7,11 @@ import type { VocabItem } from '../lib/types';
 interface Props {
   text: string;
   vocab?: VocabItem[] | null;
+  onStudiedChange?: (studiedWords: string[]) => void;
 }
 
 // Card display states
-// 0: word only  1: word + English  2: word + English + Korean
+// 0: Korean meaning  1: English meaning  2: English word
 type CardState = 0 | 1 | 2;
 
 interface DefEntry { en: string; ko: string; loading: boolean }
@@ -20,7 +21,7 @@ const isKorean = (s: string) => /[가-힣]/.test(s);
 // Session-level memory cache (survives re-renders, cleared on page refresh)
 const sessionCache = new Map<string, { en: string; ko: string }>();
 
-export default function VocabularyPanel({ text, vocab }: Props) {
+export default function VocabularyPanel({ text, vocab, onStudiedChange }: Props) {
   const words = useMemo(
     () => (vocab?.length ? vocab : extractVocabulary(text)) as
       { word: string; definition?: string; korean?: string; count?: number }[],
@@ -73,7 +74,7 @@ export default function VocabularyPanel({ text, vocab }: Props) {
       return;
     }
 
-    // Show English immediately while loading Korean
+    // Show loading while fetching Korean
     setDefs(prev => new Map(prev).set(i, { en: knownEn, ko: '', loading: true }));
 
     // 2. Supabase persistent cache
@@ -106,23 +107,33 @@ export default function VocabularyPanel({ text, vocab }: Props) {
     }
   }, [words]);
 
+  // Auto-load Korean for all cards immediately (Korean is shown by default)
+  useEffect(() => {
+    loadTriggered.current = new Set();
+    words.forEach((_, i) => {
+      // Stagger API-bound calls slightly to avoid hammering the endpoint
+      setTimeout(() => loadDef(i), i * 30);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [words]);
+
   // ── Click handlers ────────────────────────────────────────────────────
   const handleCardClick = (i: number) => {
     if (studied.has(i)) return;
     const s = getState(i);
-    if (s === 0) { setCardState(i, 1); loadDef(i); }
-    else if (s === 1) { setCardState(i, 2); }
+    if (s === 0) setCardState(i, 1);
+    else if (s === 1) setCardState(i, 2);
     // s === 2: clicking background does nothing
   };
 
-  // Click English text → remove English (back to word-only)
+  // Click English meaning → back to Korean only
   const handleEnClick = (e: React.MouseEvent, i: number) => {
     e.stopPropagation();
     setCardState(i, 0);
   };
 
-  // Click Korean text → remove Korean only (back to English)
-  const handleKoClick = (e: React.MouseEvent, i: number) => {
+  // Click English word → back to English meaning only
+  const handleWordClick = (e: React.MouseEvent, i: number) => {
     e.stopPropagation();
     setCardState(i, 1);
   };
@@ -132,6 +143,7 @@ export default function VocabularyPanel({ text, vocab }: Props) {
     setStudied(prev => {
       const next = new Set(prev);
       next.has(i) ? next.delete(i) : next.add(i);
+      onStudiedChange?.(Array.from(next).map(idx => words[idx]?.word).filter(Boolean));
       return next;
     });
   };
@@ -156,6 +168,7 @@ export default function VocabularyPanel({ text, vocab }: Props) {
         </div>
         <div className="text-sm font-semibold text-emerald-600">
           ✅ {studiedCount} / {words.length} 완료
+          {studiedCount > 0 && <span className="ml-2 text-indigo-500 font-normal text-xs">→ 게임에서 이 단어만 연습</span>}
         </div>
       </div>
 
@@ -187,48 +200,55 @@ export default function VocabularyPanel({ text, vocab }: Props) {
                   isStudied ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                 }`}>✓</button>
 
-              {/* Word */}
-              <div className={`font-bold text-base pr-7 ${isStudied ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
-                {item.word}
-              </div>
-              {'count' in item && item.count && item.count > 1 && (
-                <div className="text-xs text-gray-400">{item.count}회</div>
-              )}
+              {/* State 0: Korean meaning (default) */}
+              {!isStudied && (
+                <div className="space-y-1">
+                  {/* Korean — always visible unless studied */}
+                  <div className="font-bold text-base pr-7 text-indigo-800 leading-snug">
+                    {def?.loading
+                      ? <span className="text-indigo-300 text-sm animate-pulse">뜻 불러오는 중…</span>
+                      : def?.ko
+                      ? <span>🇰🇷 {def.ko}</span>
+                      : <span className="text-gray-300 text-sm">—</span>}
+                  </div>
+                  {'count' in item && item.count && item.count > 1 && (
+                    <div className="text-xs text-gray-400">{item.count}회</div>
+                  )}
 
-              {/* English — state 1 or 2 */}
-              {state >= 1 && !isStudied && (
-                <div className="mt-2 pt-2 border-t border-indigo-200">
-                  {def?.en ? (
+                  {/* State 1+: English meaning */}
+                  {state >= 1 && (
                     <div
                       onClick={e => handleEnClick(e, i)}
                       title="클릭하면 사라져요"
-                      className="text-xs text-gray-600 leading-snug cursor-pointer hover:line-through hover:text-gray-400 transition-all">
-                      🇺🇸 {def.en}
+                      className="text-xs text-gray-500 leading-snug border-t border-indigo-200 pt-1 mt-1 cursor-pointer hover:line-through hover:text-gray-300 transition-all">
+                      {def?.en ? <>🇺🇸 {def.en}</> : null}
                     </div>
-                  ) : def?.loading ? (
-                    <div className="text-xs text-indigo-300 animate-pulse">찾는 중…</div>
-                  ) : null}
+                  )}
 
-                  {/* Nudge to second click */}
-                  {state === 1 && !def?.loading && (
-                    <div className="mt-1 text-xs text-indigo-300">한 번 더 클릭 → 🇰🇷</div>
+                  {/* State 2: English word */}
+                  {state === 2 && (
+                    <div
+                      onClick={e => handleWordClick(e, i)}
+                      title="클릭하면 사라져요"
+                      className="text-base font-extrabold text-gray-800 border-t border-indigo-300 pt-1 mt-1 cursor-pointer hover:line-through hover:text-gray-400 transition-all">
+                      {item.word}
+                    </div>
+                  )}
+
+                  {/* Nudge hint */}
+                  {state === 0 && !def?.loading && (
+                    <div className="text-xs text-indigo-200 mt-1">클릭 → 🇺🇸</div>
+                  )}
+                  {state === 1 && (
+                    <div className="text-xs text-indigo-300 mt-1">한 번 더 → 단어</div>
                   )}
                 </div>
               )}
 
-              {/* Korean — state 2 only */}
-              {state === 2 && !isStudied && (
-                <div className="mt-1">
-                  {def?.loading ? (
-                    <div className="text-xs text-indigo-400 animate-pulse">한국어 뜻 찾는 중…</div>
-                  ) : def?.ko ? (
-                    <div
-                      onClick={e => handleKoClick(e, i)}
-                      title="클릭하면 사라져요"
-                      className="text-sm font-semibold text-indigo-800 leading-snug cursor-pointer hover:line-through hover:text-indigo-400 transition-all">
-                      🇰🇷 {def.ko}
-                    </div>
-                  ) : null}
+              {/* Studied state: show word crossed out */}
+              {isStudied && (
+                <div className="font-bold text-base pr-7 text-gray-400 line-through">
+                  {item.word}
                 </div>
               )}
             </div>
@@ -237,7 +257,7 @@ export default function VocabularyPanel({ text, vocab }: Props) {
       </div>
 
       <p className="text-xs text-gray-400 text-center">
-        💡 1번 클릭 → 영어 뜻 &nbsp;·&nbsp; 2번 클릭 → 한국어 뜻 &nbsp;·&nbsp; 각 뜻을 클릭하면 사라져요
+        💡 기본: 🇰🇷 한국어 뜻 &nbsp;·&nbsp; 1클릭 → 🇺🇸 영어 뜻 &nbsp;·&nbsp; 2클릭 → 영어 단어 &nbsp;·&nbsp; ✓ 체크 단어만 게임에서 연습
       </p>
     </div>
   );

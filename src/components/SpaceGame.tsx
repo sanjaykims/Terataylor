@@ -68,7 +68,7 @@ function rrect(ctx: CanvasRenderingContext2D, x:number, y:number, w:number, h:nu
   ctx.closePath();
 }
 
-export default function SpaceGame({ text, bookVocab }: { text: string; bookVocab?: VocabItem[] | null }) {
+export default function SpaceGame({ text, bookVocab, selectedWords }: { text: string; bookVocab?: VocabItem[] | null; selectedWords?: string[] }) {
   const cvs  = useRef<HTMLCanvasElement>(null);
   const inp  = useRef<HTMLInputElement>(null);
   const raf  = useRef(0);
@@ -90,6 +90,7 @@ export default function SpaceGame({ text, bookVocab }: { text: string; bookVocab
   });
 
   const vocab = (() => {
+    if (selectedWords && selectedWords.length >= 3) return selectedWords;
     if (bookVocab && bookVocab.length >= 6) return bookVocab.map(v => v.word);
     const w = extractVocabulary(text).map(v => v.word);
     return w.length >= 6 ? w : DEFAULT_WORDS;
@@ -373,7 +374,13 @@ export default function SpaceGame({ text, bookVocab }: { text: string; bookVocab
             외계인에 적힌 <span className="text-yellow-300 font-bold">단어를 타이핑</span>하면<br/>
             레이저로 격추! 놓치면 생명 감소 ♥
           </div>
-          <div className="text-gray-500 text-xs">{vocab === DEFAULT_WORDS ? '샘플 단어' : `교재 단어 ${vocab.length}개`} · 3 WAVES</div>
+          <div className="text-gray-500 text-xs">
+            {selectedWords?.length
+              ? <><span className="text-yellow-300 font-bold">✓ 선택된 단어 {vocab.length}개</span> · 3 WAVES</>
+              : vocab === DEFAULT_WORDS
+              ? '샘플 단어 · 3 WAVES'
+              : `교재 단어 ${vocab.length}개 · 3 WAVES`}
+          </div>
           <button onClick={startGame}
             className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl text-lg hover:bg-indigo-500 transition-all active:scale-95 shadow-lg">
             🚀 START

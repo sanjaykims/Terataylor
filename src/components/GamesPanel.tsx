@@ -15,9 +15,10 @@ const TABS: { id: GameType; label: string; active: string }[] = [
 interface Props {
   text: string;
   vocab?: VocabItem[] | null;
+  selectedWords?: string[];
 }
 
-export default function GamesPanel({ text, vocab }: Props) {
+export default function GamesPanel({ text, vocab, selectedWords }: Props) {
   const [game, setGame] = useState<GameType>('space');
 
   return (
@@ -35,7 +36,7 @@ export default function GamesPanel({ text, vocab }: Props) {
 
       {game === 'scramble' && <SentenceScramble text={text} />}
       {game === 'quiz'     && <VocabQuizGame text={text} bookVocab={vocab} />}
-      {game === 'space'    && <SpaceGame text={text} bookVocab={vocab} />}
+      {game === 'space'    && <SpaceGame text={text} bookVocab={vocab} selectedWords={selectedWords} />}
     </div>
   );
 }
