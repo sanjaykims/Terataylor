@@ -264,9 +264,10 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const [analyzeMsg,    setAnalyzeMsg]    = useState('');
   const [audioUploadMsg,setAudioUploadMsg]= useState('');
   const [uploadProgress,setUploadProgress]= useState({ done: 0, total: 0 });
-  // Prevents handleAudioTimeUpdate from jumping back behind the sentence we just seeked to
-  // (MP3 frame alignment means currentTime can land a few ms before sentenceStarts[i])
-  const seekFloorRef = useRef(-1);
+  // After a programmatic seek, hold activeIdx at the target sentence for up to 2 wall-clock
+  // seconds so stale/intermediate timeupdate events can't jump the highlight backward.
+  // Released early if audio naturally plays forward past the seeked sentence.
+  const seekStateRef = useRef<{ idx: number; wallUntil: number } | null>(null);
   const [nextChapHasAudio, setNextChapHasAudio] = useState(false);
   const [merging,       setMerging]       = useState(false);
   const [mergeMsg,      setMergeMsg]      = useState('');
@@ -567,7 +568,19 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   // Start time (seconds) of each sentence. Prefer REAL per-sentence times from
   // speech alignment; fall back to a word-count estimate until analysis is run.
   const sentenceStarts = (() => {
-    if (timings && timings.length === enRows.length) return timings;
+    if (timings && timings.length > 0) {
+      if (timings.length === enRows.length) return timings;
+      // Small mismatch (≤5 sentences): pad or trim rather than falling back to inaccurate estimate
+      if (Math.abs(timings.length - enRows.length) <= 5) {
+        if (timings.length > enRows.length) return timings.slice(0, enRows.length);
+        const ext = [...timings];
+        const avgGap = timings.length > 1 ? (timings[timings.length - 1] - timings[0]) / (timings.length - 1) : 3;
+        for (let k = timings.length; k < enRows.length; k++) {
+          ext.push(ext[ext.length - 1] + avgGap);
+        }
+        return ext;
+      }
+    }
     if (!audioDuration || enRows.length === 0) return [];
     const weights = enRows.map(s => Math.max(1, s.split(/\s+/).length));
     const total = weights.reduce((a, b) => a + b, 0);
@@ -586,14 +599,21 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       if (t >= sentenceStarts[i]) idx = i; else break;
     }
 
-    // After a seek, currentTime can land a few ms before sentenceStarts[i] due to
-    // MP3 frame alignment, which would make idx = i-1. Clamp it to the seek floor
-    // until we naturally play past that sentence.
-    if (seekFloorRef.current >= 0) {
-      if (idx < seekFloorRef.current) {
-        idx = seekFloorRef.current;
+    // After a programmatic seek, guard against intermediate timeupdate events
+    // (which can fire before the seek fully settles) pulling the highlight backward.
+    // We hold the seeked sentence for up to 2 wall-clock seconds, releasing only
+    // when the audio naturally plays forward into a later sentence.
+    const ss = seekStateRef.current;
+    if (ss !== null) {
+      if (Date.now() < ss.wallUntil) {
+        if (idx < ss.idx) {
+          idx = ss.idx;         // prevent backward jump during grace period
+        } else if (idx > ss.idx) {
+          seekStateRef.current = null; // audio played into a later sentence — release
+        }
+        // idx === ss.idx: still in the seeked sentence, keep grace active
       } else {
-        seekFloorRef.current = -1; // played past the seek point — resume normal detection
+        seekStateRef.current = null;  // 2s elapsed — resume normal detection
       }
     }
 
@@ -610,12 +630,41 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setActiveWordIdx(Math.min(Math.floor(progress * words.length), words.length - 1));
   };
 
+  // Re-sync activeIdx once the browser has finished seeking (the seeked event fires
+  // after currentTime settles, so we know exactly where the audio actually landed).
+  const handleSeeked = () => {
+    const t = audioRef.current?.currentTime ?? 0;
+    if (sentenceStarts.length === 0) return;
+    let idx = 0;
+    for (let i = 0; i < sentenceStarts.length; i++) {
+      if (t >= sentenceStarts[i]) idx = i; else break;
+    }
+    const ss = seekStateRef.current;
+    if (ss !== null) {
+      // If we landed at or past the target sentence, update the floor index so the
+      // grace period tracks the correct sentence (handles VBR seek imprecision).
+      if (idx >= ss.idx) {
+        ss.idx = idx;
+      }
+      setActiveIdx(ss.idx);
+    } else {
+      setActiveIdx(idx);
+    }
+    setActiveWordIdx(0);
+  };
+
   const seekToSentence = (i: number) => {
     if (!audioRef.current || i >= sentenceStarts.length) return;
-    audioRef.current.currentTime = sentenceStarts[i];
-    seekFloorRef.current = i;   // hold the floor until we play past sentence i
+    // Seek 150 ms before the sentence boundary so the browser frame-aligns into
+    // the sentence rather than landing a few ms past it (VBR seeking imprecision).
+    const target = Math.max(0, sentenceStarts[i] - 0.15);
+    audioRef.current.currentTime = target;
+    // Hold activeIdx at i for up to 2 wall-clock seconds regardless of timeupdate noise.
+    seekStateRef.current = { idx: i, wallUntil: Date.now() + 2000 };
     setActiveIdx(i);
     setActiveWordIdx(0);
+    // Always start playing so the highlight immediately tracks forward.
+    audioRef.current.play().catch(() => {});
   };
 
   // Keep the active sentence in view while audio plays (scroll whichever
@@ -863,7 +912,8 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
                 className="w-full rounded-xl"
                 onLoadedMetadata={e => setAudioDuration(e.currentTarget.duration || 0)}
                 onTimeUpdate={handleAudioTimeUpdate}
-                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); }}
+                onSeeked={handleSeeked}
+                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); seekStateRef.current = null; }}
               />
 
               {/* Real speech alignment */}
