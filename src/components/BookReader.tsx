@@ -541,11 +541,13 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     const sentences = enText ? splitToSentences(enText) : [];
     if (sentences.length === 0) return;
     setAnalyzing(true);
-    setAnalyzeMsg('음성 분석 중… (파일 길이에 따라 30~90초)');
+    setAnalyzeMsg('음성 분석 중… (30~90초)');
     try {
-      const cleanUrl = audioUrl.split('?')[0]; // strip cache-buster before passing to Deepgram
+      const cleanUrl = audioUrl.split('?')[0];
+      // utterances=true → Deepgram returns its own sentence segments with accurate
+      // start times. punctuate=true is required for utterance segmentation.
       const dgRes = await fetch(
-        'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
+        'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&utterances=true&punctuate=true',
         {
           method: 'POST',
           headers: {
@@ -557,15 +559,29 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       );
       if (!dgRes.ok) throw new Error(`Deepgram: ${await dgRes.text()}`);
       const dgData = await dgRes.json() as {
-        results: { channels: [{ alternatives: [{ words: import('../lib/audioAlign').WordTimestamp[] }] }] };
+        results: {
+          channels: [{ alternatives: [{ words: import('../lib/audioAlign').WordTimestamp[] }] }];
+          utterances?: import('../lib/audioAlign').UtteranceTimestamp[];
+        };
       };
       const words = dgData.results?.channels?.[0]?.alternatives?.[0]?.words ?? [];
-      if (!words.length) throw new Error('음성을 인식하지 못했어요. 다시 시도해 주세요.');
-      const { alignFromWordTimestamps } = await import('../lib/audioAlign');
-      const times = alignFromWordTimestamps(words, sentences);
+      const utterances = dgData.results?.utterances ?? [];
+      if (!words.length && !utterances.length) throw new Error('음성을 인식하지 못했어요. 다시 시도해 주세요.');
+
+      const { alignFromUtterances, alignFromWordTimestamps } = await import('../lib/audioAlign');
+      // Prefer utterance-based alignment — Deepgram's own sentence boundaries
+      // have accurate timestamps; word-by-word alignment accumulates errors.
+      const times = utterances.length > 0
+        ? alignFromUtterances(utterances, sentences)
+        : alignFromWordTimestamps(words, sentences);
+
       await saveChapterTimings(bookId, selectedChapter, times);
       setTimings(times);
-      setAnalyzeMsg('✓ 음성 분석 완료 — 실제 발화에 맞춰 하이라이트돼요');
+      setAnalyzeMsg(
+        utterances.length > 0
+          ? `✓ 음성 분석 완료 (발화 기반 정렬, ${utterances.length}개 구간)`
+          : '✓ 음성 분석 완료'
+      );
     } catch (e) {
       setAnalyzeMsg(e instanceof Error ? `분석 실패: ${e.message}` : '분석 실패');
     } finally {

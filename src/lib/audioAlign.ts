@@ -161,12 +161,73 @@ function lerp(pts: { pos: number; time: number }[], x: number): number {
   return pts[lo].time + (range > 0 ? (x - pts[lo].pos) / range : 0) * (pts[hi].time - pts[lo].time);
 }
 
-// ── Browser-side alignment from pre-computed word timestamps ─────────────────
-// Takes word timestamps from Deepgram (or any source) and runs the same
-// two-pass algorithm. No browser Whisper, no edge function, no timeout.
+// ── Browser-side alignment from Deepgram output ───────────────────────────────
+// Two strategies, tried in order:
+//
+// 1. alignFromUtterances (preferred): Deepgram returns sentence-level "utterances"
+//    with accurate start/end times when utterances=true is passed. We match each
+//    book sentence to the utterance with the highest significant-word overlap.
+//    This is far more accurate than word-by-word alignment because we use
+//    Deepgram's own sentence boundaries instead of trying to reconstruct them.
+//
+// 2. alignFromWordTimestamps (fallback): Forward-scanning sentence-by-sentence
+//    search. For each book sentence we look for its first significant words
+//    (length >= 4) in the next 150 Deepgram words, with gap tolerance so
+//    articles/prepositions between content words don't break the match.
 
 export interface WordTimestamp { word: string; start: number; end: number }
+export interface UtteranceTimestamp { start: number; end: number; transcript: string }
 
+// Normalised word list for overlap scoring.
+function normWords(text: string): string[] {
+  return text.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+}
+
+// Fraction of sentence's significant words (len > 3) that appear in utterance.
+function overlapScore(sentWords: string[], uttWords: string[]): number {
+  const sig = sentWords.filter(w => w.length > 3);
+  if (!sig.length) return 0;
+  const uttSet = new Set(uttWords.filter(w => w.length > 3));
+  return sig.filter(w => uttSet.has(w)).length / sig.length;
+}
+
+// Primary: match each book sentence to the Deepgram utterance with the best
+// word overlap, then use that utterance's start time. Processes sentences in
+// order so the search window only moves forward.
+export function alignFromUtterances(
+  utterances: UtteranceTimestamp[],
+  sentences: string[],
+): number[] {
+  if (!utterances.length || !sentences.length) return sentences.map(() => 0);
+
+  const uttWords = utterances.map(u => normWords(u.transcript));
+  const starts: number[] = [];
+  let uttPos = 0;
+
+  for (let si = 0; si < sentences.length; si++) {
+    const sentW = normWords(sentences[si]);
+    const searchEnd = Math.min(utterances.length - 1, uttPos + 20);
+
+    let bestIdx = uttPos;
+    let bestScore = -1;
+    for (let ui = uttPos; ui <= searchEnd; ui++) {
+      const score = overlapScore(sentW, uttWords[ui]);
+      if (score > bestScore) { bestScore = score; bestIdx = ui; }
+    }
+
+    starts.push(utterances[bestIdx].start);
+    // Only advance the pointer when we're confident — prevents a bad match
+    // from permanently skipping ahead and leaving later sentences unmatched.
+    if (bestScore >= 0.3) uttPos = Math.min(bestIdx + 1, utterances.length - 1);
+  }
+
+  enforceMonotone(starts);
+  return starts;
+}
+
+// Fallback: forward-scanning word-level alignment.
+// Processes sentences in order. For each sentence we search up to 150 audio
+// words ahead for the sentence's significant first words, with gap tolerance.
 export function alignFromWordTimestamps(
   words: WordTimestamp[],
   sentences: string[],
@@ -177,75 +238,52 @@ export function alignFromWordTimestamps(
 
   if (!audioFlat.length || !sentences.length) return sentences.map(() => 0);
 
-  const textFlat: { si: number; norm: string }[] = [];
+  const starts: number[] = [];
+  let audioPos = 0;
+  const SEARCH_WINDOW = 150;
+
   for (let si = 0; si < sentences.length; si++) {
-    for (const w of sentences[si].split(/\s+/).filter(Boolean)) {
-      const n = normWord(w);
-      if (n) textFlat.push({ si, norm: n });
+    // Significant words (length >= 4) from the first 8 words of this sentence.
+    const sigWords = sentences[si]
+      .split(/\s+/).slice(0, 8)
+      .map(normWord).filter(w => w.length >= 4);
+
+    if (!sigWords.length || audioPos >= audioFlat.length) {
+      starts.push(starts.length > 0 ? starts[starts.length - 1] : 0);
+      continue;
     }
-  }
-  if (!textFlat.length) return sentences.map(() => 0);
 
-  const WINDOW = 35, JUMP = WINDOW * 2;
-  const anchors: { pos: number; time: number }[] = [];
-  let textPos = 0;
+    const fw = sigWords[0];
+    const verifyWords = sigWords.slice(1, 4);   // up to 3 more to verify
+    const minScore = Math.min(2, sigWords.length);
+    const searchEnd = Math.min(audioFlat.length - 1, audioPos + SEARCH_WINDOW);
 
-  for (let ai = 0; ai < audioFlat.length; ai++) {
-    const aw = audioFlat[ai];
-    if (aw.norm.length < 5) continue;
-    const expectedTi = Math.round((ai / audioFlat.length) * textFlat.length);
-    const searchStart = (expectedTi - textPos > JUMP)
-      ? Math.max(textPos, expectedTi - Math.floor(WINDOW / 4)) : textPos;
-    const searchEnd = Math.min(
-      textFlat.length - 1,
-      Math.max(textPos + WINDOW, expectedTi + Math.floor(WINDOW / 2)),
-    );
-    for (let ti = searchStart; ti <= searchEnd; ti++) {
-      if (textFlat[ti].norm === aw.norm) {
-        anchors.push({ pos: ti, time: aw.time });
-        textPos = ti + 1;
-        break;
+    let bestAi = -1;
+    let bestScore = 0;
+
+    for (let ai = audioPos; ai <= searchEnd; ai++) {
+      if (audioFlat[ai].norm !== fw) continue;
+
+      // Check how many verifyWords appear in the next 8 audio positions
+      // (gap tolerance: short words between content words are ignored).
+      let score = 1;
+      let cursor = ai;
+      for (const vw of verifyWords) {
+        for (let k = cursor + 1; k <= cursor + 8 && k < audioFlat.length; k++) {
+          if (audioFlat[k].norm === vw) { score++; cursor = k; break; }
+        }
       }
+
+      if (score > bestScore) { bestScore = score; bestAi = ai; }
+      if (score >= minScore) break; // good enough — stop scanning
     }
-  }
 
-  if (!anchors.length) {
-    const totalTime = audioFlat[audioFlat.length - 1].time;
-    return sentences.map((_, si) => (si / sentences.length) * totalTime);
-  }
-
-  const pts = dedupeMonotone([
-    { pos: 0, time: anchors[0].time },
-    ...anchors,
-    { pos: textFlat.length, time: audioFlat[audioFlat.length - 1].time },
-  ]);
-
-  const starts = new Array<number>(sentences.length).fill(-1);
-  for (let ti = 0; ti < textFlat.length; ti++) {
-    const si = textFlat[ti].si;
-    if (starts[si] < 0) starts[si] = lerp(pts, ti);
-  }
-  let last = audioFlat[0].time;
-  for (let i = 0; i < starts.length; i++) {
-    if (starts[i] < 0) starts[i] = last; else last = starts[i];
-  }
-  enforceMonotone(starts);
-
-  // Pass 2: ±2s refinement
-  const REFINE_S = 2.0;
-  for (let si = 0; si < sentences.length; si++) {
-    const target = starts[si];
-    const fw = sentences[si].split(/\s+/).slice(0, 5).map(normWord).filter(w => w.length >= 3);
-    if (!fw.length) continue;
-    const lo = audioFlat.findIndex(w => w.time >= target - REFINE_S);
-    if (lo < 0) continue;
-    for (let ai = lo; ai < audioFlat.length && audioFlat[ai].time <= target + REFINE_S; ai++) {
-      if (audioFlat[ai].norm !== fw[0]) continue;
-      let matched = 1;
-      for (let k = 1; k < fw.length && ai + k < audioFlat.length; k++) {
-        if (audioFlat[ai + k].norm === fw[k]) matched++;
-      }
-      if (matched >= Math.min(2, fw.length)) { starts[si] = audioFlat[ai].time; break; }
+    if (bestAi >= 0 && bestScore >= minScore) {
+      starts.push(audioFlat[bestAi].time);
+      audioPos = bestAi + 1;
+    } else {
+      // No confident match: hold position, use previous time.
+      starts.push(starts.length > 0 ? starts[starts.length - 1] : audioFlat[audioPos].time);
     }
   }
 
