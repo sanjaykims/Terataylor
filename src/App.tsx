@@ -7,7 +7,6 @@ import ProgressDashboard from './components/ProgressDashboard';
 import ImageUploadInput from './components/ImageUploadInput';
 import LessonScheduleWidget from './components/LessonScheduleWidget';
 import LiteraryAnalysisWriter from './components/LiteraryAnalysisWriter';
-import PdfTextExtractor from './components/PdfTextExtractor';
 import BookReader from './components/BookReader';
 import { trackSession } from './lib/tracker';
 import { supabase } from './lib/supabase';
@@ -311,17 +310,8 @@ export default function App() {
             </button>
             {showV1Input && (
               <div className="px-5 pb-5 space-y-4">
-                {v1Book === 'edward' ? (
-                  <PdfTextExtractor
-                    bookId="edward"
-                    savedSummary={v1TextSummary}
-                    onClear={() => setV1Text('')}
-                    onExtracted={setV1Text}
-                  />
-                ) : (
-                  <ImageUploadInput mode="text" label="📄 소설 지문 사진" hint="이번 주 읽을 페이지 — 여러 장 가능"
-                    savedSummary={v1TextSummary} onClear={() => setV1Text('')} onExtracted={setV1Text} />
-                )}
+                <ImageUploadInput mode="text" label="📄 소설 지문 사진" hint="이번 주 읽을 페이지 — 여러 장 가능"
+                  savedSummary={v1TextSummary} onClear={() => setV1Text('')} onExtracted={setV1Text} />
                 <hr className="border-gray-100" />
                 <ImageUploadInput mode="vocab" label="📚 단어 사진" hint="소설에서 지정한 단어 목록 사진"
                   savedSummary={v1VocabSummary} onClear={() => setV1Vocab(null)} onExtracted={setV1Vocab} />
