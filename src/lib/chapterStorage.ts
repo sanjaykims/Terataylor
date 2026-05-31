@@ -8,6 +8,7 @@ export function saveChapterEn(bookId: BookId, lesson: number, text: string): voi
 }
 
 export function saveChapterKo(bookId: BookId, lesson: number, text: string): void {
+  if (!text.trim()) return;
   try { localStorage.setItem(key(bookId, lesson, 'ko'), text); } catch { /* quota */ }
 }
 

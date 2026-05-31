@@ -362,17 +362,8 @@ export default function BookReader({ bookId }: Props) {
         <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{txError}</p>
       )}
       {koText && !translating && (
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs text-emerald-600 font-semibold">✓ 번역 완료</span>
-          <button
-            onClick={() => {
-              saveChapterKo(bookId, selectedLesson, '');
-              setKoText(null);
-            }}
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            다시 번역
-          </button>
+        <div className="px-1">
+          <span className="text-xs text-emerald-600 font-semibold">✓ 번역 저장됨</span>
         </div>
       )}
 
