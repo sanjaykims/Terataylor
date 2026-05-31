@@ -31,21 +31,60 @@ function splitIntoChapters(pages: string[]): string[] | null {
 
   for (let i = 0; i < pages.length; i++) {
     const pageText = pages[i].trim();
-    // Skip nearly-empty pages (covers, blank pages, half-pages)
     if (pageText.length < 80) continue;
-    // Check the first 3 non-empty lines for a chapter heading
     const lines = pageText.split('\n').map(l => l.trim()).filter(Boolean);
     if (lines.slice(0, 3).some(l => CHAPTER_HEADING.test(l))) {
       starts.push(i);
     }
   }
 
-  if (starts.length < 2) return null; // Detection failed
+  if (starts.length < 2) return null;
 
   return starts.map((start, idx) => {
     const end = idx + 1 < starts.length ? starts[idx + 1] : pages.length;
     return pages.slice(start, end).join('\n\n');
   });
+}
+
+// Lines that repeat on many pages are running headers/footers (title, author, chapter name).
+function detectRunningHeaders(pages: string[]): Set<string> {
+  const counts = new Map<string, number>();
+  for (const page of pages) {
+    const lines = page.split('\n').map(l => l.trim()).filter(Boolean);
+    const candidates = new Set([...lines.slice(0, 2), ...lines.slice(-2)]);
+    for (const line of candidates) {
+      if (line.length > 0 && line.length < 60 && line.split(/\s+/).length <= 6) {
+        counts.set(line, (counts.get(line) ?? 0) + 1);
+      }
+    }
+  }
+  const threshold = Math.max(3, pages.length * 0.15);
+  const headers = new Set<string>();
+  for (const [line, count] of counts) {
+    if (count >= threshold) headers.add(line);
+  }
+  return headers;
+}
+
+function cleanPageText(text: string, runningHeaders: Set<string>): string {
+  return text
+    .split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0)
+    .filter(l => !/^\d{1,4}$/.test(l))       // bare page numbers
+    .filter(l => !runningHeaders.has(l))       // repeated header/footer lines
+    .join('\n');
+}
+
+// Strip the chapter heading line(s) from the start of a chapter's text.
+function stripChapterHeading(text: string): string {
+  const lines = text.split('\n');
+  for (let i = 0; i < Math.min(5, lines.length); i++) {
+    if (CHAPTER_HEADING.test(lines[i].trim())) {
+      return lines.slice(i + 1).join('\n').trimStart();
+    }
+  }
+  return text;
 }
 
 // ── PDF helpers ───────────────────────────────────────────────────────────────
@@ -182,18 +221,21 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     try {
       const pages = await extractAllPages(file, (done, total) => setProgress({ done, total }));
 
-      // Try automatic chapter detection
-      const detected = splitIntoChapters(pages);
+      // Remove page numbers and running headers (title / author lines on every page)
+      const runningHeaders = detectRunningHeaders(pages);
+      const cleanedPages = pages.map(p => cleanPageText(p, runningHeaders));
+
+      // Split into chapters and strip the heading line from each chapter
+      const detected = splitIntoChapters(cleanedPages);
 
       let chapterTexts: string[];
       let note: string;
 
       if (detected && detected.length >= 2) {
-        chapterTexts = detected;
+        chapterTexts = detected.map(stripChapterHeading);
         note = `${detected.length}개 챕터 감지됨`;
       } else {
-        // Fall back: treat the whole book as one chapter
-        chapterTexts = [pages.join('\n\n')];
+        chapterTexts = [cleanedPages.join('\n\n')];
         note = '챕터를 자동 감지하지 못해 전체를 1개로 저장했어요.';
       }
 
