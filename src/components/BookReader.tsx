@@ -69,34 +69,39 @@ function detectRunningHeaders(pages: string[]): Set<string> {
   return headers;
 }
 
+// Strip URLs from within a line rather than deleting the whole line.
+function stripUrls(line: string): string {
+  return line.replace(/\s*https?:\/\/\S+/gi, '').trim();
+}
+
 function cleanPageText(text: string, runningHeaders: Set<string>): string {
   return text
     .split('\n')
-    .map(l => l.trim())
+    .map(l => stripUrls(l.trim()))             // remove URLs inline first
     .filter(l => l.length > 0)
     .filter(l => !/^\d{1,4}$/.test(l))        // bare page numbers
     .filter(l => !runningHeaders.has(l))        // repeated header/footer lines
-    .filter(l => !/https?:\/\//i.test(l))      // web URLs
     .join('\n');
 }
 
-// Remove front-matter lines that may slip into chapter 1 text.
-const FRONT_MATTER_LINE = /^(table of contents|copyright|all rights reserved|dedication|published by|isbn|first published|first edition|printed in)/i;
+// Lines that are clearly front matter, not story text.
+const FRONT_MATTER_LINE = /^(table of contents|copyright|all rights reserved|dedication|published by|isbn|first published|first edition|printed in|also by|about the author|coda\b)/i;
 
 function cleanChapterText(text: string): string {
   return text
     .split('\n')
+    .map(l => stripUrls(l))                    // strip any remaining URLs
     .filter(l => !FRONT_MATTER_LINE.test(l.trim()))
-    .filter(l => !/https?:\/\//i.test(l))     // belt-and-suspenders URL removal
     .join('\n')
-    .replace(/\n{3,}/g, '\n\n')               // collapse excess blank lines
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
 
-// Strip the chapter heading line(s) from the start of a chapter's text.
+// Strip everything up to and including the chapter heading so only story prose remains.
+// Searches up to 20 lines to handle pages where front matter precedes the heading.
 function stripChapterHeading(text: string): string {
   const lines = text.split('\n');
-  for (let i = 0; i < Math.min(5, lines.length); i++) {
+  for (let i = 0; i < Math.min(20, lines.length); i++) {
     if (CHAPTER_HEADING.test(lines[i].trim())) {
       return lines.slice(i + 1).join('\n').trimStart();
     }
