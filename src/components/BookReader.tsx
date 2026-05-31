@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { BOOKS, type BookId } from '../data/syllabus';
+import { BOOKS, SCHEDULE, type BookId } from '../data/syllabus';
 import { supabase } from '../lib/supabase';
 import {
   hasBook, clearBook, loadChapterEn, loadChapterKo,
@@ -235,6 +235,14 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const [mobileView,   setMobileView]   = useState<'en' | 'ko'>('en');
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Current lesson chapter range for this book (to highlight lesson chapters)
+  const lessonChapterRange = (() => {
+    const now = new Date(); now.setHours(0, 0, 0, 0);
+    const past = SCHEDULE.filter(l => l.book === bookId && new Date(l.date) <= now && l.chapters);
+    const entry = past.at(-1) ?? SCHEDULE.find(l => l.book === bookId && l.chapters);
+    return entry?.chapters ?? null;
+  })();
+
   // ── On mount ─────────────────────────────────────────────────────────────
   useEffect(() => {
     setInitState('loading');
@@ -442,19 +450,27 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
 
       {/* Chapter selector */}
       <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-        {Array.from({ length: totalChapters }, (_, i) => i + 1).map(ch => (
-          <button key={ch} onClick={() => selectChapter(ch)}
-            className={`shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-all border relative ${
-              selectedChapter === ch
-                ? `${bk.badge} text-white border-transparent shadow-sm`
-                : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-            }`}>
-            Ch.{String(ch).padStart(2, '0')}
-            {translatedChaps.has(ch) && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border border-white" />
-            )}
-          </button>
-        ))}
+        {Array.from({ length: totalChapters }, (_, i) => i + 1).map(ch => {
+          const isLesson = lessonChapterRange && ch >= lessonChapterRange[0] && ch <= lessonChapterRange[1];
+          return (
+            <button key={ch} onClick={() => selectChapter(ch)}
+              className={`shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-all border relative ${
+                selectedChapter === ch
+                  ? `${bk.badge} text-white border-transparent shadow-sm`
+                  : isLesson
+                  ? `bg-white ${bk.border} ${bk.color} shadow-sm`
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+              }`}>
+              Ch.{String(ch).padStart(2, '0')}
+              {isLesson && selectedChapter !== ch && (
+                <span className="absolute -top-1 -left-1 text-[9px] leading-none bg-orange-400 text-white rounded-full px-1 font-bold">수업</span>
+              )}
+              {translatedChaps.has(ch) && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border border-white" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Current chapter info bar */}

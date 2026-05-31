@@ -45,14 +45,15 @@ export const BOOKS: Record<BookId, BookInfo> = {
 
 export interface LessonEntry {
   lesson: number;
-  date: string;   // YYYY-MM-DD
+  date: string;        // YYYY-MM-DD
   book: BookId;
   pages: string;
   homework: string;
+  chapters?: [number, number];  // [firstChapter, lastChapter] in the uploaded PDF
 }
 
 export const SCHEDULE: LessonEntry[] = [
-  { lesson:  1, date: '2026-06-03', book: 'edward',   pages: 'pp. 1~24',    homework: 'Read pp. 27~65' },
+  { lesson:  1, date: '2026-06-03', book: 'edward',   pages: 'Ch. 1~3',     homework: 'Read pp. 27~65', chapters: [1, 3] },
   { lesson:  2, date: '2026-06-10', book: 'edward',   pages: 'pp. 27~65',   homework: 'Read pp. 69~102' },
   { lesson:  3, date: '2026-06-17', book: 'edward',   pages: 'pp. 69~102',  homework: 'Read pp. 105~136' },
   { lesson:  4, date: '2026-06-24', book: 'edward',   pages: 'pp. 105~136', homework: 'Read pp. 139~173' },
