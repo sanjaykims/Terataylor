@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { csSet, csDel, csDelPattern, csSetBatch, csKeyExists, csGetKeysByPattern } from './cloudStorage';
+import { csGet, csSet, csDel, csDelPattern, csSetBatch, csKeyExists, csGetKeysByPattern } from './cloudStorage';
 import type { BookId } from '../data/syllabus';
 
 export async function saveChapterEn(bookId: BookId, lesson: number, text: string): Promise<void> {
@@ -38,7 +38,7 @@ export async function clearBook(bookId: BookId): Promise<void> {
   await csDelPattern(`chapter_${bookId}_`);
 }
 
-export async function getTranslatedLessons(bookId: BookId): Promise<number[]> {
+export async function getTranslatedChapters(bookId: BookId): Promise<number[]> {
   const keys = await csGetKeysByPattern(`chapter_${bookId}_%_ko`);
   return keys
     .map(k => {
@@ -48,15 +48,27 @@ export async function getTranslatedLessons(bookId: BookId): Promise<number[]> {
     .filter((n): n is number => n !== null);
 }
 
+export async function saveChapterCount(bookId: BookId, count: number): Promise<void> {
+  await csSet(`chapter_${bookId}_count`, String(count));
+}
+
+export async function loadChapterCount(bookId: BookId): Promise<number> {
+  const val = await csGet(`chapter_${bookId}_count`);
+  if (val) return parseInt(val);
+  // Fallback: count existing chapter keys (for data saved before count tracking)
+  const keys = await csGetKeysByPattern(`chapter_${bookId}_%_en`);
+  return keys.length;
+}
+
 // Batch-save all English chapter texts after PDF extraction.
 export async function saveBookChapters(
   bookId: BookId,
-  chapters: { lesson: number; text: string }[],
+  chapters: { chapter: number; text: string }[],
 ): Promise<void> {
   await csSetBatch(
     chapters
       .filter(c => c.text.trim())
-      .map(c => ({ key: `chapter_${bookId}_${c.lesson}_en`, value: c.text })),
+      .map(c => ({ key: `chapter_${bookId}_${c.chapter}_en`, value: c.text })),
   );
 }
 

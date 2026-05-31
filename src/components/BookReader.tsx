@@ -1,20 +1,54 @@
 import { useState, useRef, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { SCHEDULE, BOOKS, type BookId } from '../data/syllabus';
+import { BOOKS, type BookId } from '../data/syllabus';
 import { supabase } from '../lib/supabase';
 import {
   hasBook, clearBook, loadChapterEn, loadChapterKo,
-  saveChapterKo, saveBookChapters, getTranslatedLessons,
+  saveChapterKo, saveBookChapters, getTranslatedChapters,
+  saveChapterCount, loadChapterCount,
 } from '../lib/chapterStorage';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-function parseRange(pages: string): { start: number; end: number } | null {
-  const m = pages.match(/(\d+)\s*[~–-]\s*(\d+)/);
-  return m ? { start: +m[1], end: +m[2] } : null;
+// ── Chapter heading detection ─────────────────────────────────────────────────
+// Matches lines like "One", "Two", ..., "Twenty-five", "Chapter One",
+// "Chapter 1", or bare digits 1-30. Used to detect where chapters start.
+const NUMBER_WORDS = [
+  'one','two','three','four','five','six','seven','eight','nine','ten',
+  'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen',
+  'eighteen','nineteen','twenty',
+  'twenty-one','twenty-two','twenty-three','twenty-four','twenty-five',
+  'twenty-six','twenty-seven','twenty-eight','twenty-nine','thirty',
+];
+const CHAPTER_HEADING = new RegExp(
+  `^(chapter\\s+\\w+|${NUMBER_WORDS.join('|')}|\\d{1,2}|prologue|epilogue)$`,
+  'i',
+);
+
+function splitIntoChapters(pages: string[]): string[] | null {
+  const starts: number[] = [];
+
+  for (let i = 0; i < pages.length; i++) {
+    const pageText = pages[i].trim();
+    // Skip nearly-empty pages (covers, blank pages, half-pages)
+    if (pageText.length < 80) continue;
+    // Check the first 3 non-empty lines for a chapter heading
+    const lines = pageText.split('\n').map(l => l.trim()).filter(Boolean);
+    if (lines.slice(0, 3).some(l => CHAPTER_HEADING.test(l))) {
+      starts.push(i);
+    }
+  }
+
+  if (starts.length < 2) return null; // Detection failed
+
+  return starts.map((start, idx) => {
+    const end = idx + 1 < starts.length ? starts[idx + 1] : pages.length;
+    return pages.slice(start, end).join('\n\n');
+  });
 }
 
+// ── PDF helpers ───────────────────────────────────────────────────────────────
 async function extractAllPages(
   file: File,
   onProgress: (done: number, total: number) => void,
@@ -69,118 +103,128 @@ async function translateChunked(
   return parts.join('\n\n');
 }
 
+// ── Component ─────────────────────────────────────────────────────────────────
 type InitState = 'loading' | 'no-book' | 'has-book';
 
 export default function BookReader({ bookId }: { bookId: BookId }) {
   const bk = BOOKS[bookId];
-  const bookLessons = SCHEDULE.filter(l => l.book === bookId);
-  const firstLesson = bookLessons[0]?.lesson ?? 1;
 
-  const [initState, setInitState] = useState<InitState>('loading');
+  const [initState,       setInitState]       = useState<InitState>('loading');
+  const [totalChapters,   setTotalChapters]   = useState(0);
+  const [selectedChapter, setSelectedChapter] = useState(1);
+  const [translatedChaps, setTranslatedChaps] = useState<Set<number>>(new Set());
 
-  // PDF extraction
-  const [extracting, setExtracting] = useState(false);
-  const [progress, setProgress] = useState({ done: 0, total: 0 });
-  const [uploadError, setUploadError] = useState('');
+  const [enText,        setEnText]        = useState<string | null>(null);
+  const [koText,        setKoText]        = useState<string | null>(null);
+  const [chapterLoading,setChapterLoading]= useState(false);
 
-  // Chapter reader
-  const [selectedLesson, setSelectedLesson] = useState(firstLesson);
-  const [enText, setEnText] = useState<string | null>(null);
-  const [koText, setKoText] = useState<string | null>(null);
-  const [chapterLoading, setChapterLoading] = useState(false);
-  const [translatedLessons, setTranslatedLessons] = useState<Set<number>>(new Set());
+  const [extracting,   setExtracting]   = useState(false);
+  const [progress,     setProgress]     = useState({ done: 0, total: 0 });
+  const [uploadError,  setUploadError]  = useState('');
+  const [detectedNote, setDetectedNote] = useState('');
 
-  // Translation
-  const [translating, setTranslating] = useState(false);
-  const [txProgress, setTxProgress] = useState({ done: 0, total: 0 });
-  const [txError, setTxError] = useState('');
+  const [translating,  setTranslating]  = useState(false);
+  const [txProgress,   setTxProgress]   = useState({ done: 0, total: 0 });
+  const [txError,      setTxError]      = useState('');
 
-  // UI
   const [confirmClear, setConfirmClear] = useState(false);
-  const [mobileView, setMobileView] = useState<'en' | 'ko'>('en');
+  const [mobileView,   setMobileView]   = useState<'en' | 'ko'>('en');
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // ── On mount: check if book is uploaded ──────────────────────────────────
+  // ── On mount ─────────────────────────────────────────────────────────────
   useEffect(() => {
     setInitState('loading');
     hasBook(bookId)
       .then(async has => {
         if (!has) { setInitState('no-book'); return; }
+        const count = await loadChapterCount(bookId).catch(() => 0);
+        setTotalChapters(count);
         setInitState('has-book');
-        // Load translated lesson markers
-        const translated = await getTranslatedLessons(bookId).catch(() => [] as number[]);
-        setTranslatedLessons(new Set(translated));
-        // Load first chapter
-        await loadChapter(bookId, firstLesson);
+        const translated = await getTranslatedChapters(bookId).catch(() => [] as number[]);
+        setTranslatedChaps(new Set(translated));
+        await loadChapter(bookId, 1);
       })
       .catch(() => setInitState('no-book'));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookId]);
 
-  const loadChapter = async (bid: BookId, lesson: number) => {
+  const loadChapter = async (bid: BookId, chapter: number) => {
     setChapterLoading(true);
     setEnText(null);
     setKoText(null);
     const [en, ko] = await Promise.all([
-      loadChapterEn(bid, lesson).catch(() => null),
-      loadChapterKo(bid, lesson).catch(() => null),
+      loadChapterEn(bid, chapter).catch(() => null),
+      loadChapterKo(bid, chapter).catch(() => null),
     ]);
     setEnText(en);
     setKoText(ko);
     setChapterLoading(false);
   };
 
-  const selectLesson = async (lesson: number) => {
-    setSelectedLesson(lesson);
+  const selectChapter = async (chapter: number) => {
+    setSelectedChapter(chapter);
     setTxError('');
     setMobileView('en');
-    await loadChapter(bookId, lesson);
+    await loadChapter(bookId, chapter);
   };
 
+  // ── PDF upload & chapter splitting ────────────────────────────────────────
   const handleFile = async (file: File) => {
     if (!file.name.toLowerCase().endsWith('.pdf')) {
       setUploadError('PDF 파일만 지원합니다.');
       return;
     }
     setUploadError('');
+    setDetectedNote('');
     setExtracting(true);
     setProgress({ done: 0, total: 0 });
-    try {
-      const pages = await extractAllPages(file, (done, total) =>
-        setProgress({ done, total }),
-      );
-      const chapters = bookLessons
-        .map(lesson => {
-          const r = parseRange(lesson.pages);
-          if (!r) return null;
-          return { lesson: lesson.lesson, text: pages.slice(r.start - 1, r.end).join('\n\n') };
-        })
-        .filter(Boolean) as { lesson: number; text: string }[];
 
+    try {
+      const pages = await extractAllPages(file, (done, total) => setProgress({ done, total }));
+
+      // Try automatic chapter detection
+      const detected = splitIntoChapters(pages);
+
+      let chapterTexts: string[];
+      let note: string;
+
+      if (detected && detected.length >= 2) {
+        chapterTexts = detected;
+        note = `${detected.length}개 챕터 감지됨`;
+      } else {
+        // Fall back: treat the whole book as one chapter
+        chapterTexts = [pages.join('\n\n')];
+        note = '챕터를 자동 감지하지 못해 전체를 1개로 저장했어요.';
+      }
+
+      const chapters = chapterTexts.map((text, i) => ({ chapter: i + 1, text }));
       await saveBookChapters(bookId, chapters);
+      await saveChapterCount(bookId, chapters.length);
+
+      setTotalChapters(chapters.length);
+      setDetectedNote(note);
       setExtracting(false);
       setInitState('has-book');
-      setSelectedLesson(firstLesson);
-      setTxError('');
-      await loadChapter(bookId, firstLesson);
+      setSelectedChapter(1);
+      setTranslatedChaps(new Set());
+      await loadChapter(bookId, 1);
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : '추출 실패');
       setExtracting(false);
     }
   };
 
+  // ── Translation ───────────────────────────────────────────────────────────
   const handleTranslate = async () => {
     if (!enText) return;
     setTranslating(true);
     setTxError('');
     setTxProgress({ done: 0, total: 0 });
     try {
-      const ko = await translateChunked(enText, (done, total) =>
-        setTxProgress({ done, total }),
-      );
-      await saveChapterKo(bookId, selectedLesson, ko);
+      const ko = await translateChunked(enText, (done, total) => setTxProgress({ done, total }));
+      await saveChapterKo(bookId, selectedChapter, ko);
       setKoText(ko);
-      setTranslatedLessons(prev => new Set([...prev, selectedLesson]));
+      setTranslatedChaps(prev => new Set([...prev, selectedChapter]));
     } catch (e) {
       setTxError(e instanceof Error ? e.message : '번역 실패');
     } finally {
@@ -195,27 +239,28 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setInitState('no-book');
     setEnText(null);
     setKoText(null);
-    setTranslatedLessons(new Set());
+    setTotalChapters(0);
+    setTranslatedChaps(new Set());
+    setDetectedNote('');
   };
 
-  const enParas = enText ? enText.split(/\n\n+/).map(p => p.trim()).filter(Boolean) : [];
-  const koParas = koText ? koText.split(/\n\n+/).map(p => p.trim()).filter(Boolean) : [];
-  const maxParas = Math.max(enParas.length, koParas.length);
-  const currentEntry = SCHEDULE.find(l => l.lesson === selectedLesson);
+  const enParas   = enText ? enText.split(/\n\n+/).map(p => p.trim()).filter(Boolean) : [];
+  const koParas   = koText ? koText.split(/\n\n+/).map(p => p.trim()).filter(Boolean) : [];
+  const maxParas  = Math.max(enParas.length, koParas.length);
 
-  // ── Loading state ────────────────────────────────────────────────────────
+  // ── Loading ───────────────────────────────────────────────────────────────
   if (initState === 'loading') {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="text-center space-y-2">
-          <div className={`text-3xl animate-pulse`}>{bk.emoji}</div>
+          <div className="text-3xl animate-pulse">{bk.emoji}</div>
           <div className="text-xs text-gray-400">불러오는 중...</div>
         </div>
       </div>
     );
   }
 
-  // ── Upload view ──────────────────────────────────────────────────────────
+  // ── Upload view ───────────────────────────────────────────────────────────
   if (initState === 'no-book') {
     return (
       <div className="space-y-4">
@@ -224,22 +269,22 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
             {bk.emoji} {bk.shortTitle} — 전체 원서 읽기
           </div>
           <div className="text-xs text-gray-500 leading-relaxed">
-            PDF 전체를 업로드하면 매 수업 챕터별로 나눠서 한/영 대역으로 읽을 수 있어요.
-            <br />
-            <span className="text-gray-400">※ PDF 페이지 번호 = 책 페이지 번호라고 가정합니다.</span>
+            PDF를 업로드하면 챕터별로 자동 분리해서 한/영 대역으로 읽을 수 있어요.
           </div>
         </div>
 
         {extracting ? (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
-            <div className="text-sm font-semibold text-gray-700 text-center">📖 페이지 추출 중...</div>
+            <div className="text-sm font-semibold text-gray-700 text-center">📖 챕터 분석 중...</div>
             <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all duration-200 ${bk.badge}`}
                 style={{ width: progress.total ? `${(progress.done / progress.total) * 100}%` : '0%' }}
               />
             </div>
-            <div className="text-xs text-gray-400 text-center">{progress.done} / {progress.total} 페이지</div>
+            <div className="text-xs text-gray-400 text-center">
+              {progress.done} / {progress.total} 페이지
+            </div>
           </div>
         ) : (
           <div
@@ -263,12 +308,17 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     );
   }
 
-  // ── Reader view ──────────────────────────────────────────────────────────
+  // ── Reader view ───────────────────────────────────────────────────────────
   return (
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className={`text-sm font-bold ${bk.color}`}>{bk.emoji} {bk.shortTitle} 원서 읽기</div>
+        <div className="flex items-center gap-2">
+          <span className={`text-sm font-bold ${bk.color}`}>{bk.emoji} {bk.shortTitle}</span>
+          {detectedNote && (
+            <span className="text-xs text-gray-400">{detectedNote}</span>
+          )}
+        </div>
         {confirmClear ? (
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500">정말 삭제할까요?</span>
@@ -282,32 +332,30 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
 
       {/* Chapter selector */}
       <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-        {bookLessons.map(l => (
-          <button key={l.lesson} onClick={() => selectLesson(l.lesson)}
+        {Array.from({ length: totalChapters }, (_, i) => i + 1).map(ch => (
+          <button key={ch} onClick={() => selectChapter(ch)}
             className={`shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-all border relative ${
-              selectedLesson === l.lesson
+              selectedChapter === ch
                 ? `${bk.badge} text-white border-transparent shadow-sm`
                 : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
             }`}>
-            <div>L{String(l.lesson).padStart(2, '0')}</div>
-            <div className="font-normal opacity-75">{l.pages.replace('pp. ', '')}</div>
-            {translatedLessons.has(l.lesson) && (
+            Ch.{String(ch).padStart(2, '0')}
+            {translatedChaps.has(ch) && (
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border border-white" />
             )}
           </button>
         ))}
       </div>
 
-      {/* Chapter info bar */}
-      {currentEntry && (
-        <div className="bg-white rounded-xl border border-gray-100 px-3 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className={`text-xs font-bold ${bk.color}`}>Lesson {String(currentEntry.lesson).padStart(2, '0')}</span>
-            <span className="text-xs text-gray-500">{currentEntry.pages}</span>
-          </div>
-          {enText && <span className="text-xs text-gray-400">{enText.trim().split(/\s+/).length}단어</span>}
-        </div>
-      )}
+      {/* Current chapter info bar */}
+      <div className="bg-white rounded-xl border border-gray-100 px-3 py-2 flex items-center justify-between">
+        <span className={`text-xs font-bold ${bk.color}`}>
+          Chapter {selectedChapter} / {totalChapters}
+        </span>
+        {enText && (
+          <span className="text-xs text-gray-400">{enText.trim().split(/\s+/).length}단어</span>
+        )}
+      </div>
 
       {/* Mobile view toggle */}
       <div className="sm:hidden flex bg-white rounded-xl border border-gray-100 p-0.5 gap-0.5">
@@ -395,7 +443,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
         </>
       ) : (
         <div className="bg-gray-50 rounded-2xl p-8 text-center text-sm text-gray-400">
-          이 챕터의 텍스트를 불러올 수 없어요.<br />PDF를 다시 업로드해 주세요.
+          이 챕터의 텍스트를 불러올 수 없어요.
         </div>
       )}
     </div>
