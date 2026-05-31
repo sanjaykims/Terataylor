@@ -1,9 +1,11 @@
 // Audio-text alignment — v4 two-pass algorithm
 //
-// Pass 1 (coarse): Whisper segment-level timestamps + anchor-word matching
-//   - Segment timestamps are computed by Whisper's neural attention, much
-//     more reliable than interpolated word-level timestamps.
-//   - Words ≥ 4 chars are used as anchors. A dual search window (greedy
+// Pass 1 (coarse): Whisper word-level timestamps + anchor-word matching
+//   - Word-level timestamps are produced by Whisper's attention mechanism
+//     and are individually accurate (no interpolation needed).
+//   - Falls back to segment-level timestamps with linear interpolation when
+//     the transformers.js version does not support return_timestamps:'word'.
+//   - Words ≥ 5 chars are used as anchors. A dual search window (greedy
 //     position + fraction-based expected position) prevents the scan from
 //     getting permanently stuck behind the real audio position.
 //   - Piecewise linear interpolation between matched anchors fills in all
@@ -56,9 +58,10 @@ async function getTranscriber(onProgress: (p: AlignProgress) => void) {
 
 const normWord = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-// Build a flat word list from Whisper segment-level output.
-// Within each segment, word times are linearly interpolated between the
-// reliable segment-level start/end times.
+// Build a flat word list from Whisper output.
+// First attempts word-level timestamps (return_timestamps: 'word') which are
+// individually accurate. Falls back to segment-level with linear interpolation
+// when the installed transformers.js does not support word-level output.
 async function buildAudioWordList(
   audioUrl: string,
   onProgress: (p: AlignProgress) => void,
@@ -74,27 +77,64 @@ async function buildAudioWordList(
   const audio = await decodeTo16kMono(await res.arrayBuffer());
 
   onProgress({ phase: 'transcribing' });
-  const out = await transcriber(audio, {
-    return_timestamps: true,   // SEGMENT level — more reliable than 'word'
+
+  // ── Attempt 1: word-level timestamps ────────────────────────────────────────
+  let out = await transcriber(audio, {
+    return_timestamps: 'word',
     chunk_length_s: 30,
     stride_length_s: 5,
   });
 
+  const chunks = (out.chunks ?? []).filter(c => typeof c.timestamp?.[0] === 'number');
+
+  // Detect whether we got true word-level output. Word-level chunks each contain
+  // a single word, so avgWordsPerChunk will be close to 1. Segment-level chunks
+  // contain many words, so the average is much higher.
+  let isWordLevel = false;
+  if (chunks.length > 0) {
+    const totalWords = chunks.reduce(
+      (sum, c) => sum + c.text.trim().split(/\s+/).filter(Boolean).length,
+      0,
+    );
+    const avgWordsPerChunk = totalWords / chunks.length;
+    isWordLevel = avgWordsPerChunk < 1.5;
+  }
+
+  // ── Attempt 2: segment-level fallback ───────────────────────────────────────
+  if (!isWordLevel) {
+    out = await transcriber(audio, {
+      return_timestamps: true,
+      chunk_length_s: 30,
+      stride_length_s: 5,
+    });
+  }
+
   const segs = (out.chunks ?? []).filter(c => typeof c.timestamp?.[0] === 'number');
   const result: Array<{ norm: string; time: number }> = [];
 
-  for (let si = 0; si < segs.length; si++) {
-    const words = segs[si].text.trim().split(/\s+/).map(normWord).filter(Boolean);
-    if (!words.length) continue;
-    const start = segs[si].timestamp![0] as number;
-    // Use the next segment's start as this segment's end (more accurate than Whisper's end)
-    const end = (si + 1 < segs.length && typeof segs[si + 1].timestamp?.[0] === 'number')
-      ? segs[si + 1].timestamp![0] as number
-      : start + words.length * 0.35; // ~0.35 s/word fallback
-    for (let k = 0; k < words.length; k++) {
-      result.push({ norm: words[k], time: start + (k / words.length) * (end - start) });
+  if (isWordLevel) {
+    // Word-level: each chunk is a single word — use its timestamp directly.
+    for (const chunk of segs) {
+      const norm = normWord(chunk.text);
+      if (!norm) continue;
+      result.push({ norm, time: chunk.timestamp![0] as number });
+    }
+  } else {
+    // Segment-level fallback: linearly interpolate word times within each segment.
+    for (let si = 0; si < segs.length; si++) {
+      const words = segs[si].text.trim().split(/\s+/).map(normWord).filter(Boolean);
+      if (!words.length) continue;
+      const start = segs[si].timestamp![0] as number;
+      // Use the next segment's start as this segment's end (more accurate than Whisper's end)
+      const end = (si + 1 < segs.length && typeof segs[si + 1].timestamp?.[0] === 'number')
+        ? segs[si + 1].timestamp![0] as number
+        : start + words.length * 0.35; // ~0.35 s/word fallback
+      for (let k = 0; k < words.length; k++) {
+        result.push({ norm: words[k], time: start + (k / words.length) * (end - start) });
+      }
     }
   }
+
   return result;
 }
 
@@ -147,14 +187,14 @@ export async function alignChapterAudio(
   // combines the greedy forward position with the fraction-based expected
   // position. If the greedy scan has fallen far behind, jump the search start
   // forward so it stays close to the expected position.
-  const WINDOW = 50;
+  const WINDOW = 35;
   const JUMP   = WINDOW * 2;
   const anchors: { pos: number; time: number }[] = [];
   let textPos = 0;
 
   for (let ai = 0; ai < audioFlat.length; ai++) {
     const aw = audioFlat[ai];
-    if (aw.norm.length < 4) continue;
+    if (aw.norm.length < 5) continue;
 
     const expectedTi = Math.round((ai / audioFlat.length) * textFlat.length);
     const searchStart = (expectedTi - textPos > JUMP)
