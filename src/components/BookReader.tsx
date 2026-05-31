@@ -619,22 +619,19 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     // When audio naturally advances to the next sentence (no seek floor active),
     // record the ACTUAL timestamp. Whisper alignment has ±1-2 s accumulated error;
     // these live observations correct that drift. After 10 new observations the
-    // improved timings are saved to Supabase, benefiting future sessions too.
+    // Session-local timing refinement: record actual transition times during
+    // natural playback so seekToSentence uses them within this session.
+    // We do NOT write these back to Supabase — server-side OpenAI Whisper
+    // timestamps are already accurate and timeupdate fires up to 250ms late,
+    // so writing back would corrupt good stored timings.
     const prev = prevLiveIdxRef.current;
     if (
-      seekFloorRef.current < 0 &&   // not in a post-seek clamp
-      prev >= 0 &&                  // we have a previous reference
-      idx === prev + 1 &&           // natural +1 advance (not a jump or seek)
-      liveTimingsRef.current[idx] === undefined  // not already recorded
+      seekFloorRef.current < 0 &&
+      prev >= 0 &&
+      idx === prev + 1 &&
+      liveTimingsRef.current[idx] === undefined
     ) {
       liveTimingsRef.current[idx] = t;
-      pendingCorrRef.current++;
-      if (pendingCorrRef.current >= 10 && timings && timings.length === enRows.length) {
-        pendingCorrRef.current = 0;
-        const corrected = timings.map((s, i) => liveTimingsRef.current[i] ?? s);
-        setTimings(corrected);
-        saveChapterTimings(bookId, selectedChapter, corrected).catch(() => {});
-      }
     }
     prevLiveIdxRef.current = idx;
 
