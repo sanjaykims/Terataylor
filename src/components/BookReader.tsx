@@ -31,19 +31,20 @@ function splitIntoChapters(pages: string[]): string[] | null {
 
   for (let i = 0; i < pages.length; i++) {
     const pageText = pages[i].trim();
+    const lines = pageText.split('\n').map(l => l.trim()).filter(Boolean);
 
     if (pageText.length < 80) {
-      // Short page — only count it if the whole page IS a chapter heading
-      // (e.g. a page that just says "One" or "Chapter 3")
-      if (CHAPTER_HEADING.test(pageText)) starts.push(i);
+      // Short page (e.g. a page that just says "One"): check each line individually
+      // because stray page refs like "10/108" may have survived the number filter.
+      if (lines.some(l => CHAPTER_HEADING.test(l))) starts.push(i);
       continue;
     }
 
-    const lines = pageText.split('\n').map(l => l.trim()).filter(Boolean);
-    // Skip table-of-contents pages: multiple chapter headings on one page
+    // Skip table-of-contents pages: 4+ chapter headings on one page
     const headingCount = lines.filter(l => CHAPTER_HEADING.test(l)).length;
     if (headingCount > 3) continue;
-    if (lines.slice(0, 3).some(l => CHAPTER_HEADING.test(l))) {
+    // Check the first 5 non-empty lines (wider window than before)
+    if (lines.slice(0, 5).some(l => CHAPTER_HEADING.test(l))) {
       starts.push(i);
     }
   }
@@ -84,59 +85,33 @@ function stripUrls(line: string): string {
 function cleanPageText(text: string, runningHeaders: Set<string>): string {
   return text
     .split('\n')
-    .map(l => stripUrls(l.trim()))             // remove URLs inline first
+    .map(l => stripUrls(l.trim()))
     .filter(l => l.length > 0)
-    .filter(l => !/^\d{1,4}$/.test(l))        // bare page numbers
-    .filter(l => !runningHeaders.has(l))        // repeated header/footer lines
+    .filter(l => !/^\d{1,4}(\/\d{1,4})?$/.test(l))  // "9" or "10/108" page refs
+    .filter(l => !runningHeaders.has(l))
     .join('\n');
 }
 
-// Lines that are clearly front matter, regardless of position.
-const FRONT_MATTER_LINE = /^(table of contents|copyright|all rights reserved|dedication|published by|isbn|first published|first edition|printed in|also by|about the author|coda\b)/i;
+// Remove known front-matter lines wherever they appear in a chapter.
+const FRONT_MATTER_LINE = /^(table of contents|cover title|copyright|all rights reserved|dedication|published by|isbn|first published|first edition|printed in|also by|about the author|coda\b)/i;
 
-// Scan each chapter paragraph-by-paragraph and skip front matter before the story begins.
 function cleanChapterText(text: string): string {
-  const paras = text
-    .split(/\n\n+/)
-    .map(p => p.split('\n').map(l => stripUrls(l.trim())).filter(Boolean).join('\n'))
-    .filter(Boolean);
-
-  const result: string[] = [];
-  let storyStarted = false;
-
-  for (const p of paras) {
-    const t = p.trim();
-
-    // Remove globally-identifiable front-matter lines wherever they appear.
-    if (FRONT_MATTER_LINE.test(t)) continue;
-
-    if (!storyStarted) {
-      // TOC line: "Cover Title Page Chapter 1 Chapter 2 …" or 2+ "Chapter N" refs
-      if (/^cover title/i.test(t)) continue;
-      if ((t.match(/\bchapter\s+\d+/gi) ?? []).length >= 2) continue;
-      // Epigraph: paragraph that contains an attribution dash ("— from …")
-      if (/[—–―]\s*(from\b|[A-Z][a-z])/i.test(t)) continue;
-      // Dedication: "For Firstname Lastname, …" or "To Name Name" — short, 2 proper nouns
-      if (/^(for|to) [A-Z][a-z]+ [A-Z][a-z]+/.test(t) && t.split(/\s+/).length < 25) continue;
-      // Book-title list: long paragraph with no sentence-ending punctuation
-      const words = t.split(/\s+/).length;
-      const hasSentence = /\w[.!?](\s|$)/.test(t);
-      if (words > 8 && !hasSentence) continue;
-
-      storyStarted = true;
-    }
-
-    result.push(p);
-  }
-
-  return result.join('\n\n').trim();
+  return text
+    .split('\n')
+    .map(l => stripUrls(l))
+    .filter(l => !FRONT_MATTER_LINE.test(l.trim()))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
-// Strip everything up to and including the chapter heading so only story prose remains.
-// Searches up to 20 lines to handle pages where front matter precedes the heading.
-function stripChapterHeading(text: string): string {
+// Strip everything up to and including the first chapter heading.
+// Used on individual chapters (searches first 20 lines) and on the full
+// book text in the fallback path (searches all lines).
+function stripToFirstChapterHeading(text: string, maxLines = 20): string {
   const lines = text.split('\n');
-  for (let i = 0; i < Math.min(20, lines.length); i++) {
+  const limit = maxLines === Infinity ? lines.length : Math.min(maxLines, lines.length);
+  for (let i = 0; i < limit; i++) {
     if (CHAPTER_HEADING.test(lines[i].trim())) {
       return lines.slice(i + 1).join('\n').trimStart();
     }
@@ -289,10 +264,14 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       let note: string;
 
       if (detected && detected.length >= 2) {
-        chapterTexts = detected.map(t => cleanChapterText(stripChapterHeading(t)));
+        // Strip the heading line (search first 20 lines of each chapter page)
+        chapterTexts = detected.map(t => cleanChapterText(stripToFirstChapterHeading(t, 20)));
         note = `${detected.length}개 챕터 감지됨`;
       } else {
-        chapterTexts = [cleanChapterText(cleanedPages.join('\n\n'))];
+        // Detection failed: scan the entire joined text for the first heading,
+        // strip everything before it, then apply line-level cleaning.
+        const fullText = cleanedPages.join('\n\n');
+        chapterTexts = [cleanChapterText(stripToFirstChapterHeading(fullText, Infinity))];
         note = '챕터를 자동 감지하지 못해 전체를 1개로 저장했어요.';
       }
 
