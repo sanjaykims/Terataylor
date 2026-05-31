@@ -43,8 +43,9 @@ function splitIntoChapters(pages: string[]): string[] | null {
     // Skip table-of-contents pages: 4+ chapter headings on one page
     const headingCount = lines.filter(l => CHAPTER_HEADING.test(l)).length;
     if (headingCount > 3) continue;
-    // Check the first 5 non-empty lines (wider window than before)
-    if (lines.slice(0, 5).some(l => CHAPTER_HEADING.test(l))) {
+    // Search ALL lines — the heading may appear after front-matter text
+    // (dedication, epigraph) on the same page
+    if (lines.some(l => CHAPTER_HEADING.test(l))) {
       starts.push(i);
     }
   }
@@ -114,8 +115,10 @@ function cleanChapterText(text: string): string {
     if (!storyStarted) {
       // TOC: line with 2+ "Chapter N" references
       if ((t.match(/\bchapter\s+\d+/gi) ?? []).length >= 2) continue;
-      // Epigraph: contains attribution dash (— from …)
-      if (/[—–―]\s*(from\b|[A-Z][a-z])/i.test(t)) continue;
+      // Epigraph: last line of the paragraph starts with an attribution dash
+      // (e.g. "— from "The Testing-Tree""). Do NOT use /i so [A-Z] stays uppercase-only.
+      const lastLine = t.split('\n').filter(Boolean).pop()?.trim() ?? '';
+      if (/^[—–―]/.test(lastLine)) continue;
       // Dedication: "For/To Firstname Lastname …" short paragraph
       if (/^(for|to) [A-Z][a-z]+ [A-Z][a-z]+/.test(t) && t.split(/\s+/).length < 25) continue;
       // Book-title list: long run-on with no sentence-ending punctuation
