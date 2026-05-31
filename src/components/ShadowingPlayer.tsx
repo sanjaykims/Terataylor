@@ -5,13 +5,17 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 interface Props {
   text: string;
   audioUrl?: string | null;
+  audioUploading?: boolean;
+  onAudioUpload?: (file: File) => void;
+  onClearAudio?: () => void;
 }
 
 const RATES = [0.5, 0.65, 0.8, 1.0];
 const PAUSE_TIMES = [2, 3, 4, 5];
 
-export default function ShadowingPlayer({ text, audioUrl }: Props) {
+export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudioUpload, onClearAudio }: Props) {
   const sentences = parseSentences(text);
+  const audioFileRef = useRef<HTMLInputElement>(null);
   const [rate, setRate] = useState(0.8);
   const [shadowMode, setShadowMode] = useState(false);
   const [shadowPause, setShadowPause] = useState(3);
@@ -39,26 +43,64 @@ export default function ShadowingPlayer({ text, audioUrl }: Props) {
     play(sentences, i, rate, shadowMode, shadowPause);
   };
 
+  // ── Audio upload section (always shown at top) ──────────────────────────
+  const audioSection = onAudioUpload ? (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          🎵 섀도잉 오디오 (mp3)
+        </span>
+        {audioUrl ? (
+          <button onClick={onClearAudio}
+            className="text-xs text-gray-400 hover:text-red-500 transition-colors">
+            🗑 삭제
+          </button>
+        ) : (
+          <button
+            onClick={() => audioFileRef.current?.click()}
+            disabled={audioUploading}
+            className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-all"
+          >
+            {audioUploading ? '⏳ 업로드 중…' : '+ mp3 업로드'}
+          </button>
+        )}
+        <input ref={audioFileRef} type="file" accept="audio/mp3,audio/mpeg,audio/*" className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) onAudioUpload(f); e.target.value = ''; }} />
+      </div>
+      {audioUrl && <audio controls src={audioUrl} className="w-full mt-3 rounded-xl" />}
+      {!audioUrl && !audioUploading && (
+        <button
+          onClick={() => audioFileRef.current?.click()}
+          className="mt-3 w-full border-2 border-dashed border-indigo-200 rounded-xl py-3 text-xs text-indigo-400 hover:bg-indigo-50 transition-all"
+        >
+          클릭해서 mp3 파일 선택
+        </button>
+      )}
+    </div>
+  ) : null;
+
   if (sentences.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-400 text-lg">
-        위에 지문 사진을 업로드하면 섀도잉을 시작할 수 있어요!
+      <div className="space-y-4">
+        {audioSection}
+        <div className="text-center py-10 text-gray-400">
+          위에 지문 사진을 업로드하면 섀도잉을 시작할 수 있어요!
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-5">
+      {/* Audio upload */}
+      {audioSection}
+
       {/* Controls */}
       {audioUrl ? (
-        /* ── MP3 모드 ── */
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
-          <div className="font-bold text-gray-700 flex items-center gap-2">
-            <span className="text-2xl">🎵</span> 오디오 재생
-          </div>
-          <audio controls src={audioUrl} className="w-full rounded-xl" />
-          <p className="text-xs text-gray-400 bg-indigo-50 rounded-xl px-4 py-2">
-            💡 오디오를 듣고 아래 문장을 따라 읽어 보세요 (섀도잉). 구간을 드래그해서 반복 연습할 수 있어요.
+        /* ── MP3 모드 — audio player already shown above, just show hint ── */
+        <div className="bg-indigo-50 rounded-2xl px-4 py-3">
+          <p className="text-xs text-indigo-600 font-medium">
+            💡 오디오를 듣고 아래 문장을 따라 읽어 보세요 (섀도잉)
           </p>
         </div>
       ) : (

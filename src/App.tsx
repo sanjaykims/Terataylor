@@ -125,9 +125,7 @@ export default function App() {
   // ── Audio (Supabase Storage) ─────────────────────────────────────────────
   const [audioUploading, setAudioUploading] = useState(false);
 
-  const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleAudioUpload = async (file: File) => {
     setAudioUploading(true);
     try {
       const { error } = await supabase.storage
@@ -277,23 +275,6 @@ export default function App() {
                 <hr className="border-gray-100" />
                 <ImageUploadInput mode="vocab" label="📚 단어 사진" hint="책에서 지정한 단어 목록 사진"
                   savedSummary={a2VocabSummary} onClear={() => setA2Vocab(null)} onExtracted={setA2Vocab} />
-                <hr className="border-gray-100" />
-                <div className="space-y-2">
-                  <div className="text-sm font-semibold text-gray-700">🎵 본문 오디오 (mp3)</div>
-                  {a2AudioUrl ? (
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex items-center justify-between">
-                      <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">✓ 저장됨</span>
-                      <button onClick={clearAudio} className="text-xs text-gray-400 hover:text-red-500 transition-colors">🗑 삭제</button>
-                    </div>
-                  ) : (
-                    <label className={`cursor-pointer ${audioUploading ? 'opacity-60 pointer-events-none' : ''}`}>
-                      <div className="border-2 border-dashed border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-500 hover:border-indigo-300 hover:bg-indigo-50/50 transition-all">
-                        {audioUploading ? '⏳ 업로드 중...' : '🎵 mp3 파일 클릭해서 선택'}
-                      </div>
-                      <input type="file" accept="audio/mp3,audio/mpeg,audio/*" className="hidden" onChange={handleAudioUpload} />
-                    </label>
-                  )}
-                </div>
               </div>
             )}
           </div>
@@ -339,7 +320,14 @@ export default function App() {
               ))}
             </div>
             {a2Tab === 'reading'    && <A2PhotoViewer />}
-            {a2Tab === 'shadowing'  && <ShadowingPlayer text={a2Text} audioUrl={a2AudioUrl} />}
+            {a2Tab === 'shadowing'  && (
+              <ShadowingPlayer
+                text={a2Text} audioUrl={a2AudioUrl}
+                audioUploading={audioUploading}
+                onAudioUpload={handleAudioUpload}
+                onClearAudio={clearAudio}
+              />
+            )}
             {a2Tab === 'vocabulary' && <VocabularyPanel text={a2Text} vocab={a2Vocab} />}
             {a2Tab === 'opinion'    && <OpinionWriter />}
             {a2Tab === 'games'      && <GamesPanel text={a2Text} vocab={a2Vocab} />}
