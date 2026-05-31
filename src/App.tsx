@@ -332,7 +332,7 @@ export default function App() {
                 onClearAudio={clearAudio}
               />
             )}
-            {a2Tab === 'vocabulary' && <VocabularyPanel text={a2Text} vocab={a2Vocab} onStudiedChange={setA2StudiedWords} />}
+            {a2Tab === 'vocabulary' && <VocabularyPanel text={a2Text} vocab={a2Vocab} onStudiedChange={setA2StudiedWords} onVocabUpdate={setA2Vocab} />}
             {a2Tab === 'opinion'    && <OpinionWriter />}
             {a2Tab === 'games'      && <GamesPanel text={a2Text} vocab={a2Vocab} selectedWords={a2StudiedWords} />}
           </>
@@ -356,7 +356,7 @@ export default function App() {
             </div>
             {v1Tab === 'writing'    && <LiteraryAnalysisWriter book={v1Book} />}
             {v1Tab === 'reading'    && <BookReader key={v1Book} bookId={v1Book} />}
-            {v1Tab === 'vocabulary' && <VocabularyPanel text={v1Text} vocab={v1Vocab} onStudiedChange={setV1StudiedWords} />}
+            {v1Tab === 'vocabulary' && <VocabularyPanel text={v1Text} vocab={v1Vocab} onStudiedChange={setV1StudiedWords} onVocabUpdate={setV1Vocab} />}
             {v1Tab === 'games'      && <GamesPanel text={v1Text} vocab={v1Vocab} selectedWords={v1StudiedWords} />}
           </>
         )}

@@ -8,6 +8,7 @@ interface Props {
   text: string;
   vocab?: VocabItem[] | null;
   onStudiedChange?: (studiedWords: string[]) => void;
+  onVocabUpdate?: (enriched: VocabItem[]) => void;
 }
 
 // Card display states
@@ -21,7 +22,7 @@ const isKorean = (s: string) => /[가-힣]/.test(s);
 // Session-level memory cache (survives re-renders, cleared on page refresh)
 const sessionCache = new Map<string, { en: string; ko: string }>();
 
-export default function VocabularyPanel({ text, vocab, onStudiedChange }: Props) {
+export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabUpdate }: Props) {
   const words = useMemo(
     () => (vocab?.length ? vocab : extractVocabulary(text)) as
       { word: string; definition?: string; korean?: string; count?: number }[],
@@ -34,6 +35,8 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange }: Props)
 
   // Track which indices have had loadDef triggered (per component instance)
   const loadTriggered = useRef(new Set<number>());
+  // Only write enriched vocab back once per vocab set
+  const enrichedRef = useRef(false);
 
   const getState = (i: number): CardState => cardStates.get(i) ?? 0;
   const setCardState = (i: number, s: CardState) =>
@@ -110,12 +113,39 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange }: Props)
   // Auto-load Korean for all cards immediately (Korean is shown by default)
   useEffect(() => {
     loadTriggered.current = new Set();
+    enrichedRef.current = false;
     words.forEach((_, i) => {
       // Stagger API-bound calls slightly to avoid hammering the endpoint
       setTimeout(() => loadDef(i), i * 30);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [words]);
+
+  // Once every definition has finished loading, write any newly-fetched korean/en
+  // values back into the VocabItem list so the parent can persist them to Supabase.
+  // Next session each item already has `korean` populated → loadDef short-circuits
+  // with zero extra reads or API calls.
+  useEffect(() => {
+    if (!vocab?.length || enrichedRef.current) return;
+    if (defs.size < words.length) return;
+    const allDone = words.every((_, i) => { const d = defs.get(i); return d && !d.loading; });
+    if (!allDone) return;
+
+    const needsUpdate = words.some((item, i) => {
+      const d = defs.get(i);
+      return d && d.ko && !item.korean;
+    });
+    if (!needsUpdate) return;
+
+    enrichedRef.current = true;
+    const enriched: VocabItem[] = words.map((item, i) => {
+      const d = defs.get(i);
+      if (!d || !d.ko || item.korean) return item;
+      return { ...item, korean: d.ko, definition: d.en || item.definition };
+    });
+    onVocabUpdate?.(enriched);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defs]);
 
   // ── Click handlers ────────────────────────────────────────────────────
   const handleCardClick = (i: number) => {
