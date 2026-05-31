@@ -52,7 +52,7 @@ const playDeath = () => {
   o.start(t); o.stop(t+0.45);
 };
 
-interface Alien  { id:number; word:string; x:number; y:number; spd:number; col:string; }
+interface Alien  { id:number; word:string; display:string; x:number; y:number; spd:number; col:string; }
 interface Bullet { id:number; x:number; y:number; tx:number; ty:number; did:number; }
 interface Spark  { x:number; y:number; vx:number; vy:number; t:number; col:string; r:number; }
 interface GStar  { x:number; y:number; spd:number; r:number; }
@@ -85,15 +85,26 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
     bullets: [] as Bullet[],
     sparks:  [] as Spark[],
     lives: LIVES0, score: 0, wave: 0,
-    pool: [] as string[],
+    pool: [] as { word: string; display: string }[],
     spawnT: 2,
   });
 
-  const vocab = (() => {
-    if (selectedWords && selectedWords.length >= 3) return selectedWords;
-    if (bookVocab && bookVocab.length >= 6) return bookVocab.map(v => v.word);
+  // Build word pairs: display = Korean meaning shown on alien, word = English typed to shoot
+  const vocabPairs = (() => {
+    const koMap = new Map<string, string>();
+    if (bookVocab?.length) {
+      for (const v of bookVocab) {
+        if (v.korean) koMap.set(v.word.toLowerCase(), v.korean);
+      }
+    }
+    const toPair = (w: string) => ({ word: w, display: koMap.get(w.toLowerCase()) || w });
+
+    if (selectedWords && selectedWords.length >= 3) return selectedWords.map(toPair);
+    if (bookVocab && bookVocab.length >= 6) {
+      return bookVocab.map(v => ({ word: v.word, display: v.korean || v.word }));
+    }
     const w = extractVocabulary(text).map(v => v.word);
-    return w.length >= 6 ? w : DEFAULT_WORDS;
+    return (w.length >= 6 ? w : DEFAULT_WORDS).map(toPair);
   })();
 
   const setupWave = (wi: number) => {
@@ -101,7 +112,7 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
     g.wave = wi;
     g.aliens = []; g.bullets = [];
     const cfg = WAVES[Math.min(wi, WAVES.length-1)];
-    g.pool = [...vocab].sort(() => Math.random()-0.5).slice(0, cfg.n);
+    g.pool = [...vocabPairs].sort(() => Math.random()-0.5).slice(0, cfg.n);
     g.spawnT = 1.5;
   };
 
@@ -164,8 +175,9 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
       if (g.pool.length > 0 && g.aliens.length < 5) {
         g.spawnT -= dt;
         if (g.spawnT <= 0) {
+          const pair = g.pool.shift()!;
           g.aliens.push({
-            id:nid(), word:g.pool.shift()!,
+            id:nid(), word: pair.word, display: pair.display,
             x: 55 + Math.random()*(CW-110),
             y: -45, spd: cfg.spd + Math.random()*22,
             col: ALIEN_COLS[Math.floor(Math.random()*ALIEN_COLS.length)],
@@ -289,21 +301,45 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
         }
         ctx.shadowBlur=0;
 
-        // Word label with typed highlight
+        // ── Label box: Korean meaning (top) + English typing progress (bottom) ──
+        const hasKorean = a.display !== a.word;
+
+        // Korean line (or English word when no Korean available)
+        ctx.font = hasKorean ? 'bold 12px sans-serif' : 'bold 13px monospace';
+        const koW = ctx.measureText(a.display).width;
+
+        // English typing progress line (only drawn when Korean is shown)
         const typed = isTarget ? cur : '';
         const rest  = a.word.slice(typed.length);
-        const tyW = ctx.measureText(typed).width;
-        const reW = ctx.measureText(rest).width;
-        const totW = tyW+reW;
-        const lx = -totW/2, ly = 25;
+        ctx.font = 'bold 11px monospace';
+        const tyW  = ctx.measureText(typed).width;
+        const reW  = ctx.measureText(rest).width;
+        const enW  = tyW + reW;
 
-        ctx.fillStyle='rgba(0,0,0,0.82)';
-        rrect(ctx, lx-6, ly-2, totW+12, 20, 5); ctx.fill();
+        const boxW  = Math.max(koW, enW) + 16;
+        const boxH  = hasKorean ? (isTarget ? 38 : 24) : 22;
+        const bx    = -boxW / 2;
+        const by    = 25;
 
-        ctx.textAlign='left'; ctx.textBaseline='top';
-        if (typed) { ctx.fillStyle='#ffe066'; ctx.fillText(typed,lx,ly); }
-        ctx.fillStyle = isTarget ? '#fff' : '#ddd';
-        ctx.fillText(rest, lx+tyW, ly);
+        ctx.fillStyle = 'rgba(0,0,0,0.85)';
+        rrect(ctx, bx, by, boxW, boxH, 6); ctx.fill();
+
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+
+        // Korean / display label
+        ctx.font = hasKorean ? 'bold 12px sans-serif' : 'bold 13px monospace';
+        ctx.fillStyle = isTarget ? '#ffd43b' : (hasKorean ? '#a5d8ff' : '#ddd');
+        ctx.fillText(a.display, 0, by + 4);
+
+        // English typing progress (only when targeting and Korean is shown)
+        if (hasKorean && isTarget) {
+          ctx.font = 'bold 11px monospace';
+          ctx.textAlign = 'left';
+          const ex = -enW / 2;
+          if (typed) { ctx.fillStyle = '#ffe066'; ctx.fillText(typed, ex, by + 20); }
+          ctx.fillStyle = '#aaa';
+          ctx.fillText(rest, ex + tyW, by + 20);
+        }
 
         ctx.restore();
       }
@@ -371,8 +407,8 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
           <div style={{fontSize:56}}>🛸</div>
           <div className="text-white font-bold text-2xl tracking-wide">VOCAB INVADERS</div>
           <div className="text-gray-300 text-sm text-center px-8 leading-relaxed">
-            외계인에 적힌 <span className="text-yellow-300 font-bold">단어를 타이핑</span>하면<br/>
-            레이저로 격추! 놓치면 생명 감소 ♥
+            외계인에 적힌 <span className="text-blue-300 font-bold">🇰🇷 한국어 뜻</span>을 보고<br/>
+            <span className="text-yellow-300 font-bold">🇺🇸 영어 단어를 타이핑</span>하면 레이저 발사! ♥
           </div>
           <div className="text-gray-500 text-xs">
             {selectedWords?.length
