@@ -8,6 +8,7 @@ import ImageUploadInput from './components/ImageUploadInput';
 import LessonScheduleWidget from './components/LessonScheduleWidget';
 import LiteraryAnalysisWriter from './components/LiteraryAnalysisWriter';
 import PdfTextExtractor from './components/PdfTextExtractor';
+import BookReader from './components/BookReader';
 import { trackSession } from './lib/tracker';
 import { saveAudio, loadAudio, deleteAudio } from './lib/audioStorage';
 import type { VocabItem } from './lib/types';
@@ -15,7 +16,7 @@ import { BOOKS, type BookId } from './data/syllabus';
 
 type MainTab = 'a2' | 'v1' | 'progress';
 type A2Tab   = 'shadowing' | 'vocabulary' | 'opinion' | 'games';
-type V1Tab   = 'writing' | 'vocabulary' | 'games';
+type V1Tab   = 'writing' | 'vocabulary' | 'games' | 'reading';
 
 // ── localStorage helpers ───────────────────────────────────────────────────
 function lsGet<T>(key: string): T | null {
@@ -209,7 +210,7 @@ export default function App() {
         )}
 
         {/* ── V1 INPUT PANEL ────────────────────────────────────────────── */}
-        {mainTab === 'v1' && v1Tab !== 'writing' && (
+        {mainTab === 'v1' && v1Tab !== 'writing' && v1Tab !== 'reading' && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <button onClick={() => setShowV1Input(!showV1Input)}
               className="w-full px-5 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
@@ -269,16 +270,18 @@ export default function App() {
             <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
               {([
                 { id: 'writing',    label: '📝 글쓰기' },
+                { id: 'reading',    label: '📖 원서 읽기' },
                 { id: 'vocabulary', label: '📚 단어장' },
                 { id: 'games',      label: '🎮 게임' },
               ] as { id: V1Tab; label: string }[]).map(t => (
                 <button key={t.id} onClick={() => { switchTab('v1', t.id); setV1Tab(t.id); }}
-                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
                     v1Tab === t.id ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
                   }`}>{t.label}</button>
               ))}
             </div>
             {v1Tab === 'writing'    && <LiteraryAnalysisWriter book={v1Book} />}
+            {v1Tab === 'reading'    && <BookReader key={v1Book} bookId={v1Book} />}
             {v1Tab === 'vocabulary' && <VocabularyPanel text={v1Text} vocab={v1Vocab} />}
             {v1Tab === 'games'      && <GamesPanel text={v1Text} vocab={v1Vocab} />}
           </>
