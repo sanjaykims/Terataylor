@@ -8,7 +8,9 @@ import {
   saveChapterKo, saveBookChapters, getTranslatedChapters,
   saveChapterCount, loadChapterCount,
   saveChapterAudio, loadChapterAudio, deleteChapterAudio,
+  saveChapterTimings, loadChapterTimings, deleteChapterTimings,
 } from '../lib/chapterStorage';
+import { alignChapterAudio, type AlignProgress } from '../lib/audioAlign';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -256,6 +258,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const [audioUploading,setAudioUploading]= useState(false);
   const [activeIdx,     setActiveIdx]     = useState(-1);
   const [audioDuration, setAudioDuration] = useState(0);
+  const [timings,       setTimings]       = useState<number[] | null>(null);
+  const [analyzing,     setAnalyzing]     = useState(false);
+  const [analyzeMsg,    setAnalyzeMsg]    = useState('');
   const audioRef    = useRef<HTMLAudioElement>(null);
   const audioFileRef = useRef<HTMLInputElement>(null);
   const rowRefs       = useRef<(HTMLDivElement | null)[]>([]);
@@ -300,14 +305,18 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setAudioUrl(null);
     setActiveIdx(-1);
     setAudioDuration(0);
-    const [en, ko, audio] = await Promise.all([
+    setTimings(null);
+    setAnalyzeMsg('');
+    const [en, ko, audio, times] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
       loadChapterAudio(bid, chapter).catch(() => null),
+      loadChapterTimings(bid, chapter).catch(() => null),
     ]);
     setEnText(en);
     setKoText(ko);
     setAudioUrl(audio);
+    setTimings(times);
     setChapterLoading(false);
   };
 
@@ -424,6 +433,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     try {
       if (target !== selectedChapter) { setSelectedChapter(target); await loadChapter(bookId, target); }
       const url = await saveChapterAudio(bookId, target, file);
+      // New audio invalidates any previous alignment.
+      await deleteChapterTimings(bookId, target).catch(() => {});
+      setTimings(null);
       setAudioUrl(`${url}?t=${Date.now()}`);
       setActiveIdx(-1);
     } catch (e) {
@@ -436,9 +448,43 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
 
   const handleDeleteAudio = async () => {
     await deleteChapterAudio(bookId, selectedChapter).catch(() => {});
+    await deleteChapterTimings(bookId, selectedChapter).catch(() => {});
     setAudioUrl(null);
     setActiveIdx(-1);
     setAudioDuration(0);
+    setTimings(null);
+  };
+
+  // Transcribe the mp3 and align real word timestamps to the sentences.
+  const handleAnalyzeAudio = async () => {
+    if (!audioUrl) return;
+    const sentences = enText ? splitToSentences(enText) : [];
+    if (sentences.length === 0) return;
+    setAnalyzing(true);
+    setAnalyzeMsg('준비 중…');
+    const label: Record<AlignProgress['phase'], string> = {
+      'loading-model': '음성 인식 모델 불러오는 중',
+      'decoding':      '오디오 디코딩 중',
+      'transcribing':  '음성 분석 중 (시간이 좀 걸려요)',
+      'aligning':      '문장과 맞추는 중',
+      'done':          '완료',
+    };
+    try {
+      const times = await alignChapterAudio(audioUrl, sentences, p => {
+        setAnalyzeMsg(label[p.phase] + (p.pct != null ? ` ${p.pct}%` : '…'));
+      });
+      if (times.length > 0) {
+        await saveChapterTimings(bookId, selectedChapter, times);
+        setTimings(times);
+        setAnalyzeMsg('✓ 음성 분석 완료 — 실제 발화에 맞춰 하이라이트돼요');
+      } else {
+        setAnalyzeMsg('음성을 인식하지 못했어요. 다시 시도해 주세요.');
+      }
+    } catch (e) {
+      setAnalyzeMsg(e instanceof Error ? `분석 실패: ${e.message}` : '분석 실패');
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   // English sentences (canonical split) paired with stored Korean sentences.
@@ -451,10 +497,10 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     : [];
   const maxRows = Math.max(enRows.length, koRows.length);
 
-  // Estimated start time (seconds) of each sentence, proportional to its word
-  // count over the whole chapter. Lets us highlight the playing sentence in
-  // real time without external forced-alignment data.
+  // Start time (seconds) of each sentence. Prefer REAL per-sentence times from
+  // speech alignment; fall back to a word-count estimate until analysis is run.
   const sentenceStarts = (() => {
+    if (timings && timings.length === enRows.length) return timings;
     if (!audioDuration || enRows.length === 0) return [];
     const weights = enRows.map(s => Math.max(1, s.split(/\s+/).length));
     const total = weights.reduce((a, b) => a + b, 0);
@@ -681,6 +727,31 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
                 onTimeUpdate={handleAudioTimeUpdate}
                 onEnded={() => setActiveIdx(-1)}
               />
+
+              {/* Real speech alignment */}
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                {timings && timings.length === enRows.length ? (
+                  <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                    🎯 음성 분석 적용됨 — 실제 발화에 맞춰 하이라이트
+                  </span>
+                ) : (
+                  <span className="text-xs text-amber-600 font-semibold">
+                    ⚠️ 아직 추정 타이밍이에요. 정확히 맞추려면 음성 분석을 실행하세요.
+                  </span>
+                )}
+                <button onClick={handleAnalyzeAudio} disabled={analyzing}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 ${
+                    timings ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : `${bk.badge} text-white hover:opacity-90`
+                  }`}>
+                  {analyzing ? '⏳ 분석 중…' : timings ? '🔄 음성 다시 분석' : '🎙 음성 분석 실행'}
+                </button>
+              </div>
+              {(analyzing || analyzeMsg) && (
+                <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+                  {analyzing && <span className="inline-block animate-pulse mr-1">●</span>}
+                  {analyzeMsg}
+                </p>
+              )}
               <p className="text-xs text-gray-400">
                 💡 재생하면 영어·한국어 문장이 실시간으로 하이라이트돼요. 문장을 클릭하면 그 부분부터 들을 수 있어요.
               </p>

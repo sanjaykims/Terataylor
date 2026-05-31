@@ -115,6 +115,21 @@ export async function getChaptersWithAudio(bookId: BookId): Promise<number[]> {
     .filter((n): n is number => n !== null);
 }
 
+// Per-sentence start times (seconds) derived from real speech alignment.
+export async function saveChapterTimings(bookId: BookId, chapter: number, times: number[]): Promise<void> {
+  await csSet(`chapter_${bookId}_${chapter}_times`, JSON.stringify(times));
+}
+
+export async function loadChapterTimings(bookId: BookId, chapter: number): Promise<number[] | null> {
+  const raw = await csGet(`chapter_${bookId}_${chapter}_times`);
+  if (!raw) return null;
+  try { const a = JSON.parse(raw); return Array.isArray(a) ? a as number[] : null; } catch { return null; }
+}
+
+export async function deleteChapterTimings(bookId: BookId, chapter: number): Promise<void> {
+  await csDel(`chapter_${bookId}_${chapter}_times`).catch(() => {});
+}
+
 
 export async function migrateChaptersFromLocalStorage(): Promise<void> {
   const entries: { key: string; value: string }[] = [];

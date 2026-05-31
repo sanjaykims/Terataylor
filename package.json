@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
     "@supabase/supabase-js": "^2.106.2",
     "pdfjs-dist": "^6.0.227",
     "react": "^19.2.6",
