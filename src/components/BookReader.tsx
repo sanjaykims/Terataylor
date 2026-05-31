@@ -270,6 +270,13 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   // if the audio frame boundary landed a few ms before sentenceStarts[i].
   const isSeekingRef  = useRef(false);
   const seekFloorRef  = useRef(-1);
+  // Adaptive timing correction: records ACTUAL sentence-start times observed during
+  // natural (non-seek) playback. Whisper alignment has ±1-2s accumulated error per
+  // sentence; these live corrections replace stored values once 10+ are collected and
+  // are persisted back to Supabase so future sessions also benefit.
+  const liveTimingsRef  = useRef<(number | undefined)[]>([]);
+  const prevLiveIdxRef  = useRef(-1);  // last idx seen during natural play
+  const pendingCorrRef  = useRef(0);   // corrections not yet flushed to state
   const [nextChapHasAudio, setNextChapHasAudio] = useState(false);
   const [merging,       setMerging]       = useState(false);
   const [mergeMsg,      setMergeMsg]      = useState('');
@@ -322,6 +329,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setAnalyzeMsg('');
     setMergeMsg('');
     setNextChapHasAudio(false);
+    liveTimingsRef.current  = [];
+    prevLiveIdxRef.current  = -1;
+    pendingCorrRef.current  = 0;
     const [en, ko, audio, times, nextAudio] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
@@ -601,14 +611,37 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       if (t >= sentenceStarts[i]) idx = i; else break;
     }
 
-    // If audio landed a few ms before sentenceStarts[idx+1] due to MP3 frame
-    // alignment, prevent the highlight from jumping backward by one sentence.
+    // If audio landed a few ms before sentenceStarts[i] due to MP3 frame alignment,
+    // prevent the highlight from jumping backward by one sentence.
     if (seekFloorRef.current >= 0) {
       if (idx < seekFloorRef.current) idx = seekFloorRef.current;
       else seekFloorRef.current = -1;
     }
 
     setActiveIdx(idx);
+
+    // ── Adaptive timing correction ────────────────────────────────────────
+    // When audio naturally advances to the next sentence (no seek floor active),
+    // record the ACTUAL timestamp. Whisper alignment has ±1-2 s accumulated error;
+    // these live observations correct that drift. After 10 new observations the
+    // improved timings are saved to Supabase, benefiting future sessions too.
+    const prev = prevLiveIdxRef.current;
+    if (
+      seekFloorRef.current < 0 &&   // not in a post-seek clamp
+      prev >= 0 &&                  // we have a previous reference
+      idx === prev + 1 &&           // natural +1 advance (not a jump or seek)
+      liveTimingsRef.current[idx] === undefined  // not already recorded
+    ) {
+      liveTimingsRef.current[idx] = t;
+      pendingCorrRef.current++;
+      if (pendingCorrRef.current >= 10 && timings && timings.length === enRows.length) {
+        pendingCorrRef.current = 0;
+        const corrected = timings.map((s, i) => liveTimingsRef.current[i] ?? s);
+        setTimings(corrected);
+        saveChapterTimings(bookId, selectedChapter, corrected).catch(() => {});
+      }
+    }
+    prevLiveIdxRef.current = idx;
 
     // ── Word-level highlight ──────────────────────────────────────────────
     const sentStart = sentenceStarts[idx];
@@ -638,8 +671,14 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
 
   const seekToSentence = (i: number) => {
     if (!audioRef.current || i >= sentenceStarts.length) return;
-    audioRef.current.currentTime = sentenceStarts[i];
-    seekFloorRef.current = i;  // clamp against landing a few ms before sentenceStarts[i]
+    // Prefer live-corrected timing if we observed the actual start of this sentence
+    // during natural playback — it's more accurate than the stored Whisper estimate.
+    const liveT  = liveTimingsRef.current[i];
+    const base   = liveT ?? sentenceStarts[i];
+    // Seek 0.2 s before so the floor guard handles any frame-boundary undershoot.
+    audioRef.current.currentTime = Math.max(0, base - 0.2);
+    seekFloorRef.current = i;
+    prevLiveIdxRef.current = i;  // reset natural-play tracking from the new position
     setActiveIdx(i);
     setActiveWordIdx(0);
     // Only call play() if paused — calling it while already playing on iOS
