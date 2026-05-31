@@ -7,6 +7,7 @@ import ProgressDashboard from './components/ProgressDashboard';
 import ImageUploadInput from './components/ImageUploadInput';
 import LessonScheduleWidget from './components/LessonScheduleWidget';
 import LiteraryAnalysisWriter from './components/LiteraryAnalysisWriter';
+import PdfTextExtractor from './components/PdfTextExtractor';
 import { trackSession } from './lib/tracker';
 import { saveAudio, loadAudio, deleteAudio } from './lib/audioStorage';
 import type { VocabItem } from './lib/types';
@@ -213,14 +214,24 @@ export default function App() {
             <button onClick={() => setShowV1Input(!showV1Input)}
               className="w-full px-5 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
               <span className="font-semibold text-gray-700 flex items-center gap-2">
-                📸 {bk.emoji} {bk.shortTitle} 지문 입력
+                {bk.emoji} {bk.shortTitle} 지문 입력
               </span>
               <span className="text-gray-400 text-sm">{showV1Input ? '▲ 접기' : '▼ 펼치기'}</span>
             </button>
             {showV1Input && (
               <div className="px-5 pb-5 space-y-4">
-                <ImageUploadInput mode="text" label="📄 소설 지문 사진" hint="이번 주 읽을 페이지 — 여러 장 가능"
-                  savedSummary={v1TextSummary} onClear={() => setV1Text('')} onExtracted={setV1Text} />
+                {/* PDF extractor for Edward Tulane (has PDF); photo fallback for others */}
+                {v1Book === 'edward' ? (
+                  <PdfTextExtractor
+                    bookId="edward"
+                    savedSummary={v1TextSummary}
+                    onClear={() => setV1Text('')}
+                    onExtracted={setV1Text}
+                  />
+                ) : (
+                  <ImageUploadInput mode="text" label="📄 소설 지문 사진" hint="이번 주 읽을 페이지 — 여러 장 가능"
+                    savedSummary={v1TextSummary} onClear={() => setV1Text('')} onExtracted={setV1Text} />
+                )}
                 <hr className="border-gray-100" />
                 <ImageUploadInput mode="vocab" label="📚 단어 사진" hint="소설에서 지정한 단어 목록 사진"
                   savedSummary={v1VocabSummary} onClear={() => setV1Vocab(null)} onExtracted={setV1Vocab} />
