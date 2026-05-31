@@ -257,12 +257,16 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const [audioUrl,      setAudioUrl]      = useState<string | null>(null);
   const [audioUploading,setAudioUploading]= useState(false);
   const [activeIdx,     setActiveIdx]     = useState(-1);
+  const [activeWordIdx, setActiveWordIdx] = useState(-1);
   const [audioDuration, setAudioDuration] = useState(0);
   const [timings,       setTimings]       = useState<number[] | null>(null);
   const [analyzing,     setAnalyzing]     = useState(false);
   const [analyzeMsg,    setAnalyzeMsg]    = useState('');
   const [audioUploadMsg,setAudioUploadMsg]= useState('');
   const [uploadProgress,setUploadProgress]= useState({ done: 0, total: 0 });
+  // Prevents handleAudioTimeUpdate from jumping back behind the sentence we just seeked to
+  // (MP3 frame alignment means currentTime can land a few ms before sentenceStarts[i])
+  const seekFloorRef = useRef(-1);
   const [nextChapHasAudio, setNextChapHasAudio] = useState(false);
   const [merging,       setMerging]       = useState(false);
   const [mergeMsg,      setMergeMsg]      = useState('');
@@ -309,6 +313,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setKoText(null);
     setAudioUrl(null);
     setActiveIdx(-1);
+    setActiveWordIdx(-1);
     setAudioDuration(0);
     setTimings(null);
     setAnalyzeMsg('');
@@ -575,17 +580,42 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const handleAudioTimeUpdate = () => {
     const t = audioRef.current?.currentTime ?? 0;
     if (sentenceStarts.length === 0) return;
+
     let idx = 0;
     for (let i = 0; i < sentenceStarts.length; i++) {
       if (t >= sentenceStarts[i]) idx = i; else break;
     }
+
+    // After a seek, currentTime can land a few ms before sentenceStarts[i] due to
+    // MP3 frame alignment, which would make idx = i-1. Clamp it to the seek floor
+    // until we naturally play past that sentence.
+    if (seekFloorRef.current >= 0) {
+      if (idx < seekFloorRef.current) {
+        idx = seekFloorRef.current;
+      } else {
+        seekFloorRef.current = -1; // played past the seek point — resume normal detection
+      }
+    }
+
     setActiveIdx(idx);
+
+    // ── Word-level highlight: linear interpolation within sentence bounds ──
+    const sentStart = sentenceStarts[idx];
+    const sentEnd   = idx + 1 < sentenceStarts.length
+      ? sentenceStarts[idx + 1]
+      : (audioDuration || t + 5);
+    const duration  = Math.max(0.1, sentEnd - sentStart);
+    const words     = (enRows[idx] ?? '').split(/\s+/).filter(Boolean);
+    const progress  = Math.max(0, Math.min(1, (t - sentStart) / duration));
+    setActiveWordIdx(Math.min(Math.floor(progress * words.length), words.length - 1));
   };
 
   const seekToSentence = (i: number) => {
     if (!audioRef.current || i >= sentenceStarts.length) return;
     audioRef.current.currentTime = sentenceStarts[i];
+    seekFloorRef.current = i;   // hold the floor until we play past sentence i
     setActiveIdx(i);
+    setActiveWordIdx(0);
   };
 
   // Keep the active sentence in view while audio plays (scroll whichever
@@ -595,6 +625,20 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     rowRefs.current[activeIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     mobileRowRefs.current[activeIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [activeIdx]);
+
+  // ── Word-level karaoke renderer ──────────────────────────────────────────
+  // Returns the sentence text with spoken words (0..upToWord) colored blue.
+  const renderWords = (text: string, upToWord: number) => {
+    const words = text.split(/\s+/).filter(Boolean);
+    return words.map((word, wi) => (
+      <span key={wi}>
+        <span className={wi <= upToWord ? 'text-blue-600 font-bold' : 'text-gray-900'}>
+          {word}
+        </span>
+        {wi < words.length - 1 ? ' ' : ''}
+      </span>
+    ));
+  };
 
   // ── Loading ───────────────────────────────────────────────────────────────
   if (initState === 'loading') {
@@ -819,7 +863,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
                 className="w-full rounded-xl"
                 onLoadedMetadata={e => setAudioDuration(e.currentTarget.duration || 0)}
                 onTimeUpdate={handleAudioTimeUpdate}
-                onEnded={() => setActiveIdx(-1)}
+                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); }}
               />
 
               {/* Real speech alignment */}
@@ -888,7 +932,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
                     active ? 'bg-yellow-50' : 'hover:bg-gray-50/40'
                   } ${audioUrl ? 'cursor-pointer' : ''}`}>
                   <div className={`px-4 py-3 border-r border-gray-100 ${active ? 'border-l-4 border-l-yellow-400' : ''}`}>
-                    <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'}`}>{enRows[i] ?? ''}</p>
+                    <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'}`}>
+                      {active ? renderWords(enRows[i] ?? '', activeWordIdx) : (enRows[i] ?? '')}
+                    </p>
                   </div>
                   <div className="px-4 py-3">
                     {koRows[i] ? (
@@ -911,7 +957,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
                     onClick={() => audioUrl && seekToSentence(i)}
                     className={`text-sm leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0 transition-colors ${
                       i === activeIdx ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'
-                    }`}>{p}</p>
+                    }`}>
+                    {i === activeIdx ? renderWords(p, activeWordIdx) : p}
+                  </p>
                 ))
               : koRows.filter(Boolean).length > 0
               ? koRows.map((p, i) => (
