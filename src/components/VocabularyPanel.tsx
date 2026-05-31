@@ -141,7 +141,7 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
     const enriched: VocabItem[] = words.map((item, i) => {
       const d = defs.get(i);
       if (!d || !d.ko || item.korean) return item;
-      return { ...item, korean: d.ko, definition: d.en || item.definition };
+      return { ...item, korean: d.ko, definition: d.en || item.definition || '' };
     });
     onVocabUpdate?.(enriched);
   // eslint-disable-next-line react-hooks/exhaustive-deps

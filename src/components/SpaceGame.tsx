@@ -412,10 +412,10 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
           </div>
           <div className="text-gray-500 text-xs">
             {selectedWords?.length
-              ? <><span className="text-yellow-300 font-bold">✓ 선택된 단어 {vocab.length}개</span> · 3 WAVES</>
-              : vocab === DEFAULT_WORDS
+              ? <><span className="text-yellow-300 font-bold">✓ 선택된 단어 {vocabPairs.length}개</span> · 3 WAVES</>
+              : vocabPairs.length <= DEFAULT_WORDS.length
               ? '샘플 단어 · 3 WAVES'
-              : `교재 단어 ${vocab.length}개 · 3 WAVES`}
+              : `교재 단어 ${vocabPairs.length}개 · 3 WAVES`}
           </div>
           <button onClick={startGame}
             className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl text-lg hover:bg-indigo-500 transition-all active:scale-95 shadow-lg">
