@@ -7,6 +7,7 @@ import {
   hasBook, clearBook, loadChapterEn, loadChapterKo,
   saveChapterKo, saveBookChapters, getTranslatedChapters,
   saveChapterCount, loadChapterCount,
+  saveChapterAudio, loadChapterAudio, deleteChapterAudio,
 } from '../lib/chapterStorage';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
@@ -250,6 +251,16 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const [mobileView,   setMobileView]   = useState<'en' | 'ko'>('en');
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // ── Chapter audio + real-time sentence highlight ──────────────────────────
+  const [audioUrl,      setAudioUrl]      = useState<string | null>(null);
+  const [audioUploading,setAudioUploading]= useState(false);
+  const [activeIdx,     setActiveIdx]     = useState(-1);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const audioRef    = useRef<HTMLAudioElement>(null);
+  const audioFileRef = useRef<HTMLInputElement>(null);
+  const rowRefs       = useRef<(HTMLDivElement | null)[]>([]);
+  const mobileRowRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+
   // Index (1-based) of the chapter stored for the current/upcoming lesson.
   // When pdfPages are defined, each lesson is stored as one chapter in order.
   const currentLessonChapter = (() => {
@@ -286,12 +297,17 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setChapterLoading(true);
     setEnText(null);
     setKoText(null);
-    const [en, ko] = await Promise.all([
+    setAudioUrl(null);
+    setActiveIdx(-1);
+    setAudioDuration(0);
+    const [en, ko, audio] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
+      loadChapterAudio(bid, chapter).catch(() => null),
     ]);
     setEnText(en);
     setKoText(ko);
+    setAudioUrl(audio);
     setChapterLoading(false);
   };
 
@@ -387,9 +403,42 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setInitState('no-book');
     setEnText(null);
     setKoText(null);
+    setAudioUrl(null);
     setTotalChapters(0);
     setTranslatedChaps(new Set());
     setDetectedNote('');
+  };
+
+  // ── Chapter audio handlers ────────────────────────────────────────────────
+  // Filenames like "ch3.mp3", "chapter 03.mp3", "lesson2.mp3" → chapter number.
+  const chapterFromFilename = (name: string): number | null => {
+    const m = name.match(/(?:ch(?:apter)?|lesson|l)\s*0*(\d{1,2})/i) ?? name.match(/\b0*(\d{1,2})\b/);
+    return m ? parseInt(m[1]) : null;
+  };
+
+  const handleChapterAudioUpload = async (file: File) => {
+    const guessed = chapterFromFilename(file.name);
+    const target = guessed && guessed >= 1 && guessed <= totalChapters ? guessed : selectedChapter;
+    setAudioUploading(true);
+    setUploadError('');
+    try {
+      if (target !== selectedChapter) { setSelectedChapter(target); await loadChapter(bookId, target); }
+      const url = await saveChapterAudio(bookId, target, file);
+      setAudioUrl(`${url}?t=${Date.now()}`);
+      setActiveIdx(-1);
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : '오디오 업로드 실패');
+    } finally {
+      setAudioUploading(false);
+      if (audioFileRef.current) audioFileRef.current.value = '';
+    }
+  };
+
+  const handleDeleteAudio = async () => {
+    await deleteChapterAudio(bookId, selectedChapter).catch(() => {});
+    setAudioUrl(null);
+    setActiveIdx(-1);
+    setAudioDuration(0);
   };
 
   // English sentences (canonical split) paired with stored Korean sentences.
@@ -401,6 +450,43 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
         : splitToSentences(koText))                      // legacy paragraph format
     : [];
   const maxRows = Math.max(enRows.length, koRows.length);
+
+  // Estimated start time (seconds) of each sentence, proportional to its word
+  // count over the whole chapter. Lets us highlight the playing sentence in
+  // real time without external forced-alignment data.
+  const sentenceStarts = (() => {
+    if (!audioDuration || enRows.length === 0) return [];
+    const weights = enRows.map(s => Math.max(1, s.split(/\s+/).length));
+    const total = weights.reduce((a, b) => a + b, 0);
+    const starts: number[] = [];
+    let acc = 0;
+    for (const w of weights) { starts.push((acc / total) * audioDuration); acc += w; }
+    return starts;
+  })();
+
+  const handleAudioTimeUpdate = () => {
+    const t = audioRef.current?.currentTime ?? 0;
+    if (sentenceStarts.length === 0) return;
+    let idx = 0;
+    for (let i = 0; i < sentenceStarts.length; i++) {
+      if (t >= sentenceStarts[i]) idx = i; else break;
+    }
+    setActiveIdx(idx);
+  };
+
+  const seekToSentence = (i: number) => {
+    if (!audioRef.current || !sentenceStarts[i]) return;
+    audioRef.current.currentTime = sentenceStarts[i];
+    setActiveIdx(i);
+  };
+
+  // Keep the active sentence in view while audio plays (scroll whichever
+  // layout is currently visible; the hidden one is a harmless no-op).
+  useEffect(() => {
+    if (activeIdx < 0) return;
+    rowRefs.current[activeIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    mobileRowRefs.current[activeIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [activeIdx]);
 
   // ── Loading ───────────────────────────────────────────────────────────────
   if (initState === 'loading') {
@@ -564,6 +650,50 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
         </div>
       )}
 
+      {/* Chapter audio — shadowing with real-time sentence highlight */}
+      {!chapterLoading && enText && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              🎧 Ch.{String(selectedChapter).padStart(2, '0')} 섀도잉 오디오
+            </span>
+            {audioUrl ? (
+              <button onClick={handleDeleteAudio}
+                className="text-xs text-gray-400 hover:text-red-500 transition-colors">🗑 삭제</button>
+            ) : (
+              <button onClick={() => audioFileRef.current?.click()} disabled={audioUploading}
+                className={`px-3 py-1.5 ${bk.badge} text-white rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition-all`}>
+                {audioUploading ? '⏳ 업로드 중…' : '+ mp3 업로드'}
+              </button>
+            )}
+            <input ref={audioFileRef} type="file" accept="audio/mp3,audio/mpeg,audio/*" className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) handleChapterAudioUpload(f); }} />
+          </div>
+
+          {audioUrl ? (
+            <>
+              <audio
+                ref={audioRef}
+                controls
+                src={audioUrl}
+                className="w-full rounded-xl"
+                onLoadedMetadata={e => setAudioDuration(e.currentTarget.duration || 0)}
+                onTimeUpdate={handleAudioTimeUpdate}
+                onEnded={() => setActiveIdx(-1)}
+              />
+              <p className="text-xs text-gray-400">
+                💡 재생하면 영어·한국어 문장이 실시간으로 하이라이트돼요. 문장을 클릭하면 그 부분부터 들을 수 있어요.
+              </p>
+            </>
+          ) : (
+            <button onClick={() => audioFileRef.current?.click()} disabled={audioUploading}
+              className={`w-full border-2 border-dashed ${bk.border} rounded-xl py-3 text-xs ${bk.color} hover:opacity-80 disabled:opacity-50 transition-all`}>
+              {audioUploading ? '⏳ 업로드 중…' : '클릭해서 이 챕터 mp3 선택 (파일명에 챕터 번호가 있으면 자동 인식)'}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Reader */}
       {chapterLoading ? (
         <div className="flex items-center justify-center py-12">
@@ -581,31 +711,49 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">🇰🇷 한국어</span>
               </div>
             </div>
-            {Array.from({ length: maxRows }).map((_, i) => (
-              <div key={i} className="grid grid-cols-2 items-start border-b border-gray-50 last:border-0 hover:bg-gray-50/40 transition-colors">
-                <div className="px-4 py-3 border-r border-gray-100">
-                  <p className="text-sm text-gray-800 leading-relaxed">{enRows[i] ?? ''}</p>
+            {Array.from({ length: maxRows }).map((_, i) => {
+              const active = i === activeIdx;
+              return (
+                <div key={i}
+                  ref={el => { rowRefs.current[i] = el; }}
+                  onClick={() => audioUrl && seekToSentence(i)}
+                  className={`grid grid-cols-2 items-start border-b border-gray-50 last:border-0 transition-colors ${
+                    active ? 'bg-yellow-50' : 'hover:bg-gray-50/40'
+                  } ${audioUrl ? 'cursor-pointer' : ''}`}>
+                  <div className={`px-4 py-3 border-r border-gray-100 ${active ? 'border-l-4 border-l-yellow-400' : ''}`}>
+                    <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'}`}>{enRows[i] ?? ''}</p>
+                  </div>
+                  <div className="px-4 py-3">
+                    {koRows[i] ? (
+                      <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-700'}`}>{koRows[i]}</p>
+                    ) : (i === 0 && !koText ? (
+                      <p className="text-xs text-gray-400 italic">번역 버튼을 눌러주세요</p>
+                    ) : null)}
+                  </div>
                 </div>
-                <div className="px-4 py-3">
-                  {koRows[i] ? (
-                    <p className="text-sm text-gray-700 leading-relaxed">{koRows[i]}</p>
-                  ) : (i === 0 && !koText ? (
-                    <p className="text-xs text-gray-400 italic">번역 버튼을 눌러주세요</p>
-                  ) : null)}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Mobile: single column */}
           <div className="sm:hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
             {mobileView === 'en'
               ? enRows.map((p, i) => (
-                  <p key={i} className="text-sm text-gray-800 leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0">{p}</p>
+                  <p key={i}
+                    ref={el => { mobileRowRefs.current[i] = el; }}
+                    onClick={() => audioUrl && seekToSentence(i)}
+                    className={`text-sm leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0 transition-colors ${
+                      i === activeIdx ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'
+                    }`}>{p}</p>
                 ))
               : koRows.filter(Boolean).length > 0
               ? koRows.map((p, i) => (
-                  <p key={i} className="text-sm text-gray-700 leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0">{p}</p>
+                  <p key={i}
+                    ref={el => { mobileRowRefs.current[i] = el; }}
+                    onClick={() => audioUrl && seekToSentence(i)}
+                    className={`text-sm leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0 transition-colors ${
+                      i === activeIdx ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-700'
+                    }`}>{p}</p>
                 ))
               : <div className="text-center py-8"><p className="text-xs text-gray-400">번역 버튼을 눌러서 한국어 번역을 불러오세요</p></div>}
           </div>
