@@ -10,7 +10,6 @@ import {
   saveChapterAudio, loadChapterAudio, deleteChapterAudio,
   saveChapterTimings, loadChapterTimings, deleteChapterTimings,
 } from '../lib/chapterStorage';
-import { alignChapterAudio, type AlignProgress } from '../lib/audioAlign';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -535,24 +534,20 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setMerging(false);
   };
 
-  // Transcribe the mp3 and align real word timestamps to the sentences.
+  // Server-side audio alignment via OpenAI Whisper (word-level timestamps).
+  // No browser inference — accurate, fast, no drift.
   const handleAnalyzeAudio = async () => {
     if (!audioUrl) return;
     const sentences = enText ? splitToSentences(enText) : [];
     if (sentences.length === 0) return;
     setAnalyzing(true);
-    setAnalyzeMsg('준비 중…');
-    const label: Record<AlignProgress['phase'], string> = {
-      'loading-model': '음성 인식 모델 불러오는 중',
-      'decoding':      '오디오 디코딩 중',
-      'transcribing':  '음성 분석 중 (시간이 좀 걸려요)',
-      'aligning':      '문장과 맞추는 중',
-      'done':          '완료',
-    };
+    setAnalyzeMsg('서버에서 음성 분석 중… (30~60초 소요)');
     try {
-      const times = await alignChapterAudio(audioUrl, sentences, p => {
-        setAnalyzeMsg(label[p.phase] + (p.pct != null ? ` ${p.pct}%` : '…'));
+      const { data, error } = await supabase.functions.invoke('ocr-extract', {
+        body: { mode: 'align_audio', audioUrl, sentences },
       });
+      if (error) throw error;
+      const times: number[] = data?.starts ?? [];
       if (times.length > 0) {
         await saveChapterTimings(bookId, selectedChapter, times);
         setTimings(times);
