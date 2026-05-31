@@ -186,23 +186,33 @@ export default function ImageUploadInput(props: Props) {
       {status === 'review' && mode === 'vocab' && (
         <div className="space-y-2">
           <p className="text-xs text-gray-500 font-semibold">추출된 단어 {vocabRows.length}개 확인 및 수정:</p>
-          <div className="max-h-52 overflow-y-auto space-y-1.5 border-2 border-indigo-200 bg-indigo-50 rounded-xl p-2">
+          <div className="max-h-60 overflow-y-auto space-y-1.5 border-2 border-indigo-200 bg-indigo-50 rounded-xl p-2">
+            <div className="grid grid-cols-[6rem_1fr_1fr_1.5rem] gap-1 px-1 pb-1">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">단어</span>
+              <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wide">🇰🇷 한국어</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">🇺🇸 English</span>
+              <span />
+            </div>
             {vocabRows.map((item, i) => (
-              <div key={i} className="flex gap-1.5 items-center">
+              <div key={i} className="grid grid-cols-[6rem_1fr_1fr_1.5rem] gap-1 items-center">
                 <input value={item.word}
                   onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, word: e.target.value } : v))}
-                  className="w-28 shrink-0 px-2 py-1 rounded-lg border border-gray-200 text-sm font-semibold bg-white"
+                  className="px-2 py-1 rounded-lg border border-gray-200 text-sm font-semibold bg-white"
                   placeholder="단어" />
+                <input value={item.korean ?? ''}
+                  onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, korean: e.target.value } : v))}
+                  className="px-2 py-1 rounded-lg border border-indigo-200 text-sm bg-white"
+                  placeholder="한국어 뜻" />
                 <input value={item.definition}
                   onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, definition: e.target.value } : v))}
-                  className="flex-1 px-2 py-1 rounded-lg border border-gray-200 text-sm bg-white"
-                  placeholder="뜻" />
+                  className="px-2 py-1 rounded-lg border border-gray-200 text-sm bg-white text-gray-500"
+                  placeholder="English def" />
                 <button onClick={() => setVocabRows(prev => prev.filter((_, j) => j !== i))}
-                  className="text-gray-300 hover:text-red-400 transition-colors font-bold shrink-0">✕</button>
+                  className="text-gray-300 hover:text-red-400 transition-colors font-bold text-center">✕</button>
               </div>
             ))}
             <button
-              onClick={() => setVocabRows(prev => [...prev, { word: '', definition: '' }])}
+              onClick={() => setVocabRows(prev => [...prev, { word: '', definition: '', korean: '' }])}
               className="w-full text-xs text-indigo-400 hover:text-indigo-600 py-1 transition-colors">
               + 단어 추가
             </button>
