@@ -110,21 +110,24 @@ function cleanChapterText(text: string): string {
 
   for (const p of paras) {
     const t = p.trim();
-    if (FRONT_MATTER_LINE.test(t)) continue;  // global: always remove
+    if (FRONT_MATTER_LINE.test(t)) continue;  // always remove
 
     if (!storyStarted) {
-      // TOC: line with 2+ "Chapter N" references
+      // Chapter heading line ("One", "Chapter One", etc.)
+      if (CHAPTER_HEADING.test(t)) continue;
+      // TOC: 2+ "Chapter N" numeric refs on one line
       if ((t.match(/\bchapter\s+\d+/gi) ?? []).length >= 2) continue;
-      // Epigraph: last line of the paragraph starts with an attribution dash
-      // (e.g. "— from "The Testing-Tree""). Do NOT use /i so [A-Z] stays uppercase-only.
+      // Epigraph: last line of paragraph starts with an attribution dash
       const lastLine = t.split('\n').filter(Boolean).pop()?.trim() ?? '';
       if (/^[—–―]/.test(lastLine)) continue;
-      // Dedication: "For/To Firstname Lastname …" short paragraph
+      // Dedication: "For/To Firstname Lastname …" — short, two proper nouns
       if (/^(for|to) [A-Z][a-z]+ [A-Z][a-z]+/.test(t) && t.split(/\s+/).length < 25) continue;
-      // Book-title list: long run-on with no sentence-ending punctuation
       const words = t.split(/\s+/).length;
       const hasSentence = /\w[.!?](\s|$)/.test(t);
+      // Book-title run-on list (many words, no sentence punctuation)
       if (words > 8 && !hasSentence) continue;
+      // Short title / author name line (≤8 words, no sentence, no comma)
+      if (words <= 8 && !hasSentence && !/[,;:]/.test(t)) continue;
 
       storyStarted = true;
     }
@@ -294,14 +297,13 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       let note: string;
 
       if (detected && detected.length >= 2) {
-        // Strip the heading line (search first 20 lines of each chapter page)
+        // Strip the heading line then clean each chapter
         chapterTexts = detected.map(t => cleanChapterText(stripToFirstChapterHeading(t, 20)));
         note = `${detected.length}개 챕터 감지됨`;
       } else {
-        // Detection failed: scan the entire joined text for the first heading,
-        // strip everything before it, then apply line-level cleaning.
-        const fullText = cleanedPages.join('\n\n');
-        chapterTexts = [cleanChapterText(stripToFirstChapterHeading(fullText, Infinity))];
+        // Detection failed: cleanChapterText scans the whole book from the start,
+        // filtering front matter until it reaches the first story paragraph.
+        chapterTexts = [cleanChapterText(cleanedPages.join('\n\n'))];
         note = '챕터를 자동 감지하지 못해 전체를 1개로 저장했어요.';
       }
 
