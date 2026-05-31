@@ -84,17 +84,45 @@ function cleanPageText(text: string, runningHeaders: Set<string>): string {
     .join('\n');
 }
 
-// Lines that are clearly front matter, not story text.
+// Lines that are clearly front matter, regardless of position.
 const FRONT_MATTER_LINE = /^(table of contents|copyright|all rights reserved|dedication|published by|isbn|first published|first edition|printed in|also by|about the author|coda\b)/i;
 
+// Scan each chapter paragraph-by-paragraph and skip front matter before the story begins.
 function cleanChapterText(text: string): string {
-  return text
-    .split('\n')
-    .map(l => stripUrls(l))                    // strip any remaining URLs
-    .filter(l => !FRONT_MATTER_LINE.test(l.trim()))
-    .join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  const paras = text
+    .split(/\n\n+/)
+    .map(p => p.split('\n').map(l => stripUrls(l.trim())).filter(Boolean).join('\n'))
+    .filter(Boolean);
+
+  const result: string[] = [];
+  let storyStarted = false;
+
+  for (const p of paras) {
+    const t = p.trim();
+
+    // Remove globally-identifiable front-matter lines wherever they appear.
+    if (FRONT_MATTER_LINE.test(t)) continue;
+
+    if (!storyStarted) {
+      // TOC line: "Cover Title Page Chapter 1 Chapter 2 …" or 2+ "Chapter N" refs
+      if (/^cover title/i.test(t)) continue;
+      if ((t.match(/\bchapter\s+\d+/gi) ?? []).length >= 2) continue;
+      // Epigraph: paragraph that contains an attribution dash ("— from …")
+      if (/[—–―]\s*(from\b|[A-Z][a-z])/i.test(t)) continue;
+      // Dedication: "For Firstname Lastname, …" or "To Name Name" — short, 2 proper nouns
+      if (/^(for|to) [A-Z][a-z]+ [A-Z][a-z]+/.test(t) && t.split(/\s+/).length < 25) continue;
+      // Book-title list: long paragraph with no sentence-ending punctuation
+      const words = t.split(/\s+/).length;
+      const hasSentence = /\w[.!?](\s|$)/.test(t);
+      if (words > 8 && !hasSentence) continue;
+
+      storyStarted = true;
+    }
+
+    result.push(p);
+  }
+
+  return result.join('\n\n').trim();
 }
 
 // Strip everything up to and including the chapter heading so only story prose remains.
