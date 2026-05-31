@@ -174,37 +174,52 @@ async function extractAllPages(
   return pages;
 }
 
-async function translateChunked(
-  text: string,
+// Canonical sentence splitter — used BOTH when translating and when
+// rendering, so English sentence count always matches the stored Korean
+// sentence count and the paired reader stays aligned 1:1.
+function splitToSentences(text: string): string[] {
+  // Rejoin lines wrapped mid-sentence (PDF inserts \n at every visual line end),
+  // then split only on real sentence boundaries (.!? + Capital/Korean).
+  const normalized = text.replace(/\s*\n\s*/g, ' ').replace(/[ \t]+/g, ' ').trim();
+  if (!normalized) return [];
+  return normalized
+    .split(/(?<=[.!?…]['"”’]?)\s+(?=[A-Z"“‘'가-힣])/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+async function translateSentences(
+  enText: string,
   onChunk: (done: number, total: number) => void,
 ): Promise<string> {
-  const LIMIT = 1200;
-  const paras = text.split(/\n\n+/).filter(p => p.trim());
-  const chunks: string[][] = [];
-  let cur: string[] = [];
-  let curW = 0;
+  const sentences = splitToSentences(enText);
+  if (sentences.length === 0) return '';
 
-  for (const p of paras) {
-    const w = p.split(/\s+/).length;
-    if (curW + w > LIMIT && cur.length > 0) {
-      chunks.push(cur); cur = [p]; curW = w;
-    } else {
-      cur.push(p); curW += w;
-    }
+  // Batch sentences to stay within token limits while keeping alignment.
+  const BATCH = 30;
+  const batches: string[][] = [];
+  for (let i = 0; i < sentences.length; i += BATCH) {
+    batches.push(sentences.slice(i, i + BATCH));
   }
-  if (cur.length > 0) chunks.push(cur);
 
-  const parts: string[] = [];
-  for (let i = 0; i < chunks.length; i++) {
-    onChunk(i, chunks.length);
+  const ko: string[] = [];
+  for (let i = 0; i < batches.length; i++) {
+    onChunk(i, batches.length);
     const { data, error } = await supabase.functions.invoke('ocr-extract', {
-      body: { text: chunks[i].join('\n\n'), mode: 'translate' },
+      body: { sentences: batches[i], mode: 'translate_sentences' },
     });
     if (error) throw new Error(String((error as { message?: string }).message ?? error));
-    parts.push((data as { result: string }).result);
+    const arr = (data as { result: string[] }).result ?? [];
+    // Edge function guarantees same length, but enforce defensively.
+    // Strip any stray newlines so '\n' stays a clean per-sentence delimiter.
+    for (let j = 0; j < batches[i].length; j++) {
+      ko.push((arr[j] ?? '').replace(/\s*\n\s*/g, ' ').trim());
+    }
   }
-  onChunk(chunks.length, chunks.length);
-  return parts.join('\n\n');
+  onChunk(batches.length, batches.length);
+
+  // Store Korean sentences one-per-line, index-aligned to splitToSentences(enText).
+  return ko.join('\n');
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -354,7 +369,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setTxError('');
     setTxProgress({ done: 0, total: 0 });
     try {
-      const ko = await translateChunked(enText, (done, total) => setTxProgress({ done, total }));
+      const ko = await translateSentences(enText, (done, total) => setTxProgress({ done, total }));
       await saveChapterKo(bookId, selectedChapter, ko);
       setKoText(ko);
       setTranslatedChaps(prev => new Set([...prev, selectedChapter]));
@@ -377,26 +392,14 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setDetectedNote('');
   };
 
-  const enParas   = enText ? enText.split(/\n\n+/).map(p => p.trim()).filter(Boolean) : [];
-  const koParas   = koText ? koText.split(/\n\n+/).map(p => p.trim()).filter(Boolean) : [];
-  const maxParas  = Math.max(enParas.length, koParas.length);
-
-  // Sentence-level rows for the desktop paired reader
-  // Splits every paragraph into individual sentences so each row is short
-  // and EN/KO stay visually aligned 1:1.
-  function splitToSentences(text: string): string[] {
-    const rows: string[] = [];
-    for (const para of text.split(/\n\n+/)) {
-      const t = para.trim();
-      if (!t) continue;
-      // Split after .!? when followed by whitespace + capital/Korean/quote
-      const parts = t.split(/(?<=[.!?…]['""'']?)\s+(?=[A-Z"''"가-힣])/);
-      parts.forEach(s => { const x = s.trim(); if (x) rows.push(x); });
-    }
-    return rows.length > 0 ? rows : (text.trim() ? [text.trim()] : []);
-  }
+  // English sentences (canonical split) paired with stored Korean sentences.
+  // Korean is stored one-per-line, already index-aligned to splitToSentences(enText).
   const enRows  = enText ? splitToSentences(enText) : [];
-  const koRows  = koText ? splitToSentences(koText) : [];
+  const koRows  = koText
+    ? (koText.includes('\n') && !koText.includes('\n\n')
+        ? koText.split('\n').map(s => s.trim())          // new aligned format
+        : splitToSentences(koText))                      // legacy paragraph format
+    : [];
   const maxRows = Math.max(enRows.length, koRows.length);
 
   // ── Loading ───────────────────────────────────────────────────────────────
@@ -552,8 +555,12 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       )}
       {txError && <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{txError}</p>}
       {koText && !translating && (
-        <div className="px-1">
+        <div className="px-1 flex items-center justify-between">
           <span className="text-xs text-emerald-600 font-semibold">✓ 번역 저장됨</span>
+          <button onClick={handleTranslate}
+            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors font-semibold">
+            🔄 다시 번역 (문장 정렬)
+          </button>
         </div>
       )}
 
@@ -593,11 +600,11 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
           {/* Mobile: single column */}
           <div className="sm:hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
             {mobileView === 'en'
-              ? enParas.map((p, i) => (
+              ? enRows.map((p, i) => (
                   <p key={i} className="text-sm text-gray-800 leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0">{p}</p>
                 ))
-              : koParas.length > 0
-              ? koParas.map((p, i) => (
+              : koRows.filter(Boolean).length > 0
+              ? koRows.map((p, i) => (
                   <p key={i} className="text-sm text-gray-700 leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0">{p}</p>
                 ))
               : <div className="text-center py-8"><p className="text-xs text-gray-400">번역 버튼을 눌러서 한국어 번역을 불러오세요</p></div>}
