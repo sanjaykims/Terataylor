@@ -7,6 +7,7 @@ import ProgressDashboard from './components/ProgressDashboard';
 import ImageUploadInput from './components/ImageUploadInput';
 import LessonScheduleWidget from './components/LessonScheduleWidget';
 import LiteraryAnalysisWriter from './components/LiteraryAnalysisWriter';
+import A2PhotoViewer from './components/A2PhotoViewer';
 import BookReader from './components/BookReader';
 import { trackSession } from './lib/tracker';
 import { supabase } from './lib/supabase';
@@ -18,7 +19,7 @@ import type { VocabItem } from './lib/types';
 import { BOOKS, type BookId } from './data/syllabus';
 
 type MainTab = 'a2' | 'v1' | 'progress';
-type A2Tab   = 'shadowing' | 'vocabulary' | 'opinion' | 'games';
+type A2Tab   = 'reading' | 'shadowing' | 'vocabulary' | 'opinion' | 'games';
 type V1Tab   = 'writing' | 'vocabulary' | 'games' | 'reading';
 
 // ── One-time migration from localStorage → Supabase ───────────────────────
@@ -259,7 +260,7 @@ export default function App() {
         )}
 
         {/* ── A2 INPUT PANEL ────────────────────────────────────────────── */}
-        {mainTab === 'a2' && a2Tab !== 'opinion' && (
+        {mainTab === 'a2' && a2Tab !== 'opinion' && a2Tab !== 'reading' && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <button onClick={() => setShowA2Input(!showA2Input)}
               className="w-full px-5 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
@@ -325,6 +326,7 @@ export default function App() {
           <>
             <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
               {([
+                { id: 'reading',    label: '📄 지문 보기' },
                 { id: 'shadowing',  label: '🎧 섀도잉' },
                 { id: 'vocabulary', label: '📚 단어장' },
                 { id: 'opinion',    label: '✍️ 의견 쓰기' },
@@ -336,6 +338,7 @@ export default function App() {
                   }`}>{t.label}</button>
               ))}
             </div>
+            {a2Tab === 'reading'    && <A2PhotoViewer />}
             {a2Tab === 'shadowing'  && <ShadowingPlayer text={a2Text} audioUrl={a2AudioUrl} />}
             {a2Tab === 'vocabulary' && <VocabularyPanel text={a2Text} vocab={a2Vocab} />}
             {a2Tab === 'opinion'    && <OpinionWriter />}
