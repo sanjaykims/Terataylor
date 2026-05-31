@@ -137,35 +137,43 @@ export default function VocabularyPanel({ text, vocab }: Props) {
   );
 }
 
-// Fetches Korean meaning from the edge function.
-// englishHint: already-known English definition shown immediately while loading.
+// Module-level cache: persists as long as the page is open.
+// Re-flipping a card never re-fetches — second flip is always instant.
+const defCache = new Map<string, { korean: string; english: string }>();
+
+// Fetches Korean meaning from the edge function on first flip only.
+// englishHint: already-stored English definition, shown immediately.
 function VocabDefinitionFull({ word, englishHint }: { word: string; englishHint?: string | null }) {
-  const [korean, setKorean]       = useState<string | null>(null);
-  const [englishApi, setEnglishApi] = useState<string | null>(null);
-  const [loading, setLoading]     = useState(true);
+  const cached = defCache.get(word);
+  const [result, setResult] = useState<{ korean: string; english: string } | null>(cached ?? null);
+  const [loading, setLoading] = useState(!cached);
 
   useEffect(() => {
+    if (defCache.has(word)) return; // already cached — nothing to fetch
     supabase.functions.invoke('ocr-extract', {
       body: { word, mode: 'define_word' },
     })
       .then(({ data }) => {
         const d = data as { english: string; korean: string };
-        setKorean(d.korean ?? null);
-        // Only use API English if we don't already have it
-        if (!englishHint) setEnglishApi(d.english ?? null);
+        defCache.set(word, d);
+        setResult(d);
       })
-      .catch(() => setKorean('(조회 실패)'))
+      .catch(() => {
+        const fallback = { english: englishHint ?? '', korean: '(조회 실패)' };
+        defCache.set(word, fallback);
+        setResult(fallback);
+      })
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [word]);
 
-  const displayEnglish = englishHint ?? englishApi;
+  const displayEnglish = result?.english || englishHint || null;
 
   return (
     <div className="space-y-1">
       {loading
         ? <div className="text-xs text-indigo-400 animate-pulse">한국어 뜻 찾는 중…</div>
-        : korean && <div className="text-sm font-semibold text-indigo-800 leading-snug">🇰🇷 {korean}</div>
+        : result?.korean && <div className="text-sm font-semibold text-indigo-800 leading-snug">🇰🇷 {result.korean}</div>
       }
       {displayEnglish && (
         <div className="text-xs text-gray-500 leading-snug mt-1">🇺🇸 {displayEnglish}</div>
