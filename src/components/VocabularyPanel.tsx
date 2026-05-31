@@ -140,7 +140,7 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
     enrichedRef.current = true;
     const enriched: VocabItem[] = words.map((item, i) => {
       const d = defs.get(i);
-      if (!d || !d.ko || item.korean) return item;
+      if (!d || !d.ko || item.korean) return { ...item, definition: item.definition ?? '' };
       return { ...item, korean: d.ko, definition: d.en || item.definition || '' };
     });
     onVocabUpdate?.(enriched);
