@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { extractVocabulary } from '../utils/textUtils';
 import { supabase } from '../lib/supabase';
+import { csGet, csSet } from '../lib/cloudStorage';
 import type { VocabItem } from '../lib/types';
 
 interface Props {
@@ -8,23 +9,122 @@ interface Props {
   vocab?: VocabItem[] | null;
 }
 
-// True if the string contains any Korean syllable characters.
+// Card display states
+// 0: word only  1: word + English  2: word + English + Korean
+type CardState = 0 | 1 | 2;
+
+interface DefEntry { en: string; ko: string; loading: boolean }
+
 const isKorean = (s: string) => /[가-힣]/.test(s);
 
+// Session-level memory cache (survives re-renders, cleared on page refresh)
+const sessionCache = new Map<string, { en: string; ko: string }>();
+
 export default function VocabularyPanel({ text, vocab }: Props) {
-  const [flipped, setFlipped]   = useState<Set<number>>(new Set());
-  const [studied, setStudied]   = useState<Set<number>>(new Set());
+  const words = useMemo(
+    () => (vocab?.length ? vocab : extractVocabulary(text)) as
+      { word: string; definition?: string; korean?: string; count?: number }[],
+    [vocab, text],
+  );
 
-  const words: { word: string; definition?: string; korean?: string; count?: number }[] = vocab?.length
-    ? vocab
-    : extractVocabulary(text);
+  const [cardStates, setCardStates] = useState<Map<number, CardState>>(() => new Map());
+  const [studied,    setStudied]    = useState<Set<number>>(new Set());
+  const [defs,       setDefs]       = useState<Map<number, DefEntry>>(() => new Map());
 
-  const toggleFlip = (i: number) => {
-    setFlipped(prev => {
-      const next = new Set(prev);
-      next.has(i) ? next.delete(i) : next.add(i);
-      return next;
-    });
+  // Track which indices have had loadDef triggered (per component instance)
+  const loadTriggered = useRef(new Set<number>());
+
+  const getState = (i: number): CardState => cardStates.get(i) ?? 0;
+  const setCardState = (i: number, s: CardState) =>
+    setCardStates(prev => new Map(prev).set(i, s));
+
+  // Load definition for word i — checks memory → Supabase → API in order.
+  const loadDef = useCallback(async (i: number) => {
+    if (loadTriggered.current.has(i)) return;
+    loadTriggered.current.add(i);
+
+    const item = words[i];
+    if (!item) return;
+
+    // ── Already has Korean from v6 extraction ──────────────────────────
+    if (item.korean) {
+      setDefs(prev => new Map(prev).set(i, {
+        en: item.definition ?? '',
+        ko: item.korean!,
+        loading: false,
+      }));
+      return;
+    }
+
+    // ── Legacy: definition field contains Korean text ──────────────────
+    if (item.definition && isKorean(item.definition)) {
+      setDefs(prev => new Map(prev).set(i, { en: '', ko: item.definition!, loading: false }));
+      return;
+    }
+
+    // ── English definition stored, need Korean from cache / API ─────────
+    const knownEn = item.definition && !isKorean(item.definition) ? item.definition : '';
+    const dbKey   = `vocab_def_${item.word.toLowerCase()}`;
+
+    // 1. Session memory cache — instant
+    const mem = sessionCache.get(item.word.toLowerCase());
+    if (mem) {
+      setDefs(prev => new Map(prev).set(i, { en: knownEn || mem.en, ko: mem.ko, loading: false }));
+      return;
+    }
+
+    // Show English immediately while loading Korean
+    setDefs(prev => new Map(prev).set(i, { en: knownEn, ko: '', loading: true }));
+
+    // 2. Supabase persistent cache
+    try {
+      const stored = await csGet(dbKey);
+      if (stored) {
+        const parsed = JSON.parse(stored) as { en: string; ko: string };
+        sessionCache.set(item.word.toLowerCase(), parsed);
+        setDefs(prev => new Map(prev).set(i, {
+          en: knownEn || parsed.en,
+          ko: parsed.ko,
+          loading: false,
+        }));
+        return;
+      }
+    } catch { /* fall through */ }
+
+    // 3. API call — result is persisted to Supabase for all future loads
+    try {
+      const { data } = await supabase.functions.invoke('ocr-extract', {
+        body: { word: item.word, mode: 'define_word' },
+      });
+      const d = data as { english: string; korean: string };
+      const result = { en: knownEn || d.english || '', ko: d.korean || '' };
+      await csSet(dbKey, JSON.stringify(result)).catch(() => {});
+      sessionCache.set(item.word.toLowerCase(), result);
+      setDefs(prev => new Map(prev).set(i, { ...result, loading: false }));
+    } catch {
+      setDefs(prev => new Map(prev).set(i, { en: knownEn, ko: '(조회 실패)', loading: false }));
+    }
+  }, [words]);
+
+  // ── Click handlers ────────────────────────────────────────────────────
+  const handleCardClick = (i: number) => {
+    if (studied.has(i)) return;
+    const s = getState(i);
+    if (s === 0) { setCardState(i, 1); loadDef(i); }
+    else if (s === 1) { setCardState(i, 2); }
+    // s === 2: clicking background does nothing
+  };
+
+  // Click English text → remove English (back to word-only)
+  const handleEnClick = (e: React.MouseEvent, i: number) => {
+    e.stopPropagation();
+    setCardState(i, 0);
+  };
+
+  // Click Korean text → remove Korean only (back to English)
+  const handleKoClick = (e: React.MouseEvent, i: number) => {
+    e.stopPropagation();
+    setCardState(i, 1);
   };
 
   const toggleStudied = (e: React.MouseEvent, i: number) => {
@@ -45,15 +145,14 @@ export default function VocabularyPanel({ text, vocab }: Props) {
   }
 
   const studiedCount = studied.size;
-  const usingBookVocab = !!vocab?.length;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-500">
-          {usingBookVocab
+          {vocab?.length
             ? <><strong className="text-indigo-600">책 지정 단어 {words.length}개</strong> · 카드를 클릭해 뜻을 확인하세요</>
-            : <>본문에서 <strong className="text-indigo-600">{words.length}개</strong> 단어 추출 · 카드를 클릭하면 뜻이 나와요</>}
+            : <>본문에서 <strong className="text-indigo-600">{words.length}개</strong> 단어 추출</>}
         </div>
         <div className="text-sm font-semibold text-emerald-600">
           ✅ {studiedCount} / {words.length} 완료
@@ -67,117 +166,79 @@ export default function VocabularyPanel({ text, vocab }: Props) {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {words.map((item, i) => {
-          // ── Classify what we have ──────────────────────────────────────
-          // New v6 data:  item.korean = Korean, item.definition = English
-          // Legacy Korean: item.korean absent, item.definition has Korean chars
-          // Legacy English: item.korean absent, item.definition is English text
-          // Auto-extracted: no definition at all
-          const explicitKorean = item.korean ?? null;
-          const defIsKorean    = !explicitKorean && !!item.definition && isKorean(item.definition);
-
-          const koreanText  = explicitKorean ?? (defIsKorean ? item.definition! : null);
-          // English: from definition when (a) new format or (b) legacy English
-          const englishText = explicitKorean
-            ? (item.definition ?? null)          // new format — definition IS English
-            : defIsKorean
-              ? null                             // legacy Korean-only — no English stored
-              : (item.definition ?? null);       // English definition needs Korean lookup
-
-          const needsLookup = !koreanText; // no Korean available locally → call edge fn
+          const state     = getState(i);
+          const def       = defs.get(i);
+          const isStudied = studied.has(i);
 
           return (
-            <div key={item.word + i} onClick={() => toggleFlip(i)}
+            <div key={item.word + i}
+              onClick={() => handleCardClick(i)}
               className={`relative rounded-xl p-4 cursor-pointer transition-all select-none border-2 ${
-                studied.has(i)
+                isStudied
                   ? 'bg-emerald-50 border-emerald-300 opacity-70'
-                  : flipped.has(i)
+                  : state > 0
                   ? 'bg-indigo-50 border-indigo-300 shadow-md'
                   : 'bg-white border-gray-100 hover:border-indigo-200 hover:shadow-sm'
               }`}>
+
+              {/* ✓ button */}
               <button onClick={e => toggleStudied(e, i)}
                 className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all ${
-                  studied.has(i) ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                }`} title="학습 완료 표시">✓</button>
+                  isStudied ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                }`}>✓</button>
 
-              <div className={`font-bold text-base mb-1 pr-7 ${studied.has(i) ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+              {/* Word */}
+              <div className={`font-bold text-base pr-7 ${isStudied ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
                 {item.word}
               </div>
-
               {'count' in item && item.count && item.count > 1 && (
-                <div className="text-xs text-gray-400 mb-1">{item.count}회 등장</div>
+                <div className="text-xs text-gray-400">{item.count}회</div>
               )}
 
-              {flipped.has(i) && !studied.has(i) && (
+              {/* English — state 1 or 2 */}
+              {state >= 1 && !isStudied && (
                 <div className="mt-2 pt-2 border-t border-indigo-200">
-                  {needsLookup ? (
-                    // No Korean stored — fetch from edge function, show English hint immediately
-                    <VocabDefinitionFull word={item.word} englishHint={englishText} />
-                  ) : (
-                    <div className="space-y-1">
-                      <div className="text-sm font-semibold text-indigo-800 leading-snug">
-                        🇰🇷 {koreanText}
-                      </div>
-                      {englishText && (
-                        <div className="text-xs text-gray-500 leading-snug mt-1">
-                          🇺🇸 {englishText}
-                        </div>
-                      )}
+                  {def?.en ? (
+                    <div
+                      onClick={e => handleEnClick(e, i)}
+                      title="클릭하면 사라져요"
+                      className="text-xs text-gray-600 leading-snug cursor-pointer hover:line-through hover:text-gray-400 transition-all">
+                      🇺🇸 {def.en}
                     </div>
+                  ) : def?.loading ? (
+                    <div className="text-xs text-indigo-300 animate-pulse">찾는 중…</div>
+                  ) : null}
+
+                  {/* Nudge to second click */}
+                  {state === 1 && !def?.loading && (
+                    <div className="mt-1 text-xs text-indigo-300">한 번 더 클릭 → 🇰🇷</div>
                   )}
+                </div>
+              )}
+
+              {/* Korean — state 2 only */}
+              {state === 2 && !isStudied && (
+                <div className="mt-1">
+                  {def?.loading ? (
+                    <div className="text-xs text-indigo-400 animate-pulse">한국어 뜻 찾는 중…</div>
+                  ) : def?.ko ? (
+                    <div
+                      onClick={e => handleKoClick(e, i)}
+                      title="클릭하면 사라져요"
+                      className="text-sm font-semibold text-indigo-800 leading-snug cursor-pointer hover:line-through hover:text-indigo-400 transition-all">
+                      🇰🇷 {def.ko}
+                    </div>
+                  ) : null}
                 </div>
               )}
             </div>
           );
         })}
       </div>
+
       <p className="text-xs text-gray-400 text-center">
-        💡 단어 카드를 클릭해 한국어 뜻을 보고, ✓ 버튼으로 외운 단어를 표시하세요
+        💡 1번 클릭 → 영어 뜻 &nbsp;·&nbsp; 2번 클릭 → 한국어 뜻 &nbsp;·&nbsp; 각 뜻을 클릭하면 사라져요
       </p>
-    </div>
-  );
-}
-
-// Module-level cache: persists as long as the page is open.
-// Re-flipping a card never re-fetches — second flip is always instant.
-const defCache = new Map<string, { korean: string; english: string }>();
-
-// Fetches Korean meaning from the edge function on first flip only.
-// englishHint: already-stored English definition, shown immediately.
-function VocabDefinitionFull({ word, englishHint }: { word: string; englishHint?: string | null }) {
-  const cached = defCache.get(word);
-  const [result, setResult] = useState<{ korean: string; english: string } | null>(cached ?? null);
-  const [loading, setLoading] = useState(!cached);
-
-  useEffect(() => {
-    if (defCache.has(word)) return; // already cached — nothing to fetch
-    supabase.functions.invoke('ocr-extract', {
-      body: { word, mode: 'define_word' },
-    })
-      .then(({ data }) => {
-        const d = data as { english: string; korean: string };
-        defCache.set(word, d);
-        setResult(d);
-      })
-      .catch(() => {
-        const fallback = { english: englishHint ?? '', korean: '(조회 실패)' };
-        defCache.set(word, fallback);
-        setResult(fallback);
-      })
-      .finally(() => setLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [word]);
-
-  const displayEnglish = result?.english || englishHint || null;
-
-  return (
-    <div className="space-y-1">
-      {loading
-        ? <div className="text-xs text-indigo-400 animate-pulse">한국어 뜻 찾는 중…</div>
-        : result?.korean && <div className="text-sm font-semibold text-indigo-800 leading-snug">🇰🇷 {result.korean}</div>
-      }
-      {displayEnglish && (
-        <div className="text-xs text-gray-500 leading-snug mt-1">🇺🇸 {displayEnglish}</div>
-      )}
     </div>
   );
 }
