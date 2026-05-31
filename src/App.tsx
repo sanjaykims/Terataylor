@@ -177,11 +177,7 @@ export default function App() {
 
   const bk = BOOKS[v1Book];
 
-  // The two-column 원서 읽기 (EN/KO) benefits from the full PC width; other
-  // single-column views stay at a comfortable reading width. Mobile is full
-  // width either way.
-  const wideLayout = mainTab === 'v1' && v1Tab === 'reading';
-  const containerW = wideLayout ? 'max-w-7xl' : 'max-w-4xl';
+  const containerW = 'max-w-[1600px]';
 
   // ── Loading screen ───────────────────────────────────────────────────────
   if (!appReady) {
