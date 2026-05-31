@@ -16,7 +16,7 @@ function shuffle<T>(arr: T[]): T[] {
 
 const isKorean = (s: string) => /[가-힣]/.test(s);
 
-interface VocabPuzzle { word: string; korean: string; sentence: string; }
+interface VocabPuzzle { word: string; korean: string; meaning: string; sentence: string; }
 
 interface Props {
   text: string;
@@ -35,7 +35,8 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
   const [streak, setStreak] = useState(0);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
 
-  // Build puzzle list — vocab definitions take priority over text sentences
+  // Build puzzle list — vocab terms take priority over text sentences.
+  // Hint = English meaning (definition); puzzle = arrange the term's words in order.
   const { sentences, vocabPuzzles, mode } = useMemo(() => {
     let items = vocab?.length ? [...vocab] : [];
     if (selectedWords?.length) {
@@ -43,12 +44,16 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
       items = items.filter(v => sel.has(v.word));
     }
     const puzzles: VocabPuzzle[] = items
+      // The term itself must have 2+ words so there's something to order
+      .filter(v => v.word.trim().split(/\s+/).filter(Boolean).length >= 2)
+      // Need an English meaning to show as the hint
       .filter(v => v.definition && !isKorean(v.definition))
-      .filter(v => {
-        const wc = v.definition.split(/\s+/).filter(Boolean).length;
-        return wc >= 3 && wc <= 16;
-      })
-      .map(v => ({ word: v.word, korean: v.korean ?? '', sentence: v.definition }));
+      .map(v => ({
+        word: v.word,
+        korean: v.korean ?? '',
+        meaning: v.definition,
+        sentence: v.word.trim(),
+      }));
 
     if (puzzles.length >= 3) {
       return { sentences: [] as string[], vocabPuzzles: shuffle(puzzles), mode: 'vocab' as const };
@@ -101,7 +106,7 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
     return (
       <div className="text-center py-12 text-gray-400 text-lg">
         {vocab?.length
-          ? '단어장 단어의 영어 뜻이 없거나 너무 짧아요. 단어장에서 뜻을 먼저 불러오세요.'
+          ? '여러 단어로 된 표현(숙어/구문)이 3개 이상 있어야 표현 맞추기를 할 수 있어요. 단어장에서 영어 뜻을 먼저 불러오세요.'
           : '지문을 입력하면 문장 퍼즐 게임이 시작돼요!'}
       </div>
     );
@@ -151,7 +156,7 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
       <div className="flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
         <div>
           <div className="text-sm text-gray-500">
-            {mode === 'vocab' ? '단어 뜻 퍼즐' : '문장 퍼즐'} {sentIdx + 1} / {totalCount}
+            {mode === 'vocab' ? '표현 맞추기' : '문장 퍼즐'} {sentIdx + 1} / {totalCount}
           </div>
           <div className="text-xs text-gray-400">{completed.size}개 완료</div>
         </div>
@@ -166,18 +171,15 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
         </div>
       </div>
 
-      {/* Vocab hint card */}
+      {/* Vocab hint card — shows the English meaning; user arranges the term */}
       {mode === 'vocab' && currentHint && (
-        <div className="bg-indigo-50 border-2 border-indigo-200 rounded-2xl px-5 py-4 flex items-center gap-4">
-          <div className="flex-1">
-            <div className="text-xl font-extrabold text-gray-800">{currentHint.word}</div>
-            {currentHint.korean && (
-              <div className="text-sm text-indigo-600 font-semibold mt-0.5">🇰🇷 {currentHint.korean}</div>
-            )}
-          </div>
-          <div className="text-gray-400 text-xs text-right leading-relaxed">
-            단어의 영어 뜻을<br/>순서대로 맞춰보세요
-          </div>
+        <div className="bg-indigo-50 border-2 border-indigo-200 rounded-2xl px-5 py-4 space-y-1">
+          <div className="text-xs font-semibold text-indigo-400 uppercase tracking-wide">🇺🇸 English meaning</div>
+          <div className="text-lg font-bold text-gray-800 leading-snug">{currentHint.meaning}</div>
+          {currentHint.korean && (
+            <div className="text-sm text-indigo-600 font-semibold">🇰🇷 {currentHint.korean}</div>
+          )}
+          <div className="text-xs text-gray-400 pt-1">아래 단어들로 알맞은 표현을 순서대로 완성하세요</div>
         </div>
       )}
 
@@ -197,7 +199,7 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
       }`}>
         {placed.length === 0 && (
           <span className="text-gray-300 text-sm">
-            {mode === 'vocab' ? '아래 단어들로 영어 뜻을 완성하세요…' : '아래 단어를 클릭해서 문장을 완성하세요…'}
+            {mode === 'vocab' ? '아래 단어들로 표현을 순서대로 완성하세요…' : '아래 단어를 클릭해서 문장을 완성하세요…'}
           </span>
         )}
         {placed.map((token, i) => {
