@@ -1,12 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { SCHEDULE, BOOKS, type BookId } from '../data/syllabus';
 import { supabase } from '../lib/supabase';
 import {
-  saveChapterEn, saveChapterKo,
-  loadChapterEn, loadChapterKo,
-  hasBook, clearBook,
+  hasBook, clearBook, loadChapterEn, loadChapterKo,
+  saveChapterKo, saveBookChapters, getTranslatedLessons,
 } from '../lib/chapterStorage';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
@@ -50,12 +49,9 @@ async function translateChunked(
   for (const p of paras) {
     const w = p.split(/\s+/).length;
     if (curW + w > LIMIT && cur.length > 0) {
-      chunks.push(cur);
-      cur = [p];
-      curW = w;
+      chunks.push(cur); cur = [p]; curW = w;
     } else {
-      cur.push(p);
-      curW += w;
+      cur.push(p); curW += w;
     }
   }
   if (cur.length > 0) chunks.push(cur);
@@ -73,43 +69,72 @@ async function translateChunked(
   return parts.join('\n\n');
 }
 
-interface Props {
-  bookId: BookId;
-}
+type InitState = 'loading' | 'no-book' | 'has-book';
 
-export default function BookReader({ bookId }: Props) {
+export default function BookReader({ bookId }: { bookId: BookId }) {
   const bk = BOOKS[bookId];
   const bookLessons = SCHEDULE.filter(l => l.book === bookId);
   const firstLesson = bookLessons[0]?.lesson ?? 1;
 
-  const [loaded, setLoaded] = useState(() => hasBook(bookId));
+  const [initState, setInitState] = useState<InitState>('loading');
+
+  // PDF extraction
   const [extracting, setExtracting] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [uploadError, setUploadError] = useState('');
 
+  // Chapter reader
   const [selectedLesson, setSelectedLesson] = useState(firstLesson);
-  const [enText, setEnText] = useState<string | null>(() =>
-    hasBook(bookId) ? loadChapterEn(bookId, firstLesson) : null,
-  );
-  const [koText, setKoText] = useState<string | null>(() =>
-    hasBook(bookId) ? loadChapterKo(bookId, firstLesson) : null,
-  );
+  const [enText, setEnText] = useState<string | null>(null);
+  const [koText, setKoText] = useState<string | null>(null);
+  const [chapterLoading, setChapterLoading] = useState(false);
+  const [translatedLessons, setTranslatedLessons] = useState<Set<number>>(new Set());
 
+  // Translation
   const [translating, setTranslating] = useState(false);
   const [txProgress, setTxProgress] = useState({ done: 0, total: 0 });
   const [txError, setTxError] = useState('');
+
+  // UI
   const [confirmClear, setConfirmClear] = useState(false);
-
   const [mobileView, setMobileView] = useState<'en' | 'ko'>('en');
-
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const selectLesson = (lesson: number) => {
+  // ── On mount: check if book is uploaded ──────────────────────────────────
+  useEffect(() => {
+    setInitState('loading');
+    hasBook(bookId)
+      .then(async has => {
+        if (!has) { setInitState('no-book'); return; }
+        setInitState('has-book');
+        // Load translated lesson markers
+        const translated = await getTranslatedLessons(bookId).catch(() => [] as number[]);
+        setTranslatedLessons(new Set(translated));
+        // Load first chapter
+        await loadChapter(bookId, firstLesson);
+      })
+      .catch(() => setInitState('no-book'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId]);
+
+  const loadChapter = async (bid: BookId, lesson: number) => {
+    setChapterLoading(true);
+    setEnText(null);
+    setKoText(null);
+    const [en, ko] = await Promise.all([
+      loadChapterEn(bid, lesson).catch(() => null),
+      loadChapterKo(bid, lesson).catch(() => null),
+    ]);
+    setEnText(en);
+    setKoText(ko);
+    setChapterLoading(false);
+  };
+
+  const selectLesson = async (lesson: number) => {
     setSelectedLesson(lesson);
-    setEnText(loadChapterEn(bookId, lesson));
-    setKoText(loadChapterKo(bookId, lesson));
     setTxError('');
     setMobileView('en');
+    await loadChapter(bookId, lesson);
   };
 
   const handleFile = async (file: File) => {
@@ -124,15 +149,20 @@ export default function BookReader({ bookId }: Props) {
       const pages = await extractAllPages(file, (done, total) =>
         setProgress({ done, total }),
       );
-      for (const lesson of bookLessons) {
-        const r = parseRange(lesson.pages);
-        if (!r) continue;
-        const text = pages.slice(r.start - 1, r.end).join('\n\n');
-        saveChapterEn(bookId, lesson.lesson, text);
-      }
-      setLoaded(true);
+      const chapters = bookLessons
+        .map(lesson => {
+          const r = parseRange(lesson.pages);
+          if (!r) return null;
+          return { lesson: lesson.lesson, text: pages.slice(r.start - 1, r.end).join('\n\n') };
+        })
+        .filter(Boolean) as { lesson: number; text: string }[];
+
+      await saveBookChapters(bookId, chapters);
       setExtracting(false);
-      selectLesson(firstLesson);
+      setInitState('has-book');
+      setSelectedLesson(firstLesson);
+      setTxError('');
+      await loadChapter(bookId, firstLesson);
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : '추출 실패');
       setExtracting(false);
@@ -148,8 +178,9 @@ export default function BookReader({ bookId }: Props) {
       const ko = await translateChunked(enText, (done, total) =>
         setTxProgress({ done, total }),
       );
-      saveChapterKo(bookId, selectedLesson, ko);
+      await saveChapterKo(bookId, selectedLesson, ko);
       setKoText(ko);
+      setTranslatedLessons(prev => new Set([...prev, selectedLesson]));
     } catch (e) {
       setTxError(e instanceof Error ? e.message : '번역 실패');
     } finally {
@@ -157,23 +188,35 @@ export default function BookReader({ bookId }: Props) {
     }
   };
 
-  const handleClearBook = () => {
-    clearBook(bookId);
-    setLoaded(false);
+  const handleClearBook = async () => {
+    setConfirmClear(false);
+    setInitState('loading');
+    await clearBook(bookId).catch(() => {});
+    setInitState('no-book');
     setEnText(null);
     setKoText(null);
-    setConfirmClear(false);
-    setUploadError('');
+    setTranslatedLessons(new Set());
   };
 
   const enParas = enText ? enText.split(/\n\n+/).map(p => p.trim()).filter(Boolean) : [];
   const koParas = koText ? koText.split(/\n\n+/).map(p => p.trim()).filter(Boolean) : [];
   const maxParas = Math.max(enParas.length, koParas.length);
-
   const currentEntry = SCHEDULE.find(l => l.lesson === selectedLesson);
 
-  // ── Upload view ─────────────────────────────────────────────────────────────
-  if (!loaded) {
+  // ── Loading state ────────────────────────────────────────────────────────
+  if (initState === 'loading') {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center space-y-2">
+          <div className={`text-3xl animate-pulse`}>{bk.emoji}</div>
+          <div className="text-xs text-gray-400">불러오는 중...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Upload view ──────────────────────────────────────────────────────────
+  if (initState === 'no-book') {
     return (
       <div className="space-y-4">
         <div className={`${bk.bg} border-2 ${bk.border} rounded-2xl p-4`}>
@@ -196,34 +239,20 @@ export default function BookReader({ bookId }: Props) {
                 style={{ width: progress.total ? `${(progress.done / progress.total) * 100}%` : '0%' }}
               />
             </div>
-            <div className="text-xs text-gray-400 text-center">
-              {progress.done} / {progress.total} 페이지
-            </div>
+            <div className="text-xs text-gray-400 text-center">{progress.done} / {progress.total} 페이지</div>
           </div>
         ) : (
           <div
             onClick={() => fileRef.current?.click()}
             onDragOver={e => e.preventDefault()}
-            onDrop={e => {
-              e.preventDefault();
-              const f = e.dataTransfer.files[0];
-              if (f) handleFile(f);
-            }}
+            onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
             className={`border-2 border-dashed ${bk.border} ${bk.bg} rounded-2xl p-10 text-center cursor-pointer hover:opacity-80 transition-all`}
           >
             <div className="text-4xl mb-3">{bk.emoji}</div>
             <div className={`text-sm font-bold ${bk.color}`}>{bk.shortTitle} PDF 업로드</div>
             <div className="text-xs text-gray-400 mt-1.5">클릭하거나 드래그해서 파일 선택</div>
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".pdf,application/pdf"
-              className="hidden"
-              onChange={e => {
-                const f = e.target.files?.[0];
-                if (f) handleFile(f);
-              }}
-            />
+            <input ref={fileRef} type="file" accept=".pdf,application/pdf" className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
           </div>
         )}
 
@@ -234,107 +263,68 @@ export default function BookReader({ bookId }: Props) {
     );
   }
 
-  // ── Reader view ──────────────────────────────────────────────────────────────
+  // ── Reader view ──────────────────────────────────────────────────────────
   return (
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className={`text-sm font-bold ${bk.color}`}>
-          {bk.emoji} {bk.shortTitle} 원서 읽기
-        </div>
+        <div className={`text-sm font-bold ${bk.color}`}>{bk.emoji} {bk.shortTitle} 원서 읽기</div>
         {confirmClear ? (
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500">정말 삭제할까요?</span>
-            <button
-              onClick={handleClearBook}
-              className="text-xs text-red-500 font-semibold hover:text-red-700 transition-colors"
-            >
-              삭제
-            </button>
-            <button
-              onClick={() => setConfirmClear(false)}
-              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              취소
-            </button>
+            <button onClick={handleClearBook} className="text-xs text-red-500 font-semibold hover:text-red-700">삭제</button>
+            <button onClick={() => setConfirmClear(false)} className="text-xs text-gray-400 hover:text-gray-600">취소</button>
           </div>
         ) : (
-          <button
-            onClick={() => setConfirmClear(true)}
-            className="text-xs text-gray-400 hover:text-red-500 transition-colors"
-          >
-            🗑 삭제
-          </button>
+          <button onClick={() => setConfirmClear(true)} className="text-xs text-gray-400 hover:text-red-500 transition-colors">🗑 삭제</button>
         )}
       </div>
 
       {/* Chapter selector */}
       <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-        {bookLessons.map(l => {
-          const hasKo = !!loadChapterKo(bookId, l.lesson);
-          return (
-            <button
-              key={l.lesson}
-              onClick={() => selectLesson(l.lesson)}
-              className={`shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-all border relative ${
-                selectedLesson === l.lesson
-                  ? `${bk.badge} text-white border-transparent shadow-sm`
-                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-              }`}
-            >
-              <div>L{String(l.lesson).padStart(2, '0')}</div>
-              <div className="font-normal opacity-75">{l.pages.replace('pp. ', '')}</div>
-              {hasKo && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border border-white" />
-              )}
-            </button>
-          );
-        })}
+        {bookLessons.map(l => (
+          <button key={l.lesson} onClick={() => selectLesson(l.lesson)}
+            className={`shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-all border relative ${
+              selectedLesson === l.lesson
+                ? `${bk.badge} text-white border-transparent shadow-sm`
+                : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+            }`}>
+            <div>L{String(l.lesson).padStart(2, '0')}</div>
+            <div className="font-normal opacity-75">{l.pages.replace('pp. ', '')}</div>
+            {translatedLessons.has(l.lesson) && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border border-white" />
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Chapter info bar */}
       {currentEntry && (
         <div className="bg-white rounded-xl border border-gray-100 px-3 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className={`text-xs font-bold ${bk.color}`}>
-              Lesson {String(currentEntry.lesson).padStart(2, '0')}
-            </span>
+            <span className={`text-xs font-bold ${bk.color}`}>Lesson {String(currentEntry.lesson).padStart(2, '0')}</span>
             <span className="text-xs text-gray-500">{currentEntry.pages}</span>
           </div>
-          {enText && (
-            <span className="text-xs text-gray-400">
-              {enText.trim().split(/\s+/).length}단어
-            </span>
-          )}
+          {enText && <span className="text-xs text-gray-400">{enText.trim().split(/\s+/).length}단어</span>}
         </div>
       )}
 
-      {/* Mobile: view toggle */}
+      {/* Mobile view toggle */}
       <div className="sm:hidden flex bg-white rounded-xl border border-gray-100 p-0.5 gap-0.5">
-        <button
-          onClick={() => setMobileView('en')}
-          className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
-            mobileView === 'en' ? `${bk.badge} text-white` : 'text-gray-500'
-          }`}
-        >
-          🇺🇸 영어
-        </button>
-        <button
-          onClick={() => setMobileView('ko')}
-          className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
-            mobileView === 'ko' ? `${bk.badge} text-white` : 'text-gray-500'
-          }`}
-        >
-          🇰🇷 한국어
-        </button>
+        {(['en', 'ko'] as const).map(v => (
+          <button key={v} onClick={() => setMobileView(v)}
+            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
+              mobileView === v ? `${bk.badge} text-white` : 'text-gray-500'
+            }`}>
+            {v === 'en' ? '🇺🇸 영어' : '🇰🇷 한국어'}
+          </button>
+        ))}
       </div>
 
       {/* Translation controls */}
-      {enText && !koText && !translating && (
-        <button
-          onClick={handleTranslate}
-          className={`w-full py-3 ${bk.badge} text-white rounded-xl font-semibold text-sm shadow-sm hover:opacity-90 transition-all`}
-        >
+      {!chapterLoading && enText && !koText && !translating && (
+        <button onClick={handleTranslate}
+          className={`w-full py-3 ${bk.badge} text-white rounded-xl font-semibold text-sm shadow-sm hover:opacity-90 transition-all`}>
           🌏 이 챕터 한국어로 번역하기
         </button>
       )}
@@ -342,25 +332,15 @@ export default function BookReader({ bookId }: Props) {
         <div className="bg-white rounded-xl border border-gray-100 px-4 py-3 space-y-2">
           <div className="text-xs text-gray-600 font-semibold text-center">번역 중...</div>
           <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-300 ${bk.badge}`}
-              style={{
-                width: txProgress.total
-                  ? `${(txProgress.done / txProgress.total) * 100}%`
-                  : '15%',
-              }}
-            />
+            <div className={`h-full rounded-full transition-all duration-300 ${bk.badge}`}
+              style={{ width: txProgress.total ? `${(txProgress.done / txProgress.total) * 100}%` : '15%' }} />
           </div>
           {txProgress.total > 0 && (
-            <div className="text-xs text-gray-400 text-center">
-              {txProgress.done} / {txProgress.total} 구간
-            </div>
+            <div className="text-xs text-gray-400 text-center">{txProgress.done} / {txProgress.total} 구간</div>
           )}
         </div>
       )}
-      {txError && (
-        <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{txError}</p>
-      )}
+      {txError && <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{txError}</p>}
       {koText && !translating && (
         <div className="px-1">
           <span className="text-xs text-emerald-600 font-semibold">✓ 번역 저장됨</span>
@@ -368,7 +348,11 @@ export default function BookReader({ bookId }: Props) {
       )}
 
       {/* Reader */}
-      {enText ? (
+      {chapterLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-xs text-gray-400 animate-pulse">챕터 불러오는 중...</div>
+        </div>
+      ) : enText ? (
         <>
           {/* Desktop: paired paragraph grid */}
           <div className="hidden sm:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -381,21 +365,16 @@ export default function BookReader({ bookId }: Props) {
               </div>
             </div>
             {Array.from({ length: maxParas }).map((_, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-2 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
-              >
+              <div key={i} className="grid grid-cols-2 border-b border-gray-50 last:border-0 hover:bg-gray-50/40 transition-colors">
                 <div className="px-4 py-3 border-r border-gray-100">
                   <p className="text-sm text-gray-800 leading-relaxed">{enParas[i] ?? ''}</p>
                 </div>
                 <div className="px-4 py-3">
                   {koParas[i] ? (
                     <p className="text-sm text-gray-700 leading-relaxed">{koParas[i]}</p>
-                  ) : (
-                    i === 0 && !koText ? (
-                      <p className="text-xs text-gray-400 italic">번역 버튼을 눌러주세요</p>
-                    ) : null
-                  )}
+                  ) : (i === 0 && !koText ? (
+                    <p className="text-xs text-gray-400 italic">번역 버튼을 눌러주세요</p>
+                  ) : null)}
                 </div>
               </div>
             ))}
@@ -405,28 +384,18 @@ export default function BookReader({ bookId }: Props) {
           <div className="sm:hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
             {mobileView === 'en'
               ? enParas.map((p, i) => (
-                  <p key={i} className="text-sm text-gray-800 leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0">
-                    {p}
-                  </p>
+                  <p key={i} className="text-sm text-gray-800 leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0">{p}</p>
                 ))
               : koParas.length > 0
               ? koParas.map((p, i) => (
-                  <p key={i} className="text-sm text-gray-700 leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0">
-                    {p}
-                  </p>
+                  <p key={i} className="text-sm text-gray-700 leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0">{p}</p>
                 ))
-              : (
-                <div className="text-center py-8">
-                  <p className="text-xs text-gray-400">번역 버튼을 눌러서 한국어 번역을 불러오세요</p>
-                </div>
-              )}
+              : <div className="text-center py-8"><p className="text-xs text-gray-400">번역 버튼을 눌러서 한국어 번역을 불러오세요</p></div>}
           </div>
         </>
       ) : (
         <div className="bg-gray-50 rounded-2xl p-8 text-center text-sm text-gray-400">
-          이 챕터의 텍스트를 불러올 수 없어요.
-          <br />
-          PDF를 다시 업로드해 주세요.
+          이 챕터의 텍스트를 불러올 수 없어요.<br />PDF를 다시 업로드해 주세요.
         </div>
       )}
     </div>

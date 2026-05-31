@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BOOKS, WRITING_PROMPTS, type BookId, type WritingPrompt } from '../data/syllabus';
+import { csGetJSON, csSetJSON } from '../lib/cloudStorage';
 
 // ── Creative Story Writer (original StoryWriter logic embedded) ───────────────
 const STORY_SECTIONS = [
@@ -103,16 +104,21 @@ function CreativeStoryWriter() {
 // ── Essay Editor ──────────────────────────────────────────────────────────────
 function EssayEditor({ prompt, bookId, onBack }: { prompt: WritingPrompt; bookId: BookId; onBack: () => void }) {
   const bk = BOOKS[bookId];
-  const key = `taylor_essay_${bookId}_${prompt.id}`;
-  const [texts, setTexts] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem(key) ?? 'null') ?? prompt.sections.map(() => ''); }
-    catch { return prompt.sections.map(() => ''); }
-  });
+  const cloudKey = `essay_${bookId}_${prompt.id}`;
+  const empty = prompt.sections.map(() => '');
+  const [texts, setTexts] = useState<string[]>(empty);
   const [showStarters, setShowStarters] = useState<boolean[]>(prompt.sections.map(() => false));
+
+  useEffect(() => {
+    csGetJSON<string[]>(cloudKey).then(saved => {
+      if (Array.isArray(saved) && saved.length === prompt.sections.length) setTexts(saved);
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cloudKey]);
 
   const save = (next: string[]) => {
     setTexts(next);
-    try { localStorage.setItem(key, JSON.stringify(next)); } catch { /* ignore */ }
+    csSetJSON(cloudKey, next).catch(() => {});
   };
 
   const totalWords = texts.reduce((s, t) => s + (t.trim() ? t.trim().split(/\s+/).length : 0), 0);
@@ -210,6 +216,20 @@ function EssayEditor({ prompt, bookId, onBack }: { prompt: WritingPrompt; bookId
 function PromptGrid({ bookId, onSelect }: { bookId: BookId; onSelect: (p: WritingPrompt) => void }) {
   const bk = BOOKS[bookId];
   const prompts = WRITING_PROMPTS[bookId];
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    Promise.all(
+      prompts.map(p =>
+        csGetJSON<string[]>(`essay_${bookId}_${p.id}`)
+          .then(v => ({ id: p.id, saved: Array.isArray(v) && v.some(t => t.trim()) }))
+          .catch(() => ({ id: p.id, saved: false })),
+      ),
+    ).then(results => {
+      setSavedIds(new Set(results.filter(r => r.saved).map(r => r.id)));
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId]);
 
   return (
     <div className="space-y-4">
@@ -225,27 +245,21 @@ function PromptGrid({ bookId, onSelect }: { bookId: BookId; onSelect: (p: Writin
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {prompts.map(p => {
-          const saved = (() => {
-            try {
-              const v = JSON.parse(localStorage.getItem(`taylor_essay_${bookId}_${p.id}`) ?? 'null');
-              return Array.isArray(v) && v.some((t: string) => t.trim());
-            } catch { return false; }
-          })();
-          return (
-            <button key={p.id} onClick={() => onSelect(p)}
-              className="text-left bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:border-indigo-300 hover:shadow-md transition-all group">
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-3xl">{p.emoji}</span>
-                {saved && <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold shrink-0">작성 중</span>}
-              </div>
-              <div className={`font-bold text-sm mt-2 ${bk.color} group-hover:text-indigo-600`}>{p.concept}</div>
-              <div className="text-xs text-gray-500 mt-0.5">{p.korConcept}</div>
-              <div className="text-xs text-gray-600 mt-2 leading-relaxed line-clamp-2">{p.question}</div>
-              <div className="text-xs text-gray-400 mt-2">{p.sections.length}개 섹션 → 에세이 완성</div>
-            </button>
-          );
-        })}
+        {prompts.map(p => (
+          <button key={p.id} onClick={() => onSelect(p)}
+            className="text-left bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:border-indigo-300 hover:shadow-md transition-all group">
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-3xl">{p.emoji}</span>
+              {savedIds.has(p.id) && (
+                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold shrink-0">작성 중</span>
+              )}
+            </div>
+            <div className={`font-bold text-sm mt-2 ${bk.color} group-hover:text-indigo-600`}>{p.concept}</div>
+            <div className="text-xs text-gray-500 mt-0.5">{p.korConcept}</div>
+            <div className="text-xs text-gray-600 mt-2 leading-relaxed line-clamp-2">{p.question}</div>
+            <div className="text-xs text-gray-400 mt-2">{p.sections.length}개 섹션 → 에세이 완성</div>
+          </button>
+        ))}
       </div>
     </div>
   );
