@@ -95,14 +95,41 @@ function cleanPageText(text: string, runningHeaders: Set<string>): string {
 // Remove known front-matter lines wherever they appear in a chapter.
 const FRONT_MATTER_LINE = /^(table of contents|cover title|copyright|all rights reserved|dedication|published by|isbn|first published|first edition|printed in|also by|about the author|coda\b)/i;
 
+// Applied after the chapter heading has been stripped. Skips the front matter
+// paragraphs that appear just after the heading (TOC remnant, dedication,
+// epigraph, book-title list) and keeps everything once story prose begins.
 function cleanChapterText(text: string): string {
-  return text
-    .split('\n')
-    .map(l => stripUrls(l))
-    .filter(l => !FRONT_MATTER_LINE.test(l.trim()))
-    .join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  const paras = text
+    .split(/\n\n+/)
+    .map(p => p.split('\n').map(l => stripUrls(l.trim())).filter(Boolean).join('\n'))
+    .filter(Boolean);
+
+  const result: string[] = [];
+  let storyStarted = false;
+
+  for (const p of paras) {
+    const t = p.trim();
+    if (FRONT_MATTER_LINE.test(t)) continue;  // global: always remove
+
+    if (!storyStarted) {
+      // TOC: line with 2+ "Chapter N" references
+      if ((t.match(/\bchapter\s+\d+/gi) ?? []).length >= 2) continue;
+      // Epigraph: contains attribution dash (— from …)
+      if (/[—–―]\s*(from\b|[A-Z][a-z])/i.test(t)) continue;
+      // Dedication: "For/To Firstname Lastname …" short paragraph
+      if (/^(for|to) [A-Z][a-z]+ [A-Z][a-z]+/.test(t) && t.split(/\s+/).length < 25) continue;
+      // Book-title list: long run-on with no sentence-ending punctuation
+      const words = t.split(/\s+/).length;
+      const hasSentence = /\w[.!?](\s|$)/.test(t);
+      if (words > 8 && !hasSentence) continue;
+
+      storyStarted = true;
+    }
+
+    result.push(p);
+  }
+
+  return result.join('\n\n').trim();
 }
 
 // Strip everything up to and including the first chapter heading.
