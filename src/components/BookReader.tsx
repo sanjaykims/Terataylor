@@ -263,6 +263,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const [analyzeMsg,    setAnalyzeMsg]    = useState('');
   const [audioUploadMsg,setAudioUploadMsg]= useState('');
   const [uploadProgress,setUploadProgress]= useState({ done: 0, total: 0 });
+  const [nextChapHasAudio, setNextChapHasAudio] = useState(false);
+  const [merging,       setMerging]       = useState(false);
+  const [mergeMsg,      setMergeMsg]      = useState('');
   const audioRef    = useRef<HTMLAudioElement>(null);
   const audioFileRef = useRef<HTMLInputElement>(null);
   const rowRefs       = useRef<(HTMLDivElement | null)[]>([]);
@@ -309,16 +312,20 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setAudioDuration(0);
     setTimings(null);
     setAnalyzeMsg('');
-    const [en, ko, audio, times] = await Promise.all([
+    setMergeMsg('');
+    setNextChapHasAudio(false);
+    const [en, ko, audio, times, nextAudio] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
       loadChapterAudio(bid, chapter).catch(() => null),
       loadChapterTimings(bid, chapter).catch(() => null),
+      loadChapterAudio(bid, chapter + 1).catch(() => null),
     ]);
     setEnText(en);
     setKoText(ko);
     setAudioUrl(audio);
     setTimings(times);
+    setNextChapHasAudio(!!nextAudio);
     setChapterLoading(false);
   };
 
@@ -478,6 +485,36 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setActiveIdx(-1);
     setAudioDuration(0);
     setTimings(null);
+  };
+
+  // Merge current chapter's audio with the next chapter's audio into one seamless file.
+  const handleMergeAudio = async () => {
+    setMerging(true);
+    setMergeMsg('병합 중… Supabase에서 파일을 처리하고 있어요');
+    try {
+      const { data, error } = await supabase.functions.invoke('merge-audio', {
+        body: {
+          bookId,
+          chapters: [selectedChapter, selectedChapter + 1],
+          outputChapter: selectedChapter,
+          trimSeconds: 0,
+        },
+      });
+      if (error) throw new Error(error.message);
+      const result = data as { success: boolean; publicUrl: string; totalMB: number };
+      if (!result.success) throw new Error('병합 실패');
+      // Reload current chapter audio with new merged file
+      const freshUrl = `${result.publicUrl}?t=${Date.now()}`;
+      setAudioUrl(freshUrl);
+      setTimings(null);
+      setActiveIdx(-1);
+      setAudioDuration(0);
+      setNextChapHasAudio(false);
+      setMergeMsg(`✓ 병합 완료! (${result.totalMB} MB) 이제 하나의 파일로 재생돼요. 음성 분석을 다시 실행해 주세요.`);
+    } catch (e) {
+      setMergeMsg(`오류: ${e instanceof Error ? e.message : '알 수 없는 오류'}`);
+    }
+    setMerging(false);
   };
 
   // Transcribe the mp3 and align real word timestamps to the sentences.
@@ -750,6 +787,27 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
           </div>
           {audioUploadMsg && (
             <p className="text-xs text-emerald-600 bg-emerald-50 rounded-lg px-3 py-2">{audioUploadMsg}</p>
+          )}
+
+          {/* Merge banner: shown when current + next chapter both have audio */}
+          {audioUrl && nextChapHasAudio && !merging && !mergeMsg && (
+            <div className="flex items-center gap-3 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-2.5">
+              <span className="text-xs text-indigo-700 flex-1">
+                🔗 Ch.{selectedChapter}과 Ch.{selectedChapter + 1} 오디오가 모두 있어요. 하나로 이어 붙일까요?
+              </span>
+              <button onClick={handleMergeAudio}
+                className="px-3 py-1 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 shrink-0 transition-all">
+                Merge →
+              </button>
+            </div>
+          )}
+          {merging && (
+            <p className="text-xs text-indigo-500 bg-indigo-50 rounded-lg px-3 py-2 animate-pulse">{mergeMsg}</p>
+          )}
+          {mergeMsg && !merging && (
+            <p className={`text-xs rounded-lg px-3 py-2 ${mergeMsg.startsWith('✓') ? 'text-emerald-700 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
+              {mergeMsg}
+            </p>
           )}
 
           {audioUrl ? (
