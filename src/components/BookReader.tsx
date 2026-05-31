@@ -381,6 +381,24 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const koParas   = koText ? koText.split(/\n\n+/).map(p => p.trim()).filter(Boolean) : [];
   const maxParas  = Math.max(enParas.length, koParas.length);
 
+  // Sentence-level rows for the desktop paired reader
+  // Splits every paragraph into individual sentences so each row is short
+  // and EN/KO stay visually aligned 1:1.
+  function splitToSentences(text: string): string[] {
+    const rows: string[] = [];
+    for (const para of text.split(/\n\n+/)) {
+      const t = para.trim();
+      if (!t) continue;
+      // Split after .!? when followed by whitespace + capital/Korean/quote
+      const parts = t.split(/(?<=[.!?…]['""'']?)\s+(?=[A-Z"''"가-힣])/);
+      parts.forEach(s => { const x = s.trim(); if (x) rows.push(x); });
+    }
+    return rows.length > 0 ? rows : (text.trim() ? [text.trim()] : []);
+  }
+  const enRows  = enText ? splitToSentences(enText) : [];
+  const koRows  = koText ? splitToSentences(koText) : [];
+  const maxRows = Math.max(enRows.length, koRows.length);
+
   // ── Loading ───────────────────────────────────────────────────────────────
   if (initState === 'loading') {
     return (
@@ -546,7 +564,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
         </div>
       ) : enText ? (
         <>
-          {/* Desktop: paired paragraph grid */}
+          {/* Desktop: sentence-paired grid — one EN sentence : one KO sentence per row */}
           <div className="hidden sm:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="grid grid-cols-2 border-b border-gray-100">
               <div className="px-4 py-2.5 border-r border-gray-100">
@@ -556,14 +574,14 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">🇰🇷 한국어</span>
               </div>
             </div>
-            {Array.from({ length: maxParas }).map((_, i) => (
-              <div key={i} className="grid grid-cols-2 border-b border-gray-50 last:border-0 hover:bg-gray-50/40 transition-colors">
+            {Array.from({ length: maxRows }).map((_, i) => (
+              <div key={i} className="grid grid-cols-2 items-start border-b border-gray-50 last:border-0 hover:bg-gray-50/40 transition-colors">
                 <div className="px-4 py-3 border-r border-gray-100">
-                  <p className="text-sm text-gray-800 leading-relaxed">{enParas[i] ?? ''}</p>
+                  <p className="text-sm text-gray-800 leading-relaxed">{enRows[i] ?? ''}</p>
                 </div>
                 <div className="px-4 py-3">
-                  {koParas[i] ? (
-                    <p className="text-sm text-gray-700 leading-relaxed">{koParas[i]}</p>
+                  {koRows[i] ? (
+                    <p className="text-sm text-gray-700 leading-relaxed">{koRows[i]}</p>
                   ) : (i === 0 && !koText ? (
                     <p className="text-xs text-gray-400 italic">번역 버튼을 눌러주세요</p>
                   ) : null)}
