@@ -235,13 +235,20 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const [mobileView,   setMobileView]   = useState<'en' | 'ko'>('en');
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Current lesson chapter range for this book (to highlight lesson chapters)
-  const lessonChapterRange = (() => {
+  // Index (1-based) of the chapter stored for the current/upcoming lesson.
+  // When pdfPages are defined, each lesson is stored as one chapter in order.
+  const currentLessonChapter = (() => {
+    const bookLessons = SCHEDULE.filter(l => l.book === bookId && l.pdfPages);
+    if (bookLessons.length === 0) return null;
     const now = new Date(); now.setHours(0, 0, 0, 0);
-    const past = SCHEDULE.filter(l => l.book === bookId && new Date(l.date) <= now && l.chapters);
-    const entry = past.at(-1) ?? SCHEDULE.find(l => l.book === bookId && l.chapters);
-    return entry?.chapters ?? null;
+    // Show the next upcoming lesson; fall back to most recent past if none
+    const future = bookLessons.filter(l => new Date(l.date) > now);
+    const target = future[0] ?? bookLessons.at(-1)!;
+    return bookLessons.indexOf(target) + 1; // 1-based chapter index
   })();
+  const lessonChapterRange = currentLessonChapter
+    ? [currentLessonChapter, currentLessonChapter] as [number, number]
+    : null;
 
   // ── On mount ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -298,21 +305,29 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       const runningHeaders = detectRunningHeaders(pages);
       const cleanedPages = pages.map(p => cleanPageText(p, runningHeaders));
 
-      // Split into chapters and strip the heading line from each chapter
-      const detected = splitIntoChapters(cleanedPages);
-
       let chapterTexts: string[];
       let note: string;
 
-      if (detected && detected.length >= 2) {
-        // Strip the heading line then clean each chapter
-        chapterTexts = detected.map(t => cleanChapterText(stripToFirstChapterHeading(t, 20)));
-        note = `${detected.length}개 챕터 감지됨`;
+      // Prefer explicit PDF page ranges from the syllabus (one entry per lesson)
+      const lessonsWithPages = SCHEDULE.filter(l => l.book === bookId && l.pdfPages);
+      if (lessonsWithPages.length > 0) {
+        chapterTexts = lessonsWithPages.map(lesson => {
+          const [startPage, endPage] = lesson.pdfPages!;
+          // cleanedPages is 0-indexed; PDF pages are 1-indexed
+          const lessonPages = cleanedPages.slice(startPage - 1, endPage);
+          return cleanChapterText(lessonPages.join('\n\n'));
+        });
+        note = `${chapterTexts.length}개 수업 분량 추출됨`;
       } else {
-        // Detection failed: cleanChapterText scans the whole book from the start,
-        // filtering front matter until it reaches the first story paragraph.
-        chapterTexts = [cleanChapterText(cleanedPages.join('\n\n'))];
-        note = '챕터를 자동 감지하지 못해 전체를 1개로 저장했어요.';
+        // Fallback: auto-detect chapter headings
+        const detected = splitIntoChapters(cleanedPages);
+        if (detected && detected.length >= 2) {
+          chapterTexts = detected.map(t => cleanChapterText(stripToFirstChapterHeading(t, 20)));
+          note = `${detected.length}개 챕터 감지됨`;
+        } else {
+          chapterTexts = [cleanChapterText(cleanedPages.join('\n\n'))];
+          note = '챕터를 자동 감지하지 못해 전체를 1개로 저장했어요.';
+        }
       }
 
       const chapters = chapterTexts.map((text, i) => ({ chapter: i + 1, text }));
