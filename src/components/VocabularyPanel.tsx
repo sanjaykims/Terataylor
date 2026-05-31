@@ -8,11 +8,13 @@ interface Props {
   vocab?: VocabItem[] | null;
 }
 
+// True if the string contains any Korean syllable characters.
+const isKorean = (s: string) => /[가-힣]/.test(s);
+
 export default function VocabularyPanel({ text, vocab }: Props) {
   const [flipped, setFlipped]   = useState<Set<number>>(new Set());
   const [studied, setStudied]   = useState<Set<number>>(new Set());
 
-  // Prefer book-provided vocab; fall back to auto-extraction
   const words: { word: string; definition?: string; korean?: string; count?: number }[] = vocab?.length
     ? vocab
     : extractVocabulary(text);
@@ -58,7 +60,6 @@ export default function VocabularyPanel({ text, vocab }: Props) {
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
           style={{ width: `${(studiedCount / words.length) * 100}%` }} />
@@ -66,12 +67,23 @@ export default function VocabularyPanel({ text, vocab }: Props) {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {words.map((item, i) => {
-          // Determine Korean and English strings.
-          // New data (v6+): item.korean = Korean, item.definition = English.
-          // Old/legacy data: item.definition = Korean (no separate korean field).
-          const korean = item.korean ?? item.definition ?? null;
-          const english = item.korean && item.definition ? item.definition : null;
-          const hasAnyDef = !!(item.korean || item.definition);
+          // ── Classify what we have ──────────────────────────────────────
+          // New v6 data:  item.korean = Korean, item.definition = English
+          // Legacy Korean: item.korean absent, item.definition has Korean chars
+          // Legacy English: item.korean absent, item.definition is English text
+          // Auto-extracted: no definition at all
+          const explicitKorean = item.korean ?? null;
+          const defIsKorean    = !explicitKorean && !!item.definition && isKorean(item.definition);
+
+          const koreanText  = explicitKorean ?? (defIsKorean ? item.definition! : null);
+          // English: from definition when (a) new format or (b) legacy English
+          const englishText = explicitKorean
+            ? (item.definition ?? null)          // new format — definition IS English
+            : defIsKorean
+              ? null                             // legacy Korean-only — no English stored
+              : (item.definition ?? null);       // English definition needs Korean lookup
+
+          const needsLookup = !koreanText; // no Korean available locally → call edge fn
 
           return (
             <div key={item.word + i} onClick={() => toggleFlip(i)}
@@ -96,25 +108,21 @@ export default function VocabularyPanel({ text, vocab }: Props) {
               )}
 
               {flipped.has(i) && !studied.has(i) && (
-                <div className="mt-2 pt-2 border-t border-indigo-200 space-y-1">
-                  {hasAnyDef ? (
-                    <>
-                      {/* Korean meaning — primary, prominent */}
-                      {korean && (
-                        <div className="text-sm font-semibold text-indigo-800 leading-snug">
-                          🇰🇷 {korean}
-                        </div>
-                      )}
-                      {/* English definition — secondary, smaller */}
-                      {english && (
-                        <div className="text-xs text-gray-500 leading-snug mt-1">
-                          🇺🇸 {english}
-                        </div>
-                      )}
-                    </>
+                <div className="mt-2 pt-2 border-t border-indigo-200">
+                  {needsLookup ? (
+                    // No Korean stored — fetch from edge function, show English hint immediately
+                    <VocabDefinitionFull word={item.word} englishHint={englishText} />
                   ) : (
-                    // Auto-extracted word: fetch definition + Korean from edge function
-                    <VocabDefinitionFull word={item.word} />
+                    <div className="space-y-1">
+                      <div className="text-sm font-semibold text-indigo-800 leading-snug">
+                        🇰🇷 {koreanText}
+                      </div>
+                      {englishText && (
+                        <div className="text-xs text-gray-500 leading-snug mt-1">
+                          🇺🇸 {englishText}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               )}
@@ -129,29 +137,38 @@ export default function VocabularyPanel({ text, vocab }: Props) {
   );
 }
 
-// Used for auto-extracted words that have no stored definition.
-// Calls the edge function to get both English definition and Korean meaning.
-function VocabDefinitionFull({ word }: { word: string }) {
-  const [result, setResult] = useState<{ english: string; korean: string } | null>(null);
-  const [loading, setLoading] = useState(true);
+// Fetches Korean meaning from the edge function.
+// englishHint: already-known English definition shown immediately while loading.
+function VocabDefinitionFull({ word, englishHint }: { word: string; englishHint?: string | null }) {
+  const [korean, setKorean]       = useState<string | null>(null);
+  const [englishApi, setEnglishApi] = useState<string | null>(null);
+  const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
     supabase.functions.invoke('ocr-extract', {
       body: { word, mode: 'define_word' },
     })
-      .then(({ data }) => setResult(data as { english: string; korean: string }))
-      .catch(() => setResult({ english: '(lookup failed)', korean: '(조회 실패)' }))
+      .then(({ data }) => {
+        const d = data as { english: string; korean: string };
+        setKorean(d.korean ?? null);
+        // Only use API English if we don't already have it
+        if (!englishHint) setEnglishApi(d.english ?? null);
+      })
+      .catch(() => setKorean('(조회 실패)'))
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [word]);
 
-  if (loading) return <div className="text-xs text-indigo-400 animate-pulse">찾는 중...</div>;
+  const displayEnglish = englishHint ?? englishApi;
+
   return (
     <div className="space-y-1">
-      {result?.korean && (
-        <div className="text-sm font-semibold text-indigo-800 leading-snug">🇰🇷 {result.korean}</div>
-      )}
-      {result?.english && (
-        <div className="text-xs text-gray-500 leading-snug">🇺🇸 {result.english}</div>
+      {loading
+        ? <div className="text-xs text-indigo-400 animate-pulse">한국어 뜻 찾는 중…</div>
+        : korean && <div className="text-sm font-semibold text-indigo-800 leading-snug">🇰🇷 {korean}</div>
+      }
+      {displayEnglish && (
+        <div className="text-xs text-gray-500 leading-snug mt-1">🇺🇸 {displayEnglish}</div>
       )}
     </div>
   );
