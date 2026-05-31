@@ -448,35 +448,38 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
         )}
       </div>
 
-      {/* Chapter selector */}
-      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-        {Array.from({ length: totalChapters }, (_, i) => i + 1).map(ch => {
-          const isLesson = lessonChapterRange && ch >= lessonChapterRange[0] && ch <= lessonChapterRange[1];
-          return (
-            <button key={ch} onClick={() => selectChapter(ch)}
-              className={`shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-all border relative ${
-                selectedChapter === ch
-                  ? `${bk.badge} text-white border-transparent shadow-sm`
-                  : isLesson
-                  ? `bg-white ${bk.border} ${bk.color} shadow-sm`
-                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-              }`}>
-              Ch.{String(ch).padStart(2, '0')}
-              {isLesson && selectedChapter !== ch && (
-                <span className="absolute -top-1 -left-1 text-[9px] leading-none bg-orange-400 text-white rounded-full px-1 font-bold">수업</span>
-              )}
-              {translatedChaps.has(ch) && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border border-white" />
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {/* Chapter selector — only show chapters in the current lesson range */}
+      {(() => {
+        const visibleChapters = lessonChapterRange
+          ? Array.from({ length: lessonChapterRange[1] - lessonChapterRange[0] + 1 }, (_, i) => lessonChapterRange[0] + i)
+              .filter(ch => ch <= totalChapters)
+          : Array.from({ length: totalChapters }, (_, i) => i + 1);
+        return (
+          <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+            {visibleChapters.map(ch => (
+              <button key={ch} onClick={() => selectChapter(ch)}
+                className={`shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-all border relative ${
+                  selectedChapter === ch
+                    ? `${bk.badge} text-white border-transparent shadow-sm`
+                    : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                }`}>
+                Ch.{String(ch).padStart(2, '0')}
+                {translatedChaps.has(ch) && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border border-white" />
+                )}
+              </button>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Current chapter info bar */}
       <div className="bg-white rounded-xl border border-gray-100 px-3 py-2 flex items-center justify-between">
         <span className={`text-xs font-bold ${bk.color}`}>
-          Chapter {selectedChapter} / {totalChapters}
+          Chapter {selectedChapter}
+          {lessonChapterRange
+            ? ` (이번 수업: Ch. ${lessonChapterRange[0]}~${lessonChapterRange[1]})`
+            : ` / ${totalChapters}`}
         </span>
         {enText && (
           <span className="text-xs text-gray-400">{enText.trim().split(/\s+/).length}단어</span>
