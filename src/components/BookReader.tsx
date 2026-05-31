@@ -521,7 +521,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   };
 
   const seekToSentence = (i: number) => {
-    if (!audioRef.current || !sentenceStarts[i]) return;
+    if (!audioRef.current || i >= sentenceStarts.length) return;
     audioRef.current.currentTime = sentenceStarts[i];
     setActiveIdx(i);
   };
