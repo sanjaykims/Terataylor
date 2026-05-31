@@ -53,12 +53,12 @@ export interface LessonEntry {
 }
 
 export const SCHEDULE: LessonEntry[] = [
-  { lesson:  1, date: '2026-06-03', book: 'edward',   pages: 'Ch. 1~3',     homework: 'Read pp. 27~65', chapters: [1, 3] },
-  { lesson:  2, date: '2026-06-10', book: 'edward',   pages: 'pp. 27~65',   homework: 'Read pp. 69~102' },
-  { lesson:  3, date: '2026-06-17', book: 'edward',   pages: 'pp. 69~102',  homework: 'Read pp. 105~136' },
-  { lesson:  4, date: '2026-06-24', book: 'edward',   pages: 'pp. 105~136', homework: 'Read pp. 139~173' },
-  { lesson:  5, date: '2026-07-01', book: 'edward',   pages: 'pp. 139~173', homework: 'Read pp. 177~210' },
-  { lesson:  6, date: '2026-07-08', book: 'edward',   pages: 'pp. 177~210', homework: 'Read Coraline pp. 1~19' },
+  { lesson:  1, date: '2026-06-03', book: 'edward',   pages: 'Ch. 1~3',   homework: 'Read Ch. 4~8',          chapters: [1,  3]  },
+  { lesson:  2, date: '2026-06-10', book: 'edward',   pages: 'Ch. 4~8',   homework: 'Read Ch. 9~13',         chapters: [4,  8]  },
+  { lesson:  3, date: '2026-06-17', book: 'edward',   pages: 'Ch. 9~13',  homework: 'Read Ch. 14~17',        chapters: [9,  13] },
+  { lesson:  4, date: '2026-06-24', book: 'edward',   pages: 'Ch. 14~17', homework: 'Read Ch. 18~22',        chapters: [14, 17] },
+  { lesson:  5, date: '2026-07-01', book: 'edward',   pages: 'Ch. 18~22', homework: 'Read Ch. 23~27',        chapters: [18, 22] },
+  { lesson:  6, date: '2026-07-08', book: 'edward',   pages: 'Ch. 23~27', homework: 'Read Coraline pp. 1~19', chapters: [23, 27] },
   { lesson:  7, date: '2026-07-15', book: 'coraline', pages: 'pp. 1~19',    homework: 'Read pp. 21~45' },
   { lesson:  8, date: '2026-07-22', book: 'coraline', pages: 'pp. 21~45',   homework: 'Read pp. 47~78' },
   { lesson:  9, date: '2026-08-05', book: 'coraline', pages: 'pp. 47~78',   homework: 'Read pp. 79~112' },
