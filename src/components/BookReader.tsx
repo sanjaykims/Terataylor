@@ -678,7 +678,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setActiveIdx(i);
     setActiveWordIdx(0);
     try {
-      audioRef.current.currentTime = sentenceStarts[i];
+      // Seek 50ms past the cue boundary so MP3 frame quantization (~26ms backward
+      // snap) still lands inside cue i rather than the tail of cue i-1.
+      audioRef.current.currentTime = sentenceStarts[i] + 0.05;
       if (audioRef.current.paused) audioRef.current.play().catch(() => {});
     } catch {
       // ignore — some mobile browsers throw if the element isn't ready
