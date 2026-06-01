@@ -331,9 +331,12 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setAnalyzeMsg('');
     setMergeMsg('');
     setNextChapHasAudio(false);
-    liveTimingsRef.current  = [];
-    prevLiveIdxRef.current  = -1;
-    pendingCorrRef.current  = 0;
+    liveTimingsRef.current      = [];
+    prevLiveIdxRef.current      = -1;
+    pendingCorrRef.current      = 0;
+    isSeekingRef.current        = false;
+    seekFloorRef.current        = -1;
+    seekProtectUntilRef.current = 0;
     const [en, ko, audio, times, nextAudio] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
@@ -685,10 +688,14 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   };
 
   // Gate ALL timeupdate events while the browser is mid-seek.
-  // On mobile, timeupdate fires with stale (pre-seek) currentTime values during
-  // the seek, which would pull the highlight to the wrong sentence.
   const handleAudioTimeUpdate = () => {
     if (isSeekingRef.current) return;
+    // Also suppress timeupdate events for the full 800 ms protection window after any
+    // programmatic seek. handleSeeked sets isSeekingRef=false at ~50 ms, so without this
+    // gate the very first timeupdate (~250 ms post-seek) calls syncHighlight while the
+    // floor is still active. With synthetic 0.03 s timestamps, t+0.25 s jumps idx by
+    // many sentences, immediately clearing the floor and showing the wrong highlight.
+    if (Date.now() <= seekProtectUntilRef.current) return;
     syncHighlight();
   };
 
@@ -713,21 +720,24 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
 
   const seekToSentence = (i: number) => {
     if (!audioRef.current || i >= sentenceStarts.length) return;
-    // Seek directly to the stored sentence start. Deepgram timestamps are accurate
-    // word-by-word, so there is no need to go 0.2 s early (that caused 200 ms of
-    // the previous sentence to play while highlighting the current one).
-    // seekFloorRef still protects against the tiny MP3 frame-boundary undershoot.
-    // Protect for 800 ms: covers both the currentTime-seeking and any extra
-    // seeking that mobile browsers fire when play() is called after a seek.
     seekProtectUntilRef.current = Date.now() + 800;
-    audioRef.current.currentTime = sentenceStarts[i];
     seekFloorRef.current = i;
     prevLiveIdxRef.current = i;
     setActiveIdx(i);
     setActiveWordIdx(0);
-    if (audioRef.current.paused) {
-      audioRef.current.play().catch(() => {});
+    try {
+      audioRef.current.currentTime = sentenceStarts[i];
+      if (audioRef.current.paused) {
+        audioRef.current.play().catch(() => {});
+      }
+    } catch {
+      // currentTime assignment can throw on some mobile browsers when the audio
+      // element is not ready; ensure we don't leave isSeekingRef stuck.
+      isSeekingRef.current = false;
     }
+    // Safety net: if seeked never fires (mobile stall / iOS buffering), unblock
+    // timeupdate after 1.5 s so the highlight doesn't freeze permanently.
+    setTimeout(() => { isSeekingRef.current = false; }, 1500);
   };
 
   // Keep the active sentence in view while audio plays (scroll whichever
