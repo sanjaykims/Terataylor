@@ -683,13 +683,13 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const seekToSentence = (i: number) => {
     if (!audioRef.current || i >= sentenceStarts.length) return;
 
-    // Compute cluster end: advance while next sentence is within 0.7s of
-    // sentenceStarts[i]. Real sentences take > 1s to speak; anything shorter
-    // is a synthetic interpolated timestamp that shouldn't drive seek logic.
+    // Compute cluster end: advance while consecutive gap < 0.7s.
+    // Measuring consecutive gaps (not distance from i) correctly catches
+    // clusters whose total spread exceeds 0.7s but whose individual steps don't.
     let clusterEnd = i;
     while (
       clusterEnd + 1 < sentenceStarts.length &&
-      sentenceStarts[clusterEnd + 1] - sentenceStarts[i] < 0.7
+      sentenceStarts[clusterEnd + 1] - sentenceStarts[clusterEnd] < 0.7
     ) {
       clusterEnd++;
     }
