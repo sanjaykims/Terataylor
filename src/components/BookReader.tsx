@@ -267,6 +267,15 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const seekFloorTimeRef    = useRef(-1); // audio-position floor past cluster end; -1 = none
   const seekProtectUntilRef = useRef(0);  // wall-clock guard: programmatic seek window
   const seekTargetRef       = useRef(-1); // audio position we sought to; stale-read guard
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
+  const [showDebug, setShowDebug] = useState(false);
+  const debugLogsRef = useRef<string[]>([]);
+  const dlog = (msg: string) => {
+    console.log(msg);
+    const next = [...debugLogsRef.current.slice(-49), msg];
+    debugLogsRef.current = next;
+    setDebugLogs([...next]);
+  };
   const [nextChapHasAudio, setNextChapHasAudio] = useState(false);
   const [merging,       setMerging]       = useState(false);
   const [mergeMsg,      setMergeMsg]      = useState('');
@@ -653,15 +662,15 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     if (seekFloorTimeRef.current >= 0) {
       if (t < seekFloorTimeRef.current) return;
       if (seekTargetRef.current >= 0 && t - seekTargetRef.current > 60) {
-        console.warn('[SYNC] stale blocked: t='+t.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3));
+        dlog('[SYNC] stale blocked: t='+t.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3));
         return;
       }
-      console.log('[SYNC] floor cleared: t='+t.toFixed(3)+' idx='+idx);
+      dlog('[SYNC] floor cleared: t='+t.toFixed(3)+' idx='+idx);
       seekFloorTimeRef.current = -1;
     }
 
     if (idx !== activeIdx) {
-      console.log('[SYNC] setActiveIdx '+activeIdx+'→'+idx+' t='+t.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3));
+      dlog('[SYNC] idx '+activeIdx+'→'+idx+' t='+t.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
     }
     setActiveIdx(idx);
 
@@ -678,31 +687,28 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const handleAudioTimeUpdate = () => {
     const t = audioRef.current?.currentTime ?? 0;
     if (isSeekingRef.current) {
-      console.log('[TU-BLOCKED] t='+t.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3));
+      dlog('[TU-BLK] t='+t.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
       return;
     }
     if (seekFloorTimeRef.current >= 0 || seekTargetRef.current >= 0) {
-      console.log('[TU-ACTIVE] t='+t.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3));
+      dlog('[TU] t='+t.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
     }
     syncHighlight();
   };
 
   const handleSeeking = () => {
     const t = audioRef.current?.currentTime ?? 0;
-    console.log('[SEEKING] t='+t.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3)+' protect='+(Date.now() <= seekProtectUntilRef.current));
+    dlog('[SEEKING] t='+t.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3)+' prot='+(Date.now() <= seekProtectUntilRef.current));
     isSeekingRef.current = true;
-    // A native player drag (outside the programmatic-seek window) should clear
-    // the cluster floor so the highlight follows the drag position freely.
     if (Date.now() > seekProtectUntilRef.current) {
       seekFloorTimeRef.current = -1;
     }
-    // Safety net: unblock timeupdate if seeked never fires (iOS/mobile stall).
     setTimeout(() => { isSeekingRef.current = false; }, 1000);
   };
 
   const handleSeeked = () => {
     const t = audioRef.current?.currentTime ?? 0;
-    console.log('[SEEKED] t='+t.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3));
+    dlog('[SEEKED] t='+t.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
     isSeekingRef.current = false;
   };
 
@@ -729,11 +735,11 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     isSeekingRef.current        = true;
     setActiveIdx(i);
     setActiveWordIdx(0);
-    console.log('[TAP] i='+i+' target='+sentenceStarts[i]?.toFixed(3)+' floor='+floor.toFixed(3)+' audioBefore='+audioBeforeSeek.toFixed(3));
+    dlog('[TAP] i='+i+' tgt='+sentenceStarts[i]?.toFixed(3)+' fl='+floor.toFixed(3)+' before='+audioBeforeSeek.toFixed(3));
     try {
       audioRef.current.currentTime = sentenceStarts[i];
       const audioAfterSeek = audioRef.current.currentTime;
-      console.log('[TAP] audioAfterAssign='+audioAfterSeek.toFixed(3)+' (delta='+(audioAfterSeek-sentenceStarts[i]).toFixed(3)+')');
+      dlog('[TAP] after='+audioAfterSeek.toFixed(3)+' delta='+(audioAfterSeek-sentenceStarts[i]).toFixed(3));
       if (audioRef.current.paused) audioRef.current.play().catch(() => {});
     } catch {
       isSeekingRef.current = false;
@@ -1102,6 +1108,37 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       ) : (
         <div className="bg-gray-50 rounded-2xl p-8 text-center text-sm text-gray-400">
           이 챕터의 텍스트를 불러올 수 없어요.
+        </div>
+      )}
+
+      {/* ── DEBUG OVERLAY ── tap the button to show/hide ── */}
+      <button
+        onClick={() => setShowDebug(v => !v)}
+        style={{ position:'fixed', bottom:16, right:16, zIndex:9999,
+          background:'#1e293b', color:'#f8fafc', border:'none',
+          borderRadius:8, padding:'6px 12px', fontSize:12, opacity:0.85 }}
+      >
+        {showDebug ? 'Hide Log' : 'Debug Log'}
+      </button>
+      {showDebug && (
+        <div style={{
+          position:'fixed', bottom:52, right:8, left:8, zIndex:9998,
+          background:'rgba(15,23,42,0.95)', color:'#86efac',
+          fontFamily:'monospace', fontSize:11, lineHeight:1.5,
+          borderRadius:10, padding:10, maxHeight:'50vh',
+          overflowY:'auto', wordBreak:'break-all',
+        }}>
+          <div style={{color:'#94a3b8', marginBottom:4}}>
+            activeIdx={activeIdx} | seekTarget={seekTargetRef.current.toFixed(1)} | floor={seekFloorTimeRef.current.toFixed(1)} | isSeeking={String(isSeekingRef.current)}
+          </div>
+          {debugLogs.length === 0
+            ? <div style={{color:'#64748b'}}>No logs yet. Tap a sentence.</div>
+            : debugLogs.map((l, i) => (
+                <div key={i} style={{color: l.startsWith('[TAP]') ? '#fbbf24' : l.startsWith('[SYNC] idx') ? '#f87171' : '#86efac'}}>
+                  {l}
+                </div>
+              ))
+          }
         </div>
       )}
     </div>
