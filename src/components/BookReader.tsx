@@ -626,10 +626,11 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     // producing clusters like [42, 42, 42, 50]. seekToSentence(i) computes
     // currentTime = 42, but the loop finds idx = last-42-in-cluster (e.g. idx=2),
     // immediately clears the seek floor, and shows the wrong sentence.
-    // A 1 ms minimum gap fixes that without any perceptible effect on playback.
+    // A 30 ms minimum gap exceeds one MP3 frame (~26 ms) so the browser's frame-snap
+    // after a seek never crosses the boundary and triggers the wrong sentence index.
     const strict = raw === timings ? [...raw] : raw; // don't mutate the stored array
     for (let i = 1; i < strict.length; i++) {
-      if (strict[i] <= strict[i - 1]) strict[i] = strict[i - 1] + 0.001;
+      if (strict[i] <= strict[i - 1]) strict[i] = strict[i - 1] + 0.03;
     }
     return strict;
   })();

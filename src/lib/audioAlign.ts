@@ -441,8 +441,9 @@ function enforceMonotone(arr: number[]) {
   // Strict: each entry must be > previous, not just >=.
   // Equal timestamps cause seekToSentence(i) to compute idx > i (last hit in
   // the equal cluster), which immediately clears the seek floor and highlights
-  // the wrong sentence. A 1 ms gap is imperceptible but prevents the cluster bug.
+  // the wrong sentence. 30 ms exceeds one MP3 frame (~26 ms) so the browser's
+  // frame-snap after a seek never crosses the boundary and triggers the wrong idx.
   for (let i = 1; i < arr.length; i++) {
-    if (arr[i] <= arr[i - 1]) arr[i] = arr[i - 1] + 0.001;
+    if (arr[i] <= arr[i - 1]) arr[i] = arr[i - 1] + 0.03;
   }
 }
