@@ -438,7 +438,11 @@ export async function alignChapterAudio(
 }
 
 function enforceMonotone(arr: number[]) {
+  // Strict: each entry must be > previous, not just >=.
+  // Equal timestamps cause seekToSentence(i) to compute idx > i (last hit in
+  // the equal cluster), which immediately clears the seek floor and highlights
+  // the wrong sentence. A 1 ms gap is imperceptible but prevents the cluster bug.
   for (let i = 1; i < arr.length; i++) {
-    if (arr[i] < arr[i - 1]) arr[i] = arr[i - 1];
+    if (arr[i] <= arr[i - 1]) arr[i] = arr[i - 1] + 0.001;
   }
 }

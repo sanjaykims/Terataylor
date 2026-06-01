@@ -590,26 +590,48 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   // Start time (seconds) of each sentence. Prefer REAL per-sentence times from
   // speech alignment; fall back to a word-count estimate until analysis is run.
   const sentenceStarts = (() => {
+    let raw: number[];
     if (timings && timings.length > 0) {
-      if (timings.length === enRows.length) return timings;
-      // Small mismatch (≤5 sentences): pad or trim rather than falling back to inaccurate estimate
-      if (Math.abs(timings.length - enRows.length) <= 5) {
-        if (timings.length > enRows.length) return timings.slice(0, enRows.length);
-        const ext = [...timings];
-        const avgGap = timings.length > 1 ? (timings[timings.length - 1] - timings[0]) / (timings.length - 1) : 3;
-        for (let k = timings.length; k < enRows.length; k++) {
-          ext.push(ext[ext.length - 1] + avgGap);
+      if (timings.length === enRows.length) {
+        raw = timings;
+      } else if (Math.abs(timings.length - enRows.length) <= 5) {
+        // Small mismatch: pad or trim rather than falling back to inaccurate estimate
+        if (timings.length > enRows.length) {
+          raw = timings.slice(0, enRows.length);
+        } else {
+          raw = [...timings];
+          const avgGap = timings.length > 1 ? (timings[timings.length - 1] - timings[0]) / (timings.length - 1) : 3;
+          for (let k = timings.length; k < enRows.length; k++) {
+            raw.push(raw[raw.length - 1] + avgGap);
+          }
         }
-        return ext;
+      } else {
+        raw = [];
       }
+    } else {
+      raw = [];
     }
-    if (!audioDuration || enRows.length === 0) return [];
-    const weights = enRows.map(s => Math.max(1, s.split(/\s+/).length));
-    const total = weights.reduce((a, b) => a + b, 0);
-    const starts: number[] = [];
-    let acc = 0;
-    for (const w of weights) { starts.push((acc / total) * audioDuration); acc += w; }
-    return starts;
+
+    if (raw.length === 0) {
+      if (!audioDuration || enRows.length === 0) return [];
+      const weights = enRows.map(s => Math.max(1, s.split(/\s+/).length));
+      const total = weights.reduce((a, b) => a + b, 0);
+      raw = [];
+      let acc = 0;
+      for (const w of weights) { raw.push((acc / total) * audioDuration); acc += w; }
+    }
+
+    // Enforce strict monotonicity. When alignment Phase 3 moves a sentence
+    // backward, enforceMonotone clamps sibling sentences to the same value,
+    // producing clusters like [42, 42, 42, 50]. seekToSentence(i) computes
+    // currentTime = 42, but the loop finds idx = last-42-in-cluster (e.g. idx=2),
+    // immediately clears the seek floor, and shows the wrong sentence.
+    // A 1 ms minimum gap fixes that without any perceptible effect on playback.
+    const strict = raw === timings ? [...raw] : raw; // don't mutate the stored array
+    for (let i = 1; i < strict.length; i++) {
+      if (strict[i] <= strict[i - 1]) strict[i] = strict[i - 1] + 0.001;
+    }
+    return strict;
   })();
 
   const syncHighlight = () => {
