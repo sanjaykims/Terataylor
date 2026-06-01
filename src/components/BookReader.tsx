@@ -652,10 +652,17 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     // sentence is that long, so anything beyond 60s is a stale pre-seek read.
     if (seekFloorTimeRef.current >= 0) {
       if (t < seekFloorTimeRef.current) return;
-      if (seekTargetRef.current >= 0 && t - seekTargetRef.current > 60) return;
+      if (seekTargetRef.current >= 0 && t - seekTargetRef.current > 60) {
+        console.warn('[SYNC] stale blocked: t='+t.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3));
+        return;
+      }
+      console.log('[SYNC] floor cleared: t='+t.toFixed(3)+' idx='+idx);
       seekFloorTimeRef.current = -1;
     }
 
+    if (idx !== activeIdx) {
+      console.log('[SYNC] setActiveIdx '+activeIdx+'→'+idx+' t='+t.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3));
+    }
     setActiveIdx(idx);
 
     // Word-level karaoke within the active sentence
@@ -669,11 +676,20 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   };
 
   const handleAudioTimeUpdate = () => {
-    if (isSeekingRef.current) return;
+    const t = audioRef.current?.currentTime ?? 0;
+    if (isSeekingRef.current) {
+      console.log('[TU-BLOCKED] t='+t.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3));
+      return;
+    }
+    if (seekFloorTimeRef.current >= 0 || seekTargetRef.current >= 0) {
+      console.log('[TU-ACTIVE] t='+t.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3));
+    }
     syncHighlight();
   };
 
   const handleSeeking = () => {
+    const t = audioRef.current?.currentTime ?? 0;
+    console.log('[SEEKING] t='+t.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3)+' protect='+(Date.now() <= seekProtectUntilRef.current));
     isSeekingRef.current = true;
     // A native player drag (outside the programmatic-seek window) should clear
     // the cluster floor so the highlight follows the drag position freely.
@@ -684,14 +700,18 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setTimeout(() => { isSeekingRef.current = false; }, 1000);
   };
 
-  const handleSeeked = () => { isSeekingRef.current = false; };
+  const handleSeeked = () => {
+    const t = audioRef.current?.currentTime ?? 0;
+    console.log('[SEEKED] t='+t.toFixed(3)+' floor='+seekFloorTimeRef.current.toFixed(3)+' seekTarget='+seekTargetRef.current.toFixed(3));
+    isSeekingRef.current = false;
+  };
 
   const seekToSentence = (i: number) => {
     if (!audioRef.current || i >= sentenceStarts.length) return;
 
+    const audioBeforeSeek = audioRef.current.currentTime;
+
     // Compute cluster end: advance while consecutive gap < 0.7s.
-    // Measuring consecutive gaps (not distance from i) correctly catches
-    // clusters whose total spread exceeds 0.7s but whose individual steps don't.
     let clusterEnd = i;
     while (
       clusterEnd + 1 < sentenceStarts.length &&
@@ -699,24 +719,27 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     ) {
       clusterEnd++;
     }
-    seekFloorTimeRef.current = clusterEnd + 1 < sentenceStarts.length
+    const floor = clusterEnd + 1 < sentenceStarts.length
       ? sentenceStarts[clusterEnd + 1]
       : Infinity;
+    seekFloorTimeRef.current = floor;
 
     seekTargetRef.current       = sentenceStarts[i];
     seekProtectUntilRef.current = Date.now() + 500;
     isSeekingRef.current        = true;
     setActiveIdx(i);
     setActiveWordIdx(0);
+    console.log('[TAP] i='+i+' target='+sentenceStarts[i]?.toFixed(3)+' floor='+floor.toFixed(3)+' audioBefore='+audioBeforeSeek.toFixed(3));
     try {
       audioRef.current.currentTime = sentenceStarts[i];
+      const audioAfterSeek = audioRef.current.currentTime;
+      console.log('[TAP] audioAfterAssign='+audioAfterSeek.toFixed(3)+' (delta='+(audioAfterSeek-sentenceStarts[i]).toFixed(3)+')');
       if (audioRef.current.paused) audioRef.current.play().catch(() => {});
     } catch {
       isSeekingRef.current = false;
       return;
     }
-    // No 300ms timer here — isSeekingRef is cleared by handleSeeked (or the
-    // 1000ms safety net in handleSeeking if seeked never fires on iOS).
+    // No 300ms timer here — isSeekingRef is cleared by handleSeeked.
   };
 
   // Keep the active sentence in view while audio plays (scroll whichever
