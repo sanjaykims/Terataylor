@@ -638,18 +638,25 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     const t = audioRef.current?.currentTime ?? 0;
     if (sentenceStarts.length === 0) return;
 
-    // Guard 0 — pre-confirmation stale: after a seek, block any timeupdate
-    // where t is more than 2s from the seek target until we see a real t
-    // close to the target. This catches stale pre-seek timeupdates on
-    // Android/iOS (old currentTime while audio is still buffering), including
-    // backward seeks of only 5-30s where the old 60s threshold was too loose.
+    // Guard 0 — pre-confirmation stale: block timeupdates where t is far from
+    // the seek target until we see a real post-seek t close to it.
+    //
+    // Window = min(90% of the gap to the floor, 1.0s).
+    // This ensures a stale t that passes Guard 0 is always BELOW the floor
+    // (since stale_t ≤ target + window < target + gap = floor), so Guard 2
+    // will still hold it.  Minimum non-cluster gap in this dataset is 1.107s,
+    // so window ≤ min(0.996, 1.0) = 0.996s — always safe.
     if (seekTargetRef.current >= 0 && !seekConfirmedRef.current) {
-      if (Math.abs(t - seekTargetRef.current) > 2.0) {
-        dlog('[SYNC] G0 stale: t='+t.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
+      const gap = seekFloorTimeRef.current >= 0
+        ? seekFloorTimeRef.current - seekTargetRef.current
+        : Infinity;
+      const window = Math.min(gap * 0.9, 1.0);
+      if (Math.abs(t - seekTargetRef.current) > window) {
+        dlog('[SYNC] G0 stale: t='+t.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3)+' win='+window.toFixed(3));
         return;
       }
       seekConfirmedRef.current = true;
-      dlog('[SYNC] G0 confirmed: t='+t.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
+      dlog('[SYNC] G0 confirmed: t='+t.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3)+' win='+window.toFixed(3));
     }
 
     let idx = 0;
