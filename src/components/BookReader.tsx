@@ -265,10 +265,12 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const [uploadProgress,setUploadProgress]= useState({ done: 0, total: 0 });
   // isSeekingRef: gates ALL timeupdate events while the browser is mid-seek
   // (on mobile, timeupdate fires with stale currentTime values during seeking).
-  // seekFloorRef: after seek settles, prevents idx from jumping back by 1 sentence
-  // if the audio frame boundary landed a few ms before sentenceStarts[i].
+  // seekFloorTimeRef: after a programmatic seek to sentence i, holds sentenceStarts[i+1].
+  // syncHighlight returns early while t < seekFloorTimeRef so the highlight stays on i
+  // until audio genuinely reaches the next sentence — not just 800ms of wall-clock time.
+  // Reset to -1 (no floor) when audio advances or on native drag/end.
   const isSeekingRef        = useRef(false);
-  const seekFloorRef        = useRef(-1);
+  const seekFloorTimeRef    = useRef(-1);  // next sentence start time; -1 = no floor
   // Wall-clock time until which any seeking event is treated as programmatic.
   // Covers both the currentTime seek and the extra seeking that play() fires on mobile.
   const seekProtectUntilRef = useRef(0);
@@ -335,7 +337,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     prevLiveIdxRef.current      = -1;
     pendingCorrRef.current      = 0;
     isSeekingRef.current        = false;
-    seekFloorRef.current        = -1;
+    seekFloorTimeRef.current    = -1;
     seekProtectUntilRef.current = 0;
     const [en, ko, audio, times, nextAudio] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
@@ -645,14 +647,14 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       if (t >= sentenceStarts[i]) idx = i; else break;
     }
 
-    // After a programmatic seek, currentTime can briefly report a value BEFORE
-    // the target sentence (mobile backward-blip). If that happens, skip this
-    // syncHighlight call entirely — seekToSentence already called setActiveIdx
-    // with the correct sentence, so the highlight is already right.
-    if (seekFloorRef.current >= 0) {
-      const floorTime = sentenceStarts[seekFloorRef.current];
-      if (t < floorTime) return; // backward blip — wait for audio to settle
-      if (idx > seekFloorRef.current) seekFloorRef.current = -1;
+    // After a programmatic seek to sentence i, seekFloorTimeRef holds sentenceStarts[i+1].
+    // Return early while audio hasn't yet reached that boundary so the highlight stays
+    // locked on sentence i regardless of what the binary search says. This handles both
+    // backward blips (t < sentenceStarts[i]) AND short sentences where idx advances
+    // past i before the 800ms wall-clock window expires.
+    if (seekFloorTimeRef.current >= 0) {
+      if (t < seekFloorTimeRef.current) return;
+      seekFloorTimeRef.current = -1; // audio reached next sentence — unlock
     }
 
     setActiveIdx(idx);
@@ -668,7 +670,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     // so writing back would corrupt good stored timings.
     const prev = prevLiveIdxRef.current;
     if (
-      seekFloorRef.current < 0 &&
+      seekFloorTimeRef.current < 0 &&
       prev >= 0 &&
       idx === prev + 1 &&
       liveTimingsRef.current[idx] === undefined
@@ -704,7 +706,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     // Only clear the floor for genuine native-player drags (outside the protection window).
     // Inside the window, this seeking might be from play() firing on mobile — keep the floor.
     if (Date.now() > seekProtectUntilRef.current) {
-      seekFloorRef.current = -1;
+      seekFloorTimeRef.current = -1;
     }
   };
 
@@ -721,7 +723,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const seekToSentence = (i: number) => {
     if (!audioRef.current || i >= sentenceStarts.length) return;
     seekProtectUntilRef.current = Date.now() + 800;
-    seekFloorRef.current = i;
+    // Lock highlight on sentence i until audio reaches the next sentence's start time.
+    // Using audio position (not wall-clock) means even very short sentences stay correct.
+    seekFloorTimeRef.current = i + 1 < sentenceStarts.length ? sentenceStarts[i + 1] : Infinity;
     prevLiveIdxRef.current = i;
     setActiveIdx(i);
     setActiveWordIdx(0);
@@ -987,7 +991,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
                 onTimeUpdate={handleAudioTimeUpdate}
                 onSeeking={handleSeeking}
                 onSeeked={handleSeeked}
-                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); isSeekingRef.current = false; seekFloorRef.current = -1; }}
+                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); isSeekingRef.current = false; seekFloorTimeRef.current = -1; }}
               />
 
               {/* Real speech alignment */}
