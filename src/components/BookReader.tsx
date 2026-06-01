@@ -267,8 +267,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   // (on mobile, timeupdate fires with stale currentTime values during seeking).
   // seekFloorRef: after seek settles, prevents idx from jumping back by 1 sentence
   // if the audio frame boundary landed a few ms before sentenceStarts[i].
-  const isSeekingRef  = useRef(false);
-  const seekFloorRef  = useRef(-1);
+  const isSeekingRef           = useRef(false);
+  const seekFloorRef           = useRef(-1);
+  const isProgrammaticSeekRef  = useRef(false);
   // Adaptive timing correction: records ACTUAL sentence-start times observed during
   // natural (non-seek) playback. Whisper alignment has ±1-2s accumulated error per
   // sentence; these live corrections replace stored values once 10+ are collected and
@@ -621,8 +622,12 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     // If audio landed a few ms before sentenceStarts[i] due to MP3 frame alignment,
     // prevent the highlight from jumping backward by one sentence.
     if (seekFloorRef.current >= 0) {
-      if (idx < seekFloorRef.current) idx = seekFloorRef.current;
-      else seekFloorRef.current = -1;
+      if (idx < seekFloorRef.current) {
+        idx = seekFloorRef.current;
+      } else if (idx > seekFloorRef.current) {
+        seekFloorRef.current = -1; // clear only when audio has moved PAST target
+      }
+      // idx === floor: keep floor active until audio naturally advances
     }
 
     setActiveIdx(idx);
@@ -665,7 +670,14 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     syncHighlight();
   };
 
-  const handleSeeking = () => { isSeekingRef.current = true; };
+  const handleSeeking = () => {
+    isSeekingRef.current = true;
+    if (!isProgrammaticSeekRef.current) {
+      // Native player drag: clear the programmatic floor so it doesn't interfere
+      seekFloorRef.current = -1;
+    }
+    isProgrammaticSeekRef.current = false;
+  };
 
   // seeked fires once currentTime has fully settled — safe to sync highlight now.
   const handleSeeked = () => {
@@ -679,6 +691,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     // word-by-word, so there is no need to go 0.2 s early (that caused 200 ms of
     // the previous sentence to play while highlighting the current one).
     // seekFloorRef still protects against the tiny MP3 frame-boundary undershoot.
+    isProgrammaticSeekRef.current = true; // must be set before currentTime triggers seeking
     audioRef.current.currentTime = sentenceStarts[i];
     seekFloorRef.current = i;
     prevLiveIdxRef.current = i;
