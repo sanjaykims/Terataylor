@@ -266,6 +266,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const isSeekingRef        = useRef(false);
   const seekFloorTimeRef    = useRef(-1); // audio-position floor past cluster end; -1 = none
   const seekProtectUntilRef = useRef(0);  // wall-clock guard: programmatic seek window
+  const seekTargetRef       = useRef(-1); // audio position we sought to; stale-read guard
   const [nextChapHasAudio, setNextChapHasAudio] = useState(false);
   const [merging,       setMerging]       = useState(false);
   const [mergeMsg,      setMergeMsg]      = useState('');
@@ -321,6 +322,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     isSeekingRef.current        = false;
     seekFloorTimeRef.current    = -1;
     seekProtectUntilRef.current = 0;
+    seekTargetRef.current       = -1;
     const [en, ko, audio, times, nextAudio] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
@@ -639,15 +641,19 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     }
 
     // Guard 2 — cluster floor: seekToSentence(i) sets seekFloorTimeRef to the
-    // start of the first sentence AFTER the tight cluster containing i. Any
-    // consecutive sentences within 0.7s of sentenceStarts[i] are "cluster"
-    // (interpolated/synthetic timestamps — no narrator speaks < 0.7s sentences
-    // in practice). We hold the highlight at i until audio genuinely exits the
-    // cluster, preventing the ~300ms post-seek timeupdate from jumping idx into
-    // the middle of the cluster.
+    // start of the first sentence AFTER the tight cluster containing i.
+    // We hold the highlight at i until audio genuinely exits the cluster.
+    //
+    // Stale-position sub-guard: on iOS Safari, timeupdate can fire with the
+    // OLD currentTime while audio is still buffering to the new seek position.
+    // If the user was at t=800s and tapped sentence at t=100s, the old t=800
+    // exceeds the floor (say 105s) and would clear it prematurely.
+    // Block any t that is more than 60s ahead of the seek target — no real
+    // sentence is that long, so anything beyond 60s is a stale pre-seek read.
     if (seekFloorTimeRef.current >= 0) {
-      if (t < seekFloorTimeRef.current) return; // still inside cluster window
-      seekFloorTimeRef.current = -1;            // audio exited cluster — unlock
+      if (t < seekFloorTimeRef.current) return;
+      if (seekTargetRef.current >= 0 && t - seekTargetRef.current > 60) return;
+      seekFloorTimeRef.current = -1;
     }
 
     setActiveIdx(idx);
@@ -697,8 +703,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       ? sentenceStarts[clusterEnd + 1]
       : Infinity;
 
-    seekProtectUntilRef.current = Date.now() + 500; // window to detect native drags
-    isSeekingRef.current = true;
+    seekTargetRef.current       = sentenceStarts[i];
+    seekProtectUntilRef.current = Date.now() + 500;
+    isSeekingRef.current        = true;
     setActiveIdx(i);
     setActiveWordIdx(0);
     try {
@@ -708,7 +715,8 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
       isSeekingRef.current = false;
       return;
     }
-    setTimeout(() => { isSeekingRef.current = false; }, 300);
+    // No 300ms timer here — isSeekingRef is cleared by handleSeeked (or the
+    // 1000ms safety net in handleSeeking if seeked never fires on iOS).
   };
 
   // Keep the active sentence in view while audio plays (scroll whichever
