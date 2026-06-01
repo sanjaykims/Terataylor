@@ -263,8 +263,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const [analyzeMsg,    setAnalyzeMsg]    = useState('');
   const [audioUploadMsg,setAudioUploadMsg]= useState('');
   const [uploadProgress,setUploadProgress]= useState({ done: 0, total: 0 });
-  const isSeekingRef  = useRef(false);
-  const textTrackRef  = useRef<TextTrack | null>(null);
+  const isSeekingRef        = useRef(false);
+  const seekFloorTimeRef    = useRef(-1); // audio-position floor past cluster end; -1 = none
+  const seekProtectUntilRef = useRef(0);  // wall-clock guard: programmatic seek window
   const [nextChapHasAudio, setNextChapHasAudio] = useState(false);
   const [merging,       setMerging]       = useState(false);
   const [mergeMsg,      setMergeMsg]      = useState('');
@@ -317,7 +318,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     setAnalyzeMsg('');
     setMergeMsg('');
     setNextChapHasAudio(false);
-    isSeekingRef.current = false;
+    isSeekingRef.current        = false;
+    seekFloorTimeRef.current    = -1;
+    seekProtectUntilRef.current = 0;
     const [en, ko, audio, times, nextAudio] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
@@ -617,74 +620,95 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     return strict;
   }, [timings, enText, audioDuration]);
 
-  // ── TextTrack-based sentence sync ────────────────────────────────────────
-  // Register one VTTCue per sentence on a programmatic TextTrack. The browser
-  // fires cuechange at the exact moment each cue becomes active — no polling,
-  // no floor logic, no race conditions. Works correctly after both programmatic
-  // seeks (sentence tap) and native player drags.
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !audioUrl || sentenceStarts.length === 0) return;
-
-    // Disable and drain the previous track so old cues don't interfere.
-    if (textTrackRef.current) {
-      const prev = textTrackRef.current;
-      prev.mode = 'disabled';
-      if (prev.cues) while (prev.cues.length > 0) prev.removeCue(prev.cues[0]);
-    }
-
-    const track = audio.addTextTrack('metadata', 'sync', 'en');
-    track.mode = 'hidden'; // 'hidden' lets cuechange fire without rendering VTT text
-    textTrackRef.current = track;
-
-    for (let i = 0; i < sentenceStarts.length; i++) {
-      const start = sentenceStarts[i];
-      const end   = i + 1 < sentenceStarts.length
-        ? sentenceStarts[i + 1]
-        : Math.max(start + 0.5, audioDuration || start + 10);
-      const cue = new VTTCue(start, end, String(i));
-      cue.id = String(i);
-      track.addCue(cue);
-    }
-
-    const handleCueChange = () => {
-      const cues = track.activeCues;
-      if (!cues || cues.length === 0) return;
-      const idx = parseInt((cues[0] as VTTCue).id);
-      if (!isNaN(idx) && idx >= 0) setActiveIdx(idx);
-    };
-
-    track.addEventListener('cuechange', handleCueChange);
-    return () => track.removeEventListener('cuechange', handleCueChange);
-  }, [sentenceStarts, audioUrl, audioDuration]);
-
-  // Word-level karaoke: advance the highlighted word within the active sentence.
-  const handleAudioTimeUpdate = () => {
-    if (isSeekingRef.current || activeIdx < 0) return;
+  // ── Sentence + word sync via timeupdate ──────────────────────────────────
+  const syncHighlight = () => {
     const t = audioRef.current?.currentTime ?? 0;
-    const sentStart = sentenceStarts[activeIdx];
-    const sentEnd   = activeIdx + 1 < sentenceStarts.length
-      ? sentenceStarts[activeIdx + 1]
+    if (sentenceStarts.length === 0) return;
+
+    let idx = 0;
+    for (let i = 0; i < sentenceStarts.length; i++) {
+      if (t >= sentenceStarts[i]) idx = i; else break;
+    }
+
+    // Guard 1 — backward-blip: after seekToSentence(i) the browser snaps
+    // currentTime ~26ms backward to the nearest MP3 frame boundary, making
+    // idx = i-1 for one timeupdate cycle. Ignore that single reverse step
+    // while audio is still within 150ms of the active sentence start.
+    if (idx === activeIdx - 1 && activeIdx > 0) {
+      if (t >= sentenceStarts[activeIdx] - 0.15) return;
+    }
+
+    // Guard 2 — cluster floor: seekToSentence(i) sets seekFloorTimeRef to the
+    // start of the first sentence AFTER the tight cluster containing i. Any
+    // consecutive sentences within 0.7s of sentenceStarts[i] are "cluster"
+    // (interpolated/synthetic timestamps — no narrator speaks < 0.7s sentences
+    // in practice). We hold the highlight at i until audio genuinely exits the
+    // cluster, preventing the ~300ms post-seek timeupdate from jumping idx into
+    // the middle of the cluster.
+    if (seekFloorTimeRef.current >= 0) {
+      if (t < seekFloorTimeRef.current) return; // still inside cluster window
+      seekFloorTimeRef.current = -1;            // audio exited cluster — unlock
+    }
+
+    setActiveIdx(idx);
+
+    // Word-level karaoke within the active sentence
+    const sentStart = sentenceStarts[idx];
+    const sentEnd   = idx + 1 < sentenceStarts.length
+      ? sentenceStarts[idx + 1]
       : (audioDuration || t + 5);
-    const words    = (enRows[activeIdx] ?? '').split(/\s+/).filter(Boolean);
+    const words    = (enRows[idx] ?? '').split(/\s+/).filter(Boolean);
     const progress = Math.max(0, Math.min(1, (t - sentStart) / Math.max(0.1, sentEnd - sentStart)));
     setActiveWordIdx(Math.min(Math.floor(progress * words.length), words.length - 1));
   };
 
-  // Seek audio to sentence i. setActiveIdx gives immediate visual feedback;
-  // cuechange from the TextTrack confirms (or corrects) once the seek settles.
+  const handleAudioTimeUpdate = () => {
+    if (isSeekingRef.current) return;
+    syncHighlight();
+  };
+
+  const handleSeeking = () => {
+    isSeekingRef.current = true;
+    // A native player drag (outside the programmatic-seek window) should clear
+    // the cluster floor so the highlight follows the drag position freely.
+    if (Date.now() > seekProtectUntilRef.current) {
+      seekFloorTimeRef.current = -1;
+    }
+    // Safety net: unblock timeupdate if seeked never fires (iOS/mobile stall).
+    setTimeout(() => { isSeekingRef.current = false; }, 1000);
+  };
+
+  const handleSeeked = () => { isSeekingRef.current = false; };
+
   const seekToSentence = (i: number) => {
     if (!audioRef.current || i >= sentenceStarts.length) return;
+
+    // Compute cluster end: advance while next sentence is within 0.7s of
+    // sentenceStarts[i]. Real sentences take > 1s to speak; anything shorter
+    // is a synthetic interpolated timestamp that shouldn't drive seek logic.
+    let clusterEnd = i;
+    while (
+      clusterEnd + 1 < sentenceStarts.length &&
+      sentenceStarts[clusterEnd + 1] - sentenceStarts[i] < 0.7
+    ) {
+      clusterEnd++;
+    }
+    seekFloorTimeRef.current = clusterEnd + 1 < sentenceStarts.length
+      ? sentenceStarts[clusterEnd + 1]
+      : Infinity;
+
+    seekProtectUntilRef.current = Date.now() + 500; // window to detect native drags
+    isSeekingRef.current = true;
     setActiveIdx(i);
     setActiveWordIdx(0);
     try {
-      // Seek 50ms past the cue boundary so MP3 frame quantization (~26ms backward
-      // snap) still lands inside cue i rather than the tail of cue i-1.
-      audioRef.current.currentTime = sentenceStarts[i] + 0.05;
+      audioRef.current.currentTime = sentenceStarts[i];
       if (audioRef.current.paused) audioRef.current.play().catch(() => {});
     } catch {
-      // ignore — some mobile browsers throw if the element isn't ready
+      isSeekingRef.current = false;
+      return;
     }
+    setTimeout(() => { isSeekingRef.current = false; }, 300);
   };
 
   // Keep the active sentence in view while audio plays (scroll whichever
@@ -932,9 +956,9 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
                 className="w-full rounded-xl"
                 onLoadedMetadata={e => setAudioDuration(e.currentTarget.duration || 0)}
                 onTimeUpdate={handleAudioTimeUpdate}
-                onSeeking={() => { isSeekingRef.current = true; }}
-                onSeeked={() => { isSeekingRef.current = false; }}
-                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); isSeekingRef.current = false; }}
+                onSeeking={handleSeeking}
+                onSeeked={handleSeeked}
+                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); isSeekingRef.current = false; seekFloorTimeRef.current = -1; }}
               />
 
               {/* Real speech alignment */}
