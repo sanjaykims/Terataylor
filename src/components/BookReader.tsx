@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { BOOKS, SCHEDULE, type BookId } from '../data/syllabus';
@@ -589,19 +589,22 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
 
   // Start time (seconds) of each sentence. Prefer REAL per-sentence times from
   // speech alignment; fall back to a word-count estimate until analysis is run.
-  const sentenceStarts = (() => {
+  // Memoized on the underlying state values (not derived arrays) so the array
+  // reference stays stable across renders that don't change timing data.
+  const sentenceStarts = useMemo(() => {
+    const rows = enText ? splitToSentences(enText) : [];
     let raw: number[];
     if (timings && timings.length > 0) {
-      if (timings.length === enRows.length) {
+      if (timings.length === rows.length) {
         raw = timings;
-      } else if (Math.abs(timings.length - enRows.length) <= 5) {
+      } else if (Math.abs(timings.length - rows.length) <= 5) {
         // Small mismatch: pad or trim rather than falling back to inaccurate estimate
-        if (timings.length > enRows.length) {
-          raw = timings.slice(0, enRows.length);
+        if (timings.length > rows.length) {
+          raw = timings.slice(0, rows.length);
         } else {
           raw = [...timings];
           const avgGap = timings.length > 1 ? (timings[timings.length - 1] - timings[0]) / (timings.length - 1) : 3;
-          for (let k = timings.length; k < enRows.length; k++) {
+          for (let k = timings.length; k < rows.length; k++) {
             raw.push(raw[raw.length - 1] + avgGap);
           }
         }
@@ -613,27 +616,22 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     }
 
     if (raw.length === 0) {
-      if (!audioDuration || enRows.length === 0) return [];
-      const weights = enRows.map(s => Math.max(1, s.split(/\s+/).length));
+      if (!audioDuration || rows.length === 0) return [];
+      const weights = rows.map(s => Math.max(1, s.split(/\s+/).length));
       const total = weights.reduce((a, b) => a + b, 0);
       raw = [];
       let acc = 0;
       for (const w of weights) { raw.push((acc / total) * audioDuration); acc += w; }
     }
 
-    // Enforce strict monotonicity. When alignment Phase 3 moves a sentence
-    // backward, enforceMonotone clamps sibling sentences to the same value,
-    // producing clusters like [42, 42, 42, 50]. seekToSentence(i) computes
-    // currentTime = 42, but the loop finds idx = last-42-in-cluster (e.g. idx=2),
-    // immediately clears the seek floor, and shows the wrong sentence.
-    // A 30 ms minimum gap exceeds one MP3 frame (~26 ms) so the browser's frame-snap
-    // after a seek never crosses the boundary and triggers the wrong sentence index.
+    // Enforce strict monotonicity. A 30 ms minimum gap exceeds one MP3 frame (~26 ms)
+    // so the browser's frame-snap after a seek never crosses the boundary.
     const strict = raw === timings ? [...raw] : raw; // don't mutate the stored array
     for (let i = 1; i < strict.length; i++) {
       if (strict[i] <= strict[i - 1]) strict[i] = strict[i - 1] + 0.03;
     }
     return strict;
-  })();
+  }, [timings, enText, audioDuration]);
 
   const syncHighlight = () => {
     const t = audioRef.current?.currentTime ?? 0;
@@ -703,9 +701,13 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     }
   };
 
-  // seeked fires once currentTime has fully settled — safe to sync highlight now.
   const handleSeeked = () => {
     isSeekingRef.current = false;
+    // If we're still inside the programmatic-seek window, seekToSentence already called
+    // setActiveIdx with the correct sentence. Running syncHighlight here would compute idx
+    // from the freshly-settled currentTime and overwrite that correct value — skip it.
+    // The next timeupdate (~250 ms later) will call syncHighlight once the floor is active.
+    if (Date.now() <= seekProtectUntilRef.current) return;
     syncHighlight();
   };
 

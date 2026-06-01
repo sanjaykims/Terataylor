@@ -319,7 +319,12 @@ export function alignFromWordTimestamps(
         if (!found) break;
       }
 
-      if (matched >= 2) { starts[si] = audioFlat[ai].time; break; }
+      // Only snap forward — never let Phase 3 move a sentence before its predecessor.
+      // A backward snap produces a timestamp inside the previous sentence's audio, which
+      // enforceMonotone then "fixes" with a synthetic prev+0.03 value that is also wrong.
+      if (matched >= 2 && (si === 0 || audioFlat[ai].time > starts[si - 1])) {
+        starts[si] = audioFlat[ai].time; break;
+      }
     }
   }
 
@@ -425,7 +430,7 @@ export async function alignChapterAudio(
       for (let k = 1; k < fw.length && ai + k < audioFlat.length; k++) {
         if (audioFlat[ai + k].norm === fw[k]) matched++;
       }
-      if (matched >= Math.min(2, fw.length)) {
+      if (matched >= Math.min(2, fw.length) && (si === 0 || audioFlat[ai].time > starts[si - 1])) {
         starts[si] = audioFlat[ai].time;
         break;
       }
