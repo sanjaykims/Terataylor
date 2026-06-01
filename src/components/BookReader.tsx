@@ -267,6 +267,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
   const seekFloorTimeRef    = useRef(-1); // audio-position floor past cluster end; -1 = none
   const seekProtectUntilRef = useRef(0);  // wall-clock guard: programmatic seek window
   const seekTargetRef       = useRef(-1); // audio position we sought to; stale-read guard
+  const seekConfirmedRef    = useRef(false); // true once a TU near the target has been seen
   const [debugLogs, setDebugLogs] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
   const debugLogsRef = useRef<string[]>([]);
@@ -332,6 +333,7 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     seekFloorTimeRef.current    = -1;
     seekProtectUntilRef.current = 0;
     seekTargetRef.current       = -1;
+    seekConfirmedRef.current    = false;
     const [en, ko, audio, times, nextAudio] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
@@ -636,37 +638,40 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     const t = audioRef.current?.currentTime ?? 0;
     if (sentenceStarts.length === 0) return;
 
+    // Guard 0 — pre-confirmation stale: after a seek, block any timeupdate
+    // where t is more than 2s from the seek target until we see a real t
+    // close to the target. This catches stale pre-seek timeupdates on
+    // Android/iOS (old currentTime while audio is still buffering), including
+    // backward seeks of only 5-30s where the old 60s threshold was too loose.
+    if (seekTargetRef.current >= 0 && !seekConfirmedRef.current) {
+      if (Math.abs(t - seekTargetRef.current) > 2.0) {
+        dlog('[SYNC] G0 stale: t='+t.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
+        return;
+      }
+      seekConfirmedRef.current = true;
+      dlog('[SYNC] G0 confirmed: t='+t.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
+    }
+
     let idx = 0;
     for (let i = 0; i < sentenceStarts.length; i++) {
       if (t >= sentenceStarts[i]) idx = i; else break;
     }
 
-    // Guard 1 — backward-blip: after seekToSentence(i) the browser snaps
-    // currentTime ~26ms backward to the nearest MP3 frame boundary, making
-    // idx = i-1 for one timeupdate cycle. Ignore that single reverse step
-    // while audio is still within 150ms of the active sentence start.
+    // Guard 1 — backward-blip: MP3 frame snap lands ~26ms before target,
+    // making idx = i-1 for one cycle. Ignore while still within 150ms.
     if (idx === activeIdx - 1 && activeIdx > 0) {
       if (t >= sentenceStarts[activeIdx] - 0.15) return;
     }
 
-    // Guard 2 — cluster floor: seekToSentence(i) sets seekFloorTimeRef to the
-    // start of the first sentence AFTER the tight cluster containing i.
-    // We hold the highlight at i until audio genuinely exits the cluster.
-    //
-    // Stale-position sub-guard: on iOS Safari, timeupdate can fire with the
-    // OLD currentTime while audio is still buffering to the new seek position.
-    // If the user was at t=800s and tapped sentence at t=100s, the old t=800
-    // exceeds the floor (say 105s) and would clear it prematurely.
-    // Block any t that is more than 60s ahead of the seek target — no real
-    // sentence is that long, so anything beyond 60s is a stale pre-seek read.
+    // Guard 2 — cluster floor: hold highlight at tapped sentence until audio
+    // genuinely exits the tight cluster. Clear seekTargetRef and confirmed
+    // flag once settled so subsequent natural playback is unguarded.
     if (seekFloorTimeRef.current >= 0) {
       if (t < seekFloorTimeRef.current) return;
-      if (seekTargetRef.current >= 0 && t - seekTargetRef.current > 60) {
-        dlog('[SYNC] stale blocked: t='+t.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3));
-        return;
-      }
-      dlog('[SYNC] floor cleared: t='+t.toFixed(3)+' idx='+idx);
+      dlog('[SYNC] G2 floor cleared: t='+t.toFixed(3)+' idx='+idx);
       seekFloorTimeRef.current = -1;
+      seekTargetRef.current    = -1;
+      seekConfirmedRef.current = false;
     }
 
     if (idx !== activeIdx) {
@@ -731,8 +736,12 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     seekFloorTimeRef.current = floor;
 
     seekTargetRef.current       = sentenceStarts[i];
+    seekConfirmedRef.current    = false;
     seekProtectUntilRef.current = Date.now() + 500;
     isSeekingRef.current        = true;
+    // Clear the debug log so the TAP line is always visible at the top
+    debugLogsRef.current = [];
+    setDebugLogs([]);
     setActiveIdx(i);
     setActiveWordIdx(0);
     dlog('[TAP] i='+i+' tgt='+sentenceStarts[i]?.toFixed(3)+' fl='+floor.toFixed(3)+' before='+audioBeforeSeek.toFixed(3));
