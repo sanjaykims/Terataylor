@@ -9,7 +9,9 @@ import {
   saveChapterCount, loadChapterCount,
   saveChapterAudio, loadChapterAudio, deleteChapterAudio,
   saveChapterTimings, loadChapterTimings, deleteChapterTimings,
+  loadChapterVocab,
 } from '../lib/chapterStorage';
+import type { VocabItem } from '../lib/types';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -227,7 +229,7 @@ async function translateSentences(
 // ── Component ─────────────────────────────────────────────────────────────────
 type InitState = 'loading' | 'no-book' | 'has-book';
 
-export default function BookReader({ bookId }: { bookId: BookId }) {
+export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: BookId; onLessonVocabLoad?: (vocab: VocabItem[]) => void }) {
   const bk = BOOKS[bookId];
 
   const [initState,       setInitState]       = useState<InitState>('loading');
@@ -334,18 +336,20 @@ export default function BookReader({ bookId }: { bookId: BookId }) {
     seekProtectUntilRef.current = 0;
     seekTargetRef.current       = -1;
     seekConfirmedRef.current    = false;
-    const [en, ko, audio, times, nextAudio] = await Promise.all([
+    const [en, ko, audio, times, nextAudio, vocab] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
       loadChapterAudio(bid, chapter).catch(() => null),
       loadChapterTimings(bid, chapter).catch(() => null),
       loadChapterAudio(bid, chapter + 1).catch(() => null),
+      loadChapterVocab(bid, chapter).catch(() => null),
     ]);
     setEnText(en);
     setKoText(ko);
     setAudioUrl(audio);
     setTimings(times);
     setNextChapHasAudio(!!nextAudio);
+    if (vocab?.length && onLessonVocabLoad) onLessonVocabLoad(vocab as VocabItem[]);
     setChapterLoading(false);
   };
 

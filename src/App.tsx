@@ -355,7 +355,7 @@ export default function App() {
               ))}
             </div>
             {v1Tab === 'writing'    && <LiteraryAnalysisWriter book={v1Book} />}
-            {v1Tab === 'reading'    && <BookReader key={v1Book} bookId={v1Book} />}
+            {v1Tab === 'reading'    && <BookReader key={v1Book} bookId={v1Book} onLessonVocabLoad={setV1Vocab} />}
             {v1Tab === 'vocabulary' && <VocabularyPanel text={v1Text} vocab={v1Vocab} onStudiedChange={setV1StudiedWords} onVocabUpdate={setV1Vocab} />}
             {v1Tab === 'games'      && <GamesPanel text={v1Text} vocab={v1Vocab} selectedWords={v1StudiedWords} />}
           </>

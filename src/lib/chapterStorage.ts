@@ -130,6 +130,17 @@ export async function deleteChapterTimings(bookId: BookId, chapter: number): Pro
   await csDel(`chapter_${bookId}_${chapter}_times`).catch(() => {});
 }
 
+// Per-lesson curated vocabulary (set by teacher / pre-loaded per chapter).
+export async function saveChapterVocab(bookId: BookId, chapter: number, vocab: unknown[]): Promise<void> {
+  await csSet(`chapter_${bookId}_${chapter}_vocab`, JSON.stringify(vocab));
+}
+
+export async function loadChapterVocab(bookId: BookId, chapter: number): Promise<unknown[] | null> {
+  const raw = await csGet(`chapter_${bookId}_${chapter}_vocab`);
+  if (!raw) return null;
+  try { const a = JSON.parse(raw); return Array.isArray(a) ? a : null; } catch { return null; }
+}
+
 
 export async function migrateChaptersFromLocalStorage(): Promise<void> {
   const entries: { key: string; value: string }[] = [];
