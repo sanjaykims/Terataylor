@@ -1,23 +1,17 @@
-// Audio-text alignment — v4 two-pass algorithm
+// Audio-text alignment — v5 global alignment
 //
-// Pass 1 (coarse): Whisper word-level timestamps + anchor-word matching
-//   - Word-level timestamps are produced by Whisper's attention mechanism
-//     and are individually accurate (no interpolation needed).
-//   - Falls back to segment-level timestamps with linear interpolation when
-//     the transformers.js version does not support return_timestamps:'word'.
-//   - Words ≥ 5 chars are used as anchors. A dual search window (greedy
-//     position + fraction-based expected position) prevents the scan from
-//     getting permanently stuck behind the real audio position.
-//   - Piecewise linear interpolation between matched anchors fills in all
-//     sentence positions.
+// 1. Transcribe the chapter to word-level timestamps (Deepgram in production,
+//    Whisper/transformers.js as an offline fallback). Each word carries an
+//    individually accurate start time.
+// 2. Globally align the audio word stream to the book's text word stream with a
+//    banded Needleman–Wunsch (see `alignByNW`). Because the match is optimised
+//    over the whole chapter, repeated common words can never pull a sentence to
+//    the wrong occurrence — the failure mode of greedy/anchor matching.
+// 3. Each sentence's start is the audio time of its first matched word; any
+//    word the transcript missed is filled by interpolation between neighbours.
 //
-// Pass 2 (fine): sentence-start word matching near the interpolated time
-//   - For each sentence, search a ±2 s window around the Pass-1 estimate
-//     for the sentence's first words. If a 2-of-3 word run is found, use
-//     its timestamp as the exact sentence start.
-//
-// Result: typically within half a sentence of the correct position even
-// when Whisper misses or mispronounces several words.
+// Result: sentence starts land within a fraction of a second of the real
+// speech, and the algorithm degrades gracefully on imperfect transcripts.
 
 export type AlignPhase = 'loading-model' | 'decoding' | 'transcribing' | 'aligning' | 'done';
 export interface AlignProgress { phase: AlignPhase; pct?: number; }
@@ -138,51 +132,115 @@ async function buildAudioWordList(
   return result;
 }
 
-// ── Utilities ─────────────────────────────────────────────────────────────────
+// ── Banded Needleman–Wunsch global alignment ──────────────────────────────────
+// Aligns the audio word stream (from ASR, with per-word start times) to the
+// flat text word stream, then reads each sentence's start from the audio time
+// of its first matched word. Because the match is optimised globally, repeated
+// common words ("and", "he", "the") can never pull a sentence to the wrong
+// occurrence — the failure mode that derails greedy/anchor-and-interpolate
+// matching. The diagonal band keeps memory and time linear in chapter length,
+// so even a 60-minute chapter aligns in well under a second on a phone.
+//
+// aNorm/aTime: normalised audio words and their start times (same length).
+// Returns one start time (seconds) per sentence, strictly increasing.
+function alignByNW(aNorm: string[], aTime: number[], sentences: string[]): number[] {
+  const nSent = sentences.length;
 
-function dedupeMonotone(pts: { pos: number; time: number }[]) {
-  const out: typeof pts = [];
-  for (const p of pts) {
-    if (!out.length || p.pos > out[out.length - 1].pos) out.push(p);
+  // Flatten text into normalised words, remembering each sentence's first index.
+  const T: string[] = [];
+  const firstWordIdx: number[] = [];
+  for (let si = 0; si < nSent; si++) {
+    firstWordIdx.push(T.length);
+    for (const w of sentences[si].split(/\s+/)) {
+      const nw = normWord(w);
+      if (nw) T.push(nw);
+    }
   }
-  return out;
-}
+  const n = aNorm.length, m = T.length;
+  if (n === 0 || m === 0) return new Array(nSent).fill(0);
 
-function lerp(pts: { pos: number; time: number }[], x: number): number {
-  if (!pts.length) return 0;
-  if (x <= pts[0].pos) return pts[0].time;
-  if (x >= pts[pts.length - 1].pos) return pts[pts.length - 1].time;
-  let lo = 0, hi = pts.length - 1;
-  while (lo + 1 < hi) {
-    const mid = (lo + hi) >> 1;
-    if (pts[mid].pos <= x) lo = mid; else hi = mid;
+  const MATCH = 2, MIS = -2, GAP = -1, NEG = -1e9;
+  const ratio = m / n;
+  // Band half-width: wide enough to absorb the length difference plus local
+  // insertions/deletions (ASR errors, narrator deviations) with generous slack.
+  const W = Math.min(m, Math.max(250, Math.abs(n - m) + 200));
+  const span = 2 * W + 1;
+  const center = (i: number) => Math.round(i * ratio);
+  const dp = new Float64Array((n + 1) * span); dp.fill(NEG);
+  const tb = new Int8Array((n + 1) * span); // 0=diag, 1=gap-in-text, 2=gap-in-audio
+  const idxOf = (i: number, j: number) => {
+    const bj = j - (center(i) - W);
+    return (bj < 0 || bj >= span) ? -1 : i * span + bj;
+  };
+
+  // Initialise first audio row (all-gap prefix of text).
+  { const c0 = center(0);
+    for (let j = Math.max(0, c0 - W); j <= Math.min(m, c0 + W); j++) {
+      const id = idxOf(0, j); if (id >= 0) { dp[id] = j * GAP; tb[id] = 2; }
+    } }
+
+  for (let i = 1; i <= n; i++) {
+    const ci = center(i), jlo = Math.max(0, ci - W), jhi = Math.min(m, ci + W);
+    const ai = aNorm[i - 1];
+    for (let j = jlo; j <= jhi; j++) {
+      const cur = idxOf(i, j); if (cur < 0) continue;
+      if (j === 0) { dp[cur] = i * GAP; tb[cur] = 1; continue; }
+      let best = NEG, dir = 0;
+      const d = idxOf(i - 1, j - 1);
+      if (d >= 0 && dp[d] > NEG) { const v = dp[d] + (ai === T[j - 1] ? MATCH : MIS); if (v > best) { best = v; dir = 0; } }
+      const u = idxOf(i - 1, j);
+      if (u >= 0 && dp[u] > NEG) { const v = dp[u] + GAP; if (v > best) { best = v; dir = 1; } }
+      const l = idxOf(i, j - 1);
+      if (l >= 0 && dp[l] > NEG) { const v = dp[l] + GAP; if (v > best) { best = v; dir = 2; } }
+      dp[cur] = best; tb[cur] = dir;
+    }
   }
-  const range = pts[hi].pos - pts[lo].pos;
-  return pts[lo].time + (range > 0 ? (x - pts[lo].pos) / range : 0) * (pts[hi].time - pts[lo].time);
+
+  // Traceback: each diagonal match stamps the text word with the audio time.
+  const wtime = new Float64Array(m); wtime.fill(-1);
+  let i = n, j = m;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0) {
+      const cur = idxOf(i, j);
+      const dir = cur >= 0 ? tb[cur] : 1;
+      if (dir === 0) { if (aNorm[i - 1] === T[j - 1]) wtime[j - 1] = aTime[i - 1]; i--; j--; }
+      else if (dir === 1) { i--; }
+      else { j--; }
+    } else if (i > 0) { i--; } else { j--; }
+  }
+
+  // Fill unmatched text words by linear interpolation over flat index, so a
+  // sentence whose first word was missed still gets a sensible start.
+  const filled = wtime.slice();
+  let fk = -1; for (let k = 0; k < m; k++) if (filled[k] >= 0) { fk = k; break; }
+  let lk = -1; for (let k = m - 1; k >= 0; k--) if (filled[k] >= 0) { lk = k; break; }
+  if (fk < 0) return new Array(nSent).fill(0);
+  for (let k = 0; k < fk; k++) filled[k] = filled[fk];
+  for (let k = lk + 1; k < m; k++) filled[k] = filled[lk];
+  let p = fk;
+  for (let k = fk + 1; k <= lk; k++) {
+    if (filled[k] >= 0) {
+      if (k - p > 1) {
+        const t0 = filled[p], t1 = filled[k];
+        for (let q = p + 1; q < k; q++) filled[q] = t0 + ((q - p) / (k - p)) * (t1 - t0);
+      }
+      p = k;
+    }
+  }
+
+  const starts = new Array<number>(nSent);
+  for (let si = 0; si < nSent; si++) {
+    const fi = firstWordIdx[si];
+    starts[si] = (fi < m && filled[fi] >= 0) ? filled[fi] : (si > 0 ? starts[si - 1] : 0);
+  }
+  enforceMonotone(starts);
+  return starts;
 }
 
 // ── Browser-side alignment from Deepgram word timestamps ──────────────────────
-// Three-phase algorithm:
-//
-// Phase 1 – VERIFIED PAIR ANCHORS
-//   For every significant audio word (≥4 chars), find it in the text inside a
-//   sliding window. Before committing the anchor, verify that the NEXT significant
-//   text word also appears within 6 audio positions (gap tolerance handles inserted
-//   short words like articles). Two-word verification eliminates almost all false
-//   matches while still finding enough anchors even in imperfect transcripts.
-//   Falls back to single-word anchors (≥5 chars) if too few verified pairs.
-//
-// Phase 2 – PIECEWISE LINEAR INTERPOLATION
-//   Anchors become control points for lerp. Every sentence gets a unique time —
-//   no duplicate timestamps (the bug caused by greedy/utterance approaches).
-//   Content gaps (narrator deviates from text) are handled gracefully by spreading
-//   time proportionally between surrounding anchors.
-//
-// Phase 3 – PER-SENTENCE REFINEMENT WITH GAP TOLERANCE
-//   For each sentence, search ±3 s around the Phase-2 estimate for the sentence's
-//   first 2+ significant words. Gap tolerance (up to 5 audio words between
-//   matches) handles prepositions and minor wording differences between text and
-//   audio. Requires 2 confirmed word matches before snapping.
+// Deepgram returns accurate per-word start times for the whole chapter. We feed
+// those straight into the global aligner, which matches them to the book text
+// and reads each sentence's start from its first matched word.
 
 export interface WordTimestamp { word: string; start: number; end: number }
 
@@ -190,146 +248,14 @@ export function alignFromWordTimestamps(
   words: WordTimestamp[],
   sentences: string[],
 ): number[] {
-  const audioFlat = words
-    .map(w => ({ norm: normWord(w.word), time: w.start }))
-    .filter(w => w.norm.length > 0);
-
-  if (!audioFlat.length || !sentences.length) return sentences.map(() => 0);
-
-  // Flat word list from all sentences, tagged with sentence index
-  const textFlat: { si: number; norm: string }[] = [];
-  for (let si = 0; si < sentences.length; si++) {
-    for (const w of sentences[si].split(/\s+/).filter(Boolean)) {
-      const n = normWord(w);
-      if (n) textFlat.push({ si, norm: n });
-    }
+  const aNorm: string[] = [];
+  const aTime: number[] = [];
+  for (const w of words) {
+    const nw = normWord(w.word);
+    if (nw) { aNorm.push(nw); aTime.push(w.start); }
   }
-  if (!textFlat.length) return sentences.map(() => 0);
-
-  const WINDOW = 70, JUMP = 120;
-  let anchors: { pos: number; time: number }[] = [];
-
-  // ── Phase 1A: verified pair anchors (audio word ≥4 chars + next sig text word) ──
-  {
-    let textPos = 0;
-    for (let ai = 0; ai < audioFlat.length; ai++) {
-      const aw = audioFlat[ai];
-      if (aw.norm.length < 4) continue;
-
-      const expTi = Math.round((ai / audioFlat.length) * textFlat.length);
-      const ss = (expTi - textPos > JUMP) ? Math.max(textPos, expTi - 25) : textPos;
-      const se = Math.min(textFlat.length - 1, Math.max(textPos + WINDOW, expTi + 35));
-
-      for (let ti = ss; ti <= se; ti++) {
-        if (textFlat[ti].norm !== aw.norm) continue;
-
-        // Find the next significant text word after ti
-        let nextNorm = '';
-        for (let j = ti + 1; j < Math.min(textFlat.length, ti + 8); j++) {
-          if (textFlat[j].norm.length >= 4) { nextNorm = textFlat[j].norm; break; }
-        }
-
-        // Verify: nextNorm must appear within next 6 audio positions
-        let verified = !nextNorm; // if no next sig word, accept without verification
-        if (nextNorm) {
-          for (let g = 1; g <= 6 && ai + g < audioFlat.length; g++) {
-            if (audioFlat[ai + g].norm === nextNorm) { verified = true; break; }
-          }
-        }
-
-        if (verified) {
-          anchors.push({ pos: ti, time: aw.time });
-          textPos = ti + 1;
-          break;
-        }
-      }
-    }
-  }
-
-  // ── Phase 1B: fallback — single-word anchors (≥5 chars) ──────────────
-  const MIN_ANCHORS = Math.max(6, Math.floor(sentences.length / 10));
-  if (anchors.length < MIN_ANCHORS) {
-    anchors = [];
-    let textPos = 0;
-    for (let ai = 0; ai < audioFlat.length; ai++) {
-      const aw = audioFlat[ai];
-      if (aw.norm.length < 5) continue;
-      const expTi = Math.round((ai / audioFlat.length) * textFlat.length);
-      const ss = (expTi - textPos > JUMP) ? Math.max(textPos, expTi - 25) : textPos;
-      const se = Math.min(textFlat.length - 1, Math.max(textPos + WINDOW, expTi + 35));
-      for (let ti = ss; ti <= se; ti++) {
-        if (textFlat[ti].norm === aw.norm) {
-          anchors.push({ pos: ti, time: aw.time });
-          textPos = ti + 1;
-          break;
-        }
-      }
-    }
-  }
-
-  if (!anchors.length) {
-    const totalTime = audioFlat[audioFlat.length - 1].time;
-    return sentences.map((_, si) => (si / sentences.length) * totalTime);
-  }
-
-  // ── Phase 2: piecewise linear interpolation ────────────────────────────
-  // Every sentence gets a unique interpolated time — no duplicate timestamps.
-  const pts = dedupeMonotone([
-    { pos: 0,               time: anchors[0].time },
-    ...anchors,
-    { pos: textFlat.length, time: audioFlat[audioFlat.length - 1].time },
-  ]);
-
-  const starts = new Array<number>(sentences.length).fill(-1);
-  for (let ti = 0; ti < textFlat.length; ti++) {
-    const si = textFlat[ti].si;
-    if (starts[si] < 0) starts[si] = lerp(pts, ti);
-  }
-  let last = audioFlat[0].time;
-  for (let i = 0; i < starts.length; i++) {
-    if (starts[i] < 0) starts[i] = last; else last = starts[i];
-  }
-  enforceMonotone(starts);
-
-  // ── Phase 3: per-sentence refinement with gap tolerance ──────────────
-  // Search ±3 s around each Phase-2 estimate. Require 2+ significant words to
-  // match (with up to 5-word gap between them) before snapping. This handles
-  // articles/prepositions that appear between content words.
-  const REFINE_S = 3.0;
-  for (let si = 0; si < sentences.length; si++) {
-    const target = starts[si];
-    const fw = sentences[si]
-      .split(/\s+/).slice(0, 8)
-      .map(normWord).filter(w => w.length >= 4);
-    if (fw.length < 2) continue; // need 2+ sig words to safely refine
-
-    const lo = audioFlat.findIndex(w => w.time >= target - REFINE_S);
-    if (lo < 0) continue;
-
-    for (let ai = lo; ai < audioFlat.length && audioFlat[ai].time <= target + REFINE_S; ai++) {
-      if (audioFlat[ai].norm !== fw[0]) continue;
-
-      // Verify subsequent sig words with gap tolerance (up to 5 words apart)
-      let matched = 1, cursor = ai;
-      for (let k = 1; k < fw.length; k++) {
-        let found = false;
-        for (let g = 1; g <= 5 && cursor + g < audioFlat.length; g++) {
-          if (audioFlat[cursor + g].norm === fw[k]) { matched++; cursor += g; found = true; break; }
-        }
-        if (!found) break;
-      }
-
-      // Only snap forward — never let Phase 3 move a sentence before its predecessor.
-      // A backward snap produces a timestamp inside the previous sentence's audio, which
-      // enforceMonotone then "fixes" with a synthetic prev+0.03 value that is also wrong.
-      if (matched >= 2 && (si === 0 || audioFlat[ai].time > starts[si - 1])) {
-        starts[si] = audioFlat[ai].time; break;
-      }
-    }
-  }
-
-  enforceMonotone(starts);
-  return starts;
+  if (!aNorm.length || !sentences.length) return sentences.map(() => 0);
+  return alignByNW(aNorm, aTime, sentences);
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
@@ -342,102 +268,7 @@ export async function alignChapterAudio(
   const audioFlat = await buildAudioWordList(audioUrl, onProgress);
   onProgress({ phase: 'aligning' });
   if (!audioFlat.length || !sentences.length) return [];
-
-  // Flat text word list with sentence indices
-  const textFlat: { si: number; norm: string }[] = [];
-  for (let si = 0; si < sentences.length; si++) {
-    for (const w of sentences[si].split(/\s+/).filter(Boolean)) {
-      const n = normWord(w);
-      if (n) textFlat.push({ si, norm: n });
-    }
-  }
-  if (!textFlat.length) return sentences.map(() => 0);
-
-  // ── Pass 1: anchor matching ───────────────────────────────────────────────
-  // For each audio word (length ≥ 4), search the text using a window that
-  // combines the greedy forward position with the fraction-based expected
-  // position. If the greedy scan has fallen far behind, jump the search start
-  // forward so it stays close to the expected position.
-  const WINDOW = 35;
-  const JUMP   = WINDOW * 2;
-  const anchors: { pos: number; time: number }[] = [];
-  let textPos = 0;
-
-  for (let ai = 0; ai < audioFlat.length; ai++) {
-    const aw = audioFlat[ai];
-    if (aw.norm.length < 5) continue;
-
-    const expectedTi = Math.round((ai / audioFlat.length) * textFlat.length);
-    const searchStart = (expectedTi - textPos > JUMP)
-      ? Math.max(textPos, expectedTi - Math.floor(WINDOW / 4))
-      : textPos;
-    const searchEnd = Math.min(
-      textFlat.length - 1,
-      Math.max(textPos + WINDOW, expectedTi + Math.floor(WINDOW / 2)),
-    );
-
-    for (let ti = searchStart; ti <= searchEnd; ti++) {
-      if (textFlat[ti].norm === aw.norm) {
-        anchors.push({ pos: ti, time: aw.time });
-        textPos = ti + 1;
-        break;
-      }
-    }
-  }
-
-  if (!anchors.length) {
-    // Fallback: proportional time across audio duration
-    const totalTime = audioFlat[audioFlat.length - 1].time;
-    return sentences.map((_, si) => (si / sentences.length) * totalTime);
-  }
-
-  // Build piecewise linear interpolation control points
-  const pts = dedupeMonotone([
-    { pos: 0,               time: anchors[0].time },
-    ...anchors,
-    { pos: textFlat.length, time: audioFlat[audioFlat.length - 1].time },
-  ]);
-
-  // Map each sentence to the interpolated time of its first text word
-  const starts = new Array(sentences.length).fill(-1);
-  for (let ti = 0; ti < textFlat.length; ti++) {
-    const si = textFlat[ti].si;
-    if (starts[si] < 0) starts[si] = lerp(pts, ti);
-  }
-  let last = audioFlat[0].time;
-  for (let i = 0; i < starts.length; i++) {
-    if (starts[i] < 0) starts[i] = last; else last = starts[i];
-  }
-  enforceMonotone(starts);
-
-  // ── Pass 2: sentence-start refinement ────────────────────────────────────
-  // For each sentence, search a ±2 s window around the Pass-1 estimate for a
-  // run of 2-of-3 first words. If found, snap the sentence start to that time.
-  const REFINE_S = 2.0;
-
-  for (let si = 0; si < sentences.length; si++) {
-    const target = starts[si];
-    const fw = sentences[si].split(/\s+/).slice(0, 3).map(normWord).filter(w => w.length >= 3);
-    if (!fw.length) continue;
-
-    const lo = audioFlat.findIndex(w => w.time >= target - REFINE_S);
-    if (lo < 0) continue;
-
-    for (let ai = lo; ai < audioFlat.length && audioFlat[ai].time <= target + REFINE_S; ai++) {
-      if (audioFlat[ai].norm !== fw[0]) continue;
-      // Check how many of the next words also match
-      let matched = 1;
-      for (let k = 1; k < fw.length && ai + k < audioFlat.length; k++) {
-        if (audioFlat[ai + k].norm === fw[k]) matched++;
-      }
-      if (matched >= Math.min(2, fw.length) && (si === 0 || audioFlat[ai].time > starts[si - 1])) {
-        starts[si] = audioFlat[ai].time;
-        break;
-      }
-    }
-  }
-
-  enforceMonotone(starts);
+  const starts = alignByNW(audioFlat.map(w => w.norm), audioFlat.map(w => w.time), sentences);
   onProgress({ phase: 'done' });
   return starts;
 }
