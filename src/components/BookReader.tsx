@@ -254,53 +254,63 @@ function buildBookChapterToLessonMap(bid: BookId): Map<number, number> {
   return map;
 }
 
-function audioBufferToWav(buf: AudioBuffer): Blob {
-  const ch = buf.numberOfChannels, sr = buf.sampleRate, len = buf.length;
-  const dataSize = len * ch * 2;
-  const ab = new ArrayBuffer(44 + dataSize);
-  const v = new DataView(ab);
-  const w32 = (o: number, n: number) => v.setUint32(o, n, true);
-  const w16 = (o: number, n: number) => v.setUint16(o, n, true);
-  [0x52,0x49,0x46,0x46].forEach((b,i) => v.setUint8(i, b));    // RIFF
-  w32(4, 36 + dataSize);
-  [0x57,0x41,0x56,0x45].forEach((b,i) => v.setUint8(8+i, b)); // WAVE
-  [0x66,0x6d,0x74,0x20].forEach((b,i) => v.setUint8(12+i, b)); // fmt
-  w32(16, 16); w16(20, 1); w16(22, ch); w32(24, sr);
-  w32(28, sr * ch * 2); w16(32, ch * 2); w16(34, 16);
-  [0x64,0x61,0x74,0x61].forEach((b,i) => v.setUint8(36+i, b)); // data
-  w32(40, dataSize);
-  let off = 44;
-  for (let i = 0; i < len; i++) {
-    for (let c = 0; c < ch; c++) {
-      const s = Math.max(-1, Math.min(1, buf.getChannelData(c)[i]));
-      v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-      off += 2;
-    }
+// ── MP3 frame-level merge (mirrors the server-side merge-audio function) ──────
+// Concatenates MP3 files at the byte/frame level: strip each file's ID3 tags,
+// align to the first audio frame, and splice the raw frames together. This is
+// O(bytes) with tiny memory (compressed audio stays compressed) — unlike
+// decode→OfflineAudioContext→WAV, which buffers ~200 MB of PCM per chapter and
+// can hang the tab on long files.
+
+// ID3v2 tag at the start: 'ID3' + 4 syncsafe size bytes → bytes to skip.
+function skipId3v2(b: Uint8Array): number {
+  if (b[0] === 0x49 && b[1] === 0x44 && b[2] === 0x33) { // "ID3"
+    const size =
+      ((b[6] & 0x7f) << 21) | ((b[7] & 0x7f) << 14) |
+      ((b[8] & 0x7f) << 7)  |  (b[9] & 0x7f);
+    return 10 + size;
   }
-  return new Blob([ab], { type: 'audio/wav' });
+  return 0;
 }
 
-// Decode multiple audio files and concatenate them in order into a single WAV blob.
-// Uses 22 050 Hz mono to keep the file size reasonable (~2.6 MB/min vs ~10 MB/min stereo).
-async function mergeAudioFiles(files: File[]): Promise<Blob> {
-  const tmp = new AudioContext();
-  const buffers: AudioBuffer[] = [];
-  for (const file of files) {
-    buffers.push(await tmp.decodeAudioData(await file.arrayBuffer()));
+// ID3v1 trailer (last 128 bytes starting with 'TAG') → strip from inner files.
+function trimId3v1(b: Uint8Array): number {
+  if (b.length >= 128 &&
+      b[b.length - 128] === 0x54 && // T
+      b[b.length - 127] === 0x41 && // A
+      b[b.length - 126] === 0x47) { // G
+    return b.length - 128;
   }
-  await tmp.close();
-  const sampleRate = 22050;
-  const totalFrames = buffers.reduce((s, b) => s + Math.ceil(b.duration * sampleRate), 0);
-  const offline = new OfflineAudioContext(1, totalFrames, sampleRate);
-  let start = 0;
-  for (const buf of buffers) {
-    const src = offline.createBufferSource();
-    src.buffer = buf;
-    src.connect(offline.destination);
-    src.start(start);
-    start += buf.duration;
+  return b.length;
+}
+
+// Scan forward to the first valid MPEG audio frame sync (11 set bits + sane
+// layer/bitrate/samplerate fields), so we never splice mid-header.
+function findMp3Sync(b: Uint8Array, start: number): number {
+  for (let i = start; i < b.length - 3; i++) {
+    if (b[i] !== 0xFF) continue;
+    const h1 = b[i + 1];
+    if ((h1 & 0xE0) !== 0xE0) continue;
+    const layer      = (h1 >> 1) & 0x3;
+    const bitrateIdx = (b[i + 2] >> 4) & 0xF;
+    const srIdx      = (b[i + 2] >> 2) & 0x3;
+    if (layer === 0 || bitrateIdx === 0 || bitrateIdx === 0xF || srIdx === 3) continue;
+    return i;
   }
-  return audioBufferToWav(await offline.startRendering());
+  return start;
+}
+
+async function mergeMp3Files(files: File[]): Promise<Blob> {
+  const segments: BlobPart[] = [];
+  for (let idx = 0; idx < files.length; idx++) {
+    const bytes = new Uint8Array(await files[idx].arrayBuffer());
+    let start = skipId3v2(bytes);
+    start = findMp3Sync(bytes, start);
+    // Strip trailing ID3v1 from every file except the last so the player
+    // doesn't stop early at an embedded tag mid-stream.
+    const end = idx < files.length - 1 ? trimId3v1(bytes) : bytes.length;
+    segments.push(bytes.subarray(start, end));
+  }
+  return new Blob(segments, { type: 'audio/mpeg' });
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -588,8 +598,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         const labels = entries.map(e => `Ch.${e.bookCh}`).join('+');
         setAudioUploadMsg(`🔀 ${labels} 합치는 중...`);
         try {
-          const merged = await mergeAudioFiles(entries.map(e => e.file));
-          uploadFile = new File([merged], `ch${lessonCh}.wav`, { type: 'audio/wav' });
+          const merged = await mergeMp3Files(entries.map(e => e.file));
+          uploadFile = new File([merged], `ch${lessonCh}.mp3`, { type: 'audio/mpeg' });
         } catch (e) {
           errors.push(`Ch.${lessonCh} 병합 실패: ${e instanceof Error ? e.message : '오류'}`);
           done += entries.length;
