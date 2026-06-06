@@ -192,6 +192,24 @@ function splitToSentences(text: string): string[] {
     .filter(Boolean);
 }
 
+// When the edge function splits one English sentence into two Korean sentences,
+// the returned array is longer than the batch. Merge adjacent pairs (shortest
+// pair first) until the count matches, so every English row stays aligned 1:1.
+function alignKoreanToEnglish(raw: string[], targetLen: number): string[] {
+  const out = raw.map(s => (s ?? '').replace(/\s*\n\s*/g, ' ').trim());
+  while (out.length > targetLen && out.length > 1) {
+    let bestIdx = 0, bestLen = out[0].length + out[1].length;
+    for (let k = 1; k < out.length - 1; k++) {
+      const l = out[k].length + out[k + 1].length;
+      if (l < bestLen) { bestLen = l; bestIdx = k; }
+    }
+    out[bestIdx] = out[bestIdx] + (out[bestIdx] && out[bestIdx + 1] ? ' ' : '') + out[bestIdx + 1];
+    out.splice(bestIdx + 1, 1);
+  }
+  while (out.length < targetLen) out.push('');
+  return out;
+}
+
 async function translateSentences(
   enText: string,
   onChunk: (done: number, total: number) => void,
@@ -214,11 +232,7 @@ async function translateSentences(
     });
     if (error) throw new Error(String((error as { message?: string }).message ?? error));
     const arr = (data as { result: string[] }).result ?? [];
-    // Edge function guarantees same length, but enforce defensively.
-    // Strip any stray newlines so '\n' stays a clean per-sentence delimiter.
-    for (let j = 0; j < batches[i].length; j++) {
-      ko.push((arr[j] ?? '').replace(/\s*\n\s*/g, ' ').trim());
-    }
+    ko.push(...alignKoreanToEnglish(arr, batches[i].length));
   }
   onChunk(batches.length, batches.length);
 
@@ -590,6 +604,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         : splitToSentences(koText))                      // legacy paragraph format
     : [];
   const maxRows = Math.max(enRows.length, koRows.length);
+  const hasMismatch = koRows.length > 0 && koRows.length !== enRows.length;
 
   // Start time (seconds) of each sentence. Prefer REAL per-sentence times from
   // speech alignment; fall back to a word-count estimate until analysis is run.
@@ -948,6 +963,17 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           <button onClick={handleTranslate}
             className="text-xs text-gray-400 hover:text-indigo-600 transition-colors font-semibold">
             🔄 다시 번역 (문장 정렬)
+          </button>
+        </div>
+      )}
+      {hasMismatch && !translating && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+          <span className="text-xs text-amber-700">
+            ⚠️ 번역 문장 수({koRows.length})가 영어 문장 수({enRows.length})와 달라 위치가 어긋나 있어요. 재번역하면 자동으로 맞춰집니다.
+          </span>
+          <button onClick={handleTranslate}
+            className="shrink-0 px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-semibold hover:bg-amber-600 transition-all">
+            🔄 재번역
           </button>
         </div>
       )}
