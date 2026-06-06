@@ -488,8 +488,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const [analyzeMsg,    setAnalyzeMsg]    = useState('');
   const [audioUploadMsg,setAudioUploadMsg]= useState('');
   const [uploadProgress,setUploadProgress]= useState({ done: 0, total: 0 });
-  const isSeekingRef = useRef(false); // true while a programmatic seek is in flight
+  const isSeekingRef  = useRef(false); // true while a programmatic seek is in flight
   const seekTargetRef = useRef(-1);   // position a tap sought to; -1 once the audio lands there
+  const seekFloorRef  = useRef(-1);   // min allowed sentence idx after a tap-seek; -1 when inactive
   const [debugLogs, setDebugLogs] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
   const debugLogsRef = useRef<string[]>([]);
@@ -553,6 +554,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setNextChapHasAudio(false);
     isSeekingRef.current  = false;
     seekTargetRef.current = -1;
+    seekFloorRef.current  = -1;
     const [en, ko, audio, times, nextAudio, vocab] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
@@ -925,6 +927,17 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       if (t >= sentenceStarts[i]) idx = i; else break;
     }
 
+    // After a tap-seek the browser may land slightly before the tapped sentence
+    // (TOC rounding). Don't flip the highlight backward until the audio genuinely
+    // plays past the floor; clear once the audio crosses it.
+    if (seekFloorRef.current >= 0) {
+      if (idx < seekFloorRef.current) {
+        idx = seekFloorRef.current;
+      } else {
+        seekFloorRef.current = -1;
+      }
+    }
+
     // (b) Backward-blip: an MP3 frame-snap can land just before the target for
     // a single cycle, making idx = activeIdx-1. Hold while within 0.2 s below.
     if (idx === activeIdx - 1 && activeIdx > 0 && t >= sentenceStarts[activeIdx] - 0.2) return;
@@ -957,6 +970,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
 
     // Ignore stale pre-seek timeupdates until the audio lands at `target`.
     seekTargetRef.current = target;
+    seekFloorRef.current  = i;   // highlight must not go below the tapped sentence
     isSeekingRef.current  = true;
     setActiveIdx(i);
     setActiveWordIdx(0);
