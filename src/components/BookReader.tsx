@@ -988,13 +988,6 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     window.setTimeout(() => { isSeekingRef.current = false; }, 400);
   };
 
-  // Keep the active sentence in view while audio plays (scroll whichever
-  // layout is currently visible; the hidden one is a harmless no-op).
-  useEffect(() => {
-    if (activeIdx < 0) return;
-    rowRefs.current[activeIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    mobileRowRefs.current[activeIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [activeIdx]);
 
   // ── Word-level karaoke renderer ──────────────────────────────────────────
   // Returns the sentence text with spoken words (0..upToWord) colored blue.
