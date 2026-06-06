@@ -13,7 +13,7 @@ import { supabase } from './lib/supabase';
 import {
   csGet, csSet, csSetJSON, csDel, csGetAppState, csSetBatch,
 } from './lib/cloudStorage';
-import { migrateChaptersFromLocalStorage } from './lib/chapterStorage';
+import { migrateChaptersFromLocalStorage, loadChapterVocab } from './lib/chapterStorage';
 import type { VocabItem } from './lib/types';
 import { BOOKS, type BookId } from './data/syllabus';
 
@@ -69,15 +69,15 @@ export default function App() {
   const [a2Tab,     setA2Tab]     = useState<A2Tab>('shadowing');
   const [v1Tab,     setV1Tab]     = useState<V1Tab>('reading');
   const [showA2Input, setShowA2Input] = useState(true);
-  const [showV1Input, setShowV1Input] = useState(true);
 
   // ── Content state (loaded from Supabase on mount) ───────────────────────
-  const [v1Book,  setV1BookState]  = useState<BookId>('edward');
-  const [a2Text,  setA2TextState]  = useState('');
-  const [a2Vocab, setA2VocabState] = useState<VocabItem[] | null>(null);
+  const [v1Book,   setV1BookState]  = useState<BookId>('edward');
+  const [a2Text,   setA2TextState]  = useState('');
+  const [a2Vocab,  setA2VocabState] = useState<VocabItem[] | null>(null);
   const [a2AudioUrl, setA2AudioUrl] = useState<string | null>(null);
-  const [v1Text,  setV1TextState]  = useState('');
-  const [v1Vocab, setV1VocabState] = useState<VocabItem[] | null>(null);
+  const [v1Vocab1, setV1Vocab1]     = useState<VocabItem[] | null>(null);
+  const [v1Vocab2, setV1Vocab2]     = useState<VocabItem[] | null>(null);
+  const [v1VocabCh, setV1VocabCh]   = useState<1 | 2>(1);
   const [a2StudiedWords, setA2StudiedWords] = useState<string[]>([]);
   const [v1StudiedWords, setV1StudiedWords] = useState<string[]>([]);
 
@@ -85,18 +85,25 @@ export default function App() {
   useEffect(() => {
     migrateFromLocalStorage()
       .catch(() => {})
-      .finally(() => {
-        csGetAppState()
-          .then(data => {
-            if (data.v1_book)    setV1BookState(data.v1_book as BookId);
-            if (data.a2_text)    setA2TextState(data.a2_text);
-            if (data.a2_vocab)   { try { setA2VocabState(JSON.parse(data.a2_vocab)); } catch {} }
-            if (data.v1_text)    setV1TextState(data.v1_text);
-            if (data.v1_vocab)   { try { setV1VocabState(JSON.parse(data.v1_vocab)); } catch {} }
-            if (data.a2_audio_url) setA2AudioUrl(data.a2_audio_url);
-          })
-          .catch(() => {})
-          .finally(() => setAppReady(true));
+      .finally(async () => {
+        try {
+          const data = await csGetAppState();
+          const book = (data.v1_book as BookId) ?? 'edward';
+          if (data.v1_book)      setV1BookState(book);
+          if (data.a2_text)      setA2TextState(data.a2_text);
+          if (data.a2_vocab)     { try { setA2VocabState(JSON.parse(data.a2_vocab)); } catch {} }
+          if (data.a2_audio_url) setA2AudioUrl(data.a2_audio_url);
+          const [vc1, vc2] = await Promise.all([
+            loadChapterVocab(book, 1).catch(() => null),
+            loadChapterVocab(book, 2).catch(() => null),
+          ]);
+          if (vc1) setV1Vocab1(vc1 as VocabItem[]);
+          if (vc2) setV1Vocab2(vc2 as VocabItem[]);
+        } catch {
+          // ignore
+        } finally {
+          setAppReady(true);
+        }
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -104,7 +111,17 @@ export default function App() {
   // ── Persisting setters (fire-and-forget to Supabase) ────────────────────
   const setV1Book = (b: BookId) => {
     setV1BookState(b);
+    setV1VocabCh(1);
+    setV1Vocab1(null);
+    setV1Vocab2(null);
     csSet('v1_book', b).catch(() => {});
+    Promise.all([
+      loadChapterVocab(b, 1).catch(() => null),
+      loadChapterVocab(b, 2).catch(() => null),
+    ]).then(([vc1, vc2]) => {
+      if (vc1) setV1Vocab1(vc1 as VocabItem[]);
+      if (vc2) setV1Vocab2(vc2 as VocabItem[]);
+    });
   };
   const setA2Text = (t: string) => {
     setA2TextState(t);
@@ -114,13 +131,15 @@ export default function App() {
     setA2VocabState(v);
     v ? csSetJSON('a2_vocab', v).catch(() => {}) : csDel('a2_vocab').catch(() => {});
   };
-  const setV1Text = (t: string) => {
-    setV1TextState(t);
-    t ? csSet('v1_text', t).catch(() => {}) : csDel('v1_text').catch(() => {});
+  const setV1ChVocab = (ch: 1 | 2, v: VocabItem[] | null) => {
+    if (ch === 1) setV1Vocab1(v);
+    else setV1Vocab2(v);
+    const key = `chapter_${v1Book}_${ch}_vocab`;
+    v ? csSet(key, JSON.stringify(v)).catch(() => {}) : csDel(key).catch(() => {});
   };
-  const setV1Vocab = (v: VocabItem[] | null) => {
-    setV1VocabState(v);
-    v ? csSetJSON('v1_vocab', v).catch(() => {}) : csDel('v1_vocab').catch(() => {});
+  const handleV1VocabLoad = (vocab: VocabItem[], chapter: number) => {
+    if (chapter === 1) setV1Vocab1(vocab);
+    else if (chapter === 2) setV1Vocab2(vocab);
   };
 
   // ── Audio (Supabase Storage) ─────────────────────────────────────────────
@@ -173,8 +192,6 @@ export default function App() {
   const wc = (t: string) => t.trim().split(/\s+/).filter(Boolean).length;
   const a2TextSummary  = a2Text  ? `저장됨 (${wc(a2Text)}단어)` : undefined;
   const a2VocabSummary = a2Vocab?.length ? `저장됨 (${a2Vocab.length}개)` : undefined;
-  const v1TextSummary  = v1Text  ? `저장됨 (${wc(v1Text)}단어)` : undefined;
-  const v1VocabSummary = v1Vocab?.length ? `저장됨 (${v1Vocab.length}개)` : undefined;
 
   const bk = BOOKS[v1Book];
 
@@ -283,27 +300,6 @@ export default function App() {
           </div>
         )}
 
-        {/* ── V1 INPUT PANEL ────────────────────────────────────────────── */}
-        {mainTab === 'v1' && v1Tab !== 'reading' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <button onClick={() => setShowV1Input(!showV1Input)}
-              className="w-full px-5 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-              <span className="font-semibold text-gray-700 flex items-center gap-2">
-                {bk.emoji} {bk.shortTitle} 지문 입력
-              </span>
-              <span className="text-gray-400 text-sm">{showV1Input ? '▲ 접기' : '▼ 펼치기'}</span>
-            </button>
-            {showV1Input && (
-              <div className="px-5 pb-5 space-y-4">
-                <ImageUploadInput mode="text" label="📄 소설 지문 사진" hint="이번 주 읽을 페이지 — 여러 장 가능"
-                  savedSummary={v1TextSummary} onClear={() => setV1Text('')} onExtracted={setV1Text} />
-                <hr className="border-gray-100" />
-                <ImageUploadInput mode="vocab" label="📚 단어 사진" hint="소설에서 지정한 단어 목록 사진"
-                  savedSummary={v1VocabSummary} onClear={() => setV1Vocab(null)} onExtracted={setV1Vocab} />
-              </div>
-            )}
-          </div>
-        )}
 
         {/* ── A2 CONTENT ────────────────────────────────────────────────── */}
         {mainTab === 'a2' && (
@@ -352,9 +348,53 @@ export default function App() {
                   }`}>{t.label}</button>
               ))}
             </div>
-            {v1Tab === 'reading'    && <BookReader key={v1Book} bookId={v1Book} onLessonVocabLoad={setV1Vocab} />}
-            {v1Tab === 'vocabulary' && <VocabularyPanel text={v1Text} vocab={v1Vocab} onStudiedChange={setV1StudiedWords} onVocabUpdate={setV1Vocab} />}
-            {v1Tab === 'games'      && <GamesPanel text={v1Text} vocab={v1Vocab} selectedWords={v1StudiedWords} />}
+            {v1Tab === 'reading' && <BookReader key={v1Book} bookId={v1Book} onLessonVocabLoad={handleV1VocabLoad} />}
+            {v1Tab === 'vocabulary' && (() => {
+              const activeVocab = v1VocabCh === 1 ? v1Vocab1 : v1Vocab2;
+              const activeSummary = activeVocab?.length ? `저장됨 (${activeVocab.length}개)` : undefined;
+              return (
+                <>
+                  {/* Ch01 / Ch02 chapter selector */}
+                  <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
+                    {([1, 2] as const).map(ch => (
+                      <button key={ch}
+                        onClick={() => { setV1VocabCh(ch); setV1StudiedWords([]); }}
+                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                          v1VocabCh === ch ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
+                        }`}>
+                        Ch.0{ch} 단어장
+                      </button>
+                    ))}
+                  </div>
+                  {/* Per-chapter vocab photo upload */}
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                    <ImageUploadInput
+                      key={`vocab-upload-${v1Book}-ch${v1VocabCh}`}
+                      mode="vocab"
+                      label={`📚 Ch.0${v1VocabCh} 단어 사진`}
+                      hint="단어장 사진을 올리면 자동으로 목록이 만들어져요"
+                      savedSummary={activeSummary}
+                      onClear={() => setV1ChVocab(v1VocabCh, null)}
+                      onExtracted={vocab => setV1ChVocab(v1VocabCh, vocab)}
+                    />
+                  </div>
+                  <VocabularyPanel
+                    key={`vocab-panel-${v1Book}-ch${v1VocabCh}`}
+                    text=""
+                    vocab={activeVocab}
+                    onStudiedChange={setV1StudiedWords}
+                    onVocabUpdate={vocab => setV1ChVocab(v1VocabCh, vocab)}
+                  />
+                </>
+              );
+            })()}
+            {v1Tab === 'games' && (
+              <GamesPanel
+                text=""
+                vocab={v1VocabCh === 1 ? v1Vocab1 : v1Vocab2}
+                selectedWords={v1StudiedWords}
+              />
+            )}
           </>
         )}
 

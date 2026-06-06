@@ -441,7 +441,7 @@ async function mergeMp3Files(files: File[]): Promise<Blob> {
 // ── Component ─────────────────────────────────────────────────────────────────
 type InitState = 'loading' | 'no-book' | 'has-book';
 
-export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: BookId; onLessonVocabLoad?: (vocab: VocabItem[]) => void }) {
+export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: BookId; onLessonVocabLoad?: (vocab: VocabItem[], chapter: number) => void }) {
   const bk = BOOKS[bookId];
 
   // Compute the current/upcoming lesson chapter BEFORE useState so it can be
@@ -590,7 +590,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setAudioUrl(audio);
     setTimings(times);
     setNextChapHasAudio(!!nextAudio);
-    if (vocab?.length && onLessonVocabLoad) onLessonVocabLoad(vocab as VocabItem[]);
+    if (vocab?.length && onLessonVocabLoad) onLessonVocabLoad(vocab as VocabItem[], chapter);
     setChapterLoading(false);
   };
 
