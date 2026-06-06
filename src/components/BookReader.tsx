@@ -193,18 +193,34 @@ function splitToSentences(text: string): string[] {
 }
 
 // When the edge function splits one English sentence into two Korean sentences,
-// the returned array is longer than the batch. Merge adjacent pairs (shortest
-// pair first) until the count matches, so every English row stays aligned 1:1.
+// the returned array is longer than the batch. Detect attribution fragments
+// (short sentences ending in Korean speech verbs like 말했다/물었다) and merge
+// them with their preceding sentence. Fall back to shortest-pair for other cases.
 function alignKoreanToEnglish(raw: string[], targetLen: number): string[] {
   const out = raw.map(s => (s ?? '').replace(/\s*\n\s*/g, ' ').trim());
+  // Attribution verbs that indicate a sentence fragment belonging to the prior sentence
+  const ATTR_VERB = /(?:말했다|물었다|대답했다|속삭였다|외쳤다|소리쳤다|중얼거렸다|덧붙였다)[.。]?["']?\s*$/;
   while (out.length > targetLen && out.length > 1) {
-    let bestIdx = 0, bestLen = out[0].length + out[1].length;
-    for (let k = 1; k < out.length - 1; k++) {
-      const l = out[k].length + out[k + 1].length;
-      if (l < bestLen) { bestLen = l; bestIdx = k; }
+    // Prefer merging attribution fragments (index > 0, short, ends with speech verb)
+    let attrIdx = -1;
+    for (let k = 1; k < out.length; k++) {
+      if (out[k].length <= 20 && ATTR_VERB.test(out[k])) {
+        if (attrIdx === -1 || out[k].length < out[attrIdx].length) attrIdx = k;
+      }
     }
-    out[bestIdx] = out[bestIdx] + (out[bestIdx] && out[bestIdx + 1] ? ' ' : '') + out[bestIdx + 1];
-    out.splice(bestIdx + 1, 1);
+    if (attrIdx !== -1) {
+      out[attrIdx - 1] = out[attrIdx - 1] + ' ' + out[attrIdx];
+      out.splice(attrIdx, 1);
+    } else {
+      // Fallback: merge globally shortest adjacent pair
+      let pairLen = out[0].length + out[1].length, pairIdx = 0;
+      for (let k = 1; k < out.length - 1; k++) {
+        const l = out[k].length + out[k + 1].length;
+        if (l < pairLen) { pairLen = l; pairIdx = k; }
+      }
+      out[pairIdx] = out[pairIdx] + (out[pairIdx] && out[pairIdx + 1] ? ' ' : '') + out[pairIdx + 1];
+      out.splice(pairIdx + 1, 1);
+    }
   }
   while (out.length < targetLen) out.push('');
   return out;
@@ -384,6 +400,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const audioFileRef = useRef<HTMLInputElement>(null);
   const rowRefs       = useRef<(HTMLDivElement | null)[]>([]);
   const mobileRowRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+  // Incremented on every loadChapter call; background re-translation checks this
+  // to avoid updating stale chapter after user navigates away.
+  const loadSeqRef = useRef(0);
 
   // Maps book chapter numbers (e.g. 7) → lesson chapter index (e.g. 2).
   // Empty map for books without "Ch. N~M" page strings (Coraline).
@@ -440,16 +459,25 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       loadChapterVocab(bid, chapter).catch(() => null),
     ]);
     setEnText(en);
-    // Auto-realign Korean if sentence count doesn't match English
-    let finalKo = ko;
+    // Detect misalignment: count mismatch, trailing empty-line padding, or attribution
+    // fragments (short standalone 말했다/물었다 lines). When any condition is found,
+    // silently re-translate in the background using the fixed edge function so the
+    // data self-heals on first load and is correct on every subsequent load.
+    const finalKo = ko;
     if (en && ko) {
+      const koRaw = ko.split('\n');
+      const koLines = koRaw.map((s: string) => s.trim()).filter(Boolean);
       const enCount = splitToSentences(en).length;
-      const koLines = ko.includes('\n') && !ko.includes('\n\n')
-        ? ko.split('\n').map((s: string) => s.trim()).filter(Boolean)
-        : splitToSentences(ko);
-      if (koLines.length !== enCount && koLines.length > 0 && enCount > 0) {
-        finalKo = alignKoreanToEnglish(koLines, enCount).join('\n');
-        saveChapterKo(bid, chapter, finalKo).catch(() => {});
+      const ATTR_FRAG = /(?:말했다|물었다|대답했다|속삭였다|외쳤다|소리쳤다|중얼거렸다)[.。]?\s*$/;
+      const hasAttrFrags = koLines.some(l => l.length <= 20 && ATTR_FRAG.test(l));
+      const hasPadding = koRaw.length > koLines.length + 1;
+      if ((koLines.length !== enCount || hasAttrFrags || hasPadding) && koLines.length > 0 && enCount > 0) {
+        const seq = ++loadSeqRef.current;
+        translateSentences(en, () => {}).then(newKo => {
+          if (loadSeqRef.current !== seq) return;
+          saveChapterKo(bid, chapter, newKo).catch(() => {});
+          setKoText(newKo);
+        }).catch(() => {});
       }
     }
     setKoText(finalKo);
