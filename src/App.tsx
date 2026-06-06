@@ -6,7 +6,6 @@ import GamesPanel from './components/GamesPanel';
 import ProgressDashboard from './components/ProgressDashboard';
 import ImageUploadInput from './components/ImageUploadInput';
 import LessonScheduleWidget from './components/LessonScheduleWidget';
-import LiteraryAnalysisWriter from './components/LiteraryAnalysisWriter';
 import A2PhotoViewer from './components/A2PhotoViewer';
 import BookReader from './components/BookReader';
 import { trackSession } from './lib/tracker';
@@ -20,7 +19,7 @@ import { BOOKS, type BookId } from './data/syllabus';
 
 type MainTab = 'a2' | 'v1' | 'progress';
 type A2Tab   = 'reading' | 'shadowing' | 'vocabulary' | 'opinion' | 'games';
-type V1Tab   = 'writing' | 'vocabulary' | 'games' | 'reading';
+type V1Tab   = 'reading' | 'vocabulary' | 'games';
 
 // ── One-time migration from localStorage → Supabase ───────────────────────
 async function migrateFromLocalStorage(): Promise<void> {
@@ -68,7 +67,7 @@ export default function App() {
   const [appReady,  setAppReady]  = useState(false);
   const [mainTab,   setMainTab]   = useState<MainTab>('a2');
   const [a2Tab,     setA2Tab]     = useState<A2Tab>('shadowing');
-  const [v1Tab,     setV1Tab]     = useState<V1Tab>('writing');
+  const [v1Tab,     setV1Tab]     = useState<V1Tab>('reading');
   const [showA2Input, setShowA2Input] = useState(true);
   const [showV1Input, setShowV1Input] = useState(true);
 
@@ -217,7 +216,7 @@ export default function App() {
         <div className="grid grid-cols-3 gap-3">
           {([
             { id: 'a2',       icon: '🎧', label: 'A2 읽기/듣기', sub: '섀도잉 · 쓰기',       active: 'bg-indigo-600 shadow-indigo-200',  dim: 'text-indigo-200'  },
-            { id: 'v1',       icon: '📖', label: 'V1 소설',       sub: '문학 분석 · 글쓰기',  active: 'bg-purple-600 shadow-purple-200',  dim: 'text-purple-200'  },
+            { id: 'v1',       icon: '📖', label: 'V1 소설',       sub: '원서읽기 · 단어장',   active: 'bg-purple-600 shadow-purple-200',  dim: 'text-purple-200'  },
             { id: 'progress', icon: '📊', label: '성장 기록',      sub: '단어 · 점수',         active: 'bg-emerald-600 shadow-emerald-200', dim: 'text-emerald-200' },
           ] as { id: MainTab; icon: string; label: string; sub: string; active: string; dim: string }[]).map(t => (
             <button key={t.id} onClick={() => { flushSession(); setMainTab(t.id); }}
@@ -285,7 +284,7 @@ export default function App() {
         )}
 
         {/* ── V1 INPUT PANEL ────────────────────────────────────────────── */}
-        {mainTab === 'v1' && v1Tab !== 'writing' && v1Tab !== 'reading' && (
+        {mainTab === 'v1' && v1Tab !== 'reading' && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <button onClick={() => setShowV1Input(!showV1Input)}
               className="w-full px-5 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
@@ -343,7 +342,6 @@ export default function App() {
           <>
             <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
               {([
-                { id: 'writing',    label: '📝 글쓰기' },
                 { id: 'reading',    label: '📖 원서 읽기' },
                 { id: 'vocabulary', label: '📚 단어장' },
                 { id: 'games',      label: '🎮 게임' },
@@ -354,7 +352,6 @@ export default function App() {
                   }`}>{t.label}</button>
               ))}
             </div>
-            {v1Tab === 'writing'    && <LiteraryAnalysisWriter book={v1Book} />}
             {v1Tab === 'reading'    && <BookReader key={v1Book} bookId={v1Book} onLessonVocabLoad={setV1Vocab} />}
             {v1Tab === 'vocabulary' && <VocabularyPanel text={v1Text} vocab={v1Vocab} onStudiedChange={setV1StudiedWords} onVocabUpdate={setV1Vocab} />}
             {v1Tab === 'games'      && <GamesPanel text={v1Text} vocab={v1Vocab} selectedWords={v1StudiedWords} />}

@@ -91,7 +91,7 @@ export async function saveChapterAudio(bookId: BookId, chapter: number, file: Fi
   const path = audioPath(bookId, chapter);
   const { error } = await supabase.storage
     .from(AUDIO_BUCKET)
-    .upload(path, file, { upsert: true, contentType: 'audio/mpeg' });
+    .upload(path, file, { upsert: true, contentType: file.type || 'audio/mpeg' });
   if (error) throw error;
   const { data } = supabase.storage.from(AUDIO_BUCKET).getPublicUrl(path);
   await csSet(`chapter_${bookId}_${chapter}_audio`, data.publicUrl);

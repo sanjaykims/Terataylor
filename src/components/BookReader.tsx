@@ -240,15 +240,89 @@ async function translateSentences(
   return ko.join('\n');
 }
 
+// ── Audio helpers ─────────────────────────────────────────────────────────────
+// Build a mapping: book chapter number → lesson-chapter index (1-based).
+// Only works for books whose SCHEDULE entries have "Ch. N~M" page strings.
+function buildBookChapterToLessonMap(bid: BookId): Map<number, number> {
+  const map = new Map<number, number>();
+  SCHEDULE.filter(l => l.book === bid && l.pdfPages).forEach((lesson, idx) => {
+    const m = lesson.pages.match(/Ch\.\s*(\d+)\s*[~–]\s*(\d+)/i);
+    if (m) {
+      for (let ch = parseInt(m[1]); ch <= parseInt(m[2]); ch++) map.set(ch, idx + 1);
+    }
+  });
+  return map;
+}
+
+function audioBufferToWav(buf: AudioBuffer): Blob {
+  const ch = buf.numberOfChannels, sr = buf.sampleRate, len = buf.length;
+  const dataSize = len * ch * 2;
+  const ab = new ArrayBuffer(44 + dataSize);
+  const v = new DataView(ab);
+  const w32 = (o: number, n: number) => v.setUint32(o, n, true);
+  const w16 = (o: number, n: number) => v.setUint16(o, n, true);
+  [0x52,0x49,0x46,0x46].forEach((b,i) => v.setUint8(i, b));    // RIFF
+  w32(4, 36 + dataSize);
+  [0x57,0x41,0x56,0x45].forEach((b,i) => v.setUint8(8+i, b)); // WAVE
+  [0x66,0x6d,0x74,0x20].forEach((b,i) => v.setUint8(12+i, b)); // fmt
+  w32(16, 16); w16(20, 1); w16(22, ch); w32(24, sr);
+  w32(28, sr * ch * 2); w16(32, ch * 2); w16(34, 16);
+  [0x64,0x61,0x74,0x61].forEach((b,i) => v.setUint8(36+i, b)); // data
+  w32(40, dataSize);
+  let off = 44;
+  for (let i = 0; i < len; i++) {
+    for (let c = 0; c < ch; c++) {
+      const s = Math.max(-1, Math.min(1, buf.getChannelData(c)[i]));
+      v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      off += 2;
+    }
+  }
+  return new Blob([ab], { type: 'audio/wav' });
+}
+
+// Decode multiple audio files and concatenate them in order into a single WAV blob.
+// Uses 22 050 Hz mono to keep the file size reasonable (~2.6 MB/min vs ~10 MB/min stereo).
+async function mergeAudioFiles(files: File[]): Promise<Blob> {
+  const tmp = new AudioContext();
+  const buffers: AudioBuffer[] = [];
+  for (const file of files) {
+    buffers.push(await tmp.decodeAudioData(await file.arrayBuffer()));
+  }
+  await tmp.close();
+  const sampleRate = 22050;
+  const totalFrames = buffers.reduce((s, b) => s + Math.ceil(b.duration * sampleRate), 0);
+  const offline = new OfflineAudioContext(1, totalFrames, sampleRate);
+  let start = 0;
+  for (const buf of buffers) {
+    const src = offline.createBufferSource();
+    src.buffer = buf;
+    src.connect(offline.destination);
+    src.start(start);
+    start += buf.duration;
+  }
+  return audioBufferToWav(await offline.startRendering());
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 type InitState = 'loading' | 'no-book' | 'has-book';
 
 export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: BookId; onLessonVocabLoad?: (vocab: VocabItem[]) => void }) {
   const bk = BOOKS[bookId];
 
+  // Compute the current/upcoming lesson chapter BEFORE useState so it can be
+  // used as the initial value. bookId changes cause remount via key={v1Book}.
+  const initialLessonChapter = (() => {
+    const bookLessons = SCHEDULE.filter(l => l.book === bookId && l.pdfPages);
+    if (bookLessons.length === 0) return 1;
+    const now = new Date(); now.setHours(0, 0, 0, 0);
+    const future = bookLessons.filter(l => new Date(l.date) > now);
+    const target = future[0] ?? bookLessons.at(-1)!;
+    return bookLessons.indexOf(target) + 1;
+  })();
+
   const [initState,       setInitState]       = useState<InitState>('loading');
   const [totalChapters,   setTotalChapters]   = useState(0);
-  const [selectedChapter, setSelectedChapter] = useState(1);
+  const [selectedChapter, setSelectedChapter] = useState(initialLessonChapter);
   const [translatedChaps, setTranslatedChaps] = useState<Set<number>>(new Set());
 
   const [enText,        setEnText]        = useState<string | null>(null);
@@ -301,17 +375,14 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const rowRefs       = useRef<(HTMLDivElement | null)[]>([]);
   const mobileRowRefs = useRef<(HTMLParagraphElement | null)[]>([]);
 
-  // Index (1-based) of the chapter stored for the current/upcoming lesson.
-  // When pdfPages are defined, each lesson is stored as one chapter in order.
-  const currentLessonChapter = (() => {
-    const bookLessons = SCHEDULE.filter(l => l.book === bookId && l.pdfPages);
-    if (bookLessons.length === 0) return null;
-    const now = new Date(); now.setHours(0, 0, 0, 0);
-    // Show the next upcoming lesson; fall back to most recent past if none
-    const future = bookLessons.filter(l => new Date(l.date) > now);
-    const target = future[0] ?? bookLessons.at(-1)!;
-    return bookLessons.indexOf(target) + 1; // 1-based chapter index
-  })();
+  // Maps book chapter numbers (e.g. 7) → lesson chapter index (e.g. 2).
+  // Empty map for books without "Ch. N~M" page strings (Coraline).
+  const bookChapterToLessonMap = useMemo(() => buildBookChapterToLessonMap(bookId), [bookId]);
+
+  // null when the book has no pdfPages-based schedule (e.g. Coraline).
+  const currentLessonChapter = SCHEDULE.some(l => l.book === bookId && l.pdfPages)
+    ? initialLessonChapter
+    : null;
   const lessonChapterRange = currentLessonChapter
     ? [currentLessonChapter, currentLessonChapter] as [number, number]
     : null;
@@ -327,7 +398,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         setInitState('has-book');
         const translated = await getTranslatedChapters(bookId).catch(() => [] as number[]);
         setTranslatedChaps(new Set(translated));
-        await loadChapter(bookId, 1);
+        await loadChapter(bookId, initialLessonChapter);
       })
       .catch(() => setInitState('no-book'));
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -466,12 +537,6 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   };
 
   // ── Chapter audio handlers ────────────────────────────────────────────────
-  // Filenames like "ch3.mp3", "chapter 03.mp3", "lesson2.mp3" → chapter number.
-  const chapterFromFilename = (name: string): number | null => {
-    const m = name.match(/(?:ch(?:apter)?|lesson|l)\s*0*(\d{1,2})/i) ?? name.match(/\b0*(\d{1,2})\b/);
-    return m ? parseInt(m[1]) : null;
-  };
-
   const handleChapterAudioUpload = async (files: File[]) => {
     if (files.length === 0) return;
     setAudioUploading(true);
@@ -482,33 +547,65 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     const uploadedChapters: number[] = [];
     const errors: string[] = [];
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const guessed = chapterFromFilename(file.name);
-      const target = guessed && guessed >= 1 && guessed <= totalChapters ? guessed : selectedChapter;
-      setUploadProgress({ done: i, total: files.length });
+    // Group files by their target LESSON chapter.
+    // Filenames use book chapter numbers (ch4, ch7…); map them via the schedule.
+    type Entry = { file: File; bookCh: number };
+    const groups = new Map<number, Entry[]>();
+    for (const file of files) {
+      const m = file.name.match(/(?:ch(?:apter)?|lesson|l)\s*0*(\d{1,2})/i)
+              ?? file.name.match(/\b0*(\d{1,2})\b/);
+      const rawCh = m ? parseInt(m[1]) : null;
+      const mapped = rawCh !== null ? bookChapterToLessonMap.get(rawCh) : undefined;
+      const lessonCh = mapped !== undefined
+        ? mapped
+        : (rawCh !== null && rawCh >= 1 && rawCh <= totalChapters ? rawCh : selectedChapter);
+      if (!groups.has(lessonCh)) groups.set(lessonCh, []);
+      groups.get(lessonCh)!.push({ file, bookCh: rawCh ?? 0 });
+    }
+
+    let done = 0;
+    for (const [lessonCh, entries] of groups) {
+      // Sort by book chapter number so merged audio plays ch4→ch5→…→ch8
+      entries.sort((a, b) => a.bookCh - b.bookCh);
+      setUploadProgress({ done, total: files.length });
+
+      let uploadFile: File;
+      if (entries.length === 1) {
+        uploadFile = entries[0].file;
+      } else {
+        const labels = entries.map(e => `Ch.${e.bookCh}`).join('+');
+        setAudioUploadMsg(`🔀 ${labels} 합치는 중...`);
+        try {
+          const merged = await mergeAudioFiles(entries.map(e => e.file));
+          uploadFile = new File([merged], `ch${lessonCh}.wav`, { type: 'audio/wav' });
+        } catch (e) {
+          errors.push(`Ch.${lessonCh} 병합 실패: ${e instanceof Error ? e.message : '오류'}`);
+          done += entries.length;
+          setUploadProgress({ done, total: files.length });
+          continue;
+        }
+      }
+
       try {
-        const url = await saveChapterAudio(bookId, target, file);
-        await deleteChapterTimings(bookId, target).catch(() => {});
-        uploadedChapters.push(target);
-        // Refresh current chapter's player if this file targets it.
-        if (target === selectedChapter) {
+        const url = await saveChapterAudio(bookId, lessonCh, uploadFile);
+        await deleteChapterTimings(bookId, lessonCh).catch(() => {});
+        uploadedChapters.push(lessonCh);
+        if (lessonCh === selectedChapter) {
           setTimings(null);
           setAudioUrl(`${url}?t=${Date.now()}`);
           setActiveIdx(-1);
         }
       } catch (e) {
-        errors.push(`${file.name}: ${e instanceof Error ? e.message : '업로드 실패'}`);
+        errors.push(`Ch.${String(lessonCh).padStart(2,'0')}: ${e instanceof Error ? e.message : '업로드 실패'}`);
       }
-      setUploadProgress({ done: i + 1, total: files.length });
+      done += entries.length;
+      setUploadProgress({ done, total: files.length });
     }
 
     setAudioUploading(false);
     if (audioFileRef.current) audioFileRef.current.value = '';
 
-    if (errors.length > 0) {
-      setUploadError(errors.join(' | '));
-    }
+    if (errors.length > 0) setUploadError(errors.join(' | '));
     if (uploadedChapters.length > 0) {
       const chList = [...new Set(uploadedChapters)].sort((a, b) => a - b)
         .map(n => `Ch.${String(n).padStart(2, '0')}`).join(', ');
