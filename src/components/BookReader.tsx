@@ -315,18 +315,127 @@ function findMp3Sync(b: Uint8Array, start: number): number {
   return start;
 }
 
+// Parse the MPEG audio frame at offset `i`. Returns its geometry, or null when
+// the bytes there are not a valid Layer III frame header.
+function parseMp3Frame(b: Uint8Array, i: number) {
+  if (i + 4 > b.length) return null;
+  if (b[i] !== 0xFF || (b[i + 1] & 0xE0) !== 0xE0) return null;
+  const verBits   = (b[i + 1] >> 3) & 0x3;   // 0=MPEG2.5, 2=MPEG2, 3=MPEG1
+  const layerBits = (b[i + 1] >> 1) & 0x3;   // 1=Layer III
+  if (layerBits !== 1) return null;
+  const brIdx    = (b[i + 2] >> 4) & 0xF;
+  const srIdx    = (b[i + 2] >> 2) & 0x3;
+  const padding  = (b[i + 2] >> 1) & 0x1;
+  const chanMode = (b[i + 3] >> 6) & 0x3;     // 3=mono
+  if (brIdx === 0 || brIdx === 0xF || srIdx === 3) return null;
+  const BR_V1  = [0,32,40,48,56,64,80,96,112,128,160,192,224,256,320,0];
+  const BR_V2  = [0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,0];
+  const SR_V1  = [44100,48000,32000,0];
+  const SR_V2  = [22050,24000,16000,0];
+  const SR_V25 = [11025,12000,8000,0];
+  let bitrate = 0, sampleRate = 0, samples = 0, sideInfo = 0;
+  if (verBits === 3)      { bitrate = BR_V1[brIdx]; sampleRate = SR_V1[srIdx];  samples = 1152; sideInfo = chanMode === 3 ? 17 : 32; }
+  else if (verBits === 2) { bitrate = BR_V2[brIdx]; sampleRate = SR_V2[srIdx];  samples = 576;  sideInfo = chanMode === 3 ? 9  : 17; }
+  else if (verBits === 0) { bitrate = BR_V2[brIdx]; sampleRate = SR_V25[srIdx]; samples = 576;  sideInfo = chanMode === 3 ? 9  : 17; }
+  else return null;
+  if (!bitrate || !sampleRate) return null;
+  const frameLen = Math.floor((samples / 8 * bitrate * 1000) / sampleRate) + padding;
+  if (frameLen < 4) return null;
+  return { frameLen, samples, sampleRate, sideInfo, verBits, srIdx, chanMode };
+}
+
+// True when the frame at `start` carries a Xing/Info VBR header rather than audio.
+function isXingFrame(b: Uint8Array, start: number, sideInfo: number): boolean {
+  const k = start + 4 + sideInfo;
+  if (k + 4 > b.length) return false;
+  return (b[k] === 0x58 && b[k + 1] === 0x69 && b[k + 2] === 0x6e && b[k + 3] === 0x67) || // "Xing"
+         (b[k] === 0x49 && b[k + 1] === 0x6e && b[k + 2] === 0x66 && b[k + 3] === 0x6f);   // "Info"
+}
+
+// Build a single Xing-header frame describing the *merged* stream, so the player
+// reports the right duration and seeks accurately. A stale per-segment header
+// (carried over from the first input file) is the classic cause of "playback is
+// fine but tapping to seek jumps to the wrong place / desyncs".
+function buildXingFrame(
+  tmpl: { verBits: number; srIdx: number; chanMode: number },
+  audioFrames: number, frameOffsets: number[], frameTimes: number[],
+  totalDuration: number, bodyLength: number,
+): Uint8Array {
+  const brIdx      = tmpl.verBits === 3 ? 9 : 12;        // 128 kbps in both tables
+  const samples    = tmpl.verBits === 3 ? 1152 : 576;
+  const sampleRate = (tmpl.verBits === 3 ? [44100,48000,32000,0]
+                    : tmpl.verBits === 2 ? [22050,24000,16000,0]
+                    : [11025,12000,8000,0])[tmpl.srIdx];
+  const sideInfo = tmpl.verBits === 3 ? (tmpl.chanMode === 3 ? 17 : 32)
+                                      : (tmpl.chanMode === 3 ? 9  : 17);
+  const frameLen = Math.floor((samples / 8 * 128 * 1000) / sampleRate);
+  const f = new Uint8Array(new ArrayBuffer(frameLen)); // zero-filled (silent) frame
+  f[0] = 0xFF;
+  f[1] = 0xE0 | (tmpl.verBits << 3) | (1 << 1) | 1; // sync + version + Layer III + no CRC
+  f[2] = (brIdx << 4) | (tmpl.srIdx << 2);          // bitrate + samplerate, no padding
+  f[3] = (tmpl.chanMode << 6);
+  const x = 4 + sideInfo;
+  f[x] = 0x58; f[x + 1] = 0x69; f[x + 2] = 0x6e; f[x + 3] = 0x67; // "Xing"
+  const totalBytes = frameLen + bodyLength;
+  const w32 = (o: number, v: number) => { f[o] = (v >>> 24) & 0xff; f[o + 1] = (v >>> 16) & 0xff; f[o + 2] = (v >>> 8) & 0xff; f[o + 3] = v & 0xff; };
+  w32(x + 4, 0x0007);       // flags: frames | bytes | TOC
+  w32(x + 8, audioFrames);  // total audio frames (excludes this header frame)
+  w32(x + 12, totalBytes);  // total stream bytes
+  const tocOff = x + 16;
+  for (let k = 0; k < 100; k++) {
+    const target = (k / 100) * totalDuration;
+    let lo = 0, hi = frameTimes.length - 1, idx = 0;
+    while (lo <= hi) { const mid = (lo + hi) >> 1; if (frameTimes[mid] <= target) { idx = mid; lo = mid + 1; } else hi = mid - 1; }
+    const fileByte = frameLen + frameOffsets[idx];
+    let v = Math.floor(256 * fileByte / totalBytes);
+    if (v < 0) v = 0; if (v > 255) v = 255;
+    f[tocOff + k] = v;
+  }
+  return f;
+}
+
 async function mergeMp3Files(files: File[]): Promise<Blob> {
-  const segments: BlobPart[] = [];
+  const parts: Uint8Array[] = [];
   for (let idx = 0; idx < files.length; idx++) {
     const bytes = new Uint8Array(await files[idx].arrayBuffer());
     let start = skipId3v2(bytes);
     start = findMp3Sync(bytes, start);
+    // Drop a leading Xing/Info VBR header frame: it describes only this one file
+    // and would otherwise mislead the player about the whole merged stream.
+    const f = parseMp3Frame(bytes, start);
+    if (f && isXingFrame(bytes, start, f.sideInfo)) start += f.frameLen;
     // Strip trailing ID3v1 from every file except the last so the player
     // doesn't stop early at an embedded tag mid-stream.
     const end = idx < files.length - 1 ? trimId3v1(bytes) : bytes.length;
-    segments.push(bytes.subarray(start, end));
+    parts.push(bytes.subarray(start, end));
   }
-  return new Blob(segments, { type: 'audio/mpeg' });
+
+  // Concatenate the raw audio frames into a single body buffer.
+  const bodyLength = parts.reduce((n, p) => n + p.length, 0);
+  const body = new Uint8Array(new ArrayBuffer(bodyLength));
+  let o = 0;
+  for (const p of parts) { body.set(p, o); o += p.length; }
+
+  // Walk the body to measure frame count / timing, then prepend a correct Xing
+  // header so duration and seeking are accurate for the merged file.
+  const offsets: number[] = [];
+  const times: number[] = [];
+  let duration = 0, i = 0;
+  let tmpl: { verBits: number; srIdx: number; chanMode: number } | null = null;
+  while (i + 4 <= body.length) {
+    const fr = parseMp3Frame(body, i);
+    if (!fr) { i++; continue; }
+    if (!tmpl) tmpl = { verBits: fr.verBits, srIdx: fr.srIdx, chanMode: fr.chanMode };
+    offsets.push(i);
+    times.push(duration);
+    duration += fr.samples / fr.sampleRate;
+    i += fr.frameLen;
+  }
+  if (!tmpl || offsets.length === 0) {
+    return new Blob([body as BlobPart], { type: 'audio/mpeg' }); // unparseable — plain concat
+  }
+  const header = buildXingFrame(tmpl, offsets.length, offsets, times, duration, bodyLength);
+  return new Blob([header as BlobPart, body as BlobPart], { type: 'audio/mpeg' });
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
