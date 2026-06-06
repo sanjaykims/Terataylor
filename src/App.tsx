@@ -65,7 +65,7 @@ async function migrateFromLocalStorage(): Promise<void> {
 
 export default function App() {
   const [appReady,  setAppReady]  = useState(false);
-  const [mainTab,   setMainTab]   = useState<MainTab>('a2');
+  const [mainTab,   setMainTab]   = useState<MainTab>('v1');
   const [a2Tab,     setA2Tab]     = useState<A2Tab>('shadowing');
   const [v1Tab,     setV1Tab]     = useState<V1Tab>('reading');
   const [showA2Input, setShowA2Input] = useState(true);
@@ -171,8 +171,8 @@ export default function App() {
 
   // ── Session tracking ─────────────────────────────────────────────────────
   const sessionStart   = useRef(Date.now());
-  const currentMode    = useRef<'a2' | 'v1'>('a2');
-  const currentFeature = useRef<string>('shadowing');
+  const currentMode    = useRef<'a2' | 'v1'>('v1');
+  const currentFeature = useRef<string>('reading');
 
   const flushSession = () => {
     trackSession(currentMode.current, currentFeature.current, (Date.now() - sessionStart.current) / 1000);
