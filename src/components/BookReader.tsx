@@ -459,19 +459,20 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       loadChapterVocab(bid, chapter).catch(() => null),
     ]);
     setEnText(en);
-    // Detect misalignment: count mismatch, trailing empty-line padding, or attribution
-    // fragments (short standalone 말했다/물었다 lines). When any condition is found,
-    // silently re-translate in the background using the fixed edge function so the
-    // data self-heals on first load and is correct on every subsequent load.
+    // Self-heal only on UNAMBIGUOUS corruption signals so we never overwrite a
+    // correctly-aligned translation:
+    //   • line count ≠ English sentence count  → not stored one-per-sentence
+    //   • trailing empty-line padding (a blank line) → legacy "aligned" artifact
+    // Correctly-aligned data (N lines, no blanks, N == enCount) is left untouched.
+    // A short line ending in 말했다/물었다 is NOT a corruption signal — a one-line
+    // "「…」 said X." is perfectly valid and must not trigger a re-translation.
     const finalKo = ko;
     if (en && ko) {
       const koRaw = ko.split('\n');
       const koLines = koRaw.map((s: string) => s.trim()).filter(Boolean);
       const enCount = splitToSentences(en).length;
-      const ATTR_FRAG = /(?:말했다|물었다|대답했다|속삭였다|외쳤다|소리쳤다|중얼거렸다)[.。]?\s*$/;
-      const hasAttrFrags = koLines.some(l => l.length <= 20 && ATTR_FRAG.test(l));
       const hasPadding = koRaw.length > koLines.length + 1;
-      if ((koLines.length !== enCount || hasAttrFrags || hasPadding) && koLines.length > 0 && enCount > 0) {
+      if ((koLines.length !== enCount || hasPadding) && koLines.length > 0 && enCount > 0) {
         const seq = ++loadSeqRef.current;
         translateSentences(en, () => {}).then(newKo => {
           if (loadSeqRef.current !== seq) return;
