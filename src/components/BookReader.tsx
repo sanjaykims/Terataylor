@@ -430,7 +430,19 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       loadChapterVocab(bid, chapter).catch(() => null),
     ]);
     setEnText(en);
-    setKoText(ko);
+    // Auto-realign Korean if sentence count doesn't match English
+    let finalKo = ko;
+    if (en && ko) {
+      const enCount = splitToSentences(en).length;
+      const koLines = ko.includes('\n') && !ko.includes('\n\n')
+        ? ko.split('\n').map((s: string) => s.trim()).filter(Boolean)
+        : splitToSentences(ko);
+      if (koLines.length !== enCount && koLines.length > 0 && enCount > 0) {
+        finalKo = alignKoreanToEnglish(koLines, enCount).join('\n');
+        saveChapterKo(bid, chapter, finalKo).catch(() => {});
+      }
+    }
+    setKoText(finalKo);
     setAudioUrl(audio);
     setTimings(times);
     setNextChapHasAudio(!!nextAudio);
@@ -701,7 +713,6 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         : splitToSentences(koText))                      // legacy paragraph format
     : [];
   const maxRows = Math.max(enRows.length, koRows.length);
-  const hasMismatch = koRows.length > 0 && koRows.length !== enRows.length;
 
   // Start time (seconds) of each sentence. Prefer REAL per-sentence times from
   // speech alignment; fall back to a word-count estimate until analysis is run.
@@ -1063,18 +1074,6 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           </button>
         </div>
       )}
-      {hasMismatch && !translating && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
-          <span className="text-xs text-amber-700">
-            ⚠️ 번역 문장 수({koRows.length})가 영어 문장 수({enRows.length})와 달라 위치가 어긋나 있어요. 재번역하면 자동으로 맞춰집니다.
-          </span>
-          <button onClick={handleTranslate}
-            className="shrink-0 px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-semibold hover:bg-amber-600 transition-all">
-            🔄 재번역
-          </button>
-        </div>
-      )}
-
       {/* Chapter audio — shadowing with real-time sentence highlight */}
       {!chapterLoading && enText && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
