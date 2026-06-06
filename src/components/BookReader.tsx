@@ -379,11 +379,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const [analyzeMsg,    setAnalyzeMsg]    = useState('');
   const [audioUploadMsg,setAudioUploadMsg]= useState('');
   const [uploadProgress,setUploadProgress]= useState({ done: 0, total: 0 });
-  const isSeekingRef        = useRef(false);
-  const seekFloorTimeRef    = useRef(-1); // audio-position floor past cluster end; -1 = none
-  const seekProtectUntilRef = useRef(0);  // wall-clock guard: programmatic seek window
-  const seekTargetRef       = useRef(-1); // audio position we sought to; stale-read guard
-  const seekConfirmedRef    = useRef(false); // true once a TU near the target has been seen
+  const isSeekingRef = useRef(false); // true while a programmatic seek is in flight
+  const seekTargetRef = useRef(-1);   // position a tap sought to; -1 once the audio lands there
   const [debugLogs, setDebugLogs] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
   const debugLogsRef = useRef<string[]>([]);
@@ -445,11 +442,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setAnalyzeMsg('');
     setMergeMsg('');
     setNextChapHasAudio(false);
-    isSeekingRef.current        = false;
-    seekFloorTimeRef.current    = -1;
-    seekProtectUntilRef.current = 0;
-    seekTargetRef.current       = -1;
-    seekConfirmedRef.current    = false;
+    isSeekingRef.current  = false;
+    seekTargetRef.current = -1;
     const [en, ko, audio, times, nextAudio, vocab] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
@@ -800,29 +794,21 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   }, [timings, enText, audioDuration]);
 
   // ── Sentence + word sync via timeupdate ──────────────────────────────────
+  // Map the audio position to the active sentence. Tap-to-seek uses the SAME
+  // sentenceStarts array that drives natural playback, so seeking to a sentence
+  // and playing into it land on the identical mapping — no special cases needed
+  // beyond (a) ignoring stale pre-seek timeupdates and (b) absorbing the one-
+  // cycle MP3 frame-snap that can read ~26 ms before the target.
   const syncHighlight = () => {
     const t = audioRef.current?.currentTime ?? 0;
     if (sentenceStarts.length === 0) return;
 
-    // Guard 0 — pre-confirmation stale: block timeupdates where t is far from
-    // the seek target until we see a real post-seek t close to it.
-    //
-    // Window = min(90% of the gap to the floor, 1.0s).
-    // This ensures a stale t that passes Guard 0 is always BELOW the floor
-    // (since stale_t ≤ target + window < target + gap = floor), so Guard 2
-    // will still hold it.  Minimum non-cluster gap in this dataset is 1.107s,
-    // so window ≤ min(0.996, 1.0) = 0.996s — always safe.
-    if (seekTargetRef.current >= 0 && !seekConfirmedRef.current) {
-      const gap = seekFloorTimeRef.current >= 0
-        ? seekFloorTimeRef.current - seekTargetRef.current
-        : Infinity;
-      const window = Math.min(gap * 0.9, 1.0);
-      if (Math.abs(t - seekTargetRef.current) > window) {
-        dlog('[SYNC] G0 stale: t='+t.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3)+' win='+window.toFixed(3));
-        return;
-      }
-      seekConfirmedRef.current = true;
-      dlog('[SYNC] G0 confirmed: t='+t.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3)+' win='+window.toFixed(3));
+    // (a) Right after a tap-to-seek the browser may still emit a timeupdate
+    // carrying the PRE-seek position. Ignore those until the audio actually
+    // lands near the requested sentence, then resume normal tracking.
+    if (seekTargetRef.current >= 0) {
+      if (Math.abs(t - seekTargetRef.current) > 0.5) return;
+      seekTargetRef.current = -1;
     }
 
     let idx = 0;
@@ -830,29 +816,14 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       if (t >= sentenceStarts[i]) idx = i; else break;
     }
 
-    // Guard 1 — backward-blip: MP3 frame snap lands ~26ms before target,
-    // making idx = i-1 for one cycle. Ignore while still within 150ms.
-    if (idx === activeIdx - 1 && activeIdx > 0) {
-      if (t >= sentenceStarts[activeIdx] - 0.15) return;
-    }
+    // (b) Backward-blip: an MP3 frame-snap can land just before the target for
+    // a single cycle, making idx = activeIdx-1. Hold while within 0.2 s below.
+    if (idx === activeIdx - 1 && activeIdx > 0 && t >= sentenceStarts[activeIdx] - 0.2) return;
 
-    // Guard 2 — cluster floor: hold highlight at tapped sentence until audio
-    // genuinely exits the tight cluster. Clear seekTargetRef and confirmed
-    // flag once settled so subsequent natural playback is unguarded.
-    if (seekFloorTimeRef.current >= 0) {
-      if (t < seekFloorTimeRef.current) return;
-      dlog('[SYNC] G2 floor cleared: t='+t.toFixed(3)+' idx='+idx);
-      seekFloorTimeRef.current = -1;
-      seekTargetRef.current    = -1;
-      seekConfirmedRef.current = false;
-    }
-
-    if (idx !== activeIdx) {
-      dlog('[SYNC] idx '+activeIdx+'→'+idx+' t='+t.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
-    }
+    if (idx !== activeIdx) dlog('[SYNC] '+activeIdx+'→'+idx+' t='+t.toFixed(3));
     setActiveIdx(idx);
 
-    // Word-level karaoke within the active sentence
+    // Word-level karaoke within the active sentence.
     const sentStart = sentenceStarts[idx];
     const sentEnd   = idx + 1 < sentenceStarts.length
       ? sentenceStarts[idx + 1]
@@ -863,71 +834,35 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   };
 
   const handleAudioTimeUpdate = () => {
-    const t = audioRef.current?.currentTime ?? 0;
-    if (isSeekingRef.current) {
-      dlog('[TU-BLK] t='+t.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
-      return;
-    }
-    if (seekFloorTimeRef.current >= 0 || seekTargetRef.current >= 0) {
-      dlog('[TU] t='+t.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
-    }
+    if (isSeekingRef.current) return;
     syncHighlight();
   };
 
-  const handleSeeking = () => {
-    const t = audioRef.current?.currentTime ?? 0;
-    dlog('[SEEKING] t='+t.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3)+' prot='+(Date.now() <= seekProtectUntilRef.current));
-    isSeekingRef.current = true;
-    if (Date.now() > seekProtectUntilRef.current) {
-      seekFloorTimeRef.current = -1;
-    }
-    setTimeout(() => { isSeekingRef.current = false; }, 1000);
-  };
-
-  const handleSeeked = () => {
-    const t = audioRef.current?.currentTime ?? 0;
-    dlog('[SEEKED] t='+t.toFixed(3)+' fl='+seekFloorTimeRef.current.toFixed(3)+' tgt='+seekTargetRef.current.toFixed(3));
-    isSeekingRef.current = false;
-  };
+  const handleSeeking = () => { isSeekingRef.current = true; };
+  const handleSeeked  = () => { isSeekingRef.current = false; };
 
   const seekToSentence = (i: number) => {
-    if (!audioRef.current || i >= sentenceStarts.length) return;
+    const audio = audioRef.current;
+    if (!audio || i < 0 || i >= sentenceStarts.length) return;
+    const target = sentenceStarts[i];
 
-    const audioBeforeSeek = audioRef.current.currentTime;
-
-    // Compute cluster end: advance while consecutive gap < 0.7s.
-    let clusterEnd = i;
-    while (
-      clusterEnd + 1 < sentenceStarts.length &&
-      sentenceStarts[clusterEnd + 1] - sentenceStarts[clusterEnd] < 0.7
-    ) {
-      clusterEnd++;
-    }
-    const floor = clusterEnd + 1 < sentenceStarts.length
-      ? sentenceStarts[clusterEnd + 1]
-      : Infinity;
-    seekFloorTimeRef.current = floor;
-
-    seekTargetRef.current       = sentenceStarts[i];
-    seekConfirmedRef.current    = false;
-    seekProtectUntilRef.current = Date.now() + 500;
-    isSeekingRef.current        = true;
-    // Clear the debug log so the TAP line is always visible at the top
-    debugLogsRef.current = [];
-    setDebugLogs([]);
+    // Ignore stale pre-seek timeupdates until the audio lands at `target`.
+    seekTargetRef.current = target;
+    isSeekingRef.current  = true;
     setActiveIdx(i);
     setActiveWordIdx(0);
-    dlog('[TAP] i='+i+' tgt='+sentenceStarts[i]?.toFixed(3)+' fl='+floor.toFixed(3)+' before='+audioBeforeSeek.toFixed(3));
+    debugLogsRef.current = [];
+    setDebugLogs([]);
+    dlog('[TAP] i='+i+' tgt='+target.toFixed(3));
     try {
-      audioRef.current.currentTime = sentenceStarts[i];
-      const audioAfterSeek = audioRef.current.currentTime;
-      dlog('[TAP] after='+audioAfterSeek.toFixed(3)+' delta='+(audioAfterSeek-sentenceStarts[i]).toFixed(3));
-      if (audioRef.current.paused) audioRef.current.play().catch(() => {});
+      audio.currentTime = target;
+      if (audio.paused) audio.play().catch(() => {});
     } catch {
-      isSeekingRef.current = false;
-      return;
+      seekTargetRef.current = -1;
     }
-    // No 300ms timer here — isSeekingRef is cleared by handleSeeked.
+    // Safety net: clear the in-flight flag even if the browser omits 'seeked'
+    // for a tiny jump, so timeupdates aren't blocked forever.
+    window.setTimeout(() => { isSeekingRef.current = false; }, 400);
   };
 
   // Keep the active sentence in view while audio plays (scroll whichever
@@ -1176,7 +1111,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                 onTimeUpdate={handleAudioTimeUpdate}
                 onSeeking={handleSeeking}
                 onSeeked={handleSeeked}
-                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); isSeekingRef.current = false; seekFloorTimeRef.current = -1; }}
+                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); isSeekingRef.current = false; seekTargetRef.current = -1; }}
               />
 
               {/* Real speech alignment */}
@@ -1310,7 +1245,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           overflowY:'auto', wordBreak:'break-all',
         }}>
           <div style={{color:'#94a3b8', marginBottom:4}}>
-            activeIdx={activeIdx} | seekTarget={seekTargetRef.current.toFixed(1)} | floor={seekFloorTimeRef.current.toFixed(1)} | isSeeking={String(isSeekingRef.current)}
+            activeIdx={activeIdx} | seekTarget={seekTargetRef.current.toFixed(1)} | isSeeking={String(isSeekingRef.current)}
           </div>
           {debugLogs.length === 0
             ? <div style={{color:'#64748b'}}>No logs yet. Tap a sentence.</div>
