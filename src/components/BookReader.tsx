@@ -483,6 +483,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const [activeIdx,     setActiveIdx]     = useState(-1);
   const [activeWordIdx, setActiveWordIdx] = useState(-1);
   const [audioDuration, setAudioDuration] = useState(0);
+  const [audioCurrentTime, setAudioCurrentTime] = useState(0);
+  const [isPlaying,     setIsPlaying]     = useState(false);
+  const [playbackRate,  setPlaybackRate]  = useState(1);
   const [timings,       setTimings]       = useState<number[] | null>(null);
   const [analyzing,     setAnalyzing]     = useState(false);
   const [analyzeMsg,    setAnalyzeMsg]    = useState('');
@@ -956,6 +959,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   };
 
   const handleAudioTimeUpdate = () => {
+    const t = audioRef.current?.currentTime ?? 0;
+    setAudioCurrentTime(t);
     if (isSeekingRef.current) return;
     syncHighlight();
   };
@@ -1065,7 +1070,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
 
   // ── Reader view ───────────────────────────────────────────────────────────
   return (
-    <div className="space-y-3">
+    <div className={`space-y-3 ${audioUrl ? 'pb-28' : ''}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -1220,14 +1225,15 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
             <>
               <audio
                 ref={audioRef}
-                controls
                 src={audioUrl}
-                className="w-full rounded-xl"
+                className="hidden"
                 onLoadedMetadata={e => setAudioDuration(e.currentTarget.duration || 0)}
                 onTimeUpdate={handleAudioTimeUpdate}
                 onSeeking={handleSeeking}
                 onSeeked={handleSeeked}
-                onEnded={() => { setActiveIdx(-1); setActiveWordIdx(-1); isSeekingRef.current = false; seekTargetRef.current = -1; }}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => { setIsPlaying(false); setActiveIdx(-1); setActiveWordIdx(-1); isSeekingRef.current = false; seekTargetRef.current = -1; }}
               />
 
               {/* Real speech alignment */}
@@ -1343,10 +1349,80 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         </div>
       )}
 
+      {/* ── STICKY AUDIO PLAYER BAR ── */}
+      {audioUrl && (() => {
+        const fmt = (s: number) => {
+          const m = Math.floor(s / 60);
+          const sec = Math.floor(s % 60);
+          return `${m}:${sec.toString().padStart(2, '0')}`;
+        };
+        const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5];
+        const togglePlay = () => {
+          const a = audioRef.current;
+          if (!a) return;
+          if (a.paused) a.play().catch(() => {});
+          else a.pause();
+        };
+        const changeSpeed = (rate: number) => {
+          setPlaybackRate(rate);
+          if (audioRef.current) audioRef.current.playbackRate = rate;
+        };
+        const seek = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const t = Number(e.target.value);
+          if (audioRef.current) audioRef.current.currentTime = t;
+          setAudioCurrentTime(t);
+        };
+        return (
+          <div style={{
+            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9990,
+            background: 'rgba(15,23,42,0.96)', backdropFilter: 'blur(8px)',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            padding: '10px 16px 10px 16px',
+            display: 'flex', flexDirection: 'column', gap: 6,
+          }}>
+            {/* Progress scrubber */}
+            <input type="range" min={0} max={audioDuration || 100} step={0.5}
+              value={audioCurrentTime}
+              onChange={seek}
+              style={{ width: '100%', accentColor: '#6366f1', cursor: 'pointer', height: 4 }}
+            />
+            {/* Controls row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {/* Play / Pause */}
+              <button onClick={togglePlay} style={{
+                width: 40, height: 40, borderRadius: '50%', border: 'none',
+                background: '#6366f1', color: '#fff', fontSize: 18,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', flexShrink: 0,
+              }}>
+                {isPlaying ? '⏸' : '▶'}
+              </button>
+              {/* Time */}
+              <span style={{ color: '#94a3b8', fontSize: 12, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
+                {fmt(audioCurrentTime)} / {fmt(audioDuration)}
+              </span>
+              {/* Speed buttons */}
+              <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>
+                {SPEEDS.map(s => (
+                  <button key={s} onClick={() => changeSpeed(s)} style={{
+                    padding: '3px 8px', borderRadius: 6, border: 'none',
+                    background: playbackRate === s ? '#6366f1' : 'rgba(255,255,255,0.1)',
+                    color: playbackRate === s ? '#fff' : '#94a3b8',
+                    fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                  }}>
+                    {s}×
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ── DEBUG OVERLAY ── tap the button to show/hide ── */}
       <button
         onClick={() => setShowDebug(v => !v)}
-        style={{ position:'fixed', bottom:16, right:16, zIndex:9999,
+        style={{ position:'fixed', bottom: audioUrl ? 88 : 16, right:16, zIndex:9999,
           background:'#1e293b', color:'#f8fafc', border:'none',
           borderRadius:8, padding:'6px 12px', fontSize:12, opacity:0.85 }}
       >
@@ -1354,7 +1430,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       </button>
       {showDebug && (
         <div style={{
-          position:'fixed', bottom:52, right:8, left:8, zIndex:9998,
+          position:'fixed', bottom: audioUrl ? 140 : 52, right:8, left:8, zIndex:9998,
           background:'rgba(15,23,42,0.95)', color:'#86efac',
           fontFamily:'monospace', fontSize:11, lineHeight:1.5,
           borderRadius:10, padding:10, maxHeight:'50vh',
