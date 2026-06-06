@@ -875,7 +875,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       {/* Chapter selector — only show chapters in the current lesson range */}
       {(() => {
         const visibleChapters = lessonChapterRange
-          ? Array.from({ length: lessonChapterRange[1] - lessonChapterRange[0] + 1 }, (_, i) => lessonChapterRange[0] + i)
+          ? Array.from({ length: lessonChapterRange[1] }, (_, i) => i + 1)
               .filter(ch => ch <= totalChapters)
           : Array.from({ length: totalChapters }, (_, i) => i + 1);
         return (
