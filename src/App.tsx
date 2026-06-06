@@ -193,8 +193,6 @@ export default function App() {
   const a2TextSummary  = a2Text  ? `저장됨 (${wc(a2Text)}단어)` : undefined;
   const a2VocabSummary = a2Vocab?.length ? `저장됨 (${a2Vocab.length}개)` : undefined;
 
-  const bk = BOOKS[v1Book];
-
   const containerW = 'max-w-[1600px]';
 
   // ── Loading screen ───────────────────────────────────────────────────────
