@@ -244,11 +244,17 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
                   isStudied ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                 }`}>✓</button>
 
-              {/* 🔊 pronunciation button */}
+              {/* Pronunciation button (American English) */}
               <button onClick={e => speakWord(e, item.word)}
                 title="발음 듣기 (미국식)"
-                className="absolute bottom-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all bg-gray-100 text-gray-400 hover:bg-blue-100 hover:text-blue-500">
-                🔊
+                aria-label="발음 듣기"
+                className="absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center bg-blue-500 text-white shadow-md hover:bg-blue-600 active:scale-90 transition-all z-10">
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor"
+                  strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none" />
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                </svg>
               </button>
 
               {/* State 0: Korean meaning (default) */}
@@ -281,7 +287,7 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
                     <div
                       onClick={e => handleWordClick(e, i)}
                       title="클릭하면 사라져요"
-                      className="text-base font-extrabold text-gray-800 border-t border-indigo-300 pt-1 mt-1 cursor-pointer hover:line-through hover:text-gray-400 transition-all">
+                      className="text-base font-extrabold text-gray-800 border-t border-indigo-300 pt-1 mt-1 pr-9 cursor-pointer hover:line-through hover:text-gray-400 transition-all">
                       {item.word}
                     </div>
                   )}
@@ -298,7 +304,7 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
 
               {/* Studied state: show word crossed out */}
               {isStudied && (
-                <div className="font-bold text-base pr-7 text-gray-400 line-through">
+                <div className="font-bold text-base pr-9 text-gray-400 line-through">
                   {item.word}
                 </div>
               )}
