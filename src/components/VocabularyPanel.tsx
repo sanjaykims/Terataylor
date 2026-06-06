@@ -147,6 +147,20 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defs]);
 
+  // ── Pronunciation ─────────────────────────────────────────────────────
+  const speakWord = useCallback((e: React.MouseEvent, word: string) => {
+    e.stopPropagation();
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(word);
+    utt.lang = 'en-US';
+    utt.rate = 0.85;
+    const voices = window.speechSynthesis.getVoices();
+    const usVoice = voices.find(v => v.lang === 'en-US') ?? voices.find(v => v.lang.startsWith('en'));
+    if (usVoice) utt.voice = usVoice;
+    window.speechSynthesis.speak(utt);
+  }, []);
+
   // ── Click handlers ────────────────────────────────────────────────────
   const handleCardClick = (i: number) => {
     if (studied.has(i)) return;
@@ -230,6 +244,13 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
                   isStudied ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                 }`}>✓</button>
 
+              {/* 🔊 pronunciation button */}
+              <button onClick={e => speakWord(e, item.word)}
+                title="발음 듣기 (미국식)"
+                className="absolute bottom-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all bg-gray-100 text-gray-400 hover:bg-blue-100 hover:text-blue-500">
+                🔊
+              </button>
+
               {/* State 0: Korean meaning (default) */}
               {!isStudied && (
                 <div className="space-y-1">
@@ -287,7 +308,7 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
       </div>
 
       <p className="text-xs text-gray-400 text-center">
-        💡 기본: 🇰🇷 한국어 뜻 &nbsp;·&nbsp; 1클릭 → 🇺🇸 영어 뜻 &nbsp;·&nbsp; 2클릭 → 영어 단어 &nbsp;·&nbsp; ✓ 체크 단어만 게임에서 연습
+        💡 기본: 🇰🇷 한국어 뜻 &nbsp;·&nbsp; 1클릭 → 🇺🇸 영어 뜻 &nbsp;·&nbsp; 2클릭 → 영어 단어 &nbsp;·&nbsp; 🔊 발음 듣기 &nbsp;·&nbsp; ✓ 체크 단어만 게임에서 연습
       </p>
     </div>
   );
