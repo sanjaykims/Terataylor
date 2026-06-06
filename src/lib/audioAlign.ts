@@ -1,12 +1,14 @@
-// Audio-text alignment — v5 global alignment
+// Audio-text alignment — v5 global ("fitting") alignment
 //
 // 1. Transcribe the chapter to word-level timestamps (Deepgram in production,
 //    Whisper/transformers.js as an offline fallback). Each word carries an
 //    individually accurate start time.
-// 2. Globally align the audio word stream to the book's text word stream with a
-//    banded Needleman–Wunsch (see `alignByNW`). Because the match is optimised
-//    over the whole chapter, repeated common words can never pull a sentence to
-//    the wrong occurrence — the failure mode of greedy/anchor matching.
+// 2. Align the audio word stream to the book's text word stream with a
+//    semi-global Needleman–Wunsch (see `alignByNW`). The match is optimised over
+//    the whole chapter, so repeated common words can never pull a sentence to
+//    the wrong occurrence (the failure mode of greedy/anchor matching), and
+//    leading/trailing audio is free, so intro music or trailing next-chapter
+//    bleed does not drag the sentences out of place.
 // 3. Each sentence's start is the audio time of its first matched word; any
 //    word the transcript missed is filled by interpolation between neighbours.
 //
@@ -132,14 +134,17 @@ async function buildAudioWordList(
   return result;
 }
 
-// ── Banded Needleman–Wunsch global alignment ──────────────────────────────────
+// ── Semi-global ("fitting") Needleman–Wunsch alignment ────────────────────────
 // Aligns the audio word stream (from ASR, with per-word start times) to the
 // flat text word stream, then reads each sentence's start from the audio time
-// of its first matched word. Because the match is optimised globally, repeated
-// common words ("and", "he", "the") can never pull a sentence to the wrong
-// occurrence — the failure mode that derails greedy/anchor-and-interpolate
-// matching. The diagonal band keeps memory and time linear in chapter length,
-// so even a 60-minute chapter aligns in well under a second on a phone.
+// of its first matched word. Two properties make this robust where greedy /
+// anchor-and-interpolate matching fails:
+//   • Global optimisation — repeated common words ("and", "he", "the") can
+//     never pull a sentence to the wrong occurrence.
+//   • Semi-global ends — leading and trailing audio are skipped for free, so
+//     intro music, a count-in, or a trailing next-chapter bleed does not drag
+//     the sentences out of place; the text is fit into its contiguous region of
+//     the audio. (Gaps in the MIDDLE stay penalised, keeping the text together.)
 //
 // aNorm/aTime: normalised audio words and their start times (same length).
 // Returns one start time (seconds) per sentence, strictly increasing.
@@ -159,54 +164,46 @@ function alignByNW(aNorm: string[], aTime: number[], sentences: string[]): numbe
   const n = aNorm.length, m = T.length;
   if (n === 0 || m === 0) return new Array(nSent).fill(0);
 
-  const MATCH = 2, MIS = -2, GAP = -1, NEG = -1e9;
-  const ratio = m / n;
-  // Band half-width: wide enough to absorb the length difference plus local
-  // insertions/deletions (ASR errors, narrator deviations) with generous slack.
-  const W = Math.min(m, Math.max(250, Math.abs(n - m) + 200));
-  const span = 2 * W + 1;
-  const center = (i: number) => Math.round(i * ratio);
-  const dp = new Float64Array((n + 1) * span); dp.fill(NEG);
-  const tb = new Int8Array((n + 1) * span); // 0=diag, 1=gap-in-text, 2=gap-in-audio
-  const idxOf = (i: number, j: number) => {
-    const bj = j - (center(i) - W);
-    return (bj < 0 || bj >= span) ? -1 : i * span + bj;
-  };
+  // wtime[j] = matched audio start time of text word j (-1 until matched).
+  const wtime = new Float64Array(m).fill(-1);
 
-  // Initialise first audio row (all-gap prefix of text).
-  { const c0 = center(0);
-    for (let j = Math.max(0, c0 - W); j <= Math.min(m, c0 + W); j++) {
-      const id = idxOf(0, j); if (id >= 0) { dp[id] = j * GAP; tb[id] = 2; }
-    } }
-
-  for (let i = 1; i <= n; i++) {
-    const ci = center(i), jlo = Math.max(0, ci - W), jhi = Math.min(m, ci + W);
-    const ai = aNorm[i - 1];
-    for (let j = jlo; j <= jhi; j++) {
-      const cur = idxOf(i, j); if (cur < 0) continue;
-      if (j === 0) { dp[cur] = i * GAP; tb[cur] = 1; continue; }
-      let best = NEG, dir = 0;
-      const d = idxOf(i - 1, j - 1);
-      if (d >= 0 && dp[d] > NEG) { const v = dp[d] + (ai === T[j - 1] ? MATCH : MIS); if (v > best) { best = v; dir = 0; } }
-      const u = idxOf(i - 1, j);
-      if (u >= 0 && dp[u] > NEG) { const v = dp[u] + GAP; if (v > best) { best = v; dir = 1; } }
-      const l = idxOf(i, j - 1);
-      if (l >= 0 && dp[l] > NEG) { const v = dp[l] + GAP; if (v > best) { best = v; dir = 2; } }
-      dp[cur] = best; tb[cur] = dir;
+  // Full-matrix DP is O(n·m): trivial for a normal chapter (audio ≈ text) but it
+  // would blow up if an entire audiobook were uploaded as one chapter's audio,
+  // so cap it and fall back to a proportional estimate for pathological inputs.
+  if ((n + 1) * (m + 1) <= 24_000_000) {
+    const MATCH = 2, MIS = -2, GAP = -1, NEG = -30000;
+    const Wc = m + 1;
+    const dp = new Int16Array((n + 1) * Wc);
+    const tb = new Int8Array((n + 1) * Wc); // 0=diag, 1=skip audio, 2=skip text
+    // Row 0 (no audio consumed): a text prefix before any audio must be gaps.
+    for (let j = 0; j <= m; j++) { dp[j] = j * GAP; tb[j] = 2; }
+    // Column 0 (no text consumed): leading audio is skipped for FREE.
+    for (let i = 1; i <= n; i++) { dp[i * Wc] = 0; tb[i * Wc] = 1; }
+    for (let i = 1; i <= n; i++) {
+      const ai = aNorm[i - 1]; const row = i * Wc, prow = (i - 1) * Wc;
+      for (let j = 1; j <= m; j++) {
+        const diag = dp[prow + j - 1] + (ai === T[j - 1] ? MATCH : MIS);
+        const up = dp[prow + j] + GAP;      // skip audio word i-1 (gap in text)
+        const left = dp[row + j - 1] + GAP; // skip text word j-1 (gap in audio)
+        let best = diag, dir = 0;
+        if (up > best) { best = up; dir = 1; }
+        if (left > best) { best = left; dir = 2; }
+        dp[row + j] = best; tb[row + j] = dir;
+      }
     }
-  }
-
-  // Traceback: each diagonal match stamps the text word with the audio time.
-  const wtime = new Float64Array(m); wtime.fill(-1);
-  let i = n, j = m;
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0) {
-      const cur = idxOf(i, j);
-      const dir = cur >= 0 ? tb[cur] : 1;
+    // Trailing audio free: end at the audio row with the best score at column m.
+    let bi = 0, bestEnd = NEG;
+    for (let i = 0; i <= n; i++) { const v = dp[i * Wc + m]; if (v > bestEnd) { bestEnd = v; bi = i; } }
+    let i = bi, j = m;
+    while (j > 0) {
+      const dir = (i > 0) ? tb[i * Wc + j] : 2;
       if (dir === 0) { if (aNorm[i - 1] === T[j - 1]) wtime[j - 1] = aTime[i - 1]; i--; j--; }
       else if (dir === 1) { i--; }
       else { j--; }
-    } else if (i > 0) { i--; } else { j--; }
+    }
+  } else {
+    const total = aTime[n - 1];
+    for (let k = 0; k < m; k++) wtime[k] = (k / m) * total;
   }
 
   // Fill unmatched text words by linear interpolation over flat index, so a
