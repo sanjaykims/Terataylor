@@ -77,7 +77,8 @@ export default function App() {
   const [a2AudioUrl, setA2AudioUrl] = useState<string | null>(null);
   const [v1Vocab1, setV1Vocab1]     = useState<VocabItem[] | null>(null);
   const [v1Vocab2, setV1Vocab2]     = useState<VocabItem[] | null>(null);
-  const [v1VocabCh, setV1VocabCh]   = useState<1 | 2>(1);
+  const [v1Vocab3, setV1Vocab3]     = useState<VocabItem[] | null>(null);
+  const [v1VocabCh, setV1VocabCh]   = useState<1 | 2 | 3>(1);
   const [a2StudiedWords, setA2StudiedWords] = useState<string[]>([]);
   const [v1StudiedWords, setV1StudiedWords] = useState<string[]>([]);
 
@@ -93,12 +94,14 @@ export default function App() {
           if (data.a2_text)      setA2TextState(data.a2_text);
           if (data.a2_vocab)     { try { setA2VocabState(JSON.parse(data.a2_vocab)); } catch {} }
           if (data.a2_audio_url) setA2AudioUrl(data.a2_audio_url);
-          const [vc1, vc2] = await Promise.all([
+          const [vc1, vc2, vc3] = await Promise.all([
             loadChapterVocab(book, 1).catch(() => null),
             loadChapterVocab(book, 2).catch(() => null),
+            loadChapterVocab(book, 3).catch(() => null),
           ]);
           if (vc1) setV1Vocab1(vc1 as VocabItem[]);
           if (vc2) setV1Vocab2(vc2 as VocabItem[]);
+          if (vc3) setV1Vocab3(vc3 as VocabItem[]);
         } catch {
           // ignore
         } finally {
@@ -114,13 +117,16 @@ export default function App() {
     setV1VocabCh(1);
     setV1Vocab1(null);
     setV1Vocab2(null);
+    setV1Vocab3(null);
     csSet('v1_book', b).catch(() => {});
     Promise.all([
       loadChapterVocab(b, 1).catch(() => null),
       loadChapterVocab(b, 2).catch(() => null),
-    ]).then(([vc1, vc2]) => {
+      loadChapterVocab(b, 3).catch(() => null),
+    ]).then(([vc1, vc2, vc3]) => {
       if (vc1) setV1Vocab1(vc1 as VocabItem[]);
       if (vc2) setV1Vocab2(vc2 as VocabItem[]);
+      if (vc3) setV1Vocab3(vc3 as VocabItem[]);
     });
   };
   const setA2Text = (t: string) => {
@@ -131,15 +137,17 @@ export default function App() {
     setA2VocabState(v);
     v ? csSetJSON('a2_vocab', v).catch(() => {}) : csDel('a2_vocab').catch(() => {});
   };
-  const setV1ChVocab = (ch: 1 | 2, v: VocabItem[] | null) => {
+  const setV1ChVocab = (ch: 1 | 2 | 3, v: VocabItem[] | null) => {
     if (ch === 1) setV1Vocab1(v);
-    else setV1Vocab2(v);
+    else if (ch === 2) setV1Vocab2(v);
+    else setV1Vocab3(v);
     const key = `chapter_${v1Book}_${ch}_vocab`;
     v ? csSet(key, JSON.stringify(v)).catch(() => {}) : csDel(key).catch(() => {});
   };
   const handleV1VocabLoad = (vocab: VocabItem[], chapter: number) => {
     if (chapter === 1) setV1Vocab1(vocab);
     else if (chapter === 2) setV1Vocab2(vocab);
+    else if (chapter === 3) setV1Vocab3(vocab);
   };
 
   // ── Audio (Supabase Storage) ─────────────────────────────────────────────
@@ -348,13 +356,13 @@ export default function App() {
             </div>
             {v1Tab === 'reading' && <BookReader key={v1Book} bookId={v1Book} onLessonVocabLoad={handleV1VocabLoad} />}
             {v1Tab === 'vocabulary' && (() => {
-              const activeVocab = v1VocabCh === 1 ? v1Vocab1 : v1Vocab2;
+              const activeVocab = v1VocabCh === 1 ? v1Vocab1 : v1VocabCh === 2 ? v1Vocab2 : v1Vocab3;
               const activeSummary = activeVocab?.length ? `저장됨 (${activeVocab.length}개)` : undefined;
               return (
                 <>
                   {/* Ch01 / Ch02 chapter selector */}
                   <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
-                    {([1, 2] as const).map(ch => (
+                    {([1, 2, 3] as const).map(ch => (
                       <button key={ch}
                         onClick={() => { setV1VocabCh(ch); setV1StudiedWords([]); }}
                         className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
@@ -389,7 +397,7 @@ export default function App() {
             {v1Tab === 'games' && (
               <GamesPanel
                 text=""
-                vocab={v1VocabCh === 1 ? v1Vocab1 : v1Vocab2}
+                vocab={v1VocabCh === 1 ? v1Vocab1 : v1VocabCh === 2 ? v1Vocab2 : v1Vocab3}
                 selectedWords={v1StudiedWords}
               />
             )}
