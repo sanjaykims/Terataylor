@@ -1245,12 +1245,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         )}
       </div>
 
-      {/* Chapter selector — only show chapters in the current lesson range */}
+      {/* Chapter selector — show all chapters in the book (Ch.01 … Ch.N) */}
       {(() => {
-        const visibleChapters = lessonChapterRange
-          ? Array.from({ length: lessonChapterRange[1] }, (_, i) => i + 1)
-              .filter(ch => ch <= totalChapters)
-          : Array.from({ length: totalChapters }, (_, i) => i + 1);
+        const visibleChapters = Array.from({ length: totalChapters }, (_, i) => i + 1);
         return (
           <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
             {visibleChapters.map(ch => (
