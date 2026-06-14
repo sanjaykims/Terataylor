@@ -78,7 +78,10 @@ export default function App() {
   const [v1Vocab1, setV1Vocab1]     = useState<VocabItem[] | null>(null);
   const [v1Vocab2, setV1Vocab2]     = useState<VocabItem[] | null>(null);
   const [v1Vocab3, setV1Vocab3]     = useState<VocabItem[] | null>(null);
-  const [v1VocabCh, setV1VocabCh]   = useState<1 | 2 | 3>(1);
+  const [v1Vocab4, setV1Vocab4]     = useState<VocabItem[] | null>(null);
+  const [v1Vocab5, setV1Vocab5]     = useState<VocabItem[] | null>(null);
+  const [v1Vocab6, setV1Vocab6]     = useState<VocabItem[] | null>(null);
+  const [v1VocabCh, setV1VocabCh]   = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [a2StudiedWords, setA2StudiedWords] = useState<string[]>([]);
   const [v1StudiedWords, setV1StudiedWords] = useState<string[]>([]);
 
@@ -94,14 +97,20 @@ export default function App() {
           if (data.a2_text)      setA2TextState(data.a2_text);
           if (data.a2_vocab)     { try { setA2VocabState(JSON.parse(data.a2_vocab)); } catch {} }
           if (data.a2_audio_url) setA2AudioUrl(data.a2_audio_url);
-          const [vc1, vc2, vc3] = await Promise.all([
+          const [vc1, vc2, vc3, vc4, vc5, vc6] = await Promise.all([
             loadChapterVocab(book, 1).catch(() => null),
             loadChapterVocab(book, 2).catch(() => null),
             loadChapterVocab(book, 3).catch(() => null),
+            loadChapterVocab(book, 4).catch(() => null),
+            loadChapterVocab(book, 5).catch(() => null),
+            loadChapterVocab(book, 6).catch(() => null),
           ]);
           if (vc1) setV1Vocab1(vc1 as VocabItem[]);
           if (vc2) setV1Vocab2(vc2 as VocabItem[]);
           if (vc3) setV1Vocab3(vc3 as VocabItem[]);
+          if (vc4) setV1Vocab4(vc4 as VocabItem[]);
+          if (vc5) setV1Vocab5(vc5 as VocabItem[]);
+          if (vc6) setV1Vocab6(vc6 as VocabItem[]);
         } catch {
           // ignore
         } finally {
@@ -118,15 +127,24 @@ export default function App() {
     setV1Vocab1(null);
     setV1Vocab2(null);
     setV1Vocab3(null);
+    setV1Vocab4(null);
+    setV1Vocab5(null);
+    setV1Vocab6(null);
     csSet('v1_book', b).catch(() => {});
     Promise.all([
       loadChapterVocab(b, 1).catch(() => null),
       loadChapterVocab(b, 2).catch(() => null),
       loadChapterVocab(b, 3).catch(() => null),
-    ]).then(([vc1, vc2, vc3]) => {
+      loadChapterVocab(b, 4).catch(() => null),
+      loadChapterVocab(b, 5).catch(() => null),
+      loadChapterVocab(b, 6).catch(() => null),
+    ]).then(([vc1, vc2, vc3, vc4, vc5, vc6]) => {
       if (vc1) setV1Vocab1(vc1 as VocabItem[]);
       if (vc2) setV1Vocab2(vc2 as VocabItem[]);
       if (vc3) setV1Vocab3(vc3 as VocabItem[]);
+      if (vc4) setV1Vocab4(vc4 as VocabItem[]);
+      if (vc5) setV1Vocab5(vc5 as VocabItem[]);
+      if (vc6) setV1Vocab6(vc6 as VocabItem[]);
     });
   };
   const setA2Text = (t: string) => {
@@ -137,10 +155,13 @@ export default function App() {
     setA2VocabState(v);
     v ? csSetJSON('a2_vocab', v).catch(() => {}) : csDel('a2_vocab').catch(() => {});
   };
-  const setV1ChVocab = (ch: 1 | 2 | 3, v: VocabItem[] | null) => {
+  const setV1ChVocab = (ch: 1 | 2 | 3 | 4 | 5 | 6, v: VocabItem[] | null) => {
     if (ch === 1) setV1Vocab1(v);
     else if (ch === 2) setV1Vocab2(v);
-    else setV1Vocab3(v);
+    else if (ch === 3) setV1Vocab3(v);
+    else if (ch === 4) setV1Vocab4(v);
+    else if (ch === 5) setV1Vocab5(v);
+    else setV1Vocab6(v);
     const key = `chapter_${v1Book}_${ch}_vocab`;
     v ? csSet(key, JSON.stringify(v)).catch(() => {}) : csDel(key).catch(() => {});
   };
@@ -148,6 +169,9 @@ export default function App() {
     if (chapter === 1) setV1Vocab1(vocab);
     else if (chapter === 2) setV1Vocab2(vocab);
     else if (chapter === 3) setV1Vocab3(vocab);
+    else if (chapter === 4) setV1Vocab4(vocab);
+    else if (chapter === 5) setV1Vocab5(vocab);
+    else if (chapter === 6) setV1Vocab6(vocab);
   };
 
   // ── Audio (Supabase Storage) ─────────────────────────────────────────────
@@ -356,19 +380,24 @@ export default function App() {
             </div>
             {v1Tab === 'reading' && <BookReader key={v1Book} bookId={v1Book} onLessonVocabLoad={handleV1VocabLoad} />}
             {v1Tab === 'vocabulary' && (() => {
-              const activeVocab = v1VocabCh === 1 ? v1Vocab1 : v1VocabCh === 2 ? v1Vocab2 : v1Vocab3;
+              const vocabByChapter: Record<number, VocabItem[] | null> = {
+                1: v1Vocab1, 2: v1Vocab2, 3: v1Vocab3,
+                4: v1Vocab4, 5: v1Vocab5, 6: v1Vocab6,
+              };
+              const activeVocab = vocabByChapter[v1VocabCh];
               const activeSummary = activeVocab?.length ? `저장됨 (${activeVocab.length}개)` : undefined;
+              const chLabel = (ch: number) => `Ch.0${ch} 단어장`;
               return (
                 <>
-                  {/* Ch01 / Ch02 chapter selector */}
-                  <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
-                    {([1, 2, 3] as const).map(ch => (
+                  {/* Chapter selector — two rows of 3 */}
+                  <div className="grid grid-cols-3 gap-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-1">
+                    {([1, 2, 3, 4, 5, 6] as const).map(ch => (
                       <button key={ch}
                         onClick={() => { setV1VocabCh(ch); setV1StudiedWords([]); }}
-                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        className={`py-2.5 rounded-xl text-sm font-bold transition-all ${
                           v1VocabCh === ch ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
                         }`}>
-                        Ch.0{ch} 단어장
+                        {chLabel(ch)}
                       </button>
                     ))}
                   </div>
@@ -377,7 +406,7 @@ export default function App() {
                     <ImageUploadInput
                       key={`vocab-upload-${v1Book}-ch${v1VocabCh}`}
                       mode="vocab"
-                      label={`📚 Ch.0${v1VocabCh} 단어 사진`}
+                      label={`📚 ${chLabel(v1VocabCh)} 사진`}
                       hint="단어장 사진을 올리면 자동으로 목록이 만들어져요"
                       savedSummary={activeSummary}
                       onClear={() => setV1ChVocab(v1VocabCh, null)}
@@ -397,7 +426,14 @@ export default function App() {
             {v1Tab === 'games' && (
               <GamesPanel
                 text=""
-                vocab={v1VocabCh === 1 ? v1Vocab1 : v1VocabCh === 2 ? v1Vocab2 : v1Vocab3}
+                vocab={
+                  v1VocabCh === 1 ? v1Vocab1 :
+                  v1VocabCh === 2 ? v1Vocab2 :
+                  v1VocabCh === 3 ? v1Vocab3 :
+                  v1VocabCh === 4 ? v1Vocab4 :
+                  v1VocabCh === 5 ? v1Vocab5 :
+                  v1Vocab6
+                }
                 selectedWords={v1StudiedWords}
               />
             )}
