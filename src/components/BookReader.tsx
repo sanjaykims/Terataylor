@@ -438,6 +438,81 @@ async function mergeMp3Files(files: File[]): Promise<Blob> {
   return new Blob([header as BlobPart, body as BlobPart], { type: 'audio/mpeg' });
 }
 
+// ── Chapter range / boundary helpers ──────────────────────────────────────────
+
+const CHAPTER_NUMBER_WORDS = [
+  'zero','one','two','three','four','five','six','seven','eight','nine','ten',
+  'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen',
+  'eighteen','nineteen','twenty','twenty-one','twenty-two','twenty-three',
+  'twenty-four','twenty-five','twenty-six','twenty-seven','twenty-eight',
+  'twenty-nine','thirty',
+];
+
+// Parse a filename to get all book chapter numbers it covers.
+// Handles ranges "9~14", "9-14" and singles "ch9", "chapter 9", bare digit.
+function parseFilenameChapters(name: string): number[] {
+  const rangeM = name.match(/\b(\d{1,2})\s*[~\-]\s*(\d{1,2})\b/);
+  if (rangeM) {
+    const a = parseInt(rangeM[1]), b = parseInt(rangeM[2]);
+    if (b > a && b - a <= 10) return Array.from({ length: b - a + 1 }, (_, i) => a + i);
+  }
+  const singleM = name.match(/(?:ch(?:apter)?|l(?:esson)?)\s*0*(\d{1,2})/i)
+               ?? name.match(/\b0*(\d{1,2})\b/);
+  return singleM ? [parseInt(singleM[1])] : [];
+}
+
+// Search a Deepgram word array for "Chapter Fourteen" (or bare "fourteen").
+// Returns the audio time (seconds) just before the chapter heading, or null.
+function findChapterAnnouncement(
+  words: Array<{ word: string; start: number }>,
+  bookChapter: number,
+): number | null {
+  const target = CHAPTER_NUMBER_WORDS[bookChapter]?.toLowerCase() ?? String(bookChapter);
+  for (let i = 0; i < words.length - 1; i++) {
+    if (words[i].word?.toLowerCase() === 'chapter' &&
+        words[i + 1].word?.toLowerCase() === target) {
+      return Math.max(0, words[i].start - 0.5);
+    }
+  }
+  for (const w of words) {
+    if (w.word?.toLowerCase() === target && w.start > 30) {
+      return Math.max(0, w.start - 0.5);
+    }
+  }
+  return null;
+}
+
+// Trim an MP3 body (raw frames, no ID3 tags) to cutSeconds.
+// Rebuilds the Xing header so the player reports correct duration.
+function trimMp3BodyAtTime(body: Uint8Array, cutSeconds: number): Uint8Array {
+  const offsets: number[] = [];
+  const times: number[]   = [];
+  let i = 0, duration = 0;
+  let tmpl: { verBits: number; srIdx: number; chanMode: number } | null = null;
+  let cutOffset = body.length;
+
+  while (i + 4 <= body.length) {
+    const fr = parseMp3Frame(body, i);
+    if (!fr) { i++; continue; }
+    if (!tmpl) tmpl = { verBits: fr.verBits, srIdx: fr.srIdx, chanMode: fr.chanMode };
+    if (duration >= cutSeconds && cutOffset === body.length) cutOffset = i;
+    offsets.push(i); times.push(duration);
+    duration += fr.samples / fr.sampleRate;
+    i += fr.frameLen;
+  }
+
+  if (!tmpl || offsets.length === 0) return body;
+  const keptCount   = offsets.filter(o => o < cutOffset).length;
+  const trimmedBody = body.subarray(0, cutOffset);
+  const header = buildXingFrame(
+    tmpl, keptCount, offsets.slice(0, keptCount), times.slice(0, keptCount),
+    Math.min(cutSeconds, duration), trimmedBody.length,
+  );
+  const out = new Uint8Array(header.length + trimmedBody.length);
+  out.set(header); out.set(trimmedBody, header.length);
+  return out;
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 type InitState = 'loading' | 'no-book' | 'has-book';
 
@@ -706,27 +781,107 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     const uploadedChapters: number[] = [];
     const errors: string[] = [];
 
-    // Group files by their target LESSON chapter.
-    // Filenames use book chapter numbers (ch4, ch7…); map them via the schedule.
+    // ── Step 1: parse filenames; detect which files span a lesson boundary ──
     type Entry = { file: File; bookCh: number };
     const groups = new Map<number, Entry[]>();
+
+    type SpanInfo = {
+      file: File;
+      firstLessonCh: number;
+      firstBookCh: number;   // representative book-ch for sort order
+      splitAtBookCh: number; // first book chapter that belongs to the NEXT lesson
+    };
+    const spanningFiles: SpanInfo[] = [];
+
     for (const file of files) {
-      const m = file.name.match(/(?:ch(?:apter)?|lesson|l)\s*0*(\d{1,2})/i)
-              ?? file.name.match(/\b0*(\d{1,2})\b/);
-      const rawCh = m ? parseInt(m[1]) : null;
-      const mapped = rawCh !== null ? bookChapterToLessonMap.get(rawCh) : undefined;
-      const lessonCh = mapped !== undefined
-        ? mapped
-        : (rawCh !== null && rawCh >= 1 && rawCh <= totalChapters ? rawCh : selectedChapter);
-      if (!groups.has(lessonCh)) groups.set(lessonCh, []);
-      groups.get(lessonCh)!.push({ file, bookCh: rawCh ?? 0 });
+      const bookChs = parseFilenameChapters(file.name);
+      if (bookChs.length === 0) {
+        if (!groups.has(selectedChapter)) groups.set(selectedChapter, []);
+        groups.get(selectedChapter)!.push({ file, bookCh: 0 });
+        continue;
+      }
+
+      const lessonChs = bookChs.map(bch => {
+        const mapped = bookChapterToLessonMap.get(bch);
+        return mapped !== undefined ? mapped : (bch >= 1 ? bch : selectedChapter);
+      });
+      const uniqueLessons = [...new Set(lessonChs)].sort((a, b) => a - b);
+
+      if (uniqueLessons.length === 1) {
+        const lessonCh = uniqueLessons[0];
+        if (!groups.has(lessonCh)) groups.set(lessonCh, []);
+        groups.get(lessonCh)!.push({ file, bookCh: bookChs[0] });
+      } else {
+        // File spans two lesson chapters — needs boundary detection
+        const firstLessonCh = uniqueLessons[0];
+        const firstBookCh   = bookChs.find(bch => {
+          const l = bookChapterToLessonMap.get(bch) ?? bch;
+          return l === firstLessonCh;
+        }) ?? bookChs[0];
+        const splitAtBookCh = bookChs.find(bch => {
+          const l = bookChapterToLessonMap.get(bch) ?? bch;
+          return l === uniqueLessons[1];
+        }) ?? bookChs[bookChs.length - 1];
+        spanningFiles.push({ file, firstLessonCh, firstBookCh, splitAtBookCh });
+      }
     }
 
+    // ── Step 2: handle spanning files — Deepgram + trim ────────────────────
+    const dgApiKey = import.meta.env.VITE_DEEPGRAM_API_KEY as string | undefined;
+
+    for (const sf of spanningFiles) {
+      const label = `Ch.${sf.splitAtBookCh - 1}~${sf.splitAtBookCh}`;
+      setAudioUploadMsg(`🔍 ${label}: Ch.${sf.splitAtBookCh} 시작점 탐지 중… (최대 90초)`);
+      try {
+        if (!dgApiKey) throw new Error('VITE_DEEPGRAM_API_KEY 미설정');
+        const bytes = new Uint8Array(await sf.file.arrayBuffer());
+
+        const dgRes = await fetch(
+          'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Token ${dgApiKey}`,
+              'Content-Type': 'audio/mpeg',
+            },
+            body: bytes,
+          },
+        );
+        if (!dgRes.ok) throw new Error(`Deepgram: ${await dgRes.text()}`);
+        const dgData = await dgRes.json() as {
+          results: { channels: [{ alternatives: [{ words: Array<{ word: string; start: number }> }] }] };
+        };
+        const words = dgData.results?.channels?.[0]?.alternatives?.[0]?.words ?? [];
+        const cutTime = findChapterAnnouncement(words, sf.splitAtBookCh);
+
+        if (cutTime === null) {
+          errors.push(`${sf.file.name}: Ch.${sf.splitAtBookCh} 경계 미탐지 → 파일 전체를 Ch.0${sf.firstLessonCh}에 사용`);
+          if (!groups.has(sf.firstLessonCh)) groups.set(sf.firstLessonCh, []);
+          groups.get(sf.firstLessonCh)!.push({ file: sf.file, bookCh: sf.firstBookCh });
+        } else {
+          const mm = Math.floor(cutTime / 60), ss = Math.floor(cutTime % 60).toString().padStart(2, '0');
+          setAudioUploadMsg(`✂️ ${label}: ${mm}:${ss}에서 자르는 중…`);
+          let body = bytes.subarray(findMp3Sync(bytes, skipId3v2(bytes)));
+          const f0 = parseMp3Frame(body, 0);
+          if (f0 && isXingFrame(body, 0, f0.sideInfo)) body = body.subarray(f0.frameLen);
+          const trimmed = trimMp3BodyAtTime(body, cutTime);
+          const trimmedFile = new File([trimmed.buffer as ArrayBuffer], `ch${sf.firstLessonCh}_trimmed.mp3`, { type: 'audio/mpeg' });
+          if (!groups.has(sf.firstLessonCh)) groups.set(sf.firstLessonCh, []);
+          groups.get(sf.firstLessonCh)!.push({ file: trimmedFile, bookCh: sf.firstBookCh });
+        }
+      } catch (e) {
+        errors.push(`${sf.file.name} 경계 탐지 실패: ${e instanceof Error ? e.message : '오류'} → 파일 전체 사용`);
+        if (!groups.has(sf.firstLessonCh)) groups.set(sf.firstLessonCh, []);
+        groups.get(sf.firstLessonCh)!.push({ file: sf.file, bookCh: sf.firstBookCh });
+      }
+    }
+
+    // ── Step 3: merge + upload each lesson group ────────────────────────────
     let done = 0;
+    const totalFiles = files.length;
     for (const [lessonCh, entries] of groups) {
-      // Sort by book chapter number so merged audio plays ch4→ch5→…→ch8
       entries.sort((a, b) => a.bookCh - b.bookCh);
-      setUploadProgress({ done, total: files.length });
+      setUploadProgress({ done, total: totalFiles });
 
       let uploadFile: File;
       if (entries.length === 1) {
@@ -740,7 +895,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         } catch (e) {
           errors.push(`Ch.${lessonCh} 병합 실패: ${e instanceof Error ? e.message : '오류'}`);
           done += entries.length;
-          setUploadProgress({ done, total: files.length });
+          setUploadProgress({ done, total: totalFiles });
           continue;
         }
       }
@@ -758,7 +913,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         errors.push(`Ch.${String(lessonCh).padStart(2,'0')}: ${e instanceof Error ? e.message : '업로드 실패'}`);
       }
       done += entries.length;
-      setUploadProgress({ done, total: files.length });
+      setUploadProgress({ done, total: totalFiles });
     }
 
     setAudioUploading(false);
