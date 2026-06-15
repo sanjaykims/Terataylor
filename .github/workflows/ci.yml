@@ -18,6 +18,12 @@ jobs:
 
       - run: npm ci
 
+      - name: Check edge function files exist
+        run: |
+          test -f supabase/functions/ocr-extract/index.ts     || (echo "ERROR: ocr-extract/index.ts missing"     && exit 1)
+          test -f supabase/functions/deepgram-listen/index.ts || (echo "ERROR: deepgram-listen/index.ts missing" && exit 1)
+          test -f supabase/functions/merge-audio/index.ts     || (echo "ERROR: merge-audio/index.ts missing"     && exit 1)
+
       - name: Lint
         run: npm run lint
 

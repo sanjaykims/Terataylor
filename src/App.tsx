@@ -280,11 +280,37 @@ export default function App() {
         {/* ── MAIN TABS ─────────────────────────────────────────────────── */}
         <div className="grid grid-cols-3 gap-3">
           {([
-            { id: 'a2',       icon: '🎧', label: 'A2 읽기/듣기', sub: '섀도잉 · 쓰기',       active: 'bg-indigo-600 shadow-indigo-200',  dim: 'text-indigo-200'  },
-            { id: 'v1',       icon: '📖', label: 'V1 소설',       sub: '원서읽기 · 단어장',   active: 'bg-purple-600 shadow-purple-200',  dim: 'text-purple-200'  },
-            { id: 'progress', icon: '📊', label: '성장 기록',      sub: '단어 · 점수',         active: 'bg-emerald-600 shadow-emerald-200', dim: 'text-emerald-200' },
-          ] as { id: MainTab; icon: string; label: string; sub: string; active: string; dim: string }[]).map(t => (
-            <button key={t.id} onClick={() => { flushSession(); setMainTab(t.id); }}
+            {
+              id: 'a2', icon: '🎧', label: 'A2 읽기/듣기', sub: '섀도잉 · 쓰기',
+              active: 'bg-indigo-600 shadow-indigo-200', dim: 'text-indigo-200',
+              preload: () => {
+                import('./components/ShadowingPlayer');
+                import('./components/VocabularyPanel');
+                import('./components/OpinionWriter');
+                import('./components/GamesPanel');
+                import('./components/ImageUploadInput');
+                import('./components/A2PhotoViewer');
+              },
+            },
+            {
+              id: 'v1', icon: '📖', label: 'V1 소설', sub: '원서읽기 · 단어장',
+              active: 'bg-purple-600 shadow-purple-200', dim: 'text-purple-200',
+              preload: () => {
+                import('./components/VocabularyPanel');
+                import('./components/GamesPanel');
+                import('./components/ImageUploadInput');
+              },
+            },
+            {
+              id: 'progress', icon: '📊', label: '성장 기록', sub: '단어 · 점수',
+              active: 'bg-emerald-600 shadow-emerald-200', dim: 'text-emerald-200',
+              preload: () => { import('./components/ProgressDashboard'); },
+            },
+          ] as { id: MainTab; icon: string; label: string; sub: string; active: string; dim: string; preload: () => void }[]).map(t => (
+            <button key={t.id}
+              onClick={() => { flushSession(); setMainTab(t.id); }}
+              onMouseEnter={t.preload}
+              onTouchStart={t.preload}
               className={`py-4 rounded-2xl font-bold text-base transition-all flex flex-col items-center gap-1 ${
                 mainTab === t.id ? `${t.active} text-white shadow-lg` : 'bg-white text-gray-500 hover:bg-gray-50 shadow-sm'
               }`}>
@@ -325,7 +351,6 @@ export default function App() {
           </div>
         )}
 
-        <Suspense fallback={<TabSpinner />}>
         {/* ── A2 INPUT PANEL ────────────────────────────────────────────── */}
         {mainTab === 'a2' && a2Tab !== 'opinion' && a2Tab !== 'reading' && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -339,11 +364,13 @@ export default function App() {
             </button>
             {showA2Input && (
               <div className="px-5 pb-5 space-y-4">
-                <ImageUploadInput mode="text" label="📄 지문 사진" hint="교재 본문 페이지 — 여러 장 가능"
-                  savedSummary={a2TextSummary} onClear={() => setA2Text('')} onExtracted={setA2Text} />
-                <hr className="border-gray-100" />
-                <ImageUploadInput mode="vocab" label="📚 단어 사진" hint="책에서 지정한 단어 목록 사진"
-                  savedSummary={a2VocabSummary} onClear={() => setA2Vocab(null)} onExtracted={setA2Vocab} />
+                <Suspense fallback={<TabSpinner />}>
+                  <ImageUploadInput mode="text" label="📄 지문 사진" hint="교재 본문 페이지 — 여러 장 가능"
+                    savedSummary={a2TextSummary} onClear={() => setA2Text('')} onExtracted={setA2Text} />
+                  <hr className="border-gray-100" />
+                  <ImageUploadInput mode="vocab" label="📚 단어 사진" hint="책에서 지정한 단어 목록 사진"
+                    savedSummary={a2VocabSummary} onClear={() => setA2Vocab(null)} onExtracted={setA2Vocab} />
+                </Suspense>
               </div>
             )}
           </div>
@@ -367,18 +394,20 @@ export default function App() {
                   }`}>{t.label}</button>
               ))}
             </div>
-            {a2Tab === 'reading'    && <A2PhotoViewer />}
+            {a2Tab === 'reading'    && <Suspense fallback={<TabSpinner />}><A2PhotoViewer /></Suspense>}
             {a2Tab === 'shadowing'  && (
-              <ShadowingPlayer
-                text={a2Text} audioUrl={a2AudioUrl}
-                audioUploading={audioUploading}
-                onAudioUpload={handleAudioUpload}
-                onClearAudio={clearAudio}
-              />
+              <Suspense fallback={<TabSpinner />}>
+                <ShadowingPlayer
+                  text={a2Text} audioUrl={a2AudioUrl}
+                  audioUploading={audioUploading}
+                  onAudioUpload={handleAudioUpload}
+                  onClearAudio={clearAudio}
+                />
+              </Suspense>
             )}
-            {a2Tab === 'vocabulary' && <VocabularyPanel text={a2Text} vocab={a2Vocab} onStudiedChange={setA2StudiedWords} onVocabUpdate={setA2Vocab} />}
-            {a2Tab === 'opinion'    && <OpinionWriter />}
-            {a2Tab === 'games'      && <GamesPanel text={a2Text} vocab={a2Vocab} selectedWords={a2StudiedWords} />}
+            {a2Tab === 'vocabulary' && <Suspense fallback={<TabSpinner />}><VocabularyPanel text={a2Text} vocab={a2Vocab} onStudiedChange={setA2StudiedWords} onVocabUpdate={setA2Vocab} /></Suspense>}
+            {a2Tab === 'opinion'    && <Suspense fallback={<TabSpinner />}><OpinionWriter /></Suspense>}
+            {a2Tab === 'games'      && <Suspense fallback={<TabSpinner />}><GamesPanel text={a2Text} vocab={a2Vocab} selectedWords={a2StudiedWords} /></Suspense>}
           </>
         )}
 
@@ -420,48 +449,51 @@ export default function App() {
                       </button>
                     ))}
                   </div>
-                  {/* Per-chapter vocab photo upload */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                    <ImageUploadInput
-                      key={`vocab-upload-${v1Book}-ch${v1VocabCh}`}
-                      mode="vocab"
-                      label={`📚 ${chLabel(v1VocabCh)} 사진`}
-                      hint="단어장 사진을 올리면 자동으로 목록이 만들어져요"
-                      savedSummary={activeSummary}
-                      onClear={() => setV1ChVocab(v1VocabCh, null)}
-                      onExtracted={vocab => setV1ChVocab(v1VocabCh, vocab)}
+                  {/* Per-chapter vocab photo upload + panel */}
+                  <Suspense fallback={<TabSpinner />}>
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                      <ImageUploadInput
+                        key={`vocab-upload-${v1Book}-ch${v1VocabCh}`}
+                        mode="vocab"
+                        label={`📚 ${chLabel(v1VocabCh)} 사진`}
+                        hint="단어장 사진을 올리면 자동으로 목록이 만들어져요"
+                        savedSummary={activeSummary}
+                        onClear={() => setV1ChVocab(v1VocabCh, null)}
+                        onExtracted={vocab => setV1ChVocab(v1VocabCh, vocab)}
+                      />
+                    </div>
+                    <VocabularyPanel
+                      key={`vocab-panel-${v1Book}-ch${v1VocabCh}`}
+                      text=""
+                      vocab={activeVocab}
+                      onStudiedChange={setV1StudiedWords}
+                      onVocabUpdate={vocab => setV1ChVocab(v1VocabCh, vocab)}
                     />
-                  </div>
-                  <VocabularyPanel
-                    key={`vocab-panel-${v1Book}-ch${v1VocabCh}`}
-                    text=""
-                    vocab={activeVocab}
-                    onStudiedChange={setV1StudiedWords}
-                    onVocabUpdate={vocab => setV1ChVocab(v1VocabCh, vocab)}
-                  />
+                  </Suspense>
                 </>
               );
             })()}
             {v1Tab === 'games' && (
-              <GamesPanel
-                text=""
-                vocab={
-                  v1VocabCh === 1 ? v1Vocab1 :
-                  v1VocabCh === 2 ? v1Vocab2 :
-                  v1VocabCh === 3 ? v1Vocab3 :
-                  v1VocabCh === 4 ? v1Vocab4 :
-                  v1VocabCh === 5 ? v1Vocab5 :
-                  v1Vocab6
-                }
-                selectedWords={v1StudiedWords}
-              />
+              <Suspense fallback={<TabSpinner />}>
+                <GamesPanel
+                  text=""
+                  vocab={
+                    v1VocabCh === 1 ? v1Vocab1 :
+                    v1VocabCh === 2 ? v1Vocab2 :
+                    v1VocabCh === 3 ? v1Vocab3 :
+                    v1VocabCh === 4 ? v1Vocab4 :
+                    v1VocabCh === 5 ? v1Vocab5 :
+                    v1Vocab6
+                  }
+                  selectedWords={v1StudiedWords}
+                />
+              </Suspense>
             )}
           </>
         )}
 
         {/* ── PROGRESS ──────────────────────────────────────────────────── */}
-        {mainTab === 'progress' && <ProgressDashboard />}
-        </Suspense>
+        {mainTab === 'progress' && <Suspense fallback={<TabSpinner />}><ProgressDashboard /></Suspense>}
       </div>
     </div>
   );
