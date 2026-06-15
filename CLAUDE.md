@@ -59,6 +59,7 @@ App.tsx (tab router: a2 | v1 | progress)
 - `taylor_app_data` — Generic key-value store (UPSERT semantics) for app state
 - Separate tables track vocab progress, game scores, and session analytics
 - Edge Functions handle: OCR (image → text), dictionary lookup (English + Korean definitions), and serve as a proxy for external APIs
+- `supabase/functions/deepgram-listen` proxies Deepgram transcription; configure `DEEPGRAM_API_KEY` as a Supabase secret, not a `VITE_` client env var
 - Audio files are stored in a Supabase Storage bucket and referenced by URL in chapter records
 
 ### Navigation / Routing

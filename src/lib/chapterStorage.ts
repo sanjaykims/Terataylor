@@ -13,20 +13,22 @@ export async function saveChapterKo(bookId: BookId, lesson: number, text: string
 }
 
 export async function loadChapterEn(bookId: BookId, lesson: number): Promise<string | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('taylor_app_data')
     .select('value')
     .eq('key', `chapter_${bookId}_${lesson}_en`)
     .maybeSingle();
+  if (error) throw error;
   return (data as { value: string } | null)?.value ?? null;
 }
 
 export async function loadChapterKo(bookId: BookId, lesson: number): Promise<string | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('taylor_app_data')
     .select('value')
     .eq('key', `chapter_${bookId}_${lesson}_ko`)
     .maybeSingle();
+  if (error) throw error;
   return (data as { value: string } | null)?.value ?? null;
 }
 

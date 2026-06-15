@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState } from 'react';
 
 export type SpeechState = 'idle' | 'speaking' | 'paused' | 'waiting';
 
@@ -33,7 +33,7 @@ export function useSpeechSynthesis(options: UseSpeechSynthesisOptions = {}) {
     return preferred;
   };
 
-  const speakSentence = useCallback((index: number, sentences: string[], rate: number, shadowMode: boolean, pause: number) => {
+  function speakSentence(index: number, sentences: string[], rate: number, shadowMode: boolean, pause: number) {
     if (cancelledRef.current) return;
     if (index >= sentences.length) {
       setState2('idle');
@@ -76,9 +76,9 @@ export function useSpeechSynthesis(options: UseSpeechSynthesisOptions = {}) {
     };
 
     window.speechSynthesis.speak(utter);
-  }, [options]);
+  }
 
-  const play = useCallback((sentences: string[], fromIndex = 0, rate = 0.85, shadowMode = false, shadowPause = 3) => {
+  const play = (sentences: string[], fromIndex = 0, rate = 0.85, shadowMode = false, shadowPause = 3) => {
     window.speechSynthesis.cancel();
     if (timerRef.current) clearTimeout(timerRef.current);
     cancelledRef.current = false;
@@ -99,51 +99,51 @@ export function useSpeechSynthesis(options: UseSpeechSynthesisOptions = {}) {
     } else {
       doSpeak();
     }
-  }, [speakSentence]);
+  };
 
-  const pause = useCallback(() => {
+  const pause = () => {
     window.speechSynthesis.pause();
     setState2('paused');
-  }, []);
+  };
 
-  const resume = useCallback(() => {
+  const resume = () => {
     window.speechSynthesis.resume();
     setState2('speaking');
-  }, []);
+  };
 
-  const stop = useCallback(() => {
+  const stop = () => {
     cancelledRef.current = true;
     if (timerRef.current) clearTimeout(timerRef.current);
     window.speechSynthesis.cancel();
     setState2('idle');
     setCurrentIndex(-1);
-  }, []);
+  };
 
-  const skipNext = useCallback((sentences: string[], rate: number, shadowMode: boolean, shadowPause: number) => {
+  const skipNext = (sentences: string[], rate: number, shadowMode: boolean, shadowPause: number) => {
     cancelledRef.current = true;
     if (timerRef.current) clearTimeout(timerRef.current);
     window.speechSynthesis.cancel();
     cancelledRef.current = false;
     const next = Math.min(indexRef.current + 1, sentences.length - 1);
     speakSentence(next, sentences, rate, shadowMode, shadowPause);
-  }, [speakSentence]);
+  };
 
-  const skipPrev = useCallback((sentences: string[], rate: number, shadowMode: boolean, shadowPause: number) => {
+  const skipPrev = (sentences: string[], rate: number, shadowMode: boolean, shadowPause: number) => {
     cancelledRef.current = true;
     if (timerRef.current) clearTimeout(timerRef.current);
     window.speechSynthesis.cancel();
     cancelledRef.current = false;
     const prev = Math.max(indexRef.current - 1, 0);
     speakSentence(prev, sentences, rate, shadowMode, shadowPause);
-  }, [speakSentence]);
+  };
 
-  const replayCurrent = useCallback((sentences: string[], rate: number, shadowMode: boolean, shadowPause: number) => {
+  const replayCurrent = (sentences: string[], rate: number, shadowMode: boolean, shadowPause: number) => {
     cancelledRef.current = true;
     if (timerRef.current) clearTimeout(timerRef.current);
     window.speechSynthesis.cancel();
     cancelledRef.current = false;
     speakSentence(indexRef.current >= 0 ? indexRef.current : 0, sentences, rate, shadowMode, shadowPause);
-  }, [speakSentence]);
+  };
 
   return { state, currentIndex, play, pause, resume, stop, skipNext, skipPrev, replayCurrent };
 }

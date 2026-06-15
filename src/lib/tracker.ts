@@ -75,27 +75,30 @@ export interface StudySession {
 }
 
 export async function fetchVocabProgress(): Promise<VocabProgress[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('taylor_vocab_progress')
     .select('*')
     .order('wrong_count', { ascending: false });
+  if (error) throw error;
   return (data ?? []) as VocabProgress[];
 }
 
 export async function fetchGameScores(limit = 30): Promise<GameScore[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('taylor_game_scores')
     .select('*')
     .order('played_at', { ascending: false })
     .limit(limit);
+  if (error) throw error;
   return (data ?? []) as GameScore[];
 }
 
 export async function fetchStudySessions(limit = 50): Promise<StudySession[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('taylor_study_sessions')
     .select('*')
     .order('started_at', { ascending: false })
     .limit(limit);
+  if (error) throw error;
   return (data ?? []) as StudySession[];
 }

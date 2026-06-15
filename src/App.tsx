@@ -21,6 +21,8 @@ type MainTab = 'a2' | 'v1' | 'progress';
 type A2Tab   = 'reading' | 'shadowing' | 'vocabulary' | 'opinion' | 'games';
 type V1Tab   = 'reading' | 'vocabulary' | 'games';
 
+const timestampMs = () => Date.now();
+
 // ── One-time migration from localStorage → Supabase ───────────────────────
 async function migrateFromLocalStorage(): Promise<void> {
   try {
@@ -95,7 +97,13 @@ export default function App() {
           const book = (data.v1_book as BookId) ?? 'edward';
           if (data.v1_book)      setV1BookState(book);
           if (data.a2_text)      setA2TextState(data.a2_text);
-          if (data.a2_vocab)     { try { setA2VocabState(JSON.parse(data.a2_vocab)); } catch {} }
+          if (data.a2_vocab) {
+            try {
+              setA2VocabState(JSON.parse(data.a2_vocab));
+            } catch {
+              // Ignore malformed legacy cache and continue loading the app.
+            }
+          }
           if (data.a2_audio_url) setA2AudioUrl(data.a2_audio_url);
           const [vc1, vc2, vc3, vc4, vc5, vc6] = await Promise.all([
             loadChapterVocab(book, 1).catch(() => null),
@@ -117,7 +125,6 @@ export default function App() {
           setAppReady(true);
         }
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Persisting setters (fire-and-forget to Supabase) ────────────────────
@@ -149,11 +156,13 @@ export default function App() {
   };
   const setA2Text = (t: string) => {
     setA2TextState(t);
-    t ? csSet('a2_text', t).catch(() => {}) : csDel('a2_text').catch(() => {});
+    if (t) csSet('a2_text', t).catch(() => {});
+    else csDel('a2_text').catch(() => {});
   };
   const setA2Vocab = (v: VocabItem[] | null) => {
     setA2VocabState(v);
-    v ? csSetJSON('a2_vocab', v).catch(() => {}) : csDel('a2_vocab').catch(() => {});
+    if (v) csSetJSON('a2_vocab', v).catch(() => {});
+    else csDel('a2_vocab').catch(() => {});
   };
   const setV1ChVocab = (ch: 1 | 2 | 3 | 4 | 5 | 6, v: VocabItem[] | null) => {
     if (ch === 1) setV1Vocab1(v);
@@ -163,7 +172,8 @@ export default function App() {
     else if (ch === 5) setV1Vocab5(v);
     else setV1Vocab6(v);
     const key = `chapter_${v1Book}_${ch}_vocab`;
-    v ? csSet(key, JSON.stringify(v)).catch(() => {}) : csDel(key).catch(() => {});
+    if (v) csSet(key, JSON.stringify(v)).catch(() => {});
+    else csDel(key).catch(() => {});
   };
   const handleV1VocabLoad = (vocab: VocabItem[], chapter: number) => {
     if (chapter === 1) setV1Vocab1(vocab);
@@ -202,13 +212,14 @@ export default function App() {
   };
 
   // ── Session tracking ─────────────────────────────────────────────────────
-  const sessionStart   = useRef(Date.now());
+  const sessionStart   = useRef(timestampMs());
   const currentMode    = useRef<'a2' | 'v1'>('v1');
   const currentFeature = useRef<string>('reading');
 
   const flushSession = () => {
-    trackSession(currentMode.current, currentFeature.current, (Date.now() - sessionStart.current) / 1000);
-    sessionStart.current = Date.now();
+    const now = timestampMs();
+    trackSession(currentMode.current, currentFeature.current, (now - sessionStart.current) / 1000);
+    sessionStart.current = now;
   };
   const switchTab = (mode: 'a2' | 'v1', feature: string) => {
     flushSession(); currentMode.current = mode; currentFeature.current = feature;
@@ -217,7 +228,6 @@ export default function App() {
     const h = () => flushSession();
     window.addEventListener('beforeunload', h);
     return () => window.removeEventListener('beforeunload', h);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Saved summary banners ────────────────────────────────────────────────

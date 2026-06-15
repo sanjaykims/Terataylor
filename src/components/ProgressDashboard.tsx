@@ -33,13 +33,20 @@ export default function ProgressDashboard() {
   const [scores, setScores] = useState<GameScore[]>([]);
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [activeSection, setActiveSection] = useState<'overview' | 'vocab' | 'games' | 'sessions'>('overview');
 
   const load = async () => {
     setLoading(true);
-    const [v, g, s] = await Promise.all([fetchVocabProgress(), fetchGameScores(), fetchStudySessions()]);
-    setVocab(v); setScores(g); setSessions(s);
-    setLoading(false);
+    setError('');
+    try {
+      const [v, g, s] = await Promise.all([fetchVocabProgress(), fetchGameScores(), fetchStudySessions()]);
+      setVocab(v); setScores(g); setSessions(s);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '기록을 불러오지 못했어요.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, []);
@@ -48,6 +55,16 @@ export default function ProgressDashboard() {
     <div className="text-center py-16 space-y-3">
       <div className="text-4xl animate-spin inline-block">📊</div>
       <div className="text-gray-500 font-medium">기록 불러오는 중...</div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="text-center py-16 space-y-4">
+      <div className="text-red-500 font-semibold">기록을 불러오지 못했어요.</div>
+      <div className="text-xs text-gray-400">{error}</div>
+      <button onClick={load} className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700">
+        다시 시도
+      </button>
     </div>
   );
 

@@ -186,7 +186,8 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
     e.stopPropagation();
     setStudied(prev => {
       const next = new Set(prev);
-      next.has(i) ? next.delete(i) : next.add(i);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
       onStudiedChange?.(Array.from(next).map(idx => words[idx]?.word).filter(Boolean));
       return next;
     });

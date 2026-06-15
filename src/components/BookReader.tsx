@@ -12,6 +12,7 @@ import {
   loadChapterVocab,
 } from '../lib/chapterStorage';
 import type { VocabItem } from '../lib/types';
+import type { WordTimestamp } from '../lib/audioAlign';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -333,7 +334,7 @@ function parseMp3Frame(b: Uint8Array, i: number) {
   const SR_V1  = [44100,48000,32000,0];
   const SR_V2  = [22050,24000,16000,0];
   const SR_V25 = [11025,12000,8000,0];
-  let bitrate = 0, sampleRate = 0, samples = 0, sideInfo = 0;
+  let bitrate: number, sampleRate: number, samples: number, sideInfo: number;
   if (verBits === 3)      { bitrate = BR_V1[brIdx]; sampleRate = SR_V1[srIdx];  samples = 1152; sideInfo = chanMode === 3 ? 17 : 32; }
   else if (verBits === 2) { bitrate = BR_V2[brIdx]; sampleRate = SR_V2[srIdx];  samples = 576;  sideInfo = chanMode === 3 ? 9  : 17; }
   else if (verBits === 0) { bitrate = BR_V2[brIdx]; sampleRate = SR_V25[srIdx]; samples = 576;  sideInfo = chanMode === 3 ? 9  : 17; }
@@ -451,7 +452,7 @@ const CHAPTER_NUMBER_WORDS = [
 // Parse a filename to get all book chapter numbers it covers.
 // Handles ranges "9~14", "9-14" and singles "ch9", "chapter 9", bare digit.
 function parseFilenameChapters(name: string): number[] {
-  const rangeM = name.match(/\b(\d{1,2})\s*[~\-]\s*(\d{1,2})\b/);
+  const rangeM = name.match(/\b(\d{1,2})\s*[~-]\s*(\d{1,2})\b/);
   if (rangeM) {
     const a = parseInt(rangeM[1]), b = parseInt(rangeM[2]);
     if (b > a && b - a <= 10) return Array.from({ length: b - a + 1 }, (_, i) => a + i);
@@ -601,23 +602,6 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     ? [currentLessonChapter, currentLessonChapter] as [number, number]
     : null;
 
-  // ── On mount ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    setInitState('loading');
-    hasBook(bookId)
-      .then(async has => {
-        if (!has) { setInitState('no-book'); return; }
-        const count = await loadChapterCount(bookId).catch(() => 0);
-        setTotalChapters(count);
-        setInitState('has-book');
-        const translated = await getTranslatedChapters(bookId).catch(() => [] as number[]);
-        setTranslatedChaps(new Set(translated));
-        await loadChapter(bookId, initialLessonChapter);
-      })
-      .catch(() => setInitState('no-book'));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bookId]);
-
   const loadChapter = async (bid: BookId, chapter: number) => {
     setChapterLoading(true);
     setEnText(null);
@@ -671,6 +655,23 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     if (vocab?.length && onLessonVocabLoad) onLessonVocabLoad(vocab as VocabItem[], chapter);
     setChapterLoading(false);
   };
+
+  // ── On mount ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    setInitState('loading');
+    hasBook(bookId)
+      .then(async has => {
+        if (!has) { setInitState('no-book'); return; }
+        const count = await loadChapterCount(bookId).catch(() => 0);
+        setTotalChapters(count);
+        setInitState('has-book');
+        const translated = await getTranslatedChapters(bookId).catch(() => [] as number[]);
+        setTranslatedChaps(new Set(translated));
+        await loadChapter(bookId, initialLessonChapter);
+      })
+      .catch(() => setInitState('no-book'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId]);
 
   const selectChapter = async (chapter: number) => {
     setSelectedChapter(chapter);
@@ -976,22 +977,11 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setAnalyzeMsg('음성 분석 중… (30~90초)');
     try {
       const cleanUrl = audioUrl.split('?')[0];
-      const dgRes = await fetch(
-        'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Token ${import.meta.env.VITE_DEEPGRAM_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ url: cleanUrl }),
-        },
-      );
-      if (!dgRes.ok) throw new Error(`Deepgram: ${await dgRes.text()}`);
-      const dgData = await dgRes.json() as {
-        results: { channels: [{ alternatives: [{ words: import('../lib/audioAlign').WordTimestamp[] }] }] };
-      };
-      const words = dgData.results?.channels?.[0]?.alternatives?.[0]?.words ?? [];
+      const { data, error } = await supabase.functions.invoke('deepgram-listen', {
+        body: { audioUrl: cleanUrl },
+      });
+      if (error) throw new Error(error.message);
+      const words = ((data as { words?: WordTimestamp[] } | null)?.words ?? []);
       if (!words.length) throw new Error('음성을 인식하지 못했어요. 다시 시도해 주세요.');
 
       const { alignFromWordTimestamps } = await import('../lib/audioAlign');
@@ -1055,7 +1045,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
 
     // Enforce strict monotonicity. A 30 ms minimum gap exceeds one MP3 frame (~26 ms)
     // so the browser's frame-snap after a seek never crosses the boundary.
-    const strict = raw === timings ? [...raw] : raw; // don't mutate the stored array
+    const strict = [...raw]; // don't mutate the stored array
     for (let i = 1; i < strict.length; i++) {
       if (strict[i] <= strict[i - 1]) strict[i] = strict[i - 1] + 0.03;
     }
@@ -1588,9 +1578,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           borderRadius:10, padding:10, maxHeight:'50vh',
           overflowY:'auto', wordBreak:'break-all',
         }}>
-          <div style={{color:'#94a3b8', marginBottom:4}}>
-            activeIdx={activeIdx} | seekTarget={seekTargetRef.current.toFixed(1)} | isSeeking={String(isSeekingRef.current)}
-          </div>
+          <div style={{color:'#94a3b8', marginBottom:4}}>activeIdx={activeIdx}</div>
           {debugLogs.length === 0
             ? <div style={{color:'#64748b'}}>No logs yet. Tap a sentence.</div>
             : debugLogs.map((l, i) => (

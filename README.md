@@ -20,9 +20,18 @@ npm run dev
 
 Open `http://localhost:5173` in your browser.
 
+## Supabase Edge Functions
+
+Audio alignment calls Deepgram through `supabase/functions/deepgram-listen` so the API key is not exposed in the browser bundle. Configure the function secret before deploying:
+
+```bash
+supabase secrets set DEEPGRAM_API_KEY=...
+supabase functions deploy deepgram-listen
+```
+
 ## Tech Stack
 
 - Vite + React + TypeScript
 - Tailwind CSS v4
 - Browser Web Speech API (no API key required)
-- Free Dictionary API for vocabulary definitions
+- Supabase Edge Functions for OCR, audio merge, and Deepgram transcription

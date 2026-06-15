@@ -76,7 +76,6 @@ export default function VocabQuizGame({ text, bookVocab }: { text: string; bookV
   useEffect(() => {
     if (gameState !== 'playing') return;
     answeredRef.current = false;
-    setTimeLeft(TIME_LIMIT);
 
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
@@ -118,6 +117,7 @@ export default function VocabQuizGame({ text, bookVocab }: { text: string; bookV
     setStreak(0);
     setResults([]);
     setSelected(null);
+    setTimeLeft(TIME_LIMIT);
     setGameState('playing');
   };
 
@@ -146,6 +146,7 @@ export default function VocabQuizGame({ text, bookVocab }: { text: string; bookV
       setGameState('done');
     } else {
       setSelected(null);
+      setTimeLeft(TIME_LIMIT);
       setQIndex(i => i + 1);
     }
   };

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { extractVocabulary } from '../utils/textUtils';
 import { trackGameScore } from '../lib/tracker';
 import type { VocabItem } from '../lib/types';
@@ -68,6 +68,15 @@ function rrect(ctx: CanvasRenderingContext2D, x:number, y:number, w:number, h:nu
   ctx.closePath();
 }
 
+function Overlay({ children }: { children: ReactNode }) {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
+         style={{ background:'rgba(5,5,20,0.93)' }}>
+      {children}
+    </div>
+  );
+}
+
 export default function SpaceGame({ text, bookVocab, selectedWords }: { text: string; bookVocab?: VocabItem[] | null; selectedWords?: string[] }) {
   const cvs  = useRef<HTMLCanvasElement>(null);
   const inp  = useRef<HTMLInputElement>(null);
@@ -77,6 +86,7 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
 
   const [phase, setPhase] = useState<Phase>('start');
   const [score, setScore] = useState(0);
+  const [wave, setWave] = useState(0);
   const [iv, setIv] = useState('');
 
   const gs = useRef({
@@ -110,6 +120,7 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
   const setupWave = (wi: number) => {
     const g = gs.current;
     g.wave = wi;
+    setWave(wi);
     g.aliens = []; g.bullets = [];
     const cfg = WAVES[Math.min(wi, WAVES.length-1)];
     g.pool = [...vocabPairs].sort(() => Math.random()-0.5).slice(0, cfg.n);
@@ -374,7 +385,6 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
     lt.current = performance.now();
     raf.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf.current);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
   // Responsive scale
@@ -387,13 +397,6 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
     if (wrap.current) ob.observe(wrap.current);
     return () => ob.disconnect();
   }, []);
-
-  const Overlay = ({ children }: { children: React.ReactNode }) => (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-2xl"
-         style={{ background:'rgba(5,5,20,0.93)' }}>
-      {children}
-    </div>
-  );
 
   return (
     <div ref={wrap} className="space-y-3">
@@ -425,7 +428,7 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
 
         {phase==='wave_done' && <Overlay>
           <div style={{fontSize:48}}>🎉</div>
-          <div className="text-green-400 font-bold text-2xl">WAVE {gs.current.wave+1} CLEAR!</div>
+          <div className="text-green-400 font-bold text-2xl">WAVE {wave + 1} CLEAR!</div>
           <div className="text-yellow-300 font-bold text-xl">⭐ {score}점</div>
           <div className="text-gray-400 text-sm">3초 후 다음 웨이브...</div>
         </Overlay>}
