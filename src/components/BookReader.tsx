@@ -828,31 +828,20 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     }
 
     // ── Step 2: handle spanning files — Deepgram + trim ────────────────────
-    const dgApiKey = import.meta.env.VITE_DEEPGRAM_API_KEY as string | undefined;
-
     for (const sf of spanningFiles) {
       const label = `Ch.${sf.splitAtBookCh - 1}~${sf.splitAtBookCh}`;
       setAudioUploadMsg(`🔍 ${label}: Ch.${sf.splitAtBookCh} 시작점 탐지 중… (최대 90초)`);
       try {
-        if (!dgApiKey) throw new Error('VITE_DEEPGRAM_API_KEY 미설정');
         const bytes = new Uint8Array(await sf.file.arrayBuffer());
 
-        const dgRes = await fetch(
-          'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Token ${dgApiKey}`,
-              'Content-Type': 'audio/mpeg',
-            },
-            body: bytes,
-          },
-        );
-        if (!dgRes.ok) throw new Error(`Deepgram: ${await dgRes.text()}`);
-        const dgData = await dgRes.json() as {
-          results: { channels: [{ alternatives: [{ words: Array<{ word: string; start: number }> }] }] };
-        };
-        const words = dgData.results?.channels?.[0]?.alternatives?.[0]?.words ?? [];
+        // Send raw MP3 bytes through the server-side deepgram-listen proxy so the
+        // Deepgram API key is never exposed in the browser bundle.
+        const { data: dgData, error: dgErr } = await supabase.functions.invoke('deepgram-listen', {
+          body: bytes.buffer as ArrayBuffer,
+          headers: { 'Content-Type': 'audio/mpeg' },
+        });
+        if (dgErr) throw new Error(dgErr.message);
+        const words: Array<{ word: string; start: number }> = (dgData as { words?: Array<{ word: string; start: number }> })?.words ?? [];
         const cutTime = findChapterAnnouncement(words, sf.splitAtBookCh);
 
         if (cutTime === null) {

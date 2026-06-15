@@ -20,9 +20,24 @@ Deno.serve(async (req) => {
       return json({ error: 'DEEPGRAM_API_KEY is not configured' }, 500);
     }
 
-    const { audioUrl } = await req.json() as { audioUrl?: string };
-    if (!audioUrl || !/^https?:\/\//.test(audioUrl)) {
-      return json({ error: 'A public audioUrl is required' }, 400);
+    const contentType = req.headers.get('content-type') ?? '';
+
+    let dgBody: BodyInit;
+    let dgContentType: string;
+
+    if (contentType.includes('audio/')) {
+      // Raw binary path: client sent MP3 bytes directly (used for boundary detection
+      // on locally-held files that aren't yet in Supabase Storage).
+      dgBody = await req.arrayBuffer();
+      dgContentType = 'audio/mpeg';
+    } else {
+      // URL path: client sent { audioUrl } JSON — Deepgram fetches the file itself.
+      const { audioUrl } = await req.json() as { audioUrl?: string };
+      if (!audioUrl || !/^https?:\/\//.test(audioUrl)) {
+        return json({ error: 'A public audioUrl is required' }, 400);
+      }
+      dgBody = JSON.stringify({ url: audioUrl });
+      dgContentType = 'application/json';
     }
 
     const dgRes = await fetch(
@@ -31,9 +46,9 @@ Deno.serve(async (req) => {
         method: 'POST',
         headers: {
           Authorization: `Token ${apiKey}`,
-          'Content-Type': 'application/json',
+          'Content-Type': dgContentType,
         },
-        body: JSON.stringify({ url: audioUrl }),
+        body: dgBody,
       },
     );
 
