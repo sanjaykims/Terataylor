@@ -1,13 +1,21 @@
-import { useState, useEffect, useRef } from 'react';
-import ShadowingPlayer from './components/ShadowingPlayer';
-import VocabularyPanel from './components/VocabularyPanel';
-import OpinionWriter from './components/OpinionWriter';
-import GamesPanel from './components/GamesPanel';
-import ProgressDashboard from './components/ProgressDashboard';
-import ImageUploadInput from './components/ImageUploadInput';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import LessonScheduleWidget from './components/LessonScheduleWidget';
-import A2PhotoViewer from './components/A2PhotoViewer';
 import BookReader from './components/BookReader';
+
+// Non-default-view components — loaded on demand to keep the initial bundle lean.
+const ShadowingPlayer   = lazy(() => import('./components/ShadowingPlayer'));
+const VocabularyPanel   = lazy(() => import('./components/VocabularyPanel'));
+const OpinionWriter     = lazy(() => import('./components/OpinionWriter'));
+const GamesPanel        = lazy(() => import('./components/GamesPanel'));
+const ProgressDashboard = lazy(() => import('./components/ProgressDashboard'));
+const ImageUploadInput  = lazy(() => import('./components/ImageUploadInput'));
+const A2PhotoViewer     = lazy(() => import('./components/A2PhotoViewer'));
+
+const TabSpinner = () => (
+  <div className="flex items-center justify-center py-16">
+    <div className="w-8 h-8 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+  </div>
+);
 import { trackSession } from './lib/tracker';
 import { supabase } from './lib/supabase';
 import {
@@ -317,6 +325,7 @@ export default function App() {
           </div>
         )}
 
+        <Suspense fallback={<TabSpinner />}>
         {/* ── A2 INPUT PANEL ────────────────────────────────────────────── */}
         {mainTab === 'a2' && a2Tab !== 'opinion' && a2Tab !== 'reading' && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -452,6 +461,7 @@ export default function App() {
 
         {/* ── PROGRESS ──────────────────────────────────────────────────── */}
         {mainTab === 'progress' && <ProgressDashboard />}
+        </Suspense>
       </div>
     </div>
   );

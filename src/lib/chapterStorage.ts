@@ -3,13 +3,15 @@ import { csGet, csSet, csDel, csDelPattern, csSetBatch, csKeyExists, csGetKeysBy
 import type { BookId } from '../data/syllabus';
 
 export async function saveChapterEn(bookId: BookId, lesson: number, text: string): Promise<void> {
-  if (!text.trim()) return;
-  await csSet(`chapter_${bookId}_${lesson}_en`, text);
+  const key = `chapter_${bookId}_${lesson}_en`;
+  if (!text.trim()) { await csDel(key); return; }
+  await csSet(key, text);
 }
 
 export async function saveChapterKo(bookId: BookId, lesson: number, text: string): Promise<void> {
-  if (!text.trim()) return;
-  await csSet(`chapter_${bookId}_${lesson}_ko`, text);
+  const key = `chapter_${bookId}_${lesson}_ko`;
+  if (!text.trim()) { await csDel(key); return; }
+  await csSet(key, text);
 }
 
 export async function loadChapterEn(bookId: BookId, lesson: number): Promise<string | null> {
