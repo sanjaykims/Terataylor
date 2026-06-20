@@ -450,11 +450,17 @@ const CHAPTER_NUMBER_WORDS = [
 ];
 
 // Parse a filename to get all book chapter numbers it covers.
-// Handles ranges "9~14", "9-14" and singles "ch9", "chapter 9", bare digit.
+// Handles: "9~14", "9-14", "Chapter 13 and 14", "Chapter 24, 25 and 26", "ch9", bare digit.
 function parseFilenameChapters(name: string): number[] {
   const rangeM = name.match(/\b(\d{1,2})\s*[~-]\s*(\d{1,2})\b/);
   if (rangeM) {
     const a = parseInt(rangeM[1]), b = parseInt(rangeM[2]);
+    if (b > a && b - a <= 10) return Array.from({ length: b - a + 1 }, (_, i) => a + i);
+  }
+  // "Chapter X and Y" or "Chapter X, Y and Z" — common audiobook filename pattern
+  const andM = name.match(/\bch(?:apter)?\s+(\d{1,2})(?:\s*,\s*\d{1,2})*\s+and\s+(\d{1,2})/i);
+  if (andM) {
+    const a = parseInt(andM[1]), b = parseInt(andM[2]);
     if (b > a && b - a <= 10) return Array.from({ length: b - a + 1 }, (_, i) => a + i);
   }
   const singleM = name.match(/(?:ch(?:apter)?|l(?:esson)?)\s*0*(\d{1,2})/i)
@@ -512,6 +518,19 @@ function trimMp3BodyAtTime(body: Uint8Array, cutSeconds: number): Uint8Array {
   const out = new Uint8Array(header.length + trimmedBody.length);
   out.set(header); out.set(trimmedBody, header.length);
   return out;
+}
+
+// Return the portion of an MP3 body starting at startSeconds (frame-aligned).
+function sliceMp3BodyFromTime(body: Uint8Array, startSeconds: number): Uint8Array {
+  let i = 0, duration = 0;
+  while (i + 4 <= body.length) {
+    const fr = parseMp3Frame(body, i);
+    if (!fr) { i++; continue; }
+    if (duration >= startSeconds) return body.subarray(i);
+    duration += fr.samples / fr.sampleRate;
+    i += fr.frameLen;
+  }
+  return new Uint8Array(0);
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -789,8 +808,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     type SpanInfo = {
       file: File;
       firstLessonCh: number;
-      firstBookCh: number;   // representative book-ch for sort order
-      splitAtBookCh: number; // first book chapter that belongs to the NEXT lesson
+      secondLessonCh: number; // lesson chapter that receives the tail portion
+      firstBookCh: number;    // representative book-ch for sort order
+      splitAtBookCh: number;  // first book chapter that belongs to the NEXT lesson
     };
     const spanningFiles: SpanInfo[] = [];
 
@@ -823,7 +843,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           const l = bookChapterToLessonMap.get(bch) ?? bch;
           return l === uniqueLessons[1];
         }) ?? bookChs[bookChs.length - 1];
-        spanningFiles.push({ file, firstLessonCh, firstBookCh, splitAtBookCh });
+        spanningFiles.push({ file, firstLessonCh, secondLessonCh: uniqueLessons[1], firstBookCh, splitAtBookCh });
       }
     }
 
@@ -854,10 +874,20 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           let body = bytes.subarray(findMp3Sync(bytes, skipId3v2(bytes)));
           const f0 = parseMp3Frame(body, 0);
           if (f0 && isXingFrame(body, 0, f0.sideInfo)) body = body.subarray(f0.frameLen);
-          const trimmed = trimMp3BodyAtTime(body, cutTime);
-          const trimmedFile = new File([trimmed.buffer as ArrayBuffer], `ch${sf.firstLessonCh}_trimmed.mp3`, { type: 'audio/mpeg' });
+
+          // Head: everything before the chapter boundary → first lesson slot
+          const headPart = trimMp3BodyAtTime(body, cutTime);
+          const headFile = new File([headPart.buffer as ArrayBuffer], `ch${sf.firstLessonCh}_head.mp3`, { type: 'audio/mpeg' });
           if (!groups.has(sf.firstLessonCh)) groups.set(sf.firstLessonCh, []);
-          groups.get(sf.firstLessonCh)!.push({ file: trimmedFile, bookCh: sf.firstBookCh });
+          groups.get(sf.firstLessonCh)!.push({ file: headFile, bookCh: sf.firstBookCh });
+
+          // Tail: everything from the chapter boundary → second lesson slot
+          const tailPart = sliceMp3BodyFromTime(body, cutTime);
+          if (tailPart.length > 0) {
+            const tailFile = new File([tailPart.buffer as ArrayBuffer], `ch${sf.secondLessonCh}_tail.mp3`, { type: 'audio/mpeg' });
+            if (!groups.has(sf.secondLessonCh)) groups.set(sf.secondLessonCh, []);
+            groups.get(sf.secondLessonCh)!.push({ file: tailFile, bookCh: sf.splitAtBookCh });
+          }
         }
       } catch (e) {
         errors.push(`${sf.file.name} 경계 탐지 실패: ${e instanceof Error ? e.message : '오류'} → 파일 전체 사용`);
