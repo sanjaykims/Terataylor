@@ -124,7 +124,7 @@ Deno.serve(async (req: Request) => {
   // 7. Delete stale timings for all merged chapters
   for (const ch of chapters) {
     await supabase.from('taylor_app_data')
-      .delete().eq('key', `chapter_${bookId}_${ch}_timings`);
+      .delete().eq('key', `chapter_${bookId}_${ch}_times`);
   }
 
   return new Response(

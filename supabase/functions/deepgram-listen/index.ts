@@ -54,7 +54,8 @@ Deno.serve(async (req) => {
 
     if (!dgRes.ok) {
       const detail = await dgRes.text();
-      return json({ error: `Deepgram failed: ${detail}` }, dgRes.status);
+      // Use 'message' so the Supabase JS client (FunctionsHttpError) surfaces the real text.
+      return json({ message: `Deepgram failed (${dgRes.status}): ${detail}` }, dgRes.status);
     }
 
     const dgData = await dgRes.json();
@@ -65,7 +66,7 @@ Deno.serve(async (req) => {
     return json({ words });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return json({ error: message }, 500);
+    return json({ message }, 500);
   }
 });
 
