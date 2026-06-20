@@ -468,22 +468,46 @@ function parseFilenameChapters(name: string): number[] {
   return singleM ? [parseInt(singleM[1])] : [];
 }
 
-// Search a Deepgram word array for "Chapter Fourteen" (or bare "fourteen").
-// Returns the audio time (seconds) just before the chapter heading, or null.
+// Search a Deepgram word array for a chapter heading like "Chapter Fourteen".
+// Deepgram is invoked with smart_format=true, which renders spoken numbers as
+// DIGITS ("chapter fourteen" → tokens "chapter","14"). Spelled-out compound
+// numbers ("twenty-four") may also arrive as two tokens ("twenty","four").
+// We therefore accept every plausible form. Returns the audio time (seconds)
+// just before the heading, or null.
+function chapterNumberForms(n: number): string[] {
+  const forms = new Set<string>();
+  forms.add(String(n));                                    // smart_format digit: "14"
+  const word = CHAPTER_NUMBER_WORDS[n]?.toLowerCase();
+  if (word) {
+    forms.add(word);                                       // "fourteen", "twenty-four"
+    forms.add(word.replace('-', ' '));                     // "twenty four"
+  }
+  return [...forms];
+}
+
 function findChapterAnnouncement(
   words: Array<{ word: string; start: number }>,
   bookChapter: number,
 ): number | null {
-  const target = CHAPTER_NUMBER_WORDS[bookChapter]?.toLowerCase() ?? String(bookChapter);
+  const forms = chapterNumberForms(bookChapter);
+  // Join up to the next two tokens so "twenty four" (two words) can match.
+  const tokenAt = (i: number) => words[i]?.word?.toLowerCase() ?? '';
+  const matchesNumber = (i: number): boolean => {
+    const one = tokenAt(i);
+    const two = `${one} ${tokenAt(i + 1)}`.trim();
+    return forms.includes(one) || forms.includes(two);
+  };
+
   for (let i = 0; i < words.length - 1; i++) {
-    if (words[i].word?.toLowerCase() === 'chapter' &&
-        words[i + 1].word?.toLowerCase() === target) {
+    if (tokenAt(i) === 'chapter' && matchesNumber(i + 1)) {
       return Math.max(0, words[i].start - 0.5);
     }
   }
-  for (const w of words) {
-    if (w.word?.toLowerCase() === target && w.start > 30) {
-      return Math.max(0, w.start - 0.5);
+  // Fallback: a bare number form spoken well into the file (>30s) is very
+  // likely the chapter heading even if "chapter" wasn't transcribed.
+  for (let i = 0; i < words.length; i++) {
+    if (words[i].start > 30 && matchesNumber(i)) {
+      return Math.max(0, words[i].start - 0.5);
     }
   }
   return null;
