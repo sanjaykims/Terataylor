@@ -608,11 +608,15 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const [timings,       setTimings]       = useState<number[] | null>(null);
   const [analyzing,     setAnalyzing]     = useState(false);
   const [analyzeMsg,    setAnalyzeMsg]    = useState('');
+  // Click-to-play behavior: 'continue' = play from the tapped sentence onward;
+  // 'sentence' = play only the tapped sentence, then pause (shadowing/repeat).
+  const [clickMode,     setClickMode]     = useState<'sentence' | 'continue'>('continue');
   const [audioUploadMsg,setAudioUploadMsg]= useState('');
   const [uploadProgress,setUploadProgress]= useState({ done: 0, total: 0 });
   const isSeekingRef  = useRef(false); // true while a programmatic seek is in flight
   const seekTargetRef = useRef(-1);   // position a tap sought to; -1 once the audio lands there
   const seekFloorRef  = useRef(-1);   // min allowed sentence idx after a tap-seek; -1 when inactive
+  const segmentEndRef = useRef<number | null>(null); // 한 문장 mode: pause at this time; null = play through
   const [debugLogs, setDebugLogs] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
   const debugLogsRef = useRef<string[]>([]);
@@ -660,6 +664,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     isSeekingRef.current  = false;
     seekTargetRef.current = -1;
     seekFloorRef.current  = -1;
+    segmentEndRef.current = null;
     const [en, ko, audio, times, nextAudio, vocab] = await Promise.all([
       loadChapterEn(bid, chapter).catch(() => null),
       loadChapterKo(bid, chapter).catch(() => null),
@@ -1171,9 +1176,15 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   };
 
   const handleAudioTimeUpdate = () => {
-    const t = audioRef.current?.currentTime ?? 0;
+    const audio = audioRef.current;
+    const t = audio?.currentTime ?? 0;
     setAudioCurrentTime(t);
     if (isSeekingRef.current) return;
+    // 한 문장 mode: stop once the tapped sentence finishes.
+    if (segmentEndRef.current !== null && t >= segmentEndRef.current - 0.05) {
+      segmentEndRef.current = null;
+      audio?.pause();
+    }
     syncHighlight();
   };
 
@@ -1184,8 +1195,17 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     const audio = audioRef.current;
     if (!audio || i < 0 || i >= sentenceStarts.length) return;
     const target = sentenceStarts[i];
+    // Small pre-roll so the sentence's first word isn't clipped (Deepgram marks
+    // the recognized word onset, which can be a hair after the breath/attack).
+    const seekTo = Math.max(0, target - 0.15);
 
-    // Ignore stale pre-seek timeupdates until the audio lands at `target`.
+    // 한 문장 mode: remember where this sentence ends so playback pauses there
+    // instead of running into the next sentence. 계속 mode plays through (null).
+    segmentEndRef.current = clickMode === 'sentence'
+      ? (i + 1 < sentenceStarts.length ? sentenceStarts[i + 1] : (audioDuration || null))
+      : null;
+
+    // Ignore stale pre-seek timeupdates until the audio lands near `target`.
     seekTargetRef.current = target;
     seekFloorRef.current  = i;   // highlight must not go below the tapped sentence
     isSeekingRef.current  = true;
@@ -1195,7 +1215,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setDebugLogs([]);
     dlog('[TAP] i='+i+' tgt='+target.toFixed(3));
     try {
-      audio.currentTime = target;
+      audio.currentTime = seekTo;
       if (audio.paused) audio.play().catch(() => {});
     } catch {
       seekTargetRef.current = -1;
@@ -1445,6 +1465,27 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                 onEnded={() => { setIsPlaying(false); setActiveIdx(-1); setActiveWordIdx(-1); isSeekingRef.current = false; seekTargetRef.current = -1; }}
               />
 
+              {/* Click-to-play behavior */}
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-gray-500">문장 클릭 시:</span>
+                <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+                  <button
+                    onClick={() => setClickMode('sentence')}
+                    className={`px-2.5 py-1 font-semibold transition-colors ${
+                      clickMode === 'sentence' ? `${bk.badge} text-white` : 'bg-white text-gray-500 hover:bg-gray-50'
+                    }`}>
+                    🔂 한 문장
+                  </button>
+                  <button
+                    onClick={() => { setClickMode('continue'); segmentEndRef.current = null; }}
+                    className={`px-2.5 py-1 font-semibold transition-colors ${
+                      clickMode === 'continue' ? `${bk.badge} text-white` : 'bg-white text-gray-500 hover:bg-gray-50'
+                    }`}>
+                    ▶ 계속 듣기
+                  </button>
+                </div>
+              </div>
+
               {/* Real speech alignment */}
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 {timings && timings.length === enRows.length ? (
@@ -1470,7 +1511,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                 </p>
               )}
               <p className="text-xs text-gray-400">
-                💡 재생하면 영어·한국어 문장이 실시간으로 하이라이트돼요. 문장을 클릭하면 그 부분부터 들을 수 있어요.
+                💡 재생하면 문장이 실시간으로 하이라이트돼요. ‘🔂 한 문장’은 클릭한 문장만 듣고 멈추고, ‘▶ 계속 듣기’는 그 문장부터 이어서 들어요.
               </p>
             </>
           ) : (

@@ -77,7 +77,7 @@ Deno.serve(async (req: Request) => {
   // 2. Process each chunk
   const segments: Uint8Array[] = downloads.map(({ bytes }, idx) => {
     let start = skipId3v2(bytes);
-    let end = idx < downloads.length - 1 ? trimId3v1(bytes) : bytes.length;
+    const end = idx < downloads.length - 1 ? trimId3v1(bytes) : bytes.length;
     start = findSync(bytes, start);
     if (idx > 0 && trimSeconds > 0) {
       const bps = bytesPerSec(bytes, start);
