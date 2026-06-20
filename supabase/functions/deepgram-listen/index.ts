@@ -17,52 +17,107 @@ Deno.serve(async (req) => {
   try {
     const apiKey = Deno.env.get('DEEPGRAM_API_KEY');
     if (!apiKey) {
-      return json({ error: 'DEEPGRAM_API_KEY is not configured' }, 500);
+      return json({ message: 'DEEPGRAM_API_KEY is not configured' }, 500);
     }
 
     const contentType = req.headers.get('content-type') ?? '';
 
-    let dgBody: BodyInit;
-    let dgContentType: string;
+    // Mode: issue a short-lived Deepgram key so the browser can call Deepgram
+    // directly (avoids the 25-second edge-function wall-clock timeout for long audio).
+    if (!contentType.includes('audio/')) {
+      const body = await req.json() as { mode?: string; audioUrl?: string };
 
-    if (contentType.includes('audio/')) {
-      // Raw binary path: client sent MP3 bytes directly (used for boundary detection
-      // on locally-held files that aren't yet in Supabase Storage).
-      dgBody = await req.arrayBuffer();
-      dgContentType = 'audio/mpeg';
-    } else {
-      // URL path: client sent { audioUrl } JSON — Deepgram fetches the file itself.
-      const { audioUrl } = await req.json() as { audioUrl?: string };
-      if (!audioUrl || !/^https?:\/\//.test(audioUrl)) {
-        return json({ error: 'A public audioUrl is required' }, 400);
+      if (body.mode === 'get_temp_key') {
+        // 1. Get the project ID
+        const projRes = await fetch('https://api.deepgram.com/v1/projects', {
+          headers: { Authorization: `Token ${apiKey}` },
+        });
+        if (!projRes.ok) {
+          const detail = await projRes.text();
+          return json({ message: `Deepgram projects failed (${projRes.status}): ${detail}` }, 502);
+        }
+        const projData = await projRes.json() as { projects?: { project_id: string }[] };
+        const projectId = projData.projects?.[0]?.project_id;
+        if (!projectId) {
+          return json({ message: 'No Deepgram project found' }, 502);
+        }
+
+        // 2. Create a 120-second key scoped to transcription only
+        const keyRes = await fetch(
+          `https://api.deepgram.com/v1/projects/${projectId}/keys`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Token ${apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              comment: 'temp-browser',
+              scopes: ['usage:write'],
+              time_to_live_in_seconds: 120,
+            }),
+          },
+        );
+        if (!keyRes.ok) {
+          const detail = await keyRes.text();
+          return json({ message: `Deepgram key creation failed (${keyRes.status}): ${detail}` }, 502);
+        }
+        const keyData = await keyRes.json() as { key?: string };
+        if (!keyData.key) {
+          return json({ message: 'Deepgram returned no key' }, 502);
+        }
+        return json({ tempKey: keyData.key });
       }
-      dgBody = JSON.stringify({ url: audioUrl });
-      dgContentType = 'application/json';
+
+      // URL path: client sent { audioUrl } JSON — Deepgram fetches the file itself.
+      const { audioUrl } = body;
+      if (!audioUrl || !/^https?:\/\//.test(audioUrl)) {
+        return json({ message: 'A public audioUrl is required' }, 400);
+      }
+      const dgRes = await fetch(
+        'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Token ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url: audioUrl }),
+        },
+      );
+      if (!dgRes.ok) {
+        const detail = await dgRes.text();
+        return json({ message: `Deepgram failed (${dgRes.status}): ${detail}` }, dgRes.status);
+      }
+      const dgData = await dgRes.json();
+      const words = (
+        dgData?.results?.channels?.[0]?.alternatives?.[0]?.words ?? []
+      ) as DeepgramWord[];
+      return json({ words });
     }
 
+    // Raw binary path: client sent MP3 bytes directly (used for boundary detection
+    // on locally-held files that aren't yet in Supabase Storage).
+    const dgBody = await req.arrayBuffer();
     const dgRes = await fetch(
       'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
       {
         method: 'POST',
         headers: {
           Authorization: `Token ${apiKey}`,
-          'Content-Type': dgContentType,
+          'Content-Type': 'audio/mpeg',
         },
         body: dgBody,
       },
     );
-
     if (!dgRes.ok) {
       const detail = await dgRes.text();
-      // Use 'message' so the Supabase JS client (FunctionsHttpError) surfaces the real text.
       return json({ message: `Deepgram failed (${dgRes.status}): ${detail}` }, dgRes.status);
     }
-
     const dgData = await dgRes.json();
     const words = (
       dgData?.results?.channels?.[0]?.alternatives?.[0]?.words ?? []
     ) as DeepgramWord[];
-
     return json({ words });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';

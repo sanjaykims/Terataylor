@@ -986,8 +986,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setMerging(false);
   };
 
-  // Browser-side audio alignment via Deepgram (URL-based, no file upload).
-  // Deepgram fetches the audio directly — no edge function, no timeout.
+  // Browser-side audio alignment: get a short-lived Deepgram key from the edge
+  // function (fast, stays within 25s timeout), then call Deepgram directly from
+  // the browser so there is no proxy timeout regardless of audio length.
   const handleAnalyzeAudio = async () => {
     if (!audioUrl) return;
     const sentences = enText ? splitToSentences(enText) : [];
@@ -995,12 +996,35 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setAnalyzing(true);
     setAnalyzeMsg('음성 분석 중… (30~90초)');
     try {
-      const cleanUrl = audioUrl.split('?')[0];
-      const { data, error } = await supabase.functions.invoke('deepgram-listen', {
-        body: { audioUrl: cleanUrl },
+      // Step 1: get a 120-second Deepgram temp key from our edge function
+      const { data: keyData, error: keyErr } = await supabase.functions.invoke('deepgram-listen', {
+        body: { mode: 'get_temp_key' },
       });
-      if (error) throw new Error(error.message);
-      const words = ((data as { words?: WordTimestamp[] } | null)?.words ?? []);
+      if (keyErr) throw new Error(keyErr.message);
+      const tempKey = (keyData as { tempKey?: string } | null)?.tempKey;
+      if (!tempKey) throw new Error('임시 키를 받지 못했어요. 잠시 후 다시 시도해 주세요.');
+
+      // Step 2: call Deepgram directly from the browser (no edge function proxy, no timeout)
+      const cleanUrl = audioUrl.split('?')[0];
+      const dgRes = await fetch(
+        'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Token ${tempKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url: cleanUrl }),
+        },
+      );
+      if (!dgRes.ok) {
+        const detail = await dgRes.text();
+        throw new Error(`Deepgram 오류 (${dgRes.status}): ${detail}`);
+      }
+      const dgData = await dgRes.json() as {
+        results?: { channels?: [{ alternatives?: [{ words?: WordTimestamp[] }] }] };
+      };
+      const words = dgData?.results?.channels?.[0]?.alternatives?.[0]?.words ?? [];
       if (!words.length) throw new Error('음성을 인식하지 못했어요. 다시 시도해 주세요.');
 
       const { alignFromWordTimestamps } = await import('../lib/audioAlign');
