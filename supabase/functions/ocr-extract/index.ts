@@ -1,3 +1,5 @@
+// Translation/OCR/dictionary edge function. Deployed via GitHub Actions
+// (.github/workflows/deploy-functions.yml) on changes to supabase/functions/**.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import Anthropic from 'npm:@anthropic-ai/sdk';
 
