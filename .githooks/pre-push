@@ -1,0 +1,30 @@
+#!/bin/sh
+# Pre-push guard: refuse to push commits that fail the production build.
+#
+# Why: Vercel runs its own build on every push. If that build fails, Vercel does
+# NOT deploy — it silently keeps serving the previous build, so a broken change
+# looks "live" but isn't. This hook runs the exact production build locally and
+# blocks the push if it fails, so a broken bundle never reaches origin/Vercel.
+#
+# Enable once per clone:   git config core.hooksPath .githooks
+# Bypass in an emergency:  git push --no-verify
+
+echo "▶ pre-push: verifying production build (npm run build)…"
+
+if [ ! -d node_modules ]; then
+  echo "⚠ node_modules not found — installing dependencies first (npm ci)…"
+  if ! npm ci; then
+    echo "✗ pre-push: npm ci failed. Fix dependencies, then push again."
+    exit 1
+  fi
+fi
+
+if npm run build; then
+  echo "✓ pre-push: build passed — proceeding with push"
+  exit 0
+else
+  echo ""
+  echo "✗ pre-push: BUILD FAILED — push aborted."
+  echo "  Fix the errors above, or bypass with: git push --no-verify"
+  exit 1
+fi

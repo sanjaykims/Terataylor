@@ -19,6 +19,17 @@ npm run preview   # Preview production build locally
 
 There are no tests. Deployment is via Vercel (auto-deploy on push to main).
 
+> ⚠️ Vercel runs its own build on push and, if it fails, **silently keeps serving
+> the previous build** (a broken change looks "live" but isn't). To catch this
+> before pushing, enable the pre-push build guard once per clone:
+>
+> ```bash
+> git config core.hooksPath .githooks   # runs `npm run build` before every push
+> ```
+>
+> CI (`.github/workflows/ci.yml`) also runs `npm run build`; always confirm the
+> commit's ✅/❌ check after pushing.
+
 ## Tech Stack
 
 | Layer | Technology |
