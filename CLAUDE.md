@@ -70,6 +70,7 @@ App.tsx (tab router: a2 | v1 | progress)
 - `taylor_app_data` — Generic key-value store (UPSERT semantics) for app state
 - Separate tables track vocab progress, game scores, and session analytics
 - Edge Functions handle: OCR (image → text), dictionary lookup (English + Korean definitions), and serve as a proxy for external APIs
+- Edge functions auto-deploy via `.github/workflows/deploy-functions.yml` whenever `supabase/functions/**` changes on `main`. One-time setup: add a Supabase access token (dashboard → Account → Access Tokens) as the GitHub repo secret `SUPABASE_ACCESS_TOKEN`. Manual fallback: `supabase functions deploy <name> --project-ref aeygqjuhqjvlhjrslbxd`
 - `supabase/functions/deepgram-listen` proxies Deepgram transcription; configure `DEEPGRAM_API_KEY` as a Supabase secret, not a `VITE_` client env var
 - Audio files are stored in a Supabase Storage bucket and referenced by URL in chapter records
 
