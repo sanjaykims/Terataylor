@@ -1067,37 +1067,58 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setAnalyzing(true);
     setAnalyzeMsg('음성 분석 중… (30~90초)');
     try {
-      // Step 1: get a 120-second Deepgram temp key from our edge function
-      const { data: keyData, error: keyErr } = await supabase.functions.invoke('deepgram-listen', {
-        body: { mode: 'get_temp_key' },
-      });
-      if (keyErr) throw new Error(await extractFnError(keyErr));
-      const keyPayload = keyData as { tempKey?: string; message?: string } | null;
-      if (keyPayload?.message && !keyPayload.tempKey) throw new Error(keyPayload.message);
-      const tempKey = keyPayload?.tempKey;
-      if (!tempKey) throw new Error('임시 키를 받지 못했어요. 잠시 후 다시 시도해 주세요.');
-
-      // Step 2: call Deepgram directly from the browser (no edge function proxy, no timeout)
       const cleanUrl = audioUrl.split('?')[0];
-      const dgRes = await fetch(
-        'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Token ${tempKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ url: cleanUrl }),
-        },
-      );
-      if (!dgRes.ok) {
-        const detail = await dgRes.text();
-        throw new Error(`Deepgram 오류 (${dgRes.status}): ${detail}`);
+
+      // Preferred path: mint a 120-second Deepgram key and call Deepgram directly
+      // from the browser, sidestepping the edge-function wall-clock timeout on long
+      // audio. This needs the master key to carry the keys:write scope.
+      let tempKey: string | undefined;
+      try {
+        const { data: keyData, error: keyErr } = await supabase.functions.invoke('deepgram-listen', {
+          body: { mode: 'get_temp_key' },
+        });
+        if (keyErr) throw new Error(await extractFnError(keyErr));
+        const keyPayload = keyData as { tempKey?: string; message?: string } | null;
+        if (keyPayload?.message && !keyPayload.tempKey) throw new Error(keyPayload.message);
+        tempKey = keyPayload?.tempKey;
+      } catch (keyErr) {
+        // If the master key lacks keys:write it cannot mint temp keys. Don't fail —
+        // fall back to the server-side proxy below (needs only usage:write).
+        const m = keyErr instanceof Error ? keyErr.message : String(keyErr);
+        if (!/keys:write|INSUFFICIENT_PERMISSIONS|\b403\b/.test(m)) throw keyErr;
       }
-      const dgData = await dgRes.json() as {
-        results?: { channels?: [{ alternatives?: [{ words?: WordTimestamp[] }] }] };
-      };
-      const words = dgData?.results?.channels?.[0]?.alternatives?.[0]?.words ?? [];
+
+      let words: WordTimestamp[] = [];
+      if (tempKey) {
+        const dgRes = await fetch(
+          'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
+          {
+            method: 'POST',
+            headers: { Authorization: `Token ${tempKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: cleanUrl }),
+          },
+        );
+        if (!dgRes.ok) {
+          const detail = await dgRes.text();
+          throw new Error(`Deepgram 오류 (${dgRes.status}): ${detail}`);
+        }
+        const dgData = await dgRes.json() as {
+          results?: { channels?: [{ alternatives?: [{ words?: WordTimestamp[] }] }] };
+        };
+        words = dgData?.results?.channels?.[0]?.alternatives?.[0]?.words ?? [];
+      } else {
+        // Fallback: edge function proxies the request — Deepgram fetches the URL
+        // itself. Slower (subject to the function timeout on very long files) but
+        // works with a transcription-only (usage:write) key.
+        setAnalyzeMsg('음성 분석 중… (프록시 모드 — 시간이 더 걸릴 수 있어요)');
+        const { data: proxyData, error: proxyErr } = await supabase.functions.invoke('deepgram-listen', {
+          body: { audioUrl: cleanUrl },
+        });
+        if (proxyErr) throw new Error(await extractFnError(proxyErr));
+        const proxyPayload = proxyData as { words?: WordTimestamp[]; message?: string } | null;
+        if (proxyPayload?.message && !proxyPayload.words) throw new Error(proxyPayload.message);
+        words = proxyPayload?.words ?? [];
+      }
       if (!words.length) throw new Error('음성을 인식하지 못했어요. 다시 시도해 주세요.');
 
       const { alignFromWordTimestamps } = await import('../lib/audioAlign');
