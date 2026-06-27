@@ -18,8 +18,11 @@ Deno.serve(async (req: Request) => {
       images?: { data: string; type: string }[];
       text?: string;
       sentences?: string[];
+      sentence?: string;
+      prev?: string;
+      next?: string;
       word?: string;
-      mode: 'text' | 'vocab' | 'translate' | 'translate_sentences' | 'define_word';
+      mode: 'text' | 'vocab' | 'translate' | 'translate_sentences' | 'translate_one' | 'define_word';
     };
     const { mode } = body;
 
@@ -52,7 +55,40 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // ── Sentence-aligned translate mode ───────────────────────────────────
+    // ── Single-sentence translate (guaranteed 1:1 alignment) ──────────────
+    // The client sends ONE target sentence at a time (plus neighbors purely as
+    // context). Because the unit is a single sentence, the model cannot split it
+    // across rows or renumber anything — whatever it returns is THIS sentence's
+    // translation, and the client drops it at the matching index. This is what
+    // keeps English and Korean meaning-aligned 1:1, which batch translation
+    // (positional array or numbered keys) could not guarantee.
+    if (mode === 'translate_one') {
+      const sentence = (body.sentence ?? '').trim();
+      if (!sentence) {
+        return new Response(JSON.stringify({ result: '' }), {
+          headers: { ...cors, 'Content-Type': 'application/json' },
+        });
+      }
+      const prev = (body.prev ?? '').trim();
+      const next = (body.next ?? '').trim();
+      const response = await client.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        system: `You are a professional English→Korean literary translator for a children's novel. Translate ONLY the TARGET sentence into one natural Korean rendering. The surrounding sentences are context for pronouns/tone only — do NOT translate them. Keep dialogue together with its attribution (e.g. «"Pretty," she said.» stays one Korean rendering). Return ONLY the Korean translation as plain text — no surrounding quotes around the whole thing, no numbering, no notes.`,
+        messages: [{
+          role: 'user',
+          content: `Context before: ${prev || '(none)'}\nContext after: ${next || '(none)'}\n\nTARGET sentence to translate:\n${sentence}`,
+        }],
+      });
+      const ko = response.content[0].type === 'text'
+        ? response.content[0].text.replace(/\s*\n\s*/g, ' ').trim()
+        : '';
+      return new Response(JSON.stringify({ result: ko }), {
+        headers: { ...cors, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ── Sentence-aligned translate mode (legacy batch; kept for compatibility) ──
     if (mode === 'translate_sentences') {
       const sentences = body.sentences ?? [];
       if (sentences.length === 0) {

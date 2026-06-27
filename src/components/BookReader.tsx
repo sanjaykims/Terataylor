@@ -227,45 +227,48 @@ async function translateSentences(
   const sentences = splitToSentences(enText);
   if (sentences.length === 0) return '';
 
-  // Batch sentences to stay within token limits while keeping alignment.
-  const BATCH = 30;
-  const batches: string[][] = [];
-  for (let i = 0; i < sentences.length; i += BATCH) {
-    batches.push(sentences.slice(i, i + BATCH));
-  }
+  // Translate ONE sentence per request, in parallel with bounded concurrency.
+  // Each Korean result is written to its own fixed index, so a single English
+  // sentence can never split across rows or shift the ones after it — the column
+  // pairing is guaranteed 1:1 by construction. Neighbors are sent only as context.
+  const ko = new Array<string>(sentences.length).fill('');
+  const CONCURRENCY = 5;
+  let done = 0;
 
-  const ko: string[] = [];
-  for (let i = 0; i < batches.length; i++) {
-    onChunk(i, batches.length);
-    // Retry each batch so one transient failure (rate-limit, cold start) doesn't
-    // abort the whole re-translation and leave stale, misaligned Korean behind.
-    let arr: string[] | null = null;
+  const translateOne = async (i: number): Promise<void> => {
     let lastErr: unknown = null;
     for (let attempt = 0; attempt < 3; attempt++) {
       if (attempt > 0) await new Promise(r => setTimeout(r, 800 * attempt));
       const { data, error } = await supabase.functions.invoke('ocr-extract', {
-        body: { sentences: batches[i], mode: 'translate_sentences' },
+        body: {
+          mode: 'translate_one',
+          sentence: sentences[i],
+          prev: sentences[i - 1] ?? '',
+          next: sentences[i + 1] ?? '',
+        },
       });
       if (error) { lastErr = new Error(await extractFnError(error)); continue; }
-      // The function returns 200 even on internal failure paths that yield no
-      // result; treat a present `error` field in the body as a real failure.
-      const payload = data as { result?: string[]; error?: string } | null;
+      const payload = data as { result?: string; error?: string } | null;
       if (payload?.error) { lastErr = new Error(payload.error); continue; }
-      arr = payload?.result ?? [];
-      break;
+      ko[i] = (payload?.result ?? '').replace(/\s*\n\s*/g, ' ').trim();
+      return;
     }
-    if (arr === null) {
-      throw lastErr instanceof Error ? lastErr : new Error('번역 요청 실패');
-    }
-    // The function returns translations index-aligned by sentence number and
-    // already exactly batch-length. Map by position to be safe (pad/clip to the
-    // batch size) so each English sentence keeps its own Korean cell — no merging.
-    const batch = batches[i];
-    for (let j = 0; j < batch.length; j++) {
-      ko.push((arr[j] ?? '').replace(/\s*\n\s*/g, ' ').trim());
-    }
-  }
-  onChunk(batches.length, batches.length);
+    throw lastErr instanceof Error ? lastErr : new Error('번역 요청 실패');
+  };
+
+  const queue = Array.from(sentences.keys());
+  onChunk(0, sentences.length);
+  await Promise.all(
+    Array.from({ length: Math.min(CONCURRENCY, sentences.length) }, async () => {
+      for (;;) {
+        const i = queue.shift();
+        if (i === undefined) return;
+        await translateOne(i);
+        done += 1;
+        onChunk(done, sentences.length);
+      }
+    }),
+  );
 
   // Store Korean sentences one-per-line, index-aligned to splitToSentences(enText).
   return ko.join('\n');
