@@ -193,6 +193,15 @@ function splitToSentences(text: string): string[] {
     .filter(Boolean);
 }
 
+// Split stored Korean into the SAME rows the reader renders, so alignment checks
+// and rendering never disagree. New format = one sentence per line (single \n,
+// no blank-line separators); legacy format = paragraphs re-split into sentences.
+function splitKoRows(koText: string): string[] {
+  return koText.includes('\n') && !koText.includes('\n\n')
+    ? koText.split('\n').map(s => s.trim())
+    : splitToSentences(koText);
+}
+
 // When the edge function splits one English sentence into two Korean sentences,
 // the returned array is longer than the batch. Detect attribution fragments
 // (short sentences ending in Korean speech verbs like 말했다/물었다) and merge
@@ -262,16 +271,26 @@ async function translateSentences(
   const ko: string[] = [];
   for (let i = 0; i < batches.length; i++) {
     onChunk(i, batches.length);
-    const { data, error } = await supabase.functions.invoke('ocr-extract', {
-      body: { sentences: batches[i], mode: 'translate_sentences' },
-    });
-    if (error) throw new Error(await extractFnError(error));
-    // The function returns 200 even on internal failure paths that yield no
-    // result; treat a present `error` field in the body as a real failure so it
-    // surfaces instead of silently producing empty Korean.
-    const payload = data as { result?: string[]; error?: string } | null;
-    if (payload?.error) throw new Error(payload.error);
-    const arr = payload?.result ?? [];
+    // Retry each batch so one transient failure (rate-limit, cold start) doesn't
+    // abort the whole re-translation and leave stale, misaligned Korean behind.
+    let arr: string[] | null = null;
+    let lastErr: unknown = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 800 * attempt));
+      const { data, error } = await supabase.functions.invoke('ocr-extract', {
+        body: { sentences: batches[i], mode: 'translate_sentences' },
+      });
+      if (error) { lastErr = new Error(await extractFnError(error)); continue; }
+      // The function returns 200 even on internal failure paths that yield no
+      // result; treat a present `error` field in the body as a real failure.
+      const payload = data as { result?: string[]; error?: string } | null;
+      if (payload?.error) { lastErr = new Error(payload.error); continue; }
+      arr = payload?.result ?? [];
+      break;
+    }
+    if (arr === null) {
+      throw lastErr instanceof Error ? lastErr : new Error('번역 요청 실패');
+    }
     ko.push(...alignKoreanToEnglish(arr, batches[i].length));
   }
   onChunk(batches.length, batches.length);
@@ -699,24 +718,21 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       loadChapterVocab(bid, chapter).catch(() => null),
     ]);
     setEnText(en);
-    // Self-heal only on UNAMBIGUOUS corruption signals so we never overwrite a
-    // correctly-aligned translation:
-    //   • line count ≠ English sentence count  → not stored one-per-sentence
-    //   • trailing empty-line padding (a blank line) → legacy "aligned" artifact
-    // Correctly-aligned data (N lines, no blanks, N == enCount) is left untouched.
-    // A short line ending in 말했다/물었다 is NOT a corruption signal — a one-line
-    // "「…」 said X." is perfectly valid and must not trigger a re-translation.
+    // Self-heal when the stored Korean does not line up 1:1 with the English the
+    // reader will render. We compare using the EXACT same row split as rendering
+    // (splitKoRows / splitToSentences) so the trigger matches the visible symptom:
+    // if the columns would be misaligned (different row counts), re-translate from
+    // the English (the source of truth). This catches stale Korean left behind when
+    // a chapter's English was re-extracted after an earlier translation (ch05).
     const finalKo = ko;
     if (en && ko) {
-      const koRaw = ko.split('\n');
-      const koLines = koRaw.map((s: string) => s.trim()).filter(Boolean);
       const enCount = splitToSentences(en).length;
-      const hasPadding = koRaw.length > koLines.length + 1;
-      if ((koLines.length !== enCount || hasPadding) && koLines.length > 0 && enCount > 0) {
-        // Korean is misaligned with the English (wrong sentence count or legacy
-        // padding). Re-translate, but do it VISIBLY: show the translation spinner
-        // and surface any failure, so a broken heal never leaves stale Korean
-        // silently on screen (the bug that left ch05 mismatched).
+      const koRowCount = splitKoRows(ko).length;
+      const koNonEmpty = splitKoRows(ko).filter(Boolean).length;
+      if (enCount > 0 && koNonEmpty > 0 && koRowCount !== enCount) {
+        // Re-translate VISIBLY: drive the spinner and surface failures, so a broken
+        // heal never leaves stale Korean silently on screen.
+        dlog(`[heal] ch${chapter}: ko rows=${koRowCount} ≠ en sentences=${enCount} → re-translating`);
         const seq = ++loadSeqRef.current;
         setTranslating(true);
         setTxError('');
@@ -729,13 +745,16 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           setKoText(newKo);
           setTranslatedChaps(prev => new Set([...prev, chapter]));
           setTranslating(false);
+          dlog(`[heal] ch${chapter}: done — ko rows=${splitKoRows(newKo).length}, en=${enCount}`);
         }).catch(e => {
           if (loadSeqRef.current !== seq) return;
-          setTxError(e instanceof Error
-            ? `번역 정렬 실패: ${e.message} — 🔄 다시 번역을 눌러 주세요`
-            : '번역 정렬 실패 — 🔄 다시 번역을 눌러 주세요');
+          const msg = e instanceof Error ? e.message : String(e);
+          setTxError(`번역 정렬 실패: ${msg} — 🔄 다시 번역을 눌러 주세요`);
           setTranslating(false);
+          dlog(`[heal] ch${chapter}: FAILED — ${msg}`);
         });
+      } else {
+        dlog(`[heal] ch${chapter}: aligned — ko rows=${koRowCount}, en sentences=${enCount}`);
       }
     }
     setKoText(finalKo);
@@ -1136,11 +1155,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   // English sentences (canonical split) paired with stored Korean sentences.
   // Korean is stored one-per-line, already index-aligned to splitToSentences(enText).
   const enRows  = enText ? splitToSentences(enText) : [];
-  const koRows  = koText
-    ? (koText.includes('\n') && !koText.includes('\n\n')
-        ? koText.split('\n').map(s => s.trim())          // new aligned format
-        : splitToSentences(koText))                      // legacy paragraph format
-    : [];
+  const koRows  = koText ? splitKoRows(koText) : [];
   const maxRows = Math.max(enRows.length, koRows.length);
 
   // Start time (seconds) of each sentence. Prefer REAL per-sentence times from
