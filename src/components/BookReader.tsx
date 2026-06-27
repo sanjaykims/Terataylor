@@ -202,40 +202,6 @@ function splitKoRows(koText: string): string[] {
     : splitToSentences(koText);
 }
 
-// When the edge function splits one English sentence into two Korean sentences,
-// the returned array is longer than the batch. Detect attribution fragments
-// (short sentences ending in Korean speech verbs like 말했다/물었다) and merge
-// them with their preceding sentence. Fall back to shortest-pair for other cases.
-function alignKoreanToEnglish(raw: string[], targetLen: number): string[] {
-  const out = raw.map(s => (s ?? '').replace(/\s*\n\s*/g, ' ').trim());
-  // Attribution verbs that indicate a sentence fragment belonging to the prior sentence
-  const ATTR_VERB = /(?:말했다|물었다|대답했다|속삭였다|외쳤다|소리쳤다|중얼거렸다|덧붙였다)[.。]?["']?\s*$/;
-  while (out.length > targetLen && out.length > 1) {
-    // Prefer merging attribution fragments (index > 0, short, ends with speech verb)
-    let attrIdx = -1;
-    for (let k = 1; k < out.length; k++) {
-      if (out[k].length <= 20 && ATTR_VERB.test(out[k])) {
-        if (attrIdx === -1 || out[k].length < out[attrIdx].length) attrIdx = k;
-      }
-    }
-    if (attrIdx !== -1) {
-      out[attrIdx - 1] = out[attrIdx - 1] + ' ' + out[attrIdx];
-      out.splice(attrIdx, 1);
-    } else {
-      // Fallback: merge globally shortest adjacent pair
-      let pairLen = out[0].length + out[1].length, pairIdx = 0;
-      for (let k = 1; k < out.length - 1; k++) {
-        const l = out[k].length + out[k + 1].length;
-        if (l < pairLen) { pairLen = l; pairIdx = k; }
-      }
-      out[pairIdx] = out[pairIdx] + (out[pairIdx] && out[pairIdx + 1] ? ' ' : '') + out[pairIdx + 1];
-      out.splice(pairIdx + 1, 1);
-    }
-  }
-  while (out.length < targetLen) out.push('');
-  return out;
-}
-
 // supabase.functions.invoke returns a FunctionsHttpError on any non-2xx, but the
 // useful detail (the edge function's own {error} body) lives on error.context,
 // a Response. Pull it out so failures show the real cause (e.g. an Anthropic
@@ -291,7 +257,13 @@ async function translateSentences(
     if (arr === null) {
       throw lastErr instanceof Error ? lastErr : new Error('번역 요청 실패');
     }
-    ko.push(...alignKoreanToEnglish(arr, batches[i].length));
+    // The function returns translations index-aligned by sentence number and
+    // already exactly batch-length. Map by position to be safe (pad/clip to the
+    // batch size) so each English sentence keeps its own Korean cell — no merging.
+    const batch = batches[i];
+    for (let j = 0; j < batch.length; j++) {
+      ko.push((arr[j] ?? '').replace(/\s*\n\s*/g, ' ').trim());
+    }
   }
   onChunk(batches.length, batches.length);
 

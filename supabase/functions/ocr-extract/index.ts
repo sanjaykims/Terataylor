@@ -6,151 +6,6 @@ const cors = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// ── Audio alignment helpers ────────────────────────────────────────────────────
-
-const normWord = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-
-function dedupeMonotone(pts: { pos: number; time: number }[]) {
-  const out: typeof pts = [];
-  for (const p of pts) {
-    if (!out.length || p.pos > out[out.length - 1].pos) out.push(p);
-  }
-  return out;
-}
-
-function lerp(pts: { pos: number; time: number }[], x: number): number {
-  if (!pts.length) return 0;
-  if (x <= pts[0].pos) return pts[0].time;
-  if (x >= pts[pts.length - 1].pos) return pts[pts.length - 1].time;
-  let lo = 0, hi = pts.length - 1;
-  while (lo + 1 < hi) {
-    const mid = (lo + hi) >> 1;
-    if (pts[mid].pos <= x) lo = mid; else hi = mid;
-  }
-  const range = pts[hi].pos - pts[lo].pos;
-  return pts[lo].time + (range > 0 ? (x - pts[lo].pos) / range : 0) * (pts[hi].time - pts[lo].time);
-}
-
-function enforceMonotone(arr: number[]) {
-  for (let i = 1; i < arr.length; i++) {
-    if (arr[i] < arr[i - 1]) arr[i] = arr[i - 1];
-  }
-}
-
-function alignWordsToSentences(
-  words: { word: string; start: number; end: number }[],
-  sentences: string[],
-): number[] {
-  const audioFlat = words
-    .map(w => ({ norm: normWord(w.word), time: w.start }))
-    .filter(w => w.norm.length > 0);
-
-  if (!audioFlat.length || !sentences.length) return sentences.map(() => 0);
-
-  const textFlat: { si: number; norm: string }[] = [];
-  for (let si = 0; si < sentences.length; si++) {
-    for (const w of sentences[si].split(/\s+/).filter(Boolean)) {
-      const n = normWord(w);
-      if (n) textFlat.push({ si, norm: n });
-    }
-  }
-  if (!textFlat.length) return sentences.map(() => 0);
-
-  const WINDOW = 35;
-  const JUMP   = WINDOW * 2;
-  const anchors: { pos: number; time: number }[] = [];
-  let textPos = 0;
-
-  for (let ai = 0; ai < audioFlat.length; ai++) {
-    const aw = audioFlat[ai];
-    if (aw.norm.length < 5) continue;
-
-    const expectedTi = Math.round((ai / audioFlat.length) * textFlat.length);
-    const searchStart = (expectedTi - textPos > JUMP)
-      ? Math.max(textPos, expectedTi - Math.floor(WINDOW / 4))
-      : textPos;
-    const searchEnd = Math.min(
-      textFlat.length - 1,
-      Math.max(textPos + WINDOW, expectedTi + Math.floor(WINDOW / 2)),
-    );
-
-    for (let ti = searchStart; ti <= searchEnd; ti++) {
-      if (textFlat[ti].norm === aw.norm) {
-        anchors.push({ pos: ti, time: aw.time });
-        textPos = ti + 1;
-        break;
-      }
-    }
-  }
-
-  if (!anchors.length) {
-    const totalTime = audioFlat[audioFlat.length - 1].time;
-    return sentences.map((_, si) => (si / sentences.length) * totalTime);
-  }
-
-  const pts = dedupeMonotone([
-    { pos: 0,               time: anchors[0].time },
-    ...anchors,
-    { pos: textFlat.length, time: audioFlat[audioFlat.length - 1].time },
-  ]);
-
-  const starts = new Array(sentences.length).fill(-1) as number[];
-  for (let ti = 0; ti < textFlat.length; ti++) {
-    const si = textFlat[ti].si;
-    if (starts[si] < 0) starts[si] = lerp(pts, ti);
-  }
-  let last = audioFlat[0].time;
-  for (let i = 0; i < starts.length; i++) {
-    if (starts[i] < 0) starts[i] = last; else last = starts[i];
-  }
-  enforceMonotone(starts);
-
-  const REFINE_S = 2.0;
-  for (let si = 0; si < sentences.length; si++) {
-    const target = starts[si];
-    const fw = sentences[si].split(/\s+/).slice(0, 5).map(normWord).filter(w => w.length >= 3);
-    if (!fw.length) continue;
-
-    const lo = audioFlat.findIndex(w => w.time >= target - REFINE_S);
-    if (lo < 0) continue;
-
-    for (let ai = lo; ai < audioFlat.length && audioFlat[ai].time <= target + REFINE_S; ai++) {
-      if (audioFlat[ai].norm !== fw[0]) continue;
-      let matched = 1;
-      for (let k = 1; k < fw.length && ai + k < audioFlat.length; k++) {
-        if (audioFlat[ai + k].norm === fw[k]) matched++;
-      }
-      if (matched >= Math.min(2, fw.length)) {
-        starts[si] = audioFlat[ai].time;
-        break;
-      }
-    }
-  }
-
-  enforceMonotone(starts);
-  return starts;
-}
-
-// ── Translation alignment helper ──────────────────────────────────────────────
-// When the model returns more items than requested (it split one English sentence
-// into two Korean sentences), merge the shortest adjacent pair repeatedly until
-// the count matches. This preserves correct alignment for all other sentences.
-function mergeToLength(arr: string[], targetLen: number): string[] {
-  const out = arr.map(s => (s ?? '').trim());
-  while (out.length > targetLen && out.length > 1) {
-    let bestIdx = 0;
-    let bestLen = (out[0]?.length ?? 0) + (out[1]?.length ?? 0);
-    for (let k = 1; k < out.length - 1; k++) {
-      const l = (out[k]?.length ?? 0) + (out[k + 1]?.length ?? 0);
-      if (l < bestLen) { bestLen = l; bestIdx = k; }
-    }
-    out[bestIdx] = ((out[bestIdx] ?? '') + ' ' + (out[bestIdx + 1] ?? '')).trim();
-    out.splice(bestIdx + 1, 1);
-  }
-  while (out.length < targetLen) out.push('');
-  return out;
-}
-
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 Deno.serve(async (req: Request) => {
@@ -162,60 +17,9 @@ Deno.serve(async (req: Request) => {
       text?: string;
       sentences?: string[];
       word?: string;
-      audioUrl?: string;
-      mode: 'text' | 'vocab' | 'translate' | 'translate_sentences' | 'define_word' | 'align_audio';
+      mode: 'text' | 'vocab' | 'translate' | 'translate_sentences' | 'define_word';
     };
     const { mode } = body;
-
-    // ── Server-side audio alignment via Deepgram ──────────────────────────
-    if (mode === 'align_audio') {
-      const audioUrl = body.audioUrl ?? '';
-      const sentences = body.sentences ?? [];
-      if (!audioUrl || !sentences.length) {
-        return new Response(JSON.stringify({ starts: [] }), {
-          headers: { ...cors, 'Content-Type': 'application/json' },
-        });
-      }
-
-      const dgRes = await fetch(
-        'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Token ${Deno.env.get('DEEPGRAM_API_KEY')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ url: audioUrl }),
-        },
-      );
-
-      if (!dgRes.ok) {
-        const errText = await dgRes.text();
-        throw new Error(`Deepgram error: ${errText}`);
-      }
-
-      const dgData = await dgRes.json() as {
-        results: {
-          channels: [{
-            alternatives: [{
-              words: { word: string; start: number; end: number }[];
-            }];
-          }];
-        };
-      };
-
-      const dgWords = dgData?.results?.channels?.[0]?.alternatives?.[0]?.words ?? [];
-      if (!dgWords.length) {
-        return new Response(JSON.stringify({ starts: [] }), {
-          headers: { ...cors, 'Content-Type': 'application/json' },
-        });
-      }
-
-      const starts = alignWordsToSentences(dgWords, sentences);
-      return new Response(JSON.stringify({ starts }), {
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      });
-    }
 
     const client = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
 
@@ -257,36 +61,48 @@ Deno.serve(async (req: Request) => {
 
       const numbered = sentences.map((s, i) => `${i + 1}. ${s}`).join('\n');
 
-      // Prefill "[" forces the model directly into JSON array output,
-      // eliminating prose preamble and reducing the chance of stray splits.
+      // Return a JSON OBJECT keyed by sentence number ({"1":"…","2":"…"}) rather
+      // than a positional array. We then read each translation BY KEY, so even if
+      // the model splits or merges a sentence it can never shift the translations
+      // that follow — alignment errors stay local instead of cascading. Prefill
+      // "{" forces the model straight into the JSON object.
       const response = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 8192,
-        system: `You are a professional literary translator (English → Korean) working on a children's novel. Translate numbered English sentences into Korean.
+        system: `You are a professional literary translator (English → Korean) working on a children's novel. Translate the numbered English sentences into natural Korean.
 
-CRITICAL ALIGNMENT RULE: Each numbered English line must produce EXACTLY ONE Korean string — never split one English sentence into two Korean entries. This applies even when a sentence contains both dialogue and an attribution tag (e.g. "Hello," said Jane. must remain a single Korean string). Violating this rule breaks the entire reader alignment.`,
+OUTPUT: Return ONLY a JSON object whose keys are the sentence numbers (as strings "1","2",…) and whose values are the Korean translation of that exact sentence: {"1":"…","2":"…"}.
+
+RULES:
+- Produce EXACTLY one key for every input number from 1 to ${sentences.length}.
+- Put the ENTIRE translation of a sentence in its single value, even when the sentence mixes dialogue with an attribution tag or subordinate clauses (e.g. «"Pretty," she said as she lined up the buttons.» → one value). NEVER split one sentence across two keys.
+- Do not add, omit, merge, or renumber keys.`,
         messages: [
           {
             role: 'user',
-            content: `Translate the following ${sentences.length} English sentences into Korean.\nReturn ONLY a JSON array of exactly ${sentences.length} strings — one translation per input sentence, in the same order.\n\n${numbered}`,
+            content: `Translate these ${sentences.length} English sentences into Korean.\n\n${numbered}`,
           },
-          // Prefill forces the response to start as a JSON array
-          { role: 'assistant', content: '[' },
+          // Prefill forces the response to start as a JSON object
+          { role: 'assistant', content: '{' },
         ],
       });
 
-      // The model continues from "[", so prepend it back before parsing
-      const continuation = response.content[0].type === 'text' ? response.content[0].text : ']';
-      const raw = '[' + continuation;
-      let arr: string[] = [];
+      // The model continues from "{", so prepend it back before parsing
+      const continuation = response.content[0].type === 'text' ? response.content[0].text : '}';
+      const raw = '{' + continuation;
+      let obj: Record<string, unknown> = {};
       try {
-        const end = raw.lastIndexOf(']');
-        arr = JSON.parse(end >= 0 ? raw.slice(0, end + 1) : raw + ']');
-      } catch { arr = []; }
+        const end = raw.lastIndexOf('}');
+        obj = JSON.parse(end >= 0 ? raw.slice(0, end + 1) : raw + '}');
+      } catch { obj = {}; }
 
-      // Enforce exact length: merge extra items (split sentences) rather than
-      // truncating, which would shift all subsequent translations.
-      arr = mergeToLength(arr, sentences.length);
+      // Build an exactly-length, index-aligned array by reading each sentence's
+      // translation by its 1-based key. Missing keys become '' (rendered as a
+      // blank Korean cell) instead of pulling the next sentence up.
+      const arr = sentences.map((_, i) => {
+        const v = obj[String(i + 1)];
+        return typeof v === 'string' ? v.replace(/\s*\n\s*/g, ' ').trim() : '';
+      });
 
       return new Response(JSON.stringify({ result: arr }), {
         headers: { ...cors, 'Content-Type': 'application/json' },
