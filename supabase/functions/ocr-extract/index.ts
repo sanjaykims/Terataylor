@@ -8,6 +8,23 @@ const cors = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Detects when the model broke character and returned an English meta-reply
+// (asking for clarification, apologizing, explaining) instead of a translation.
+function looksLikeMetaReply(ko: string, source: string): boolean {
+  if (!ko) return true;
+  const hasHangul = /[가-힣]/.test(ko);
+  const sourceHasLetters = /[A-Za-z]/.test(source);
+  // A genuine translation of letter-bearing English almost always has Hangul.
+  if (sourceHasLetters && !hasHangul) return true;
+  // Conversational/meta phrases the model emits when it refuses to translate.
+  if (/\b(I apologize|I'm sorry|target sentence|could you (?:please )?provide|appears to be (?:incomplete|a fragment)|transcription error|complete (?:sentence|thought)|please provide)\b/i.test(ko)) {
+    return true;
+  }
+  // A single source sentence should never balloon into a long paragraph.
+  if (ko.length > source.length * 6 + 120) return true;
+  return false;
+}
+
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 Deno.serve(async (req: Request) => {
@@ -71,18 +88,39 @@ Deno.serve(async (req: Request) => {
       }
       const prev = (body.prev ?? '').trim();
       const next = (body.next ?? '').trim();
-      const response = await client.messages.create({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
-        system: `You are a professional English→Korean literary translator for a children's novel. Translate ONLY the TARGET sentence into one natural Korean rendering. The surrounding sentences are context for pronouns/tone only — do NOT translate them. Keep dialogue together with its attribution (e.g. «"Pretty," she said.» stays one Korean rendering). Return ONLY the Korean translation as plain text — no surrounding quotes around the whole thing, no numbering, no notes.`,
-        messages: [{
-          role: 'user',
-          content: `Context before: ${prev || '(none)'}\nContext after: ${next || '(none)'}\n\nTARGET sentence to translate:\n${sentence}`,
-        }],
-      });
-      const ko = response.content[0].type === 'text'
-        ? response.content[0].text.replace(/\s*\n\s*/g, ' ').trim()
-        : '';
+
+      const baseSystem = `You are a professional English→Korean literary translator for a children's novel. Translate ONLY the TARGET sentence into one natural Korean rendering. The surrounding sentences are context for pronouns/tone only — do NOT translate them. Keep dialogue together with its attribution (e.g. «"Pretty," she said.» stays one Korean rendering).
+
+ABSOLUTE OUTPUT RULES:
+- Output ONLY the Korean translation as plain text. No English words, no explanations, no notes, no numbering, no surrounding quotes around the whole line.
+- NEVER ask a question, NEVER ask for clarification, and NEVER comment on the input.
+- The TARGET may be a fragment, a single word or letter, stammering, or punctuation only (e.g. «"I.», «"I—I—», «—»). In that case translate it as-is into the closest natural Korean (e.g. «"I.» → «"저...», «"I—I—» → «"저, 저—») and output ONLY that. Do not refuse.`;
+
+      const callModel = async (strict: boolean): Promise<string> => {
+        const resp = await client.messages.create({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 1024,
+          system: strict
+            ? baseSystem + `\n\nThe previous attempt did not return a Korean translation. Output Korean characters ONLY — absolutely no English sentences or apologies.`
+            : baseSystem,
+          messages: [{
+            role: 'user',
+            content: `Context before: ${prev || '(none)'}\nContext after: ${next || '(none)'}\n\nTARGET sentence to translate:\n${sentence}`,
+          }],
+        });
+        return resp.content[0].type === 'text'
+          ? resp.content[0].text.replace(/\s*\n\s*/g, ' ').trim()
+          : '';
+      };
+
+      // Guard against the model breaking character (e.g. replying in English to
+      // ask about a fragment). A real translation of letter-bearing source must
+      // contain Hangul; meta-replies don't. Retry strictly, then fall back to the
+      // source so a row can never fill with an English paragraph.
+      let ko = await callModel(false);
+      if (looksLikeMetaReply(ko, sentence)) ko = await callModel(true);
+      if (looksLikeMetaReply(ko, sentence)) ko = sentence;
+
       return new Response(JSON.stringify({ result: ko }), {
         headers: { ...cors, 'Content-Type': 'application/json' },
       });

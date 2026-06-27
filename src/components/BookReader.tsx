@@ -202,6 +202,15 @@ function splitKoRows(koText: string): string[] {
     : splitToSentences(koText);
 }
 
+// Client-side guard mirroring the edge function: a Korean translation of
+// letter-bearing English should contain Hangul. If it doesn't (or it reads like
+// an English meta/refusal reply), reject it so a row never fills with English.
+function looksLikeMetaReply(ko: string, source: string): boolean {
+  if (!ko) return true;
+  if (/[가-힣]/.test(ko)) return false;        // has Hangul → a real translation
+  return /[A-Za-z]/.test(source);              // letters in → Hangul expected out
+}
+
 // supabase.functions.invoke returns a FunctionsHttpError on any non-2xx, but the
 // useful detail (the edge function's own {error} body) lives on error.context,
 // a Response. Pull it out so failures show the real cause (e.g. an Anthropic
@@ -237,6 +246,7 @@ async function translateSentences(
 
   const translateOne = async (i: number): Promise<void> => {
     let lastErr: unknown = null;
+    let gotResponse = false;
     for (let attempt = 0; attempt < 3; attempt++) {
       if (attempt > 0) await new Promise(r => setTimeout(r, 800 * attempt));
       const { data, error } = await supabase.functions.invoke('ocr-extract', {
@@ -250,9 +260,16 @@ async function translateSentences(
       if (error) { lastErr = new Error(await extractFnError(error)); continue; }
       const payload = data as { result?: string; error?: string } | null;
       if (payload?.error) { lastErr = new Error(payload.error); continue; }
-      ko[i] = (payload?.result ?? '').replace(/\s*\n\s*/g, ' ').trim();
-      return;
+      gotResponse = true;
+      const candidate = (payload?.result ?? '').replace(/\s*\n\s*/g, ' ').trim();
+      // If the model broke character and replied in English, retry; never store it.
+      if (!looksLikeMetaReply(candidate, sentences[i])) { ko[i] = candidate; return; }
+      lastErr = new Error('번역 응답이 한국어가 아니에요');
     }
+    // The server answered but kept returning a non-Korean reply for this one
+    // sentence (a degenerate fragment). Leave its Korean cell blank rather than
+    // failing the whole chapter or storing English text.
+    if (gotResponse) { ko[i] = ''; return; }
     throw lastErr instanceof Error ? lastErr : new Error('번역 요청 실패');
   };
 
