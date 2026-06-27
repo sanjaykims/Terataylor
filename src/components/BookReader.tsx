@@ -679,9 +679,6 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const audioFileRef = useRef<HTMLInputElement>(null);
   const rowRefs       = useRef<(HTMLDivElement | null)[]>([]);
   const mobileRowRefs = useRef<(HTMLParagraphElement | null)[]>([]);
-  // Incremented on every loadChapter call; background re-translation checks this
-  // to avoid updating stale chapter after user navigates away.
-  const loadSeqRef = useRef(0);
 
   // Maps book chapter numbers (e.g. 7) → lesson chapter index (e.g. 2).
   // Empty map for books without "Ch. N~M" page strings (Coraline).
