@@ -661,6 +661,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setAnalyzeMsg('');
     setMergeMsg('');
     setNextChapHasAudio(false);
+    setTranslating(false);
+    setTxError('');
     isSeekingRef.current  = false;
     seekTargetRef.current = -1;
     seekFloorRef.current  = -1;
@@ -688,12 +690,29 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       const enCount = splitToSentences(en).length;
       const hasPadding = koRaw.length > koLines.length + 1;
       if ((koLines.length !== enCount || hasPadding) && koLines.length > 0 && enCount > 0) {
+        // Korean is misaligned with the English (wrong sentence count or legacy
+        // padding). Re-translate, but do it VISIBLY: show the translation spinner
+        // and surface any failure, so a broken heal never leaves stale Korean
+        // silently on screen (the bug that left ch05 mismatched).
         const seq = ++loadSeqRef.current;
-        translateSentences(en, () => {}).then(newKo => {
+        setTranslating(true);
+        setTxError('');
+        setTxProgress({ done: 0, total: 0 });
+        translateSentences(en, (done, total) => {
+          if (loadSeqRef.current === seq) setTxProgress({ done, total });
+        }).then(newKo => {
           if (loadSeqRef.current !== seq) return;
           saveChapterKo(bid, chapter, newKo).catch(() => {});
           setKoText(newKo);
-        }).catch(() => {});
+          setTranslatedChaps(prev => new Set([...prev, chapter]));
+          setTranslating(false);
+        }).catch(e => {
+          if (loadSeqRef.current !== seq) return;
+          setTxError(e instanceof Error
+            ? `번역 정렬 실패: ${e.message} — 🔄 다시 번역을 눌러 주세요`
+            : '번역 정렬 실패 — 🔄 다시 번역을 눌러 주세요');
+          setTranslating(false);
+        });
       }
     }
     setKoText(finalKo);
