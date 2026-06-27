@@ -227,6 +227,24 @@ function alignKoreanToEnglish(raw: string[], targetLen: number): string[] {
   return out;
 }
 
+// supabase.functions.invoke returns a FunctionsHttpError on any non-2xx, but the
+// useful detail (the edge function's own {error} body) lives on error.context,
+// a Response. Pull it out so failures show the real cause (e.g. an Anthropic
+// 401/model error) instead of the generic "non-2xx status code".
+async function extractFnError(error: unknown): Promise<string> {
+  const ctx = (error as { context?: unknown }).context;
+  if (ctx instanceof Response) {
+    try {
+      const body = await ctx.clone().json();
+      if (body?.error) return String(body.error);
+      if (body?.message) return String(body.message);
+    } catch {
+      try { const t = await ctx.clone().text(); if (t) return t; } catch { /* ignore */ }
+    }
+  }
+  return String((error as { message?: string }).message ?? error);
+}
+
 async function translateSentences(
   enText: string,
   onChunk: (done: number, total: number) => void,
@@ -247,8 +265,13 @@ async function translateSentences(
     const { data, error } = await supabase.functions.invoke('ocr-extract', {
       body: { sentences: batches[i], mode: 'translate_sentences' },
     });
-    if (error) throw new Error(String((error as { message?: string }).message ?? error));
-    const arr = (data as { result: string[] }).result ?? [];
+    if (error) throw new Error(await extractFnError(error));
+    // The function returns 200 even on internal failure paths that yield no
+    // result; treat a present `error` field in the body as a real failure so it
+    // surfaces instead of silently producing empty Korean.
+    const payload = data as { result?: string[]; error?: string } | null;
+    if (payload?.error) throw new Error(payload.error);
+    const arr = payload?.result ?? [];
     ko.push(...alignKoreanToEnglish(arr, batches[i].length));
   }
   onChunk(batches.length, batches.length);
