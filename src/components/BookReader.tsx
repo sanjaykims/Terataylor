@@ -633,6 +633,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const [translating,  setTranslating]  = useState(false);
   const [txProgress,   setTxProgress]   = useState({ done: 0, total: 0 });
   const [txError,      setTxError]      = useState('');
+  // True when stored Korean doesn't line up 1:1 with the English (e.g. stale
+  // translation after the English was re-extracted). Surfaced as a banner; the
+  // user fixes it on demand via "🔄 다시 번역" — no auto re-translation on load.
+  const [misaligned,   setMisaligned]   = useState(false);
 
   const [confirmClear, setConfirmClear] = useState(false);
   const [mobileView,   setMobileView]   = useState<'en' | 'ko'>('en');
@@ -705,6 +709,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setNextChapHasAudio(false);
     setTranslating(false);
     setTxError('');
+    setMisaligned(false);
     isSeekingRef.current  = false;
     seekTargetRef.current = -1;
     seekFloorRef.current  = -1;
@@ -718,46 +723,25 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       loadChapterVocab(bid, chapter).catch(() => null),
     ]);
     setEnText(en);
-    // Self-heal when the stored Korean does not line up 1:1 with the English the
-    // reader will render. We compare using the EXACT same row split as rendering
-    // (splitKoRows / splitToSentences) so the trigger matches the visible symptom:
-    // if the columns would be misaligned (different row counts), re-translate from
-    // the English (the source of truth). This catches stale Korean left behind when
-    // a chapter's English was re-extracted after an earlier translation (ch05).
-    const finalKo = ko;
+    // Detect (but do NOT auto-fix) Korean that doesn't line up 1:1 with the English
+    // the reader renders. We compare using the EXACT same row split as rendering
+    // (splitKoRows) so the check matches the visible symptom. When the columns would
+    // be misaligned (different row counts), we just flag it and show a banner — the
+    // user re-aligns on demand with the "🔄 다시 번역" button. No re-translation runs
+    // automatically on load.
+    setMisaligned(false);
     if (en && ko) {
       const enCount = splitToSentences(en).length;
       const koRowCount = splitKoRows(ko).length;
       const koNonEmpty = splitKoRows(ko).filter(Boolean).length;
       if (enCount > 0 && koNonEmpty > 0 && koRowCount !== enCount) {
-        // Re-translate VISIBLY: drive the spinner and surface failures, so a broken
-        // heal never leaves stale Korean silently on screen.
-        dlog(`[heal] ch${chapter}: ko rows=${koRowCount} ≠ en sentences=${enCount} → re-translating`);
-        const seq = ++loadSeqRef.current;
-        setTranslating(true);
-        setTxError('');
-        setTxProgress({ done: 0, total: 0 });
-        translateSentences(en, (done, total) => {
-          if (loadSeqRef.current === seq) setTxProgress({ done, total });
-        }).then(newKo => {
-          if (loadSeqRef.current !== seq) return;
-          saveChapterKo(bid, chapter, newKo).catch(() => {});
-          setKoText(newKo);
-          setTranslatedChaps(prev => new Set([...prev, chapter]));
-          setTranslating(false);
-          dlog(`[heal] ch${chapter}: done — ko rows=${splitKoRows(newKo).length}, en=${enCount}`);
-        }).catch(e => {
-          if (loadSeqRef.current !== seq) return;
-          const msg = e instanceof Error ? e.message : String(e);
-          setTxError(`번역 정렬 실패: ${msg} — 🔄 다시 번역을 눌러 주세요`);
-          setTranslating(false);
-          dlog(`[heal] ch${chapter}: FAILED — ${msg}`);
-        });
+        setMisaligned(true);
+        dlog(`[align] ch${chapter}: ko rows=${koRowCount} ≠ en sentences=${enCount} → 다시 번역 필요`);
       } else {
-        dlog(`[heal] ch${chapter}: aligned — ko rows=${koRowCount}, en sentences=${enCount}`);
+        dlog(`[align] ch${chapter}: aligned — ko rows=${koRowCount}, en sentences=${enCount}`);
       }
     }
-    setKoText(finalKo);
+    setKoText(ko);
     setAudioUrl(audio);
     setTimings(times);
     setNextChapHasAudio(!!nextAudio);
@@ -859,6 +843,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       const ko = await translateSentences(enText, (done, total) => setTxProgress({ done, total }));
       await saveChapterKo(bookId, selectedChapter, ko);
       setKoText(ko);
+      setMisaligned(false);
       setTranslatedChaps(prev => new Set([...prev, selectedChapter]));
     } catch (e) {
       setTxError(e instanceof Error ? e.message : '번역 실패');
@@ -1469,7 +1454,18 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         </div>
       )}
       {txError && <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{txError}</p>}
-      {koText && !translating && (
+      {koText && !translating && misaligned && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+          <span className="text-xs text-amber-700 font-semibold">
+            ⚠️ 영어와 한국어 문장 수가 맞지 않아요. 정렬하려면 다시 번역하세요.
+          </span>
+          <button onClick={handleTranslate}
+            className={`shrink-0 px-3 py-1.5 ${bk.badge} text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-all`}>
+            🔄 다시 번역
+          </button>
+        </div>
+      )}
+      {koText && !translating && !misaligned && (
         <div className="px-1 flex items-center justify-between">
           <span className="text-xs text-emerald-600 font-semibold">✓ 번역 저장됨</span>
           <button onClick={handleTranslate}
