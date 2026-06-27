@@ -1071,8 +1071,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       const { data: keyData, error: keyErr } = await supabase.functions.invoke('deepgram-listen', {
         body: { mode: 'get_temp_key' },
       });
-      if (keyErr) throw new Error(keyErr.message);
-      const tempKey = (keyData as { tempKey?: string } | null)?.tempKey;
+      if (keyErr) throw new Error(await extractFnError(keyErr));
+      const keyPayload = keyData as { tempKey?: string; message?: string } | null;
+      if (keyPayload?.message && !keyPayload.tempKey) throw new Error(keyPayload.message);
+      const tempKey = keyPayload?.tempKey;
       if (!tempKey) throw new Error('임시 키를 받지 못했어요. 잠시 후 다시 시도해 주세요.');
 
       // Step 2: call Deepgram directly from the browser (no edge function proxy, no timeout)
