@@ -16,8 +16,11 @@ on:
       book_id:
         description: 'Book id (edward | coraline)'
         default: 'coraline'
+      src_url:
+        description: 'External share link (Google Drive/Dropbox/direct) — big files that exceed the Supabase upload limit'
+        default: ''
       src_path:
-        description: 'Storage path of the full-book audio'
+        description: 'Storage path of the full-book audio (used when src_url is empty)'
         default: 'v1/coraline/ch1.mp3'
       boundaries:
         description: 'Book chapters that START lessons 2..K'
@@ -39,6 +42,9 @@ jobs:
       - name: Split audiobook into lesson chapters
         env:
           BOOK_ID: ${{ inputs.book_id || 'coraline' }}
+          # On push-triggered runs, the source link below is used (set it, push,
+          # and the split runs); workflow_dispatch input overrides it.
+          SRC_URL: ${{ inputs.src_url || '' }}
           SRC_PATH: ${{ inputs.src_path || 'v1/coraline/ch1.mp3' }}
           BOUNDARIES: ${{ inputs.boundaries || '3,5,7,10,12' }}
         run: node scripts/split-audiobook.mjs
