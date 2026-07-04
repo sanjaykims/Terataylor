@@ -1513,7 +1513,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                   : audioUrl ? '📁 추가 업로드' : '+ mp3 업로드'}
               </button>
             </div>
-            <input ref={audioFileRef} type="file" accept="audio/mp3,audio/mpeg,audio/*" className="hidden"
+            <input ref={audioFileRef} type="file" accept="audio/mp3,audio/mpeg,audio/*,video/mp4,.mp4,.m4a,.m4b" className="hidden"
               multiple
               onChange={e => {
                 const files = Array.from(e.target.files ?? []);
