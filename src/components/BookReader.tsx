@@ -1671,7 +1671,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           const sec = Math.floor(s % 60);
           return `${m}:${sec.toString().padStart(2, '0')}`;
         };
-        const SPEEDS = [0.7, 0.9, 1, 1.1, 1.3];
+        const SPEEDS = [0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3];
         const togglePlay = () => {
           const a = audioRef.current;
           if (!a) return;
@@ -1716,8 +1716,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
               <span style={{ color: '#94a3b8', fontSize: 12, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
                 {fmt(audioCurrentTime)} / {fmt(audioDuration)}
               </span>
-              {/* Speed buttons */}
-              <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>
+              {/* Speed buttons — wrap on narrow screens so 7 buttons never overflow */}
+              <div style={{ display: 'flex', gap: 4, marginLeft: 'auto', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                 {SPEEDS.map(s => (
                   <button key={s} onClick={() => changeSpeed(s)} style={{
                     padding: '3px 8px', borderRadius: 6, border: 'none',
