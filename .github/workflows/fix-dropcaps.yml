@@ -1,0 +1,36 @@
+name: Fix Drop-cap Artifacts
+
+# Maintenance tool: cleans PDF drop-cap artifacts ("C ORALINE DISCOVERED…") at
+# chapter openings in stored lesson texts. Idempotent — a second run finds no
+# artifacts and writes nothing. Logs every before→after change for auditing.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-dropcaps.yml'
+      - 'scripts/fix-dropcaps.mjs'
+  workflow_dispatch:
+    inputs:
+      book_id:
+        description: 'Book id (edward | coraline)'
+        default: 'coraline'
+      chapter_count:
+        description: 'Number of lesson chapters to scan'
+        default: '6'
+
+concurrency:
+  group: fix-dropcaps
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fix drop-cap artifacts in stored chapters
+        env:
+          BOOK_ID: ${{ inputs.book_id || 'coraline' }}
+          CHAPTER_COUNT: ${{ inputs.chapter_count || '6' }}
+        run: node scripts/fix-dropcaps.mjs
