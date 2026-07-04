@@ -1,0 +1,44 @@
+name: Trim Audio Head
+
+# Maintenance tool: trims the head of a stored chapter MP3 so it starts at the
+# given book-chapter announcement (e.g. an uploaded lesson file that begins with
+# the previous lesson's last chapter). Runs in Actions because this runner can
+# reach Supabase/Deepgram. Idempotent — skips if the file already starts there.
+#
+# Run manually from the Actions tab with inputs, or push a change to these files
+# to run with the defaults below.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/trim-audio-head.yml'
+      - 'scripts/trim-audio-head.mjs'
+  workflow_dispatch:
+    inputs:
+      book_id:
+        description: 'Book id (edward | coraline)'
+        default: 'edward'
+      lesson:
+        description: 'Lesson chapter slot (ch<N>.mp3 in storage)'
+        default: '6'
+      target_book_ch:
+        description: 'Book chapter the file should START at'
+        default: '23'
+
+concurrency:
+  group: trim-audio-head
+  cancel-in-progress: false
+
+jobs:
+  trim:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trim stored audio to target chapter
+        env:
+          BOOK_ID: ${{ inputs.book_id || 'edward' }}
+          LESSON: ${{ inputs.lesson || '6' }}
+          TARGET_BOOK_CH: ${{ inputs.target_book_ch || '23' }}
+        run: node scripts/trim-audio-head.mjs
