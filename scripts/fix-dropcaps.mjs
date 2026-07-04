@@ -32,42 +32,59 @@ const HEADING_LINE = /^[ivxlc]+\.$|^\d{1,2}\.?$/i;
 
 function sentenceCaseToken(tok, isFirst) {
   const lower = tok.toLowerCase();
-  const base = lower.replace(/['’]s$/, '');
-  const proper = PROPER.get(base);
-  if (proper) return proper + lower.slice(base.length);
-  return isFirst ? lower[0].toUpperCase() + lower.slice(1) : lower;
+  const word = (lower.match(/^[a-z]+/) ?? [''])[0];   // leading letters only
+  const proper = PROPER.get(word);
+  if (proper) return proper + lower.slice(word.length);
+  return isFirst && word ? lower[0].toUpperCase() + lower.slice(1) : lower;
 }
 
 // Fix ONE opening line; returns the fixed line or null if nothing changed.
 function fixOpeningLine(line) {
   const tokens = line.split(/\s+/).filter(Boolean);
-  let changed = false;
+  const before = tokens.join(' ');
+
+  // 0) PDF extraction can split punctuation into its own token ("INSIDE ,",
+  //    "CORALINE ’ S"). Re-attach: punctuation joins the previous token, and a
+  //    lone letter after an apostrophe-ending token is a possessive 's.
+  for (let k = tokens.length - 1; k > 0; k--) {
+    if (/^[,.;:!?…”"’']+$/.test(tokens[k])) tokens.splice(k - 1, 2, tokens[k - 1] + tokens[k]);
+  }
+  for (let k = tokens.length - 1; k > 0; k--) {
+    if (/[’']$/.test(tokens[k - 1]) && /^[A-Za-z]$/.test(tokens[k])) {
+      tokens.splice(k - 1, 2, tokens[k - 1] + tokens[k]);
+    }
+  }
 
   // 1) Re-attach the drop cap: leading single capital + capital-starting word.
   while (tokens.length > 1 && /^[A-Z]$/.test(tokens[0]) && /^[A-Z]/.test(tokens[1])) {
     tokens.splice(0, 2, tokens[0] + tokens[1]);
-    changed = true;
   }
 
-  // 2) Measure the small-caps run (ALL-CAPS words; lone "A"/"I" are real words).
-  const isCaps = (t) => /^[A-Z][A-Z'’]*$/.test(t) && (t.length >= 2 || t === 'A' || t === 'I');
-  let j = 0;
+  // 2) Find the first small-caps run near the line start (ALL-CAPS words,
+  //    punctuation ignored; lone "A"/"I" are real words and may sit inside it).
+  const isCaps = (t) => {
+    const letters = t.replace(/[^A-Za-z]/g, '');
+    return letters.length > 0 && letters === letters.toUpperCase()
+      && (letters.length >= 2 || letters === 'A' || letters === 'I');
+  };
+  let s = 0;
+  while (s < Math.min(tokens.length, 8) && !isCaps(tokens[s])) s++;
+  let j = s;
   while (j < tokens.length && isCaps(tokens[j])) j++;
 
   // 2b) Split word at the run's edge: "…DOOR O f the…" → "…DOOR Of the…".
   if (j < tokens.length - 1 && /^[A-Z]$/.test(tokens[j]) && /^[a-z]$/.test(tokens[j + 1])) {
     tokens.splice(j, 2, tokens[j] + tokens[j + 1]);
     j++;
-    changed = true;
   }
 
-  // 3) Sentence-case the caps run (2+ words so normal text is never touched).
-  if (j >= 2) {
-    for (let k = 0; k < j; k++) tokens[k] = sentenceCaseToken(tokens[k], k === 0);
-    changed = true;
+  // 3) Sentence-case the caps run (2+ words so normal prose is never touched).
+  if (j - s >= 2) {
+    for (let k = s; k < j; k++) tokens[k] = sentenceCaseToken(tokens[k], k === 0);
   }
 
-  return changed ? tokens.join(' ') : null;
+  const after = tokens.join(' ');
+  return after !== before ? after : null;
 }
 
 // Fix all openings in a chapter text; returns { text, changes: [before, after][] }.
