@@ -4,6 +4,7 @@ name: Split Audiobook
 # taylor-audio bucket into per-lesson chapter slots, cutting at the "Chapter N"
 # announcements that begin each lesson. Exits green with a notice when the
 # source file hasn't been uploaded yet.
+# Re-run 2026-07-04: repair ch01/ch02 after an accidental in-app merge.
 
 on:
   push:
