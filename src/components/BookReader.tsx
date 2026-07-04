@@ -691,16 +691,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   // Maps book chapter numbers (e.g. 7) → lesson chapter index (e.g. 2).
   const bookChapterToLessonMap = useMemo(() => buildBookChapterToLessonMap(bookId), [bookId]);
 
-  // null when the book has no lesson-structured schedule at all.
-  const currentLessonChapter = SCHEDULE.some(l => l.book === bookId && (l.pdfPages || CH_RANGE.test(l.pages)))
-    ? initialLessonChapter
-    : null;
-  // Book-chapter range of this week's lesson, for the header label
-  // (e.g. Edward L6 → "Ch. 23~27", Coraline L1 → "Ch. 1~2").
-  const lessonChapterRange = currentLessonChapter
-    ? (lessonChapterRangesFor(bookId)[currentLessonChapter - 1]
-        ?? [currentLessonChapter, currentLessonChapter] as [number, number])
-    : null;
+  // Book-chapter range of the SELECTED lesson slot, for the header label
+  // (e.g. Coraline ch05 → "Ch. 10~11", Edward ch06 → "Ch. 23~27").
+  // null when the book has no lesson-structured schedule.
+  const selectedChapterRange = lessonChapterRangesFor(bookId)[selectedChapter - 1] ?? null;
 
   const loadChapter = async (bid: BookId, chapter: number) => {
     setChapterLoading(true);
@@ -1396,8 +1390,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       <div className="bg-white rounded-xl border border-gray-100 px-3 py-2 flex items-center justify-between">
         <span className={`text-xs font-bold ${bk.color}`}>
           Chapter {selectedChapter}
-          {lessonChapterRange
-            ? ` (이번 수업: Ch. ${lessonChapterRange[0]}~${lessonChapterRange[1]})`
+          {selectedChapterRange
+            ? ` (책 챕터: Ch. ${selectedChapterRange[0]}${selectedChapterRange[1] !== selectedChapterRange[0] ? `~${selectedChapterRange[1]}` : ''})`
             : ` / ${totalChapters}`}
         </span>
         {enText && (
