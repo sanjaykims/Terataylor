@@ -44,7 +44,7 @@ jobs:
           BOOK_ID: ${{ inputs.book_id || 'coraline' }}
           # On push-triggered runs, the source link below is used (set it, push,
           # and the split runs); workflow_dispatch input overrides it.
-          SRC_URL: ${{ inputs.src_url || '' }}
+          SRC_URL: ${{ inputs.src_url || 'https://drive.google.com/file/d/1bNhkAycCEgxnZLg_vAYKO7F2KbOr15rF/view?usp=drivesdk' }}
           SRC_PATH: ${{ inputs.src_path || 'v1/coraline/ch1.mp3' }}
           BOUNDARIES: ${{ inputs.boundaries || '3,5,7,10,12' }}
         run: node scripts/split-audiobook.mjs
