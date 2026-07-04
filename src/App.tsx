@@ -23,7 +23,7 @@ import {
 } from './lib/cloudStorage';
 import { migrateChaptersFromLocalStorage, loadChapterVocab } from './lib/chapterStorage';
 import type { VocabItem } from './lib/types';
-import { BOOKS, type BookId } from './data/syllabus';
+import { BOOKS, currentLesson, type BookId } from './data/syllabus';
 
 type MainTab = 'a2' | 'v1' | 'progress';
 type A2Tab   = 'reading' | 'shadowing' | 'vocabulary' | 'opinion' | 'games';
@@ -81,7 +81,10 @@ export default function App() {
   const [showA2Input, setShowA2Input] = useState(true);
 
   // ── Content state (loaded from Supabase on mount) ───────────────────────
-  const [v1Book,   setV1BookState]  = useState<BookId>('edward');
+  // The book follows the academy schedule: opening the app lands on the book
+  // of this week's class (Edward through 7/8, Coraline from 7/9). Manual
+  // switching still works within a session.
+  const [v1Book,   setV1BookState]  = useState<BookId>(currentLesson().book);
   const [a2Text,   setA2TextState]  = useState('');
   const [a2Vocab,  setA2VocabState] = useState<VocabItem[] | null>(null);
   const [a2AudioUrl, setA2AudioUrl] = useState<string | null>(null);
@@ -102,8 +105,9 @@ export default function App() {
       .finally(async () => {
         try {
           const data = await csGetAppState();
-          const book = (data.v1_book as BookId) ?? 'edward';
-          if (data.v1_book)      setV1BookState(book);
+          // Deliberately NOT restoring data.v1_book: the schedule decides which
+          // book the app opens on, so it advances by itself between terms.
+          const book = currentLesson().book;
           if (data.a2_text)      setA2TextState(data.a2_text);
           if (data.a2_vocab) {
             try {

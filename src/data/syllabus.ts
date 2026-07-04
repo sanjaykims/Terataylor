@@ -67,7 +67,18 @@ export const SCHEDULE: LessonEntry[] = [
   { lesson: 12, date: '2026-08-26', book: 'coraline', pages: 'Ch. 12~13', homework: 'Term End 🎉' },
 ];
 
-export const HOLIDAY = { date: '2026-07-29', note: 'NO CLASS (7/29 ~ 7/31 여름방학)' };
+export const HOLIDAY = { date: '2026-07-29', note: 'NO CLASS (7/28 ~ 7/31 여름방학 휴원)' };
+
+// The lesson the app should focus on today: the next upcoming class (today
+// included — the chapter stays selected through class day), or the final
+// lesson once the course is over. Weeks without a Wednesday class (여름방학)
+// resolve to the following week's lesson automatically because only real
+// class dates exist in SCHEDULE.
+export function currentLesson(today: Date = new Date()): LessonEntry {
+  const now = new Date(today);
+  now.setHours(0, 0, 0, 0);
+  return SCHEDULE.find(l => new Date(l.date) >= now) ?? SCHEDULE[SCHEDULE.length - 1];
+}
 
 // ── Writing Prompts ───────────────────────────────────────────────────────────
 export interface EssaySection {
