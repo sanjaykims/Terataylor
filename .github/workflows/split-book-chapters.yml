@@ -1,0 +1,37 @@
+name: Split Book Chapters
+
+# Maintenance tool: splits a book stored as one big chapter blob into per-lesson
+# texts by detecting chapter headings and grouping them by the syllabus ranges.
+# Aborts without writing when the detected heading count doesn't match, so
+# re-runs after a successful split are harmless.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/split-book-chapters.yml'
+      - 'scripts/split-book-chapters.mjs'
+  workflow_dispatch:
+    inputs:
+      book_id:
+        description: 'Book id (edward | coraline)'
+        default: 'coraline'
+      ranges:
+        description: 'Lesson ranges, e.g. 1-2,3-4,5-6,7-9,10-11,12-13'
+        default: '1-2,3-4,5-6,7-9,10-11,12-13'
+
+concurrency:
+  group: split-book-chapters
+  cancel-in-progress: false
+
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Split stored book into lesson chapters
+        env:
+          BOOK_ID: ${{ inputs.book_id || 'coraline' }}
+          RANGES: ${{ inputs.ranges || '1-2,3-4,5-6,7-9,10-11,12-13' }}
+        run: node scripts/split-book-chapters.mjs
