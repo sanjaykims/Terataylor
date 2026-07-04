@@ -1671,7 +1671,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           const sec = Math.floor(s % 60);
           return `${m}:${sec.toString().padStart(2, '0')}`;
         };
-        const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5];
+        const SPEEDS = [0.7, 0.9, 1, 1.1, 1.3];
         const togglePlay = () => {
           const a = audioRef.current;
           if (!a) return;
@@ -1725,7 +1725,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                     color: playbackRate === s ? '#fff' : '#94a3b8',
                     fontSize: 11, fontWeight: 600, cursor: 'pointer',
                   }}>
-                    {s}×
+                    {s.toFixed(1)}×
                   </button>
                 ))}
               </div>
