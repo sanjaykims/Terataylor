@@ -18,7 +18,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 // ── Chapter heading detection ─────────────────────────────────────────────────
 // Matches lines like "One", "Two", ..., "Twenty-five", "Chapter One",
-// "Chapter 1", or bare digits 1-30. Used to detect where chapters start.
+// "Chapter 1", bare digits 1-30, or Roman numerals "I."–"XV" (Coraline-style
+// editions), each with an optional trailing period. Used to detect chapter starts.
 const NUMBER_WORDS = [
   'one','two','three','four','five','six','seven','eight','nine','ten',
   'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen',
@@ -26,8 +27,13 @@ const NUMBER_WORDS = [
   'twenty-one','twenty-two','twenty-three','twenty-four','twenty-five',
   'twenty-six','twenty-seven','twenty-eight','twenty-nine','thirty',
 ];
+// A lone "I" line could be the pronoun, so the single-letter numeral requires
+// its period ("I."); multi-character numerals are unambiguous either way.
+const ROMAN_NUMERALS = [
+  'ii','iii','iv','v','vi','vii','viii','ix','x','xi','xii','xiii','xiv','xv',
+];
 const CHAPTER_HEADING = new RegExp(
-  `^(chapter\\s+\\w+|${NUMBER_WORDS.join('|')}|\\d{1,2}|prologue|epilogue)$`,
+  `^(chapter\\s+\\w+\\.?|(?:${NUMBER_WORDS.join('|')})\\.?|\\d{1,2}\\.?|i\\.|(?:${ROMAN_NUMERALS.join('|')})\\.?|prologue|epilogue)$`,
   'i',
 );
 
@@ -291,19 +297,32 @@ async function translateSentences(
   return ko.join('\n');
 }
 
-// ── Audio helpers ─────────────────────────────────────────────────────────────
+// ── Lesson-chapter structure ──────────────────────────────────────────────────
+// A book is "lesson-structured" when its SCHEDULE entries carry "Ch. N~M" page
+// strings (both Edward and Coraline). pdfPages is optional on top of that: with
+// it, PDF upload slices by explicit page ranges (Edward); without it, upload
+// auto-detects book-chapter headings and groups them into the lesson ranges
+// (Coraline).
+const CH_RANGE = /Ch\.\s*(\d+)\s*[~–]\s*(\d+)/i;
+
+// The book's per-lesson book-chapter ranges, in schedule order.
+function lessonChapterRangesFor(bid: BookId): Array<[number, number]> {
+  return SCHEDULE.filter(l => l.book === bid)
+    .map(l => l.pages.match(CH_RANGE))
+    .filter((m): m is RegExpMatchArray => !!m)
+    .map(m => [parseInt(m[1]), parseInt(m[2])] as [number, number]);
+}
+
 // Build a mapping: book chapter number → lesson-chapter index (1-based).
-// Only works for books whose SCHEDULE entries have "Ch. N~M" page strings.
 function buildBookChapterToLessonMap(bid: BookId): Map<number, number> {
   const map = new Map<number, number>();
-  SCHEDULE.filter(l => l.book === bid && l.pdfPages).forEach((lesson, idx) => {
-    const m = lesson.pages.match(/Ch\.\s*(\d+)\s*[~–]\s*(\d+)/i);
-    if (m) {
-      for (let ch = parseInt(m[1]); ch <= parseInt(m[2]); ch++) map.set(ch, idx + 1);
-    }
+  lessonChapterRangesFor(bid).forEach(([a, b], idx) => {
+    for (let ch = a; ch <= b; ch++) map.set(ch, idx + 1);
   });
   return map;
 }
+
+// ── Audio helpers ─────────────────────────────────────────────────────────────
 
 // ── MP3 frame-level merge (mirrors the server-side merge-audio function) ──────
 // Concatenates MP3 files at the byte/frame level: strip each file's ID3 tags,
@@ -600,7 +619,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   // Compute the current/upcoming lesson chapter BEFORE useState so it can be
   // used as the initial value. bookId changes cause remount via key={v1Book}.
   const initialLessonChapter = (() => {
-    const bookLessons = SCHEDULE.filter(l => l.book === bookId && l.pdfPages);
+    const bookLessons = SCHEDULE.filter(l => l.book === bookId && (l.pdfPages || CH_RANGE.test(l.pages)));
     if (bookLessons.length === 0) return 1;
     const now = new Date(); now.setHours(0, 0, 0, 0);
     const future = bookLessons.filter(l => new Date(l.date) > now);
@@ -673,15 +692,17 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const mobileRowRefs = useRef<(HTMLParagraphElement | null)[]>([]);
 
   // Maps book chapter numbers (e.g. 7) → lesson chapter index (e.g. 2).
-  // Empty map for books without "Ch. N~M" page strings (Coraline).
   const bookChapterToLessonMap = useMemo(() => buildBookChapterToLessonMap(bookId), [bookId]);
 
-  // null when the book has no pdfPages-based schedule (e.g. Coraline).
-  const currentLessonChapter = SCHEDULE.some(l => l.book === bookId && l.pdfPages)
+  // null when the book has no lesson-structured schedule at all.
+  const currentLessonChapter = SCHEDULE.some(l => l.book === bookId && (l.pdfPages || CH_RANGE.test(l.pages)))
     ? initialLessonChapter
     : null;
+  // Book-chapter range of this week's lesson, for the header label
+  // (e.g. Edward L6 → "Ch. 23~27", Coraline L1 → "Ch. 1~2").
   const lessonChapterRange = currentLessonChapter
-    ? [currentLessonChapter, currentLessonChapter] as [number, number]
+    ? (lessonChapterRangesFor(bookId)[currentLessonChapter - 1]
+        ?? [currentLessonChapter, currentLessonChapter] as [number, number])
     : null;
 
   const loadChapter = async (bid: BookId, chapter: number) => {
@@ -785,6 +806,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
 
       // Prefer explicit PDF page ranges from the syllabus (one entry per lesson)
       const lessonsWithPages = SCHEDULE.filter(l => l.book === bookId && l.pdfPages);
+      const lessonRanges = lessonChapterRangesFor(bookId);
+      const lastBookCh = lessonRanges.length ? lessonRanges[lessonRanges.length - 1][1] : 0;
+      const detected = lessonsWithPages.length > 0 ? null : splitIntoChapters(cleanedPages);
+
       if (lessonsWithPages.length > 0) {
         chapterTexts = lessonsWithPages.map(lesson => {
           const [startPage, endPage] = lesson.pdfPages!;
@@ -793,16 +818,22 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           return cleanChapterText(lessonPages.join('\n\n'));
         });
         note = `${chapterTexts.length}개 수업 분량 추출됨`;
+      } else if (detected && lastBookCh > 0 && detected.length === lastBookCh) {
+        // No page ranges, but the syllabus defines "Ch. N~M" per lesson and we
+        // detected exactly that many book chapters (Coraline: 13 chapters →
+        // 6 lessons). Group the detected chapters into one text per lesson, the
+        // same shape the pdfPages path produces for Edward.
+        chapterTexts = lessonRanges.map(([a, b]) =>
+          cleanChapterText(detected.slice(a - 1, b).join('\n\n')));
+        note = `${lastBookCh}개 챕터 감지 → ${chapterTexts.length}개 수업 분량으로 묶었어요`;
+      } else if (detected && detected.length >= 2) {
+        chapterTexts = detected.map(t => cleanChapterText(stripToFirstChapterHeading(t, 20)));
+        note = `${detected.length}개 챕터 감지됨` + (lastBookCh > 0
+          ? ` (수업 구성은 ${lastBookCh}개 기준이라 묶지 못했어요)`
+          : '');
       } else {
-        // Fallback: auto-detect chapter headings
-        const detected = splitIntoChapters(cleanedPages);
-        if (detected && detected.length >= 2) {
-          chapterTexts = detected.map(t => cleanChapterText(stripToFirstChapterHeading(t, 20)));
-          note = `${detected.length}개 챕터 감지됨`;
-        } else {
-          chapterTexts = [cleanChapterText(cleanedPages.join('\n\n'))];
-          note = '챕터를 자동 감지하지 못해 전체를 1개로 저장했어요.';
-        }
+        chapterTexts = [cleanChapterText(cleanedPages.join('\n\n'))];
+        note = '챕터를 자동 감지하지 못해 전체를 1개로 저장했어요.';
       }
 
       const chapters = chapterTexts.map((text, i) => ({ chapter: i + 1, text }));

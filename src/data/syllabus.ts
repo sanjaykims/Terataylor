@@ -58,13 +58,13 @@ export const SCHEDULE: LessonEntry[] = [
   { lesson:  3, date: '2026-06-17', book: 'edward',   pages: 'Ch. 9~13',  homework: 'Read Ch. 14~17',         pdfPages: [39, 53]  },
   { lesson:  4, date: '2026-06-24', book: 'edward',   pages: 'Ch. 14~17', homework: 'Read Ch. 18~22',         pdfPages: [55, 68]  },
   { lesson:  5, date: '2026-07-01', book: 'edward',   pages: 'Ch. 18~22', homework: 'Read Ch. 23~27',         pdfPages: [70, 83]  },
-  { lesson:  6, date: '2026-07-08', book: 'edward',   pages: 'Ch. 23~27', homework: 'Read Coraline pp. 1~19', pdfPages: [86, 100] },
-  { lesson:  7, date: '2026-07-15', book: 'coraline', pages: 'pp. 1~19',    homework: 'Read pp. 21~45' },
-  { lesson:  8, date: '2026-07-22', book: 'coraline', pages: 'pp. 21~45',   homework: 'Read pp. 47~78' },
-  { lesson:  9, date: '2026-08-05', book: 'coraline', pages: 'pp. 47~78',   homework: 'Read pp. 79~112' },
-  { lesson: 10, date: '2026-08-12', book: 'coraline', pages: 'pp. 79~112',  homework: 'Read pp. 113~135' },
-  { lesson: 11, date: '2026-08-19', book: 'coraline', pages: 'pp. 113~135', homework: 'Read pp. 137~160' },
-  { lesson: 12, date: '2026-08-26', book: 'coraline', pages: 'pp. 137~160', homework: 'Term End 🎉' },
+  { lesson:  6, date: '2026-07-08', book: 'edward',   pages: 'Ch. 23~27', homework: 'Read Coraline Ch. 1~2',  pdfPages: [86, 100] },
+  { lesson:  7, date: '2026-07-15', book: 'coraline', pages: 'Ch. 1~2',   homework: 'Read Ch. 3~4' },
+  { lesson:  8, date: '2026-07-22', book: 'coraline', pages: 'Ch. 3~4',   homework: 'Read Ch. 5~6' },
+  { lesson:  9, date: '2026-08-05', book: 'coraline', pages: 'Ch. 5~6',   homework: 'Read Ch. 7~9' },
+  { lesson: 10, date: '2026-08-12', book: 'coraline', pages: 'Ch. 7~9',   homework: 'Read Ch. 10~11' },
+  { lesson: 11, date: '2026-08-19', book: 'coraline', pages: 'Ch. 10~11', homework: 'Read Ch. 12~13' },
+  { lesson: 12, date: '2026-08-26', book: 'coraline', pages: 'Ch. 12~13', homework: 'Term End 🎉' },
 ];
 
 export const HOLIDAY = { date: '2026-07-29', note: 'NO CLASS (7/29 ~ 7/31 여름방학)' };
