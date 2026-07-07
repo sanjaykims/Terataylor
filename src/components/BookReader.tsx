@@ -11,6 +11,7 @@ import {
   saveChapterTimings, loadChapterTimings, deleteChapterTimings,
   loadChapterVocab,
 } from '../lib/chapterStorage';
+import { sessionSetDetail } from '../lib/tracker';
 import type { VocabItem } from '../lib/types';
 import type { WordTimestamp } from '../lib/audioAlign';
 
@@ -745,6 +746,13 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     if (vocab?.length && onLessonVocabLoad) onLessonVocabLoad(vocab as VocabItem[], chapter);
     setChapterLoading(false);
   };
+
+  // Attribute study time to the exact book+chapter on screen. Chapter/book
+  // changes close the running segment, so 학습 기록 shows per-chapter durations.
+  useEffect(() => {
+    sessionSetDetail(`${bookId}:ch${selectedChapter}`);
+    return () => sessionSetDetail(null);
+  }, [bookId, selectedChapter]);
 
   // ── On mount ─────────────────────────────────────────────────────────────
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import LessonScheduleWidget from './components/LessonScheduleWidget';
 import BookReader from './components/BookReader';
 
@@ -16,7 +16,7 @@ const TabSpinner = () => (
     <div className="w-8 h-8 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
   </div>
 );
-import { trackSession } from './lib/tracker';
+import { sessionFlush, sessionSwitch, sessionSetDetail, sessionRestart } from './lib/tracker';
 import { supabase } from './lib/supabase';
 import {
   csGet, csSet, csSetJSON, csDel, csGetAppState, csSetBatch,
@@ -28,8 +28,6 @@ import { BOOKS, currentLesson, type BookId } from './data/syllabus';
 type MainTab = 'a2' | 'v1' | 'progress';
 type A2Tab   = 'reading' | 'shadowing' | 'vocabulary' | 'opinion' | 'games';
 type V1Tab   = 'reading' | 'vocabulary' | 'games';
-
-const timestampMs = () => Date.now();
 
 // ── One-time migration from localStorage → Supabase ───────────────────────
 async function migrateFromLocalStorage(): Promise<void> {
@@ -223,24 +221,26 @@ export default function App() {
     setA2AudioUrl(null);
   };
 
-  // ── Session tracking ─────────────────────────────────────────────────────
-  const sessionStart   = useRef(timestampMs());
-  const currentMode    = useRef<'a2' | 'v1'>('v1');
-  const currentFeature = useRef<string>('reading');
-
-  const flushSession = () => {
-    const now = timestampMs();
-    trackSession(currentMode.current, currentFeature.current, (now - sessionStart.current) / 1000);
-    sessionStart.current = now;
-  };
-  const switchTab = (mode: 'a2' | 'v1', feature: string) => {
-    flushSession(); currentMode.current = mode; currentFeature.current = feature;
-  };
+  // ── Session tracking (engine lives in lib/tracker) ───────────────────────
   useEffect(() => {
-    const h = () => flushSession();
-    window.addEventListener('beforeunload', h);
-    return () => window.removeEventListener('beforeunload', h);
+    const unload = () => sessionFlush();
+    // Pause the clock while the tab is hidden so a phone left on the home
+    // screen (or an overnight background tab) doesn't record ghost hours.
+    const vis = () => (document.hidden ? sessionFlush() : sessionRestart());
+    window.addEventListener('beforeunload', unload);
+    document.addEventListener('visibilitychange', vis);
+    return () => {
+      window.removeEventListener('beforeunload', unload);
+      document.removeEventListener('visibilitychange', vis);
+    };
   }, []);
+
+  // The V1 vocab tab studies a specific book+chapter — attribute time to it.
+  useEffect(() => {
+    if (mainTab === 'v1' && v1Tab === 'vocabulary') {
+      sessionSetDetail(`${v1Book}:ch${v1VocabCh}`);
+    }
+  }, [mainTab, v1Tab, v1Book, v1VocabCh]);
 
   // ── Saved summary banners ────────────────────────────────────────────────
   const wc = (t: string) => t.trim().split(/\s+/).filter(Boolean).length;
@@ -312,7 +312,11 @@ export default function App() {
             },
           ] as { id: MainTab; icon: string; label: string; sub: string; active: string; dim: string; preload: () => void }[]).map(t => (
             <button key={t.id}
-              onClick={() => { flushSession(); setMainTab(t.id); }}
+              onClick={() => {
+                if (t.id === 'progress') sessionFlush();
+                else sessionSwitch(t.id, t.id === 'a2' ? a2Tab : v1Tab);
+                setMainTab(t.id);
+              }}
               onMouseEnter={t.preload}
               onTouchStart={t.preload}
               className={`py-4 rounded-2xl font-bold text-base transition-all flex flex-col items-center gap-1 ${
@@ -392,7 +396,7 @@ export default function App() {
                 { id: 'opinion',    label: '✍️ 의견 쓰기' },
                 { id: 'games',      label: '🎮 게임' },
               ] as { id: A2Tab; label: string }[]).map(t => (
-                <button key={t.id} onClick={() => { switchTab('a2', t.id); setA2Tab(t.id); }}
+                <button key={t.id} onClick={() => { sessionSwitch('a2', t.id); setA2Tab(t.id); }}
                   className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                     a2Tab === t.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
                   }`}>{t.label}</button>
@@ -424,7 +428,7 @@ export default function App() {
                 { id: 'vocabulary', label: '📚 단어장' },
                 { id: 'games',      label: '🎮 게임' },
               ] as { id: V1Tab; label: string }[]).map(t => (
-                <button key={t.id} onClick={() => { switchTab('v1', t.id); setV1Tab(t.id); }}
+                <button key={t.id} onClick={() => { sessionSwitch('v1', t.id); setV1Tab(t.id); }}
                   className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
                     v1Tab === t.id ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
                   }`}>{t.label}</button>

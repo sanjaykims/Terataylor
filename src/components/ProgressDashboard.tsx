@@ -6,8 +6,22 @@ import type { VocabProgress, GameScore, StudySession } from '../lib/tracker';
 
 const GAME_LABELS: Record<string, string> = { space: '🛸 우주게임', quiz: '⚡ 단어퀴즈', scramble: '🎮 문장퍼즐' };
 const FEATURE_LABELS: Record<string, string> = {
-  shadowing: '🎧 섀도잉', vocabulary: '📚 단어장', opinion: '✍️ 의견쓰기', story: '📖 스토리쓰기', games: '🎮 게임',
+  reading: '📖 원서 읽기', shadowing: '🎧 섀도잉', vocabulary: '📚 단어장',
+  opinion: '✍️ 의견쓰기', story: '📖 스토리쓰기', games: '🎮 게임',
 };
+const BOOK_LABELS: Record<string, string> = { edward: '🐰 Edward', coraline: '🔮 Coraline' };
+
+// Sessions store detail inside the feature column: "reading:coraline:ch3".
+// Legacy rows are just "reading" — both shapes parse here.
+function parseFeature(feature: string): { base: string; where: string | null } {
+  const [base, book, ch] = feature.split(':');
+  if (book && BOOK_LABELS[book]) {
+    const n = parseInt((ch ?? '').replace(/\D/g, ''), 10);
+    const chLabel = Number.isFinite(n) ? ` Ch.${String(n).padStart(2, '0')}` : '';
+    return { base, where: `${BOOK_LABELS[book]}${chLabel}` };
+  }
+  return { base: feature, where: null };
+}
 
 function formatDuration(seconds: number) {
   if (seconds < 60) return `${seconds}초`;
@@ -78,8 +92,10 @@ export default function ProgressDashboard() {
   const recentGames = scores.slice(0, 8);
   const maxRecentScore = recentGames.length ? Math.max(...recentGames.map(s => s.score)) : 1;
 
+  // Group by the base feature so "reading:coraline:ch3" rolls up into 원서 읽기.
   const featureTime = sessions.reduce<Record<string, number>>((acc, s) => {
-    acc[s.feature] = (acc[s.feature] ?? 0) + s.duration_seconds;
+    const base = parseFeature(s.feature).base;
+    acc[base] = (acc[base] ?? 0) + s.duration_seconds;
     return acc;
   }, {});
 
@@ -268,22 +284,26 @@ export default function ProgressDashboard() {
             <div className="text-center py-12 text-gray-400">
               학습 기록이 아직 없어요. 각 기능을 사용하면 자동으로 기록됩니다!
             </div>
-          ) : sessions.map((s, idx) => (
-            <div key={idx} className="flex items-center gap-3 bg-white rounded-xl border border-gray-100 px-4 py-3">
-              <span className="text-xl shrink-0">{FEATURE_LABELS[s.feature]?.split(' ')[0] ?? '📖'}</span>
-              <div className="flex-1">
-                <div className="font-semibold text-gray-800 text-sm">
-                  {FEATURE_LABELS[s.feature] ?? s.feature}
+          ) : sessions.map((s, idx) => {
+            const f = parseFeature(s.feature);
+            return (
+              <div key={idx} className="flex items-center gap-3 bg-white rounded-xl border border-gray-100 px-4 py-3">
+                <span className="text-xl shrink-0">{FEATURE_LABELS[f.base]?.split(' ')[0] ?? '📖'}</span>
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-800 text-sm">
+                    {FEATURE_LABELS[f.base] ?? f.base}
+                    {f.where && <span className="text-purple-600"> · {f.where}</span>}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {s.mode.toUpperCase()} · {formatDate(s.started_at)}
+                  </div>
                 </div>
-                <div className="text-xs text-gray-400">
-                  {s.mode.toUpperCase()} · {formatDate(s.started_at)}
+                <div className="font-semibold text-emerald-600 text-sm shrink-0">
+                  {formatDuration(s.duration_seconds)}
                 </div>
               </div>
-              <div className="font-semibold text-emerald-600 text-sm shrink-0">
-                {formatDuration(s.duration_seconds)}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

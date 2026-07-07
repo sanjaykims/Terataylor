@@ -60,6 +60,44 @@ export async function trackSession(
   }
 }
 
+// ── Live session engine ───────────────────────────────────────────────────────
+// One "segment" is a contiguous stretch of studying one feature — and, for V1,
+// one specific book+chapter. Segments end on tab switch, chapter switch, page
+// hide, or unload, so every stored row says exactly WHAT was studied and for
+// how long. The detail is encoded into the feature column ("reading:edward:ch6")
+// so no schema change is needed; old rows ("reading") still parse fine.
+const MAX_SEGMENT_S = 3 * 3600; // a forgotten open tab can't record a 20h "session"
+
+let segMode: 'a2' | 'v1' = 'v1';
+let segFeature = 'reading';
+let segDetail: string | null = null; // e.g. "coraline:ch3"
+let segStart = Date.now();
+
+export function sessionFlush() {
+  const dur = Math.min((Date.now() - segStart) / 1000, MAX_SEGMENT_S);
+  segStart = Date.now();
+  const feature = segDetail ? `${segFeature}:${segDetail}` : segFeature;
+  void trackSession(segMode, feature, dur);
+}
+
+export function sessionSwitch(mode: 'a2' | 'v1', feature: string) {
+  sessionFlush();
+  segMode = mode;
+  segFeature = feature;
+  segDetail = null; // the new view re-announces its own book/chapter
+}
+
+// Called by views that know their book/chapter (BookReader, the V1 vocab tab).
+// A change closes the current segment so time is attributed per chapter.
+export function sessionSetDetail(detail: string | null) {
+  if (detail === segDetail) return;
+  sessionFlush();
+  segDetail = detail;
+}
+
+// Discard time that accumulated while the page was hidden.
+export function sessionRestart() { segStart = Date.now(); }
+
 // ── Fetch progress data ───────────────────────────────────────────────────────
 export interface VocabProgress {
   word: string; correct_count: number; wrong_count: number;
