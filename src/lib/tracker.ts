@@ -47,13 +47,16 @@ export async function trackGameScore(
 export async function trackSession(
   mode: 'a2' | 'v1',
   feature: string,
-  durationSeconds: number
+  durationSeconds: number,
+  startedAtIso?: string,
 ) {
   try {
     if (durationSeconds < 10) return; // ignore accidental tab switches
     await supabase.from('taylor_study_sessions').insert({
       mode, feature, duration_seconds: Math.round(durationSeconds),
-      started_at: new Date().toISOString(),
+      // The segment's true START (not the flush moment), so 학습 기록 shows
+      // when studying actually began.
+      started_at: startedAtIso ?? new Date().toISOString(),
     });
   } catch (e) {
     console.warn('tracker:session', e);
@@ -74,10 +77,11 @@ let segDetail: string | null = null; // e.g. "coraline:ch3"
 let segStart = Date.now();
 
 export function sessionFlush() {
+  const startedAt = new Date(segStart).toISOString();
   const dur = Math.min((Date.now() - segStart) / 1000, MAX_SEGMENT_S);
   segStart = Date.now();
   const feature = segDetail ? `${segFeature}:${segDetail}` : segFeature;
-  void trackSession(segMode, feature, dur);
+  void trackSession(segMode, feature, dur, startedAt);
 }
 
 export function sessionSwitch(mode: 'a2' | 'v1', feature: string) {

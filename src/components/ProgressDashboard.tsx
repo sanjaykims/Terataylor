@@ -29,9 +29,25 @@ function formatDuration(seconds: number) {
   return `${Math.floor(seconds / 3600)}시간 ${Math.floor((seconds % 3600) / 60)}분`;
 }
 
+// Always Korea time (Asia/Seoul), regardless of the viewing device's timezone.
+const KST_DATE = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', weekday: 'short',
+});
+const KST_TIME = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false,
+});
+
 function formatDate(iso: string) {
   const d = new Date(iso);
-  return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return `${KST_DATE.format(d)} ${KST_TIME.format(d)}`;
+}
+
+// "7/5 (토) 19:39 ~ 20:31" — when the study stretch started and ended, in KST.
+function formatSessionWhen(startedIso: string, durationSeconds: number) {
+  const start = new Date(startedIso);
+  const end = new Date(start.getTime() + durationSeconds * 1000);
+  const range = durationSeconds >= 60 ? ` ~ ${KST_TIME.format(end)}` : '';
+  return `${KST_DATE.format(start)} ${KST_TIME.format(start)}${range}`;
 }
 
 function MiniBar({ value, max, color }: { value: number; max: number; color: string }) {
@@ -295,7 +311,7 @@ export default function ProgressDashboard() {
                     {f.where && <span className="text-purple-600"> · {f.where}</span>}
                   </div>
                   <div className="text-xs text-gray-400">
-                    {s.mode.toUpperCase()} · {formatDate(s.started_at)}
+                    {s.mode.toUpperCase()} · {formatSessionWhen(s.started_at, s.duration_seconds)}
                   </div>
                 </div>
                 <div className="font-semibold text-emerald-600 text-sm shrink-0">
