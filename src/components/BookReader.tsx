@@ -221,10 +221,14 @@ async function extractAllPages(
 function splitToSentences(text: string): string[] {
   // Rejoin lines wrapped mid-sentence (PDF inserts \n at every visual line end),
   // then split only on real sentence boundaries (.!? + Capital/Korean).
+  // The two negative look-behinds prevent splitting after a common title
+  // abbreviation (Mr./Mrs./Dr./St.…) or a single-letter initial (J. R. R.), each
+  // of which is followed by a capitalized word and would otherwise create a
+  // bogus fragment row that breaks EN↔KO alignment.
   const normalized = text.replace(/\s*\n\s*/g, ' ').replace(/[ \t]+/g, ' ').trim();
   if (!normalized) return [];
   return normalized
-    .split(/(?<=[.!?…]['"”’]?)\s+(?=[A-Z"“‘'가-힣])/)
+    .split(/(?<=[.!?…]['"”’]?)(?<!\b(?:Mr|Mrs|Ms|Dr|St|Jr|Sr|Prof|Rev|Gen|Col|Sgt|Lt|Capt|vs|etc|Inc|Ltd)\.)(?<!\b[A-Z]\.)\s+(?=[A-Z"“‘'가-힣])/)
     .map(s => s.trim())
     .filter(Boolean);
 }

@@ -2,9 +2,13 @@ export function parseSentences(text: string): string[] {
   const trimmed = text.trim();
   if (!trimmed) return [];
 
-  // Split on sentence-ending punctuation followed by space or end of string
+  // Split on a real sentence boundary: end punctuation (optionally wrapped by a
+  // closing quote — «She left.» / «"Go away!"») followed by a space and the next
+  // sentence's opener (capital, opening/curly quote, or digit). Negative
+  // look-behinds skip title abbreviations (Mr./Mrs./Dr.…) and single-letter
+  // initials so they don't fragment a sentence.
   const sentences = trimmed
-    .split(/(?<=[.!?])\s+(?=[A-Z"'])/)
+    .split(/(?<=[.!?…]['"”’]?)(?<!\b(?:Mr|Mrs|Ms|Dr|St|Jr|Sr|Prof|Rev|Gen|Col|Sgt|Lt|Capt|vs|etc|Inc|Ltd)\.)(?<!\b[A-Z]\.)\s+(?=[A-Z"“‘'0-9])/)
     .map(s => s.trim())
     .filter(s => s.length > 0);
 
