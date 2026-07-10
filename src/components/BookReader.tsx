@@ -1026,16 +1026,19 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           const f0 = parseMp3Frame(body, 0);
           if (f0 && isXingFrame(body, 0, f0.sideInfo)) body = body.subarray(f0.frameLen);
 
-          // Head: everything before the chapter boundary → first lesson slot
+          // Head: everything before the chapter boundary → first lesson slot.
+          // Pass the Uint8Array VIEW itself, not headPart.buffer — a subarray's
+          // .buffer is the whole original file (ignores byteOffset/length), which
+          // would upload the entire file to both slots instead of the split parts.
           const headPart = trimMp3BodyAtTime(body, cutTime);
-          const headFile = new File([headPart.buffer as ArrayBuffer], `ch${sf.firstLessonCh}_head.mp3`, { type: 'audio/mpeg' });
+          const headFile = new File([headPart.slice().buffer], `ch${sf.firstLessonCh}_head.mp3`, { type: 'audio/mpeg' });
           if (!groups.has(sf.firstLessonCh)) groups.set(sf.firstLessonCh, []);
           groups.get(sf.firstLessonCh)!.push({ file: headFile, bookCh: sf.firstBookCh });
 
           // Tail: everything from the chapter boundary → second lesson slot
           const tailPart = sliceMp3BodyFromTime(body, cutTime);
           if (tailPart.length > 0) {
-            const tailFile = new File([tailPart.buffer as ArrayBuffer], `ch${sf.secondLessonCh}_tail.mp3`, { type: 'audio/mpeg' });
+            const tailFile = new File([tailPart.slice().buffer], `ch${sf.secondLessonCh}_tail.mp3`, { type: 'audio/mpeg' });
             if (!groups.has(sf.secondLessonCh)) groups.set(sf.secondLessonCh, []);
             groups.get(sf.secondLessonCh)!.push({ file: tailFile, bookCh: sf.splitAtBookCh });
           }
