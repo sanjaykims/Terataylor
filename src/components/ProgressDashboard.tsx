@@ -300,7 +300,7 @@ export default function ProgressDashboard() {
             <div className="text-center py-12 text-gray-400">
               학습 기록이 아직 없어요. 각 기능을 사용하면 자동으로 기록됩니다!
             </div>
-          ) : sessions.map((s, idx) => {
+          ) : sessions.slice(0, 100).map((s, idx) => {
             const f = parseFeature(s.feature);
             return (
               <div key={idx} className="flex items-center gap-3 bg-white rounded-xl border border-gray-100 px-4 py-3">

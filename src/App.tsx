@@ -68,10 +68,13 @@ async function migrateFromLocalStorage(): Promise<void> {
 
   if (entries.length > 0) await csSetBatch(entries);
 
+  // Mark migrated NOW, before the chapter step. If chapters fail, the flag still
+  // stops a re-run from re-pushing these legacy app-state values over data the
+  // user has since changed in the cloud. Chapters are re-derivable via re-upload.
+  await csSet('_migrated', '1');
+
   // Chapters live in chapterStorage — delegate
   await migrateChaptersFromLocalStorage();
-
-  await csSet('_migrated', '1');
 }
 
 export default function App() {
@@ -237,7 +240,7 @@ export default function App() {
     // overnight background tab records no time — and a close WHILE hidden can't
     // dump the hidden hours as study time.
     const vis = () => (document.hidden ? sessionPause() : sessionResume());
-    const unload = () => sessionFlush();
+    const unload = () => sessionFlush(true); // keepalive so the final row survives teardown
     window.addEventListener('pagehide', unload);   // fires reliably on mobile
     window.addEventListener('beforeunload', unload);
     document.addEventListener('visibilitychange', vis);
@@ -326,6 +329,7 @@ export default function App() {
           ] as { id: MainTab; icon: string; label: string; sub: string; active: string; dim: string; preload: () => void }[]).map(t => (
             <button key={t.id}
               onClick={() => {
+                if (t.id === mainTab) return; // re-tapping the active tab is a no-op
                 // Browsing the dashboard is not studying — pause the clock.
                 if (t.id === 'progress') sessionPause();
                 else sessionSwitch(t.id, t.id === 'a2' ? a2Tab : v1Tab);
@@ -410,7 +414,7 @@ export default function App() {
                 { id: 'opinion',    label: '✍️ 의견 쓰기' },
                 { id: 'games',      label: '🎮 게임' },
               ] as { id: A2Tab; label: string }[]).map(t => (
-                <button key={t.id} onClick={() => { sessionSwitch('a2', t.id); setA2Tab(t.id); }}
+                <button key={t.id} onClick={() => { if (t.id !== a2Tab) { sessionSwitch('a2', t.id); setA2Tab(t.id); } }}
                   className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                     a2Tab === t.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
                   }`}>{t.label}</button>
@@ -442,7 +446,7 @@ export default function App() {
                 { id: 'vocabulary', label: '📚 단어장' },
                 { id: 'games',      label: '🎮 게임' },
               ] as { id: V1Tab; label: string }[]).map(t => (
-                <button key={t.id} onClick={() => { sessionSwitch('v1', t.id); setV1Tab(t.id); }}
+                <button key={t.id} onClick={() => { if (t.id !== v1Tab) { sessionSwitch('v1', t.id); setV1Tab(t.id); } }}
                   className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
                     v1Tab === t.id ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
                   }`}>{t.label}</button>

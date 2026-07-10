@@ -233,9 +233,13 @@ function splitToSentences(text: string): string[] {
 // and rendering never disagree. New format = one sentence per line (single \n,
 // no blank-line separators); legacy format = paragraphs re-split into sentences.
 function splitKoRows(koText: string): string[] {
-  return koText.includes('\n') && !koText.includes('\n\n')
-    ? koText.split('\n').map(s => s.trim())
-    : splitToSentences(koText);
+  // New format = one sentence per line (translateSentences never emits a "\n\n":
+  // empty cells are stored as a space). So the ONLY reliable legacy signal is a
+  // blank-line paragraph break. A single-line translation (no "\n" at all) is
+  // still new format — one row — not a paragraph to re-split.
+  return koText.includes('\n\n')
+    ? splitToSentences(koText)
+    : koText.split('\n').map(s => s.trim());
 }
 
 // Client-side guard mirroring the edge function: a Korean translation of

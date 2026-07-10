@@ -39,13 +39,16 @@ export async function hasBook(bookId: BookId): Promise<boolean> {
 }
 
 export async function clearBook(bookId: BookId): Promise<void> {
-  // Remove any chapter audio files from Storage before dropping the marker rows.
+  // Remove chapter audio from Storage BEFORE dropping the marker rows. Storage
+  // .remove() resolves with { error } instead of throwing, so inspect it: if the
+  // files couldn't be deleted (e.g. RLS), keep the marker rows so the files stay
+  // reachable/retryable rather than being orphaned with no record.
   const audioChapters = await getChaptersWithAudio(bookId).catch(() => [] as number[]);
   if (audioChapters.length > 0) {
-    await supabase.storage
+    const { error } = await supabase.storage
       .from('taylor-audio')
-      .remove(audioChapters.map(n => `v1/${bookId}/ch${n}.mp3`))
-      .catch(() => {});
+      .remove(audioChapters.map(n => `v1/${bookId}/ch${n}.mp3`));
+    if (error) throw new Error(`오디오 파일 삭제 실패: ${error.message}`);
   }
   await csDelPattern(`chapter_${bookId}_`);
 }
@@ -67,9 +70,16 @@ export async function saveChapterCount(bookId: BookId, count: number): Promise<v
 export async function loadChapterCount(bookId: BookId): Promise<number> {
   const val = await csGet(`chapter_${bookId}_count`);
   if (val) return parseInt(val);
-  // Fallback: count existing chapter keys (for data saved before count tracking)
+  // Fallback for legacy data with no count row: use the HIGHEST chapter number,
+  // not the key count — an empty chapter leaves a gap (e.g. {1..4,6..12}) and a
+  // plain count would hide the trailing chapters.
   const keys = await csGetKeysByPattern(`chapter_${bookId}_%_en`);
-  return keys.length;
+  let max = 0;
+  for (const k of keys) {
+    const m = k.match(/chapter_\w+_(\d+)_en/);
+    if (m) max = Math.max(max, parseInt(m[1]));
+  }
+  return max;
 }
 
 // Batch-save all English chapter texts after PDF extraction.

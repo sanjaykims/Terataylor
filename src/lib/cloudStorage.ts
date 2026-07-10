@@ -19,7 +19,10 @@ export async function csGetJSON<T>(key: string): Promise<T | null> {
 }
 
 export async function csSet(key: string, value: string): Promise<void> {
-  if (!value) return;
+  // Allow an empty string to persist (clearing a field). Only bail on
+  // undefined/null — e.g. csSetJSON(key, undefined) → JSON.stringify → undefined
+  // — which would otherwise write a literal "undefined"/null row.
+  if (value == null) return;
   const { error } = await supabase
     .from('taylor_app_data')
     .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
