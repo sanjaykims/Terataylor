@@ -34,7 +34,7 @@ const ROMAN_NUMERALS = [
   'ii','iii','iv','v','vi','vii','viii','ix','x','xi','xii','xiii','xiv','xv',
 ];
 const CHAPTER_HEADING = new RegExp(
-  `^(chapter\\s+\\w+\\.?|(?:${NUMBER_WORDS.join('|')})\\.?|\\d{1,2}\\.?|i\\.|(?:${ROMAN_NUMERALS.join('|')})\\.?|prologue|epilogue)$`,
+  `^(chapter\\s+[\\w-]+\\.?|(?:${NUMBER_WORDS.join('|')})\\.?|\\d{1,2}\\.?|i\\.|(?:${ROMAN_NUMERALS.join('|')})\\.?|prologue|epilogue)$`,
   'i',
 );
 
@@ -64,9 +64,35 @@ function splitIntoChapters(pages: string[]): string[] | null {
 
   if (starts.length < 2) return null;
 
+  // Index of the first line on a page that IS a chapter heading (-1 if none).
+  const headingLineIdx = (pageText: string): number => {
+    const ls = pageText.split('\n');
+    for (let i = 0; i < ls.length; i++) if (CHAPTER_HEADING.test(ls[i].trim())) return i;
+    return -1;
+  };
+  const fromHeading = (pageText: string): string => {
+    const h = headingLineIdx(pageText);
+    return h < 0 ? pageText : pageText.split('\n').slice(h).join('\n');
+  };
+  const beforeHeading = (pageText: string): string => {
+    const h = headingLineIdx(pageText);
+    return h <= 0 ? '' : pageText.split('\n').slice(0, h).join('\n');
+  };
+
+  // Build each chapter at LINE granularity, not whole pages: a chapter owns its
+  // start page from the heading onward, all full middle pages, plus the leading
+  // (pre-next-heading) tail of the next chapter's start page. This stops a
+  // chapter that begins mid-page from stealing the previous chapter's ending
+  // prose (or losing its own).
   return starts.map((start, idx) => {
     const end = idx + 1 < starts.length ? starts[idx + 1] : pages.length;
-    return pages.slice(start, end).join('\n\n');
+    const parts: string[] = [fromHeading(pages[start])];
+    for (let p = start + 1; p < end; p++) parts.push(pages[p]);
+    if (end < pages.length) {
+      const tail = beforeHeading(pages[end]);
+      if (tail.trim()) parts.push(tail);
+    }
+    return parts.filter(s => s.trim()).join('\n\n');
   });
 }
 
@@ -122,9 +148,11 @@ function cleanChapterText(text: string): string {
 
   for (const p of paras) {
     const t = p.trim();
-    if (FRONT_MATTER_LINE.test(t)) continue;  // always remove
 
     if (!storyStarted) {
+      // Front-matter lines are only front matter BEFORE the story begins; the
+      // same word mid-story (e.g. Edward Tulane's 'Coda' ending) is real prose.
+      if (FRONT_MATTER_LINE.test(t)) continue;
       // Chapter heading line ("One", "Chapter One", etc.)
       if (CHAPTER_HEADING.test(t)) continue;
       // TOC: 2+ "Chapter N" numeric refs on one line
@@ -135,7 +163,8 @@ function cleanChapterText(text: string): string {
       // Dedication: "For/To Firstname Lastname …" — short, two proper nouns
       if (/^(for|to) [A-Z][a-z]+ [A-Z][a-z]+/.test(t) && t.split(/\s+/).length < 25) continue;
       const words = t.split(/\s+/).length;
-      const hasSentence = /\w[.!?](\s|$)/.test(t);
+      // Sentence-final punctuation may be followed by a closing quote (dialogue).
+      const hasSentence = /\w[.!?]['"”’]*(\s|$)/.test(t) || /['"”’]$/.test(t);
       // Book-title run-on list (many words, no sentence punctuation)
       if (words > 8 && !hasSentence) continue;
       // Short title / author name line (≤8 words, no sentence, no comma)
@@ -831,9 +860,15 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         // No page ranges, but the syllabus defines "Ch. N~M" per lesson and we
         // detected exactly that many book chapters (Coraline: 13 chapters →
         // 6 lessons). Group the detected chapters into one text per lesson, the
-        // same shape the pdfPages path produces for Edward.
+        // same shape the pdfPages path produces for Edward. Strip EACH chapter's
+        // own heading line first — otherwise interior headings ("II.") glue onto
+        // the following sentence ("II. Coraline…") and shift EN/KO alignment.
         chapterTexts = lessonRanges.map(([a, b]) =>
-          cleanChapterText(detected.slice(a - 1, b).join('\n\n')));
+          cleanChapterText(
+            detected.slice(a - 1, b)
+              .map(c => stripToFirstChapterHeading(c, 5))
+              .join('\n\n'),
+          ));
         note = `${lastBookCh}개 챕터 감지 → ${chapterTexts.length}개 수업 분량으로 묶었어요`;
       } else if (detected && detected.length >= 2) {
         chapterTexts = detected.map(t => cleanChapterText(stripToFirstChapterHeading(t, 20)));
