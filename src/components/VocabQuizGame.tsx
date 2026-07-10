@@ -141,7 +141,10 @@ export default function VocabQuizGame({ text, bookVocab }: { text: string; bookV
 
   const nextQuestion = () => {
     if (qIndex + 1 >= questions.length) {
-      const correctCount = results.filter(Boolean).length + (selected === questions[qIndex]?.correct ? 1 : 0);
+      // The last answer is already in `results` (appended by handleSelect/
+      // handleTimeout), so don't add it again — that double-counted the final
+      // correct answer.
+      const correctCount = results.filter(Boolean).length;
       trackGameScore('quiz', score, { correct: correctCount, total: questions.length });
       setGameState('done');
     } else {

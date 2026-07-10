@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import LessonScheduleWidget from './components/LessonScheduleWidget';
 import BookReader from './components/BookReader';
 
@@ -198,7 +198,13 @@ export default function App() {
     if (v) csSet(key, JSON.stringify(v)).catch(() => {});
     else csDel(key).catch(() => {});
   };
-  const handleV1VocabLoad = (vocab: VocabItem[], chapter: number) => {
+  // Mirror the current book in a ref so a late vocab callback from a just-
+  // unmounted BookReader (book switch) can't drop the old book's vocab into the
+  // new book's slots.
+  const v1BookRef = useRef(v1Book);
+  v1BookRef.current = v1Book;
+  const handleV1VocabLoad = (vocab: VocabItem[], chapter: number, forBook: BookId) => {
+    if (forBook !== v1BookRef.current) return;
     if (chapter === 1) setV1Vocab1(vocab);
     else if (chapter === 2) setV1Vocab2(vocab);
     else if (chapter === 3) setV1Vocab3(vocab);

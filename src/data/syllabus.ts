@@ -74,10 +74,19 @@ export const HOLIDAY = { date: '2026-07-29', note: 'NO CLASS (7/28 ~ 7/31 여름
 // lesson once the course is over. Weeks without a Wednesday class (여름방학)
 // resolve to the following week's lesson automatically because only real
 // class dates exist in SCHEDULE.
+// Today's calendar date in the academy's timezone (Asia/Seoul), 'YYYY-MM-DD'.
+// Comparing this string to a lesson's 'YYYY-MM-DD' date is timezone-safe: a bare
+// 'YYYY-MM-DD' parses as UTC midnight, which — mixed with a local `new Date()` —
+// selected the wrong lesson on non-KST devices (and near midnight).
+export function kstToday(today: Date = new Date()): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(today); // en-CA → 'YYYY-MM-DD'
+}
+
 export function currentLesson(today: Date = new Date()): LessonEntry {
-  const now = new Date(today);
-  now.setHours(0, 0, 0, 0);
-  return SCHEDULE.find(l => new Date(l.date) >= now) ?? SCHEDULE[SCHEDULE.length - 1];
+  const t = kstToday(today);
+  return SCHEDULE.find(l => l.date >= t) ?? SCHEDULE[SCHEDULE.length - 1];
 }
 
 // ── Writing Prompts ───────────────────────────────────────────────────────────

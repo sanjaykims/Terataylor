@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { BOOKS, SCHEDULE, type BookId } from '../data/syllabus';
+import { BOOKS, SCHEDULE, kstToday, type BookId } from '../data/syllabus';
 import { supabase } from '../lib/supabase';
 import {
   hasBook, clearBook, loadChapterEn, loadChapterKo,
@@ -650,7 +650,7 @@ function sliceMp3BodyFromTime(body: Uint8Array, startSeconds: number): Uint8Arra
 // ── Component ─────────────────────────────────────────────────────────────────
 type InitState = 'loading' | 'no-book' | 'has-book';
 
-export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: BookId; onLessonVocabLoad?: (vocab: VocabItem[], chapter: number) => void }) {
+export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: BookId; onLessonVocabLoad?: (vocab: VocabItem[], chapter: number, forBook: BookId) => void }) {
   const bk = BOOKS[bookId];
 
   // Compute the current/upcoming lesson chapter BEFORE useState so it can be
@@ -658,9 +658,11 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const initialLessonChapter = (() => {
     const bookLessons = SCHEDULE.filter(l => l.book === bookId && (l.pdfPages || CH_RANGE.test(l.pages)));
     if (bookLessons.length === 0) return 1;
-    const now = new Date(); now.setHours(0, 0, 0, 0);
-    const future = bookLessons.filter(l => new Date(l.date) > now);
-    const target = future[0] ?? bookLessons.at(-1)!;
+    // Compare KST calendar dates (string vs string) so the selected chapter is
+    // correct regardless of the device timezone. Class day stays on that lesson
+    // (>= today); it advances to the next lesson the day after.
+    const today = kstToday();
+    const target = bookLessons.find(l => l.date >= today) ?? bookLessons.at(-1)!;
     return bookLessons.indexOf(target) + 1;
   })();
 
@@ -790,7 +792,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setKoText(ko);
     setAudioUrl(audio);
     setTimings(times);
-    if (vocab?.length && onLessonVocabLoad) onLessonVocabLoad(vocab as VocabItem[], chapter);
+    if (vocab?.length && onLessonVocabLoad) onLessonVocabLoad(vocab as VocabItem[], chapter, bid);
     setChapterLoading(false);
   };
 

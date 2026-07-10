@@ -1,38 +1,29 @@
-import { SCHEDULE, BOOKS, HOLIDAY } from '../data/syllabus';
+import { SCHEDULE, BOOKS, HOLIDAY, kstToday } from '../data/syllabus';
 
-function today0() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-function parseDate(s: string) {
-  const d = new Date(s);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-function daysDiff(a: Date, b: Date) {
-  return Math.round((b.getTime() - a.getTime()) / 86_400_000);
-}
+// All date logic on 'YYYY-MM-DD' strings compared in the academy's timezone
+// (KST), so it is correct regardless of the viewing device's timezone. Day
+// counts parse both sides as explicit UTC midnight (consistent → exact days).
+const utcDays = (s: string) => Math.round(Date.parse(`${s}T00:00:00Z`) / 86_400_000);
+function daysDiff(a: string, b: string) { return utcDays(b) - utcDays(a); }
 function fmtDate(s: string) {
-  const d = parseDate(s);
-  return `${d.getMonth() + 1}/${d.getDate()} (수)`;
+  const [, m, d] = s.split('-');
+  return `${Number(m)}/${Number(d)} (수)`;
 }
 
 export default function LessonScheduleWidget() {
-  const now    = today0();
-  const holiday = parseDate(HOLIDAY.date);
+  const today = kstToday();
 
   // Most recent past lesson (or current if today == lesson date)
-  const pastLessons  = SCHEDULE.filter(l => parseDate(l.date) <= now);
-  const futureLessons = SCHEDULE.filter(l => parseDate(l.date) > now);
+  const pastLessons  = SCHEDULE.filter(l => l.date <= today);
+  const futureLessons = SCHEDULE.filter(l => l.date > today);
   const current  = pastLessons.at(-1) ?? null;
   const next     = futureLessons[0] ?? null;
-  const isToday  = (s: string) => parseDate(s).getTime() === now.getTime();
-  const isHolidayToday = now.getTime() === holiday.getTime();
+  const isToday  = (s: string) => s === today;
+  const isHolidayToday = HOLIDAY.date === today;
   const termEnded = pastLessons.length === SCHEDULE.length && !next;
 
   // Days until next class
-  const daysUntil = next ? daysDiff(now, parseDate(next.date)) : null;
+  const daysUntil = next ? daysDiff(today, next.date) : null;
   const dTag = daysUntil === 0 ? 'TODAY!' : daysUntil === 1 ? 'D-1' : daysUntil != null ? `D-${daysUntil}` : null;
 
   // Semester progress
@@ -127,7 +118,7 @@ export default function LessonScheduleWidget() {
         </div>
         <div className="flex mt-1 gap-0.5">
           {SCHEDULE.map(l => {
-            const past = parseDate(l.date) <= now;
+            const past = l.date <= today;
             const isCur = current?.lesson === l.lesson;
             return (
               <div key={l.lesson} title={`Lesson ${l.lesson} (${l.book === 'edward' ? 'ET' : 'CL'})`}
