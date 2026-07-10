@@ -183,6 +183,15 @@ RULES:
         ],
       });
 
+      // If the model hit the token ceiling, the JSON is truncated and would parse
+      // to mostly-empty — report it instead of silently returning blank Korean
+      // with a 200 (which is indistinguishable from success).
+      if (response.stop_reason === 'max_tokens') {
+        return new Response(JSON.stringify({ error: 'translation truncated (max_tokens) — send fewer sentences' }), {
+          status: 502, headers: { ...cors, 'Content-Type': 'application/json' },
+        });
+      }
+
       // The model continues from "{", so prepend it back before parsing
       const continuation = response.content[0].type === 'text' ? response.content[0].text : '}';
       const raw = '{' + continuation;

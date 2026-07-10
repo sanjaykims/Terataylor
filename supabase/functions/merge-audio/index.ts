@@ -25,8 +25,11 @@ function trimId3v1(b: Uint8Array): number {
   return b.length;
 }
 
-function findSync(b: Uint8Array, start: number): number {
-  for (let i = start; i < b.length - 3; i++) {
+// Find the next MPEG audio frame sync, never scanning past `end`. If none is
+// found before `end`, return `end` (caller can detect "no sync in range").
+function findSync(b: Uint8Array, start: number, end: number = b.length): number {
+  const limit = Math.min(end, b.length) - 3;
+  for (let i = start; i < limit; i++) {
     if (b[i] !== 0xFF) continue;
     const h1 = b[i + 1];
     if ((h1 & 0xE0) !== 0xE0) continue;
@@ -36,13 +39,18 @@ function findSync(b: Uint8Array, start: number): number {
     if (layer === 0 || bitrateIdx === 0 || bitrateIdx === 0xF || srIdx === 3) continue;
     return i;
   }
-  return start;
+  return end;
 }
 
+// Bytes-per-second of the frame at frameAt, honoring the MPEG version — MPEG2/2.5
+// (common for 16/22.05/24 kHz speech audiobooks) uses a different bitrate table
+// than MPEG1, so a version-blind lookup skipped the wrong byte count on trim.
 function bytesPerSec(b: Uint8Array, frameAt: number): number {
-  const bitrateTable = [0,32,40,48,56,64,80,96,112,128,160,192,224,256,320,0];
+  const V1 = [0,32,40,48,56,64,80,96,112,128,160,192,224,256,320,0];
+  const V2 = [0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,0];
+  const version = (b[frameAt + 1] >> 3) & 0x3; // 3=MPEG1, 2=MPEG2, 0=MPEG2.5, 1=reserved
   const idx = (b[frameAt + 2] >> 4) & 0xF;
-  const kbps = bitrateTable[idx];
+  const kbps = (version === 3 ? V1 : V2)[idx];
   return kbps > 0 ? (kbps * 1000) / 8 : 16000;
 }
 
@@ -70,6 +78,7 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: 'invalid bookId/chapters' }), { status: 400, headers: CORS });
   }
 
+  try {
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
@@ -90,11 +99,14 @@ Deno.serve(async (req: Request) => {
   const segments: Uint8Array[] = downloads.map(({ bytes }, idx) => {
     let start = skipId3v2(bytes);
     const end = idx < downloads.length - 1 ? trimId3v1(bytes) : bytes.length;
-    start = findSync(bytes, start);
+    start = findSync(bytes, start, end);
     if (idx > 0 && trimSeconds > 0) {
       const bps = bytesPerSec(bytes, start);
       const skip = Math.floor(trimSeconds * bps);
-      start = findSync(bytes, Math.min(start + skip, end - 1));
+      // Bound the trim search to `end`; if the skip lands past the audio, keep
+      // the frame we already have rather than splicing garbage or dropping all.
+      const trimmed = findSync(bytes, Math.min(start + skip, end - 1), end);
+      if (trimmed < end) start = trimmed;
     }
     return bytes.subarray(start, end);
   });
@@ -150,4 +162,11 @@ Deno.serve(async (req: Request) => {
     }),
     { headers: { ...CORS, 'Content-Type': 'application/json' } },
   );
+  } catch (err) {
+    // Return a CORS-bearing JSON error so a browser caller sees the real message
+    // instead of an opaque cross-origin failure.
+    const message = err instanceof Error ? err.message : 'merge failed';
+    return new Response(JSON.stringify({ error: message }),
+      { status: 500, headers: { ...CORS, 'Content-Type': 'application/json' } });
+  }
 });
