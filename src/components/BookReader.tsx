@@ -295,7 +295,10 @@ async function translateSentences(
   );
 
   // Store Korean sentences one-per-line, index-aligned to splitToSentences(enText).
-  return ko.join('\n');
+  // A rare untranslatable sentence leaves an empty cell; store it as a single
+  // space, never as a truly blank line, so the join can't produce a "\n\n" that
+  // splitKoRows would misread as the legacy paragraph format and re-split.
+  return ko.map(s => (s === '' ? ' ' : s)).join('\n');
 }
 
 // ── Lesson-chapter structure ──────────────────────────────────────────────────
@@ -686,6 +689,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   };
   const audioRef    = useRef<HTMLAudioElement>(null);
   const audioFileRef = useRef<HTMLInputElement>(null);
+  const loadSeqRef  = useRef(0); // bumped per loadChapter; guards stale writes
   const rowRefs       = useRef<(HTMLDivElement | null)[]>([]);
   const mobileRowRefs = useRef<(HTMLParagraphElement | null)[]>([]);
 
@@ -698,6 +702,15 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const selectedChapterRange = lessonChapterRangesFor(bookId)[selectedChapter - 1] ?? null;
 
   const loadChapter = async (bid: BookId, chapter: number) => {
+    // Stop the outgoing chapter's audio BEFORE unmounting its <audio> element —
+    // a detached but still-playing element would otherwise keep narrating the
+    // old chapter over the new one until GC.
+    audioRef.current?.pause();
+    // Generation guard: a fast Ch.2→Ch.3 double-click fires two loadChapters;
+    // only the newest may write state, so we never pair one chapter's English
+    // with another's selectedChapter (and never persist a translation under the
+    // wrong key).
+    const seq = ++loadSeqRef.current;
     setChapterLoading(true);
     setEnText(null);
     setKoText(null);
@@ -721,6 +734,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       loadChapterTimings(bid, chapter).catch(() => null),
       loadChapterVocab(bid, chapter).catch(() => null),
     ]);
+    if (loadSeqRef.current !== seq) return; // a newer load superseded this one
     setEnText(en);
     // Detect (but do NOT auto-fix) Korean that doesn't line up 1:1 with the English
     // the reader renders. We compare using the EXACT same row split as rendering
@@ -851,19 +865,27 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   // ── Translation ───────────────────────────────────────────────────────────
   const handleTranslate = async () => {
     if (!enText) return;
+    // Pin the chapter this run belongs to. A translation takes minutes (hundreds
+    // of per-sentence requests); if the user switches chapters meanwhile, the
+    // result must be saved under THIS chapter and must not overwrite the newly
+    // displayed one's Korean column.
+    const forChapter = selectedChapter;
+    const seq = loadSeqRef.current;
     setTranslating(true);
     setTxError('');
     setTxProgress({ done: 0, total: 0 });
     try {
       const ko = await translateSentences(enText, (done, total) => setTxProgress({ done, total }));
-      await saveChapterKo(bookId, selectedChapter, ko);
-      setKoText(ko);
-      setMisaligned(false);
-      setTranslatedChaps(prev => new Set([...prev, selectedChapter]));
+      await saveChapterKo(bookId, forChapter, ko);
+      setTranslatedChaps(prev => new Set([...prev, forChapter]));
+      if (loadSeqRef.current === seq) {   // still the same chapter on screen
+        setKoText(ko);
+        setMisaligned(false);
+      }
     } catch (e) {
-      setTxError(e instanceof Error ? e.message : '번역 실패');
+      if (loadSeqRef.current === seq) setTxError(e instanceof Error ? e.message : '번역 실패');
     } finally {
-      setTranslating(false);
+      if (loadSeqRef.current === seq) setTranslating(false);
     }
   };
 
@@ -1496,7 +1518,12 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                 ref={audioRef}
                 src={audioUrl}
                 className="hidden"
-                onLoadedMetadata={e => setAudioDuration(e.currentTarget.duration || 0)}
+                onLoadedMetadata={e => {
+                  setAudioDuration(e.currentTarget.duration || 0);
+                  // A fresh <audio> (chapter change) starts at 1.0×; restore the
+                  // user's chosen speed so the selector and playback stay in sync.
+                  e.currentTarget.playbackRate = playbackRate;
+                }}
                 onTimeUpdate={handleAudioTimeUpdate}
                 onSeeking={handleSeeking}
                 onSeeked={handleSeeked}

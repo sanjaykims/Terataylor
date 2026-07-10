@@ -3,12 +3,16 @@ import { supabase } from './supabase';
 // ── Vocab ─────────────────────────────────────────────────────────────────────
 export async function trackVocabResult(word: string, correct: boolean) {
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('taylor_vocab_progress')
       .select('correct_count, wrong_count, streak')
       .eq('word', word)
       .maybeSingle();
 
+    // A failed READ returns error with data=null. Do NOT treat that as "new
+    // word" — writing {0,0} back would wipe a real history. Abort instead; this
+    // one result is lost, but the accumulated counts survive.
+    if (error) return;
     const prev = data ?? { correct_count: 0, wrong_count: 0, streak: 0 };
     await supabase.from('taylor_vocab_progress').upsert({
       word,
@@ -75,8 +79,12 @@ let segMode: 'a2' | 'v1' = 'v1';
 let segFeature = 'reading';
 let segDetail: string | null = null; // e.g. "coraline:ch3"
 let segStart = Date.now();
+let paused = false; // true while the page is hidden or the Progress tab is open
 
 export function sessionFlush() {
+  // While paused, no studying is happening — record nothing but keep the clock
+  // reset so a later resume measures only visible time.
+  if (paused) { segStart = Date.now(); return; }
   const startedAt = new Date(segStart).toISOString();
   const dur = Math.min((Date.now() - segStart) / 1000, MAX_SEGMENT_S);
   segStart = Date.now();
@@ -89,6 +97,8 @@ export function sessionSwitch(mode: 'a2' | 'v1', feature: string) {
   segMode = mode;
   segFeature = feature;
   segDetail = null; // the new view re-announces its own book/chapter
+  paused = false;   // studying resumes on the new tab
+  segStart = Date.now();
 }
 
 // Called by views that know their book/chapter (BookReader, the V1 vocab tab).
@@ -99,8 +109,18 @@ export function sessionSetDetail(detail: string | null) {
   segDetail = detail;
 }
 
-// Discard time that accumulated while the page was hidden.
-export function sessionRestart() { segStart = Date.now(); }
+// Stop accruing study time (page hidden, or Progress dashboard open). The
+// visible stretch so far is recorded; nothing accrues until resume.
+export function sessionPause() {
+  if (paused) return;
+  sessionFlush();
+  paused = true;
+}
+
+export function sessionResume() {
+  paused = false;
+  segStart = Date.now();
+}
 
 // ── Fetch progress data ───────────────────────────────────────────────────────
 export interface VocabProgress {

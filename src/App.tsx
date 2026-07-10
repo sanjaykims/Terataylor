@@ -16,7 +16,7 @@ const TabSpinner = () => (
     <div className="w-8 h-8 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
   </div>
 );
-import { sessionFlush, sessionSwitch, sessionSetDetail, sessionRestart } from './lib/tracker';
+import { sessionFlush, sessionSwitch, sessionSetDetail, sessionPause, sessionResume } from './lib/tracker';
 import { supabase } from './lib/supabase';
 import {
   csGet, csSet, csSetJSON, csDel, csGetAppState, csSetBatch,
@@ -28,6 +28,9 @@ import { BOOKS, currentLesson, type BookId } from './data/syllabus';
 type MainTab = 'a2' | 'v1' | 'progress';
 type A2Tab   = 'reading' | 'shadowing' | 'vocabulary' | 'opinion' | 'games';
 type V1Tab   = 'reading' | 'vocabulary' | 'games';
+
+// Bumped on every V1 book switch; a late vocab load checks it before writing.
+let v1BookSeqRef = 0;
 
 // ── One-time migration from localStorage → Supabase ───────────────────────
 async function migrateFromLocalStorage(): Promise<void> {
@@ -141,6 +144,7 @@ export default function App() {
   const setV1Book = (b: BookId) => {
     setV1BookState(b);
     setV1VocabCh(1);
+    setV1StudiedWords([]);   // don't carry one book's studied words into the other's games
     setV1Vocab1(null);
     setV1Vocab2(null);
     setV1Vocab3(null);
@@ -148,6 +152,9 @@ export default function App() {
     setV1Vocab5(null);
     setV1Vocab6(null);
     csSet('v1_book', b).catch(() => {});
+    // Generation guard: a quick Coraline→Edward switch must not let the slower
+    // first request land its vocab under the second book's slots.
+    const seq = ++v1BookSeqRef;
     Promise.all([
       loadChapterVocab(b, 1).catch(() => null),
       loadChapterVocab(b, 2).catch(() => null),
@@ -156,6 +163,7 @@ export default function App() {
       loadChapterVocab(b, 5).catch(() => null),
       loadChapterVocab(b, 6).catch(() => null),
     ]).then(([vc1, vc2, vc3, vc4, vc5, vc6]) => {
+      if (seq !== v1BookSeqRef) return; // a newer book switch superseded this
       if (vc1) setV1Vocab1(vc1 as VocabItem[]);
       if (vc2) setV1Vocab2(vc2 as VocabItem[]);
       if (vc3) setV1Vocab3(vc3 as VocabItem[]);
@@ -223,13 +231,16 @@ export default function App() {
 
   // ── Session tracking (engine lives in lib/tracker) ───────────────────────
   useEffect(() => {
+    // Pause (not flush) while hidden so a phone on the home screen or an
+    // overnight background tab records no time — and a close WHILE hidden can't
+    // dump the hidden hours as study time.
+    const vis = () => (document.hidden ? sessionPause() : sessionResume());
     const unload = () => sessionFlush();
-    // Pause the clock while the tab is hidden so a phone left on the home
-    // screen (or an overnight background tab) doesn't record ghost hours.
-    const vis = () => (document.hidden ? sessionFlush() : sessionRestart());
+    window.addEventListener('pagehide', unload);   // fires reliably on mobile
     window.addEventListener('beforeunload', unload);
     document.addEventListener('visibilitychange', vis);
     return () => {
+      window.removeEventListener('pagehide', unload);
       window.removeEventListener('beforeunload', unload);
       document.removeEventListener('visibilitychange', vis);
     };
@@ -313,7 +324,8 @@ export default function App() {
           ] as { id: MainTab; icon: string; label: string; sub: string; active: string; dim: string; preload: () => void }[]).map(t => (
             <button key={t.id}
               onClick={() => {
-                if (t.id === 'progress') sessionFlush();
+                // Browsing the dashboard is not studying — pause the clock.
+                if (t.id === 'progress') sessionPause();
                 else sessionSwitch(t.id, t.id === 'a2' ? a2Tab : v1Tab);
                 setMainTab(t.id);
               }}
