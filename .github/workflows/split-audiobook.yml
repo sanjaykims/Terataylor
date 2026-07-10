@@ -2,16 +2,15 @@ name: Split Audiobook
 
 # Maintenance tool: splits ONE full-book audio file (mp3/mp4/m4a) stored in the
 # taylor-audio bucket into per-lesson chapter slots, cutting at the "Chapter N"
-# announcements that begin each lesson. Exits green with a notice when the
-# source file hasn't been uploaded yet.
-# Re-run 2026-07-04: repair ch01/ch02 after an accidental in-app merge.
+# announcements that begin each lesson.
+#
+# MANUAL ONLY (workflow_dispatch). It is intentionally NOT push-triggered: this
+# job re-downloads a large source, overwrites chapter audio, and DELETES the
+# source slots — running it automatically on every edit to this file (with a
+# hardcoded source) would silently re-split and clobber audio. Run it from the
+# Actions tab with the inputs you want.
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/split-audiobook.yml'
-      - 'scripts/split-audiobook.mjs'
   workflow_dispatch:
     inputs:
       book_id:

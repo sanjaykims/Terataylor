@@ -542,7 +542,10 @@ const CHAPTER_NUMBER_WORDS = [
 // Parse a filename to get all book chapter numbers it covers.
 // Handles: "9~14", "9-14", "Chapter 13 and 14", "Chapter 24, 25 and 26", "ch9", bare digit.
 function parseFilenameChapters(name: string): number[] {
-  const rangeM = name.match(/\b(\d{1,2})\s*[~-]\s*(\d{1,2})\b/);
+  // Bare "N-M" range, but NOT when either number is part of a longer number run
+  // separated by - . / (dates like 2024-01-05, versions like v1.2-3) — those are
+  // not chapter ranges. The negative look-around excludes such contexts.
+  const rangeM = name.match(/(?<![\d./-])(\d{1,2})\s*[~-]\s*(\d{1,2})(?![\d./-])/);
   if (rangeM) {
     const a = parseInt(rangeM[1]), b = parseInt(rangeM[2]);
     if (b > a && b - a <= 10) return Array.from({ length: b - a + 1 }, (_, i) => a + i);
