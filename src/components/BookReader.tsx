@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback, memo } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { BOOKS, SCHEDULE, kstToday, type BookId } from '../data/syllabus';
@@ -545,7 +545,7 @@ function parseFilenameChapters(name: string): number[] {
   // Bare "N-M" range, but NOT when either number is part of a longer number run
   // separated by - . / (dates like 2024-01-05, versions like v1.2-3) — those are
   // not chapter ranges. The negative look-around excludes such contexts.
-  const rangeM = name.match(/(?<![\d./-])(\d{1,2})\s*[~-]\s*(\d{1,2})(?![\d./-])/);
+  const rangeM = name.match(/(?<![\d./-])(\d{1,2})\s*[~-]\s*(\d{1,2})(?!\d)/);
   if (rangeM) {
     const a = parseInt(rangeM[1]), b = parseInt(rangeM[2]);
     if (b > a && b - a <= 10) return Array.from({ length: b - a + 1 }, (_, i) => a + i);
@@ -649,6 +649,100 @@ function sliceMp3BodyFromTime(body: Uint8Array, startSeconds: number): Uint8Arra
   }
   return new Uint8Array(0);
 }
+
+// ── Word-level karaoke renderer ────────────────────────────────────────────────
+// Pure: returns the sentence text with spoken words (0..upToWord) colored blue.
+function renderWords(text: string, upToWord: number) {
+  const words = text.split(/\s+/).filter(Boolean);
+  return words.map((word, wi) => (
+    <span key={wi}>
+      <span className={wi <= upToWord ? 'text-blue-600 font-bold' : 'text-gray-900'}>{word}</span>
+      {wi < words.length - 1 ? ' ' : ''}
+    </span>
+  ));
+}
+
+// ── Sentence rows (paired EN/KO grid + mobile list) ────────────────────────────
+// Memoized so the ~4x/sec audio timeupdate (which updates the scrubber's time in
+// the parent) does NOT reconcile hundreds of rows. It re-renders only when its
+// own inputs change — the active sentence/word (per word, not per tick), the
+// texts, or the tap handler. onSeek is a stable useCallback from the parent.
+interface SentenceRowsProps {
+  enRows: string[]; koRows: string[]; maxRows: number;
+  activeIdx: number; activeWordIdx: number; hasKo: boolean; hasAudio: boolean;
+  mobileView: 'en' | 'ko';
+  onSeek: (i: number) => void;
+  rowRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+  mobileRowRefs: React.MutableRefObject<(HTMLParagraphElement | null)[]>;
+}
+const SentenceRows = memo(function SentenceRows(
+  { enRows, koRows, maxRows, activeIdx, activeWordIdx, hasKo, hasAudio, mobileView, onSeek, rowRefs, mobileRowRefs }: SentenceRowsProps,
+) {
+  return (
+    <>
+      {/* Desktop: paired grid */}
+      <div className="hidden sm:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="grid grid-cols-2 border-b border-gray-100">
+          <div className="px-4 py-2.5 border-r border-gray-100">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">🇺🇸 English</span>
+          </div>
+          <div className="px-4 py-2.5">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">🇰🇷 한국어</span>
+          </div>
+        </div>
+        {Array.from({ length: maxRows }).map((_, i) => {
+          const active = i === activeIdx;
+          return (
+            <div key={i}
+              ref={el => { rowRefs.current[i] = el; }}
+              onClick={() => hasAudio && onSeek(i)}
+              className={`grid grid-cols-2 items-start border-b border-gray-50 last:border-0 transition-colors ${
+                active ? 'bg-yellow-50' : 'hover:bg-gray-50/40'
+              } ${hasAudio ? 'cursor-pointer' : ''}`}>
+              <div className={`px-4 py-3 border-r border-gray-100 ${active ? 'border-l-4 border-l-yellow-400' : ''}`}>
+                <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'}`}>
+                  {active ? renderWords(enRows[i] ?? '', activeWordIdx) : (enRows[i] ?? '')}
+                </p>
+              </div>
+              <div className="px-4 py-3">
+                {koRows[i] ? (
+                  <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-700'}`}>{koRows[i]}</p>
+                ) : (i === 0 && !hasKo ? (
+                  <p className="text-xs text-gray-400 italic">번역 버튼을 눌러주세요</p>
+                ) : null)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Mobile: single column */}
+      <div className="sm:hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
+        {mobileView === 'en'
+          ? enRows.map((p, i) => (
+              <p key={i}
+                ref={el => { mobileRowRefs.current[i] = el; }}
+                onClick={() => hasAudio && onSeek(i)}
+                className={`text-sm leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0 transition-colors ${
+                  i === activeIdx ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'
+                }`}>
+                {i === activeIdx ? renderWords(p, activeWordIdx) : p}
+              </p>
+            ))
+          : koRows.filter(Boolean).length > 0
+          ? koRows.map((p, i) => (
+              <p key={i}
+                ref={el => { mobileRowRefs.current[i] = el; }}
+                onClick={() => hasAudio && onSeek(i)}
+                className={`text-sm leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0 transition-colors ${
+                  i === activeIdx ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-700'
+                }`}>{p}</p>
+            ))
+          : <div className="text-center py-8"><p className="text-xs text-gray-400">번역 버튼을 눌러서 한국어 번역을 불러오세요</p></div>}
+      </div>
+    </>
+  );
+});
 
 // ── Component ─────────────────────────────────────────────────────────────────
 type InitState = 'loading' | 'no-book' | 'has-book';
@@ -1193,8 +1287,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
 
   // English sentences (canonical split) paired with stored Korean sentences.
   // Korean is stored one-per-line, already index-aligned to splitToSentences(enText).
-  const enRows  = enText ? splitToSentences(enText) : [];
-  const koRows  = koText ? splitKoRows(koText) : [];
+  // Memoized on the source text so the ~4x/sec audio timeupdate renders don't
+  // re-run splitToSentences/splitKoRows over the whole chapter every tick.
+  const enRows  = useMemo(() => (enText ? splitToSentences(enText) : []), [enText]);
+  const koRows  = useMemo(() => (koText ? splitKoRows(koText) : []), [koText]);
   const maxRows = Math.max(enRows.length, koRows.length);
 
   // Start time (seconds) of each sentence. Prefer REAL per-sentence times from
@@ -1313,7 +1409,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const handleSeeking = () => { isSeekingRef.current = true; };
   const handleSeeked  = () => { isSeekingRef.current = false; };
 
-  const seekToSentence = (i: number) => {
+  const seekToSentence = useCallback((i: number) => {
     const audio = audioRef.current;
     if (!audio || i < 0 || i >= sentenceStarts.length) return;
     const target = sentenceStarts[i];
@@ -1345,22 +1441,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     // Safety net: clear the in-flight flag even if the browser omits 'seeked'
     // for a tiny jump, so timeupdates aren't blocked forever.
     window.setTimeout(() => { isSeekingRef.current = false; }, 400);
-  };
-
-
-  // ── Word-level karaoke renderer ──────────────────────────────────────────
-  // Returns the sentence text with spoken words (0..upToWord) colored blue.
-  const renderWords = (text: string, upToWord: number) => {
-    const words = text.split(/\s+/).filter(Boolean);
-    return words.map((word, wi) => (
-      <span key={wi}>
-        <span className={wi <= upToWord ? 'text-blue-600 font-bold' : 'text-gray-900'}>
-          {word}
-        </span>
-        {wi < words.length - 1 ? ' ' : ''}
-      </span>
-    ));
-  };
+    // Stable across renders except when the timing inputs change, so the memoized
+    // SentenceRows isn't re-rendered on every audio tick.
+  }, [sentenceStarts, clickMode, audioDuration]);
 
   // ── Loading ───────────────────────────────────────────────────────────────
   if (initState === 'loading') {
@@ -1648,68 +1731,12 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           <div className="text-xs text-gray-400 animate-pulse">챕터 불러오는 중...</div>
         </div>
       ) : enText ? (
-        <>
-          {/* Desktop: sentence-paired grid — one EN sentence : one KO sentence per row */}
-          <div className="hidden sm:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="grid grid-cols-2 border-b border-gray-100">
-              <div className="px-4 py-2.5 border-r border-gray-100">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">🇺🇸 English</span>
-              </div>
-              <div className="px-4 py-2.5">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">🇰🇷 한국어</span>
-              </div>
-            </div>
-            {Array.from({ length: maxRows }).map((_, i) => {
-              const active = i === activeIdx;
-              return (
-                <div key={i}
-                  ref={el => { rowRefs.current[i] = el; }}
-                  onClick={() => audioUrl && seekToSentence(i)}
-                  className={`grid grid-cols-2 items-start border-b border-gray-50 last:border-0 transition-colors ${
-                    active ? 'bg-yellow-50' : 'hover:bg-gray-50/40'
-                  } ${audioUrl ? 'cursor-pointer' : ''}`}>
-                  <div className={`px-4 py-3 border-r border-gray-100 ${active ? 'border-l-4 border-l-yellow-400' : ''}`}>
-                    <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'}`}>
-                      {active ? renderWords(enRows[i] ?? '', activeWordIdx) : (enRows[i] ?? '')}
-                    </p>
-                  </div>
-                  <div className="px-4 py-3">
-                    {koRows[i] ? (
-                      <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-700'}`}>{koRows[i]}</p>
-                    ) : (i === 0 && !koText ? (
-                      <p className="text-xs text-gray-400 italic">번역 버튼을 눌러주세요</p>
-                    ) : null)}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Mobile: single column */}
-          <div className="sm:hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
-            {mobileView === 'en'
-              ? enRows.map((p, i) => (
-                  <p key={i}
-                    ref={el => { mobileRowRefs.current[i] = el; }}
-                    onClick={() => audioUrl && seekToSentence(i)}
-                    className={`text-sm leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0 transition-colors ${
-                      i === activeIdx ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'
-                    }`}>
-                    {i === activeIdx ? renderWords(p, activeWordIdx) : p}
-                  </p>
-                ))
-              : koRows.filter(Boolean).length > 0
-              ? koRows.map((p, i) => (
-                  <p key={i}
-                    ref={el => { mobileRowRefs.current[i] = el; }}
-                    onClick={() => audioUrl && seekToSentence(i)}
-                    className={`text-sm leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0 transition-colors ${
-                      i === activeIdx ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-700'
-                    }`}>{p}</p>
-                ))
-              : <div className="text-center py-8"><p className="text-xs text-gray-400">번역 버튼을 눌러서 한국어 번역을 불러오세요</p></div>}
-          </div>
-        </>
+        <SentenceRows
+          enRows={enRows} koRows={koRows} maxRows={maxRows}
+          activeIdx={activeIdx} activeWordIdx={activeWordIdx}
+          hasKo={!!koText} hasAudio={!!audioUrl} mobileView={mobileView}
+          onSeek={seekToSentence} rowRefs={rowRefs} mobileRowRefs={mobileRowRefs}
+        />
       ) : (
         <div className="bg-gray-50 rounded-2xl p-8 text-center text-sm text-gray-400">
           이 챕터의 텍스트를 불러올 수 없어요.
