@@ -173,7 +173,9 @@ function alignByNW(aNorm: string[], aTime: number[], sentences: string[]): numbe
   // Full-matrix DP is O(n·m): trivial for a normal chapter (audio ≈ text) but it
   // would blow up if an entire audiobook were uploaded as one chapter's audio,
   // so cap it and fall back to a proportional estimate for pathological inputs.
-  if ((n + 1) * (m + 1) <= 24_000_000) {
+  // Also bound m: dp is Int16 and row 0 initializes to -m, so m ≥ 32768 would
+  // overflow and silently corrupt the whole alignment — fall back instead.
+  if ((n + 1) * (m + 1) <= 24_000_000 && m < 32_000) {
     const MATCH = 2, MIS = -2, GAP = -1, NEG = -30000;
     const Wc = m + 1;
     const dp = new Int16Array((n + 1) * Wc);

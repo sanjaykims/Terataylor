@@ -117,7 +117,9 @@ export default function App() {
               // Ignore malformed legacy cache and continue loading the app.
             }
           }
-          if (data.a2_audio_url) setA2AudioUrl(data.a2_audio_url);
+          // Cache-bust: Storage serves the public object with a long max-age, so
+          // a re-uploaded a2.mp3 (same URL) would otherwise play last week's file.
+          if (data.a2_audio_url) setA2AudioUrl(`${data.a2_audio_url}?t=${Date.now()}`);
           const [vc1, vc2, vc3, vc4, vc5, vc6] = await Promise.all([
             loadChapterVocab(book, 1).catch(() => null),
             loadChapterVocab(book, 2).catch(() => null),
