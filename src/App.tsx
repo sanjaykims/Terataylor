@@ -184,6 +184,7 @@ export default function App() {
   };
   const setA2Vocab = (v: VocabItem[] | null) => {
     setA2VocabState(v);
+    setA2StudiedWords([]); // a new/cleared vocab list invalidates the old studied set
     if (v) csSetJSON('a2_vocab', v).catch(() => {});
     else csDel('a2_vocab').catch(() => {});
   };

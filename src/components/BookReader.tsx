@@ -600,10 +600,14 @@ function findChapterAnnouncement(
       return Math.max(0, words[i].start - 0.5);
     }
   }
-  // Fallback: a bare number form spoken well into the file (>30s) is very
-  // likely the chapter heading even if "chapter" wasn't transcribed.
-  for (let i = 0; i < words.length; i++) {
-    if (words[i].start > 30 && matchesNumber(i)) {
+  // Fallback (only when "chapter" wasn't transcribed): a bare number is the
+  // heading only if it is spoken well into the file (>30s) AND preceded by a
+  // clear pause (>1s gap from the previous word), as a narrator pauses before
+  // announcing a chapter. The pause requirement avoids matching a number that
+  // merely flows inside prose ("fourteen years", "14 dollars").
+  for (let i = 1; i < words.length; i++) {
+    const gap = words[i].start - words[i - 1].start;
+    if (words[i].start > 30 && gap > 1.0 && matchesNumber(i)) {
       return Math.max(0, words[i].start - 0.5);
     }
   }

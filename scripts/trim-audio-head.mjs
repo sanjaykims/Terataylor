@@ -51,8 +51,11 @@ function findAnnouncement(words, ch) {
   for (let i = 0; i < words.length - 1; i++) {
     if (tok(i) === 'chapter' && matches(i + 1)) return Math.max(0, words[i].start - 0.5);
   }
-  for (let i = 0; i < words.length; i++) {
-    if (words[i].start > 30 && matches(i)) return Math.max(0, words[i].start - 0.5);
+  // Fallback only when a bare number is spoken >30s in AND after a clear pause
+  // (>1s), so a number flowing inside prose isn't mistaken for the heading.
+  for (let i = 1; i < words.length; i++) {
+    const gap = words[i].start - words[i - 1].start;
+    if (words[i].start > 30 && gap > 1.0 && matches(i)) return Math.max(0, words[i].start - 0.5);
   }
   return null;
 }

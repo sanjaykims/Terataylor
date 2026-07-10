@@ -93,9 +93,13 @@ export default function VocabQuizGame({ text, bookVocab }: { text: string; bookV
   const startGame = async () => {
     setGameState('loading');
     let defs: WordDef[];
-    if (bookVocab && bookVocab.length >= 4) {
-      // Book-provided vocab already has definitions — use directly
-      defs = bookVocab.slice(0, 8).map(v => ({ word: v.word, definition: v.definition }));
+    // Book vocab only works as quiz questions if it actually has definitions;
+    // an OCR'd list can have blanks. Keep only entries with both fields.
+    const bookDefs = (bookVocab ?? [])
+      .filter(v => v.word?.trim() && v.definition?.trim())
+      .map(v => ({ word: v.word, definition: v.definition }));
+    if (bookDefs.length >= 4) {
+      defs = bookDefs.slice(0, 8);
     } else {
       // Auto-extract from text and fetch definitions from dictionary
       const candidates = extractedVocab.slice(0, 10);

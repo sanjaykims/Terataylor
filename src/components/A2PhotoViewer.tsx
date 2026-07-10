@@ -26,11 +26,17 @@ export default function A2PhotoViewer() {
   const [uploading,   setUploading]   = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  // Live mirror of `images` + a serialized upload chain, so a second upload
+  // started while the first is still compressing appends to the FIRST batch's
+  // result instead of the stale pre-upload array (which dropped a batch).
+  const imagesRef = useRef<string[]>([]);
+  const chainRef  = useRef<Promise<void>>(Promise.resolve());
+  const apply = (imgs: string[]) => { imagesRef.current = imgs; setImages(imgs); };
 
   useEffect(() => {
     csGet(STORAGE_KEY)
-      .then(raw => setImages(raw ? (JSON.parse(raw) as string[]) : []))
-      .catch(() => setImages([]))
+      .then(raw => apply(raw ? (JSON.parse(raw) as string[]) : []))
+      .catch(() => apply([]))
       .finally(() => setLoading(false));
   }, []);
 
@@ -42,31 +48,32 @@ export default function A2PhotoViewer() {
     }
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
+    if (fileRef.current) fileRef.current.value = '';
     if (!files.length) return;
     setUploading(true);
-    try {
-      const compressed = await Promise.all(files.map(f => compressImage(f)));
-      const next = [...images, ...compressed];
-      await save(next);
-      setImages(next);
-    } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = '';
-    }
+    chainRef.current = chainRef.current
+      .then(async () => {
+        const compressed = await Promise.all(files.map(f => compressImage(f)));
+        const next = [...imagesRef.current, ...compressed]; // read after prior upload committed
+        await save(next);
+        apply(next);
+      })
+      .catch(() => {})
+      .finally(() => setUploading(false));
   };
 
   const handleRemove = async (idx: number) => {
-    const next = images.filter((_, i) => i !== idx);
+    const next = imagesRef.current.filter((_, i) => i !== idx);
     await save(next);
-    setImages(next);
+    apply(next);
   };
 
   const handleClear = async () => {
     setConfirmClear(false);
     await save([]);
-    setImages([]);
+    apply([]);
   };
 
   if (loading) {
