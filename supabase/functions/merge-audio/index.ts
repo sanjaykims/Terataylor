@@ -49,13 +49,25 @@ function bytesPerSec(b: Uint8Array, frameAt: number): number {
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
+  // This function runs with the SERVICE ROLE key (bypasses RLS) and can
+  // overwrite/DELETE arbitrary chapter audio, driven entirely by the caller.
+  // It is no longer invoked from the browser — only from trusted tooling — so
+  // gate it behind a secret that is NOT in the client bundle. Refuse everything
+  // unless MERGE_SECRET is configured AND matches, closing it to the public.
+  const secret = Deno.env.get('MERGE_SECRET');
+  if (!secret || req.headers.get('x-merge-secret') !== secret) {
+    return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403, headers: CORS });
+  }
+
   let body: { bookId: string; chapters: number[]; outputChapter?: number; trimSeconds?: number };
   try { body = await req.json(); }
   catch { return new Response(JSON.stringify({ error: 'invalid json' }), { status: 400, headers: CORS }); }
 
   const { bookId, chapters, outputChapter = chapters[0], trimSeconds = 0 } = body;
-  if (!bookId || !chapters?.length) {
-    return new Response(JSON.stringify({ error: 'bookId and chapters required' }), { status: 400, headers: CORS });
+  if (!bookId || !/^[a-z0-9_-]{1,32}$/i.test(bookId) || !Array.isArray(chapters) ||
+      chapters.length === 0 || chapters.length > 30 ||
+      !chapters.every(c => Number.isInteger(c) && c >= 1 && c <= 99)) {
+    return new Response(JSON.stringify({ error: 'invalid bookId/chapters' }), { status: 400, headers: CORS });
   }
 
   const supabase = createClient(

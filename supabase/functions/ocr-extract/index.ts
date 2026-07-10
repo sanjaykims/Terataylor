@@ -43,6 +43,26 @@ Deno.serve(async (req: Request) => {
     };
     const { mode } = body;
 
+    // Input caps: this endpoint runs on the owner's Anthropic key with only the
+    // public anon key for auth, so bound every request to normal app sizes to
+    // deny bulk credit-farming. Real usage (one sentence, one word, one chapter's
+    // vocab photos) sits far under these limits.
+    const tooBig =
+      (body.text && body.text.length > 20_000) ||
+      (body.sentence && body.sentence.length > 4_000) ||
+      (body.prev && body.prev.length > 4_000) ||
+      (body.next && body.next.length > 4_000) ||
+      (body.word && body.word.length > 200) ||
+      (body.sentences && (body.sentences.length > 60 ||
+        body.sentences.some(s => (s?.length ?? 0) > 4_000))) ||
+      (body.images && (body.images.length > 6 ||
+        body.images.some(i => (i?.data?.length ?? 0) > 8_000_000)));
+    if (tooBig) {
+      return new Response(JSON.stringify({ error: 'input too large' }), {
+        status: 413, headers: { ...cors, 'Content-Type': 'application/json' },
+      });
+    }
+
     const client = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
 
     // ── Single-word definition + Korean meaning ───────────────────────────

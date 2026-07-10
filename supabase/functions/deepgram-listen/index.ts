@@ -70,9 +70,13 @@ Deno.serve(async (req) => {
       }
 
       // URL path: client sent { audioUrl } JSON — Deepgram fetches the file itself.
+      // Restrict to THIS project's own public Storage bucket so the endpoint
+      // can't be used to transcribe arbitrary internet audio (SSRF / bill-farming
+      // a stranger's 10-hour podcast on the owner's Deepgram account).
       const { audioUrl } = body;
-      if (!audioUrl || !/^https?:\/\//.test(audioUrl)) {
-        return json({ message: 'A public audioUrl is required' }, 400);
+      const ALLOWED_PREFIX = `${Deno.env.get('SUPABASE_URL') ?? ''}/storage/v1/object/public/taylor-audio/`;
+      if (!audioUrl || !audioUrl.startsWith(ALLOWED_PREFIX)) {
+        return json({ message: 'audioUrl must be a taylor-audio Storage URL' }, 400);
       }
       const dgRes = await fetch(
         'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
@@ -99,6 +103,11 @@ Deno.serve(async (req) => {
     // Raw binary path: client sent MP3 bytes directly (used for boundary detection
     // on locally-held files that aren't yet in Supabase Storage).
     const dgBody = await req.arrayBuffer();
+    // Cap upload size so a stranger can't stream unbounded audio on the owner's
+    // Deepgram bill. A single lesson chapter is well under this.
+    if (dgBody.byteLength > 80 * 1024 * 1024) {
+      return json({ message: 'audio too large (max 80 MB)' }, 413);
+    }
     const dgRes = await fetch(
       'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
       {
