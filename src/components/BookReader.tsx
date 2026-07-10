@@ -1167,8 +1167,11 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         } else {
           raw = [...timings];
           const avgGap = timings.length > 1 ? (timings[timings.length - 1] - timings[0]) / (timings.length - 1) : 3;
+          const ceil = audioDuration || Infinity;
           for (let k = timings.length; k < rows.length; k++) {
-            raw.push(raw[raw.length - 1] + avgGap);
+            // Clamp extrapolated starts below the audio end, else tapping a
+            // padded row seeks past the end → instant 'ended' + a stuck highlight.
+            raw.push(Math.min(raw[raw.length - 1] + avgGap, ceil - 0.05));
           }
         }
       } else {
@@ -1688,6 +1691,13 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           const t = Number(e.target.value);
           if (audioRef.current) audioRef.current.currentTime = t;
           setAudioCurrentTime(t);
+          // A manual scrub overrides any in-flight tap-to-seek and any 한 문장
+          // segment stop, so highlighting tracks freely from the new position
+          // instead of pausing at the old sentence end or freezing on a stale
+          // seek target.
+          segmentEndRef.current = null;
+          seekTargetRef.current = -1;
+          seekFloorRef.current  = -1;
         };
         return (
           <div style={{

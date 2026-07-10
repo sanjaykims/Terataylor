@@ -66,12 +66,17 @@ export async function csGetKeysByPattern(pattern: string): Promise<string[]> {
   return (data ?? []).map((r: { key: string }) => r.key);
 }
 
-// Fetches all app-level state excluding large chapter texts.
+// Fetches the small app-level state used at startup. Excludes bulky rows the
+// caller never reads here: chapter texts, the a2_photos base64 blob (loaded on
+// demand by A2PhotoViewer), and the vocab_def_* dictionary cache (read per word
+// by VocabularyPanel). Pulling those made every app open download megabytes.
 export async function csGetAppState(): Promise<Record<string, string>> {
   const { data, error } = await supabase
     .from('taylor_app_data')
     .select('key, value')
     .not('key', 'like', 'chapter_%')
+    .not('key', 'like', 'vocab_def_%')
+    .neq('key', 'a2_photos')
     .neq('key', '_migrated');
   if (error) throw error;
   return Object.fromEntries((data ?? [] as Row[]).map((r: Row) => [r.key, r.value]));

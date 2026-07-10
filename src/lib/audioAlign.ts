@@ -48,6 +48,9 @@ async function getTranscriber(onProgress: (p: AlignProgress) => void) {
         },
       });
     })();
+    // Don't cache a rejected download (offline/CDN hiccup) forever — clear it so
+    // a retry can re-attempt instead of failing instantly for the whole session.
+    transcriberPromise.catch(() => { transcriberPromise = null; });
   }
   return transcriberPromise;
 }
@@ -264,7 +267,12 @@ export async function alignChapterAudio(
 ): Promise<number[]> {
   const audioFlat = await buildAudioWordList(audioUrl, onProgress);
   onProgress({ phase: 'aligning' });
-  if (!audioFlat.length || !sentences.length) return [];
+  // Honor the "one start per sentence" contract and always signal 'done', even
+  // when the transcript is empty (silence/music) — callers wire off 'done'.
+  if (!audioFlat.length || !sentences.length) {
+    onProgress({ phase: 'done' });
+    return sentences.map(() => 0);
+  }
   const starts = alignByNW(audioFlat.map(w => w.norm), audioFlat.map(w => w.time), sentences);
   onProgress({ phase: 'done' });
   return starts;
