@@ -6,24 +6,56 @@
 // All art is self-contained CSS/SVG (no external assets); motion is disabled
 // under prefers-reduced-motion.
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ambient } from '../lib/ambientAudio';
+import { recordVisit, getStreak } from '../lib/streak';
 
 export default function CoralineWorld({ onEnter }: { onEnter: () => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const [soundOn, setSoundOn] = useState(false);
+  // Log today's visit and read the streak once, when the journey opens.
+  const [streak] = useState(() => { recordVisit(); return getStreak(); });
+
+  const toggleSound = async () => {
+    if (ambient.on) {
+      ambient.stop(); setSoundOn(false);
+      try { localStorage.setItem('taylor_sound', 'off'); } catch { /* ignore */ }
+    } else {
+      await ambient.start(); setSoundOn(true); ambient.chime(0);
+      try { localStorage.setItem('taylor_sound', 'on'); } catch { /* ignore */ }
+    }
+  };
+
+  // Enter the app with a "stepping through the door" flourish.
+  const enterWithFx = () => { if (ambient.on) { ambient.whoosh(); ambient.chime(12); } onEnter(); };
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Scroll-reveal
+    // Scroll-reveal — and a soft chime as each scene arrives.
     const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('in'); }),
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); ambient.chime(); } }),
       { root, threshold: 0.18 },
     );
     root.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 
-    if (reduce) return () => io.disconnect();
+    // If Taylor had sound on last time, resume it on his first gesture
+    // (browsers require one before audio can play).
+    let pref: string | null = null;
+    try { pref = localStorage.getItem('taylor_sound'); } catch { /* ignore */ }
+    if (pref === 'on') {
+      const kick = () => {
+        ambient.start().then(() => setSoundOn(true));
+        window.removeEventListener('pointerdown', kick);
+        root.removeEventListener('scroll', kick);
+      };
+      window.addEventListener('pointerdown', kick, { once: true });
+      root.addEventListener('scroll', kick, { once: true });
+    }
+
+    if (reduce) return () => { io.disconnect(); ambient.stop(); };
 
     // Parallax: scroll (per-layer, based on distance from viewport centre) +
     // pointer (tilt of the arrival scene). Batched into one rAF loop.
@@ -64,6 +96,7 @@ export default function CoralineWorld({ onEnter }: { onEnter: () => void }) {
       cancelAnimationFrame(raf);
       root.removeEventListener('mousemove', mm);
       root.removeEventListener('touchmove', tm);
+      ambient.stop();
     };
   }, []);
 
@@ -73,6 +106,16 @@ export default function CoralineWorld({ onEnter }: { onEnter: () => void }) {
       className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden text-white"
       style={{ ['--px']: 0, ['--py']: 0, scrollBehavior: 'smooth' } as React.CSSProperties}
     >
+      {/* Sound toggle (top-left) — procedural ambient, off until Taylor opts in */}
+      <button
+        onClick={toggleSound}
+        title={soundOn ? '소리 끄기' : '소리 켜기'}
+        className={`glass-night fixed left-4 top-4 z-[60] flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ring-1 ring-white/20 ${soundOn ? 'text-amber-200' : 'text-violet-100 hover:text-white'} ${soundOn ? '' : 'animate-pulse'}`}
+      >
+        <span className="text-sm">{soundOn ? '🔊' : '🔈'}</span>
+        <span className="hidden sm:inline">{soundOn ? '소리 켜짐' : '소리 켜기'}</span>
+      </button>
+
       {/* Skip / enter — always reachable */}
       <button
         onClick={onEnter}
@@ -309,6 +352,24 @@ export default function CoralineWorld({ onEnter }: { onEnter: () => void }) {
         </div>
 
         <div className="reveal relative z-10 max-w-xl">
+          {/* Daily study streak — rewards Taylor for coming back every day */}
+          <div className="glass-night mx-auto mb-7 inline-flex flex-col items-center gap-2.5 rounded-2xl px-7 py-4">
+            <div className="text-sm font-extrabold text-amber-200">
+              {streak.count >= 2 ? `🔥 ${streak.count}일 연속 공부 중!`
+                : streak.activeToday ? '🔥 오늘도 문을 열었구나!'
+                : '🔥 오늘부터 불꽃을 켜볼까?'}
+            </div>
+            <div className="flex gap-1.5">
+              {streak.last7.map((d, i) => (
+                <div key={i} title={d.date}
+                  className={`h-2.5 w-2.5 rounded-full transition-colors ${d.active ? 'bg-amber-400' : 'bg-white/15'} ${d.isToday ? 'ring-2 ring-amber-300/70' : ''}`} />
+              ))}
+            </div>
+            <div className="text-[11px] text-violet-200/60">
+              {streak.best >= 2 ? `최고 기록 ${streak.best}일 · 이어서 갱신해보자!` : '매일 들어오면 불꽃이 자라나요'}
+            </div>
+          </div>
+
           <h2 className="font-display text-4xl font-extrabold leading-tight sm:text-6xl">
             준비됐어, <span className="text-shimmer">태윤아?</span>
           </h2>
@@ -317,7 +378,7 @@ export default function CoralineWorld({ onEnter }: { onEnter: () => void }) {
             오늘도 한 걸음, 영어의 마법을 배우러 들어가 볼까?
           </p>
           <button
-            onClick={onEnter}
+            onClick={enterWithFx}
             className="group mt-9 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-indigo-600 px-8 py-4 text-lg font-extrabold text-white shadow-2xl shadow-fuchsia-500/40 ring-1 ring-white/25 hover:-translate-y-0.5 hover:shadow-fuchsia-500/60"
           >
             <span>✨ 공부하러 들어가기</span>

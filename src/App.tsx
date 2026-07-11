@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import LessonScheduleWidget from './components/LessonScheduleWidget';
 import CoralineHero from './components/CoralineHero';
 import CoralineWorld from './components/CoralineWorld';
+import { getStreak } from './lib/streak';
 import BookReader from './components/BookReader';
 
 // Non-default-view components — loaded on demand to keep the initial bundle lean.
@@ -86,7 +87,8 @@ export default function App() {
   const [showWorld, setShowWorld] = useState(() => {
     try { return sessionStorage.getItem('taylor_world_seen') !== '1'; } catch { return true; }
   });
-  const enterApp = () => { try { sessionStorage.setItem('taylor_world_seen', '1'); } catch { /* ignore */ } setShowWorld(false); };
+  const [streak, setStreak] = useState(getStreak);
+  const enterApp = () => { try { sessionStorage.setItem('taylor_world_seen', '1'); } catch { /* ignore */ } setStreak(getStreak()); setShowWorld(false); };
   const [mainTab,   setMainTab]   = useState<MainTab>('v1');
   const [a2Tab,     setA2Tab]     = useState<A2Tab>('shadowing');
   const [v1Tab,     setV1Tab]     = useState<V1Tab>('reading');
@@ -311,8 +313,16 @@ export default function App() {
               <div className="text-xs text-violet-200/70 font-medium">청담어학원 Tera 예습 도우미</div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <span className="text-sm font-semibold text-violet-100/80 hidden sm:inline">안녕, 태윤아! ✨</span>
+            {streak.count >= 1 && (
+              <span
+                title={`${streak.count}일 연속 공부 중`}
+                className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-2.5 py-1.5 text-xs font-extrabold text-amber-200 ring-1 ring-amber-300/30"
+              >
+                🔥 {streak.count}
+              </span>
+            )}
             <button
               onClick={() => setShowWorld(true)}
               title="다른 세계 다시 보기"
