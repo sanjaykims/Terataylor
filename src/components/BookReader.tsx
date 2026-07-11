@@ -707,7 +707,7 @@ const SentenceRows = memo(function SentenceRows(
               className={`grid grid-cols-2 items-start border-b border-gray-50 last:border-0 transition-colors ${
                 active ? 'bg-yellow-50' : 'hover:bg-gray-50/40'
               } ${hasAudio ? 'cursor-pointer' : ''}`}>
-              <div className={`px-4 py-3 border-r border-gray-100 ${active ? 'border-l-4 border-l-yellow-400' : ''}`}>
+              <div className={`px-4 py-3 border-r border-gray-100 ${active ? 'border-l-2 border-l-amber-400' : ''}`}>
                 <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'}`}>
                   {active ? renderWords(enRows[i] ?? '', activeWordIdx) : (enRows[i] ?? '')}
                 </p>
