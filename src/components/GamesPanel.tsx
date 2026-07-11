@@ -23,12 +23,10 @@ export default function GamesPanel({ text, vocab, selectedWords }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
+      <div className="seg grid grid-cols-3">
         {TABS.map(t => (
           <button key={t.id} onClick={() => setGame(t.id)}
-            className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
-              game === t.id ? t.active : 'text-gray-500 hover:bg-gray-50'
-            }`}>
+            className={`seg-btn ${game === t.id ? 'seg-btn-active' : ''}`}>
             {t.label}
           </button>
         ))}

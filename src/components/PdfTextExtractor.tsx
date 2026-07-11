@@ -186,11 +186,11 @@ export default function PdfTextExtractor({ bookId, onExtracted, savedSummary, on
             <span className="text-xs text-gray-500 shrink-0">페이지 범위</span>
             <input type="number" min="1" max={totalPages ?? 999} value={startPage}
               onChange={e => setStart(e.target.value)}
-              className="w-16 border-2 border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:border-indigo-400" />
+              className="field w-16 px-2 py-1.5 text-center" />
             <span className="text-gray-400">~</span>
             <input type="number" min="1" max={totalPages ?? 999} value={endPage}
               onChange={e => setEnd(e.target.value)}
-              className="w-16 border-2 border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:border-indigo-400" />
+              className="field w-16 px-2 py-1.5 text-center" />
             <span className="text-xs text-gray-400">페이지</span>
           </div>
 
@@ -212,7 +212,7 @@ export default function PdfTextExtractor({ bookId, onExtracted, savedSummary, on
             추출 완료 ({preview.trim().split(/\s+/).length}단어) — 확인 후 사용하세요:
           </p>
           <textarea value={preview} onChange={e => setPreview(e.target.value)}
-            className="w-full h-44 border-2 border-indigo-200 bg-indigo-50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 resize-none leading-relaxed" />
+            className="field w-full h-44 resize-none leading-relaxed" />
           <button onClick={confirm}
             className="w-full py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all">
             ✓ 이 텍스트로 사용하기
@@ -221,7 +221,7 @@ export default function PdfTextExtractor({ bookId, onExtracted, savedSummary, on
       )}
 
       {status === 'done' && (
-        <button onClick={() => setStatus('review')} className="text-xs text-indigo-400 hover:underline">
+        <button onClick={() => setStatus('review')} className="text-xs text-violet-500 hover:text-violet-700 hover:underline transition-colors">
           다시 편집하기
         </button>
       )}

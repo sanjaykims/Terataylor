@@ -664,7 +664,7 @@ function renderWords(text: string, upToWord: number) {
   const words = text.split(/\s+/).filter(Boolean);
   return words.map((word, wi) => (
     <span key={wi}>
-      <span className={wi <= upToWord ? 'text-blue-600 font-bold' : 'text-gray-900'}>{word}</span>
+      <span className={wi <= upToWord ? 'text-violet-600 font-bold' : 'text-gray-900'}>{word}</span>
       {wi < words.length - 1 ? ' ' : ''}
     </span>
   ));
@@ -689,13 +689,13 @@ const SentenceRows = memo(function SentenceRows(
   return (
     <>
       {/* Desktop: paired grid */}
-      <div className="hidden sm:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="grid grid-cols-2 border-b border-gray-100">
-          <div className="px-4 py-2.5 border-r border-gray-100">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">🇺🇸 English</span>
+      <div className="hidden sm:block surface overflow-hidden">
+        <div className="grid grid-cols-2 border-b border-violet-100/70">
+          <div className="px-4 py-2.5 border-r border-violet-100/70">
+            <span className="eyebrow text-violet-500/80">🇺🇸 English</span>
           </div>
           <div className="px-4 py-2.5">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">🇰🇷 한국어</span>
+            <span className="eyebrow text-violet-500/80">🇰🇷 한국어</span>
           </div>
         </div>
         {Array.from({ length: maxRows }).map((_, i) => {
@@ -704,17 +704,17 @@ const SentenceRows = memo(function SentenceRows(
             <div key={i}
               ref={el => { rowRefs.current[i] = el; }}
               onClick={() => hasAudio && onSeek(i)}
-              className={`grid grid-cols-2 items-start border-b border-gray-50 last:border-0 transition-colors ${
-                active ? 'bg-yellow-50' : 'hover:bg-gray-50/40'
+              className={`grid grid-cols-2 items-start border-b border-violet-50 last:border-0 transition-colors ${
+                active ? 'bg-amber-50/80' : 'hover:bg-violet-50/40'
               } ${hasAudio ? 'cursor-pointer' : ''}`}>
-              <div className={`px-4 py-3 border-r border-gray-100 ${active ? 'border-l-2 border-l-amber-400' : ''}`}>
-                <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'}`}>
+              <div className={`px-4 py-3 border-r border-violet-100/70 ${active ? 'border-l-2 border-l-amber-400' : ''}`}>
+                <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-800'}`}>
                   {active ? renderWords(enRows[i] ?? '', activeWordIdx) : (enRows[i] ?? '')}
                 </p>
               </div>
               <div className="px-4 py-3">
                 {koRows[i] ? (
-                  <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-700'}`}>{koRows[i]}</p>
+                  <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-700'}`}>{koRows[i]}</p>
                 ) : (i === 0 && !hasKo ? (
                   <p className="text-xs text-gray-400 italic">번역 버튼을 눌러주세요</p>
                 ) : null)}
@@ -725,14 +725,14 @@ const SentenceRows = memo(function SentenceRows(
       </div>
 
       {/* Mobile: single column */}
-      <div className="sm:hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
+      <div className="sm:hidden surface p-4 space-y-3">
         {mobileView === 'en'
           ? enRows.map((p, i) => (
               <p key={i}
                 ref={el => { mobileRowRefs.current[i] = el; }}
                 onClick={() => hasAudio && onSeek(i)}
-                className={`text-sm leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0 transition-colors ${
-                  i === activeIdx ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-800'
+                className={`text-sm leading-relaxed border-b border-violet-50 pb-3 last:border-0 last:pb-0 transition-colors ${
+                  i === activeIdx ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-800'
                 }`}>
                 {i === activeIdx ? renderWords(p, activeWordIdx) : p}
               </p>
@@ -742,8 +742,8 @@ const SentenceRows = memo(function SentenceRows(
               <p key={i}
                 ref={el => { mobileRowRefs.current[i] = el; }}
                 onClick={() => hasAudio && onSeek(i)}
-                className={`text-sm leading-relaxed border-b border-gray-50 pb-3 last:border-0 last:pb-0 transition-colors ${
-                  i === activeIdx ? 'text-gray-900 font-semibold bg-yellow-200/60 rounded px-1' : 'text-gray-700'
+                className={`text-sm leading-relaxed border-b border-violet-50 pb-3 last:border-0 last:pb-0 transition-colors ${
+                  i === activeIdx ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-700'
                 }`}>{p}</p>
             ))
           : <div className="text-center py-8"><p className="text-xs text-gray-400">번역 버튼을 눌러서 한국어 번역을 불러오세요</p></div>}
@@ -1479,11 +1479,11 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         </div>
 
         {extracting ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+          <div className="surface p-6 space-y-3">
             <div className="text-sm font-semibold text-gray-700 text-center">📖 챕터 분석 중...</div>
-            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-violet-100/70 rounded-full h-3 overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-200 ${bk.badge}`}
+                className="h-full rounded-full transition-all duration-200 bg-gradient-to-r from-violet-600 to-fuchsia-600"
                 style={{ width: progress.total ? `${(progress.done / progress.total) * 100}%` : '0%' }}
               />
             </div>
@@ -1542,10 +1542,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
             {visibleChapters.map(ch => (
               <button key={ch} onClick={() => selectChapter(ch)}
-                className={`shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-all border relative ${
+                className={`shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition-all border relative ${
                   selectedChapter === ch
-                    ? `${bk.badge} text-white border-transparent shadow-sm`
-                    : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                    ? 'bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white border-transparent shadow-sm shadow-violet-500/30'
+                    : 'bg-white border-violet-100 text-gray-600 hover:border-violet-300 hover:text-violet-700'
                 }`}>
                 Ch.{String(ch).padStart(2, '0')}
                 {translatedChaps.has(ch) && (
@@ -1558,7 +1558,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       })()}
 
       {/* Current chapter info bar */}
-      <div className="bg-white rounded-xl border border-gray-100 px-3 py-2 flex items-center justify-between">
+      <div className="surface-soft px-3 py-2 flex items-center justify-between">
         <span className={`text-xs font-bold ${bk.color}`}>
           Chapter {selectedChapter}
           {selectedChapterRange
@@ -1571,12 +1571,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       </div>
 
       {/* Mobile view toggle */}
-      <div className="sm:hidden flex bg-white rounded-xl border border-gray-100 p-0.5 gap-0.5">
+      <div className="sm:hidden seg">
         {(['en', 'ko'] as const).map(v => (
           <button key={v} onClick={() => setMobileView(v)}
-            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
-              mobileView === v ? `${bk.badge} text-white` : 'text-gray-500'
-            }`}>
+            className={`seg-btn ${mobileView === v ? 'seg-btn-active' : ''}`}>
             {v === 'en' ? '🇺🇸 영어' : '🇰🇷 한국어'}
           </button>
         ))}
@@ -1585,15 +1583,15 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       {/* Translation controls */}
       {!chapterLoading && enText && !koText && !translating && (
         <button onClick={handleTranslate}
-          className={`w-full py-3 ${bk.badge} text-white rounded-xl font-semibold text-sm shadow-sm hover:opacity-90 transition-all`}>
+          className="btn-primary w-full text-sm">
           🌏 이 챕터 한국어로 번역하기
         </button>
       )}
       {translating && (
-        <div className="bg-white rounded-xl border border-gray-100 px-4 py-3 space-y-2">
+        <div className="surface-soft px-4 py-3 space-y-2">
           <div className="text-xs text-gray-600 font-semibold text-center">번역 중...</div>
-          <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-            <div className={`h-full rounded-full transition-all duration-300 ${bk.badge}`}
+          <div className="w-full bg-violet-100/70 rounded-full h-2 overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-violet-600 to-fuchsia-600"
               style={{ width: txProgress.total ? `${(txProgress.done / txProgress.total) * 100}%` : '15%' }} />
           </div>
           {txProgress.total > 0 && (
@@ -1608,7 +1606,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
             ⚠️ 영어와 한국어 문장 수가 맞지 않아요. 정렬하려면 다시 번역하세요.
           </span>
           <button onClick={handleTranslate}
-            className={`shrink-0 px-3 py-1.5 ${bk.badge} text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-all`}>
+            className="shrink-0 px-3 py-1.5 bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white rounded-lg text-xs font-semibold hover:brightness-110 transition-all">
             🔄 다시 번역
           </button>
         </div>
@@ -1617,14 +1615,14 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         <div className="px-1 flex items-center justify-between">
           <span className="text-xs text-emerald-600 font-semibold">✓ 번역 저장됨</span>
           <button onClick={handleTranslate}
-            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors font-semibold">
+            className="text-xs text-gray-400 hover:text-violet-600 transition-colors font-semibold">
             🔄 다시 번역 (문장 정렬)
           </button>
         </div>
       )}
       {/* Chapter audio — shadowing with real-time sentence highlight */}
       {!chapterLoading && enText && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
+        <div className="surface p-4 space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
               🎧 섀도잉 오디오
@@ -1635,7 +1633,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                   className="text-xs text-gray-400 hover:text-red-500 transition-colors">🗑 삭제</button>
               )}
               <button onClick={() => audioFileRef.current?.click()} disabled={audioUploading}
-                className={`px-3 py-1.5 ${bk.badge} text-white rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition-all`}>
+                className="px-3 py-1.5 bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white rounded-lg text-xs font-semibold hover:brightness-110 disabled:opacity-50 transition-all">
                 {audioUploading
                   ? `⏳ ${uploadProgress.done}/${uploadProgress.total} 업로드 중…`
                   : audioUrl ? '📁 추가 업로드' : '+ mp3 업로드'}
@@ -1676,19 +1674,15 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
               {/* Click-to-play behavior */}
               <div className="flex items-center gap-2 text-xs">
                 <span className="text-gray-500">문장 클릭 시:</span>
-                <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+                <div className="seg">
                   <button
                     onClick={() => setClickMode('sentence')}
-                    className={`px-2.5 py-1 font-semibold transition-colors ${
-                      clickMode === 'sentence' ? `${bk.badge} text-white` : 'bg-white text-gray-500 hover:bg-gray-50'
-                    }`}>
+                    className={`seg-btn ${clickMode === 'sentence' ? 'seg-btn-active' : ''}`}>
                     🔂 한 문장
                   </button>
                   <button
                     onClick={() => { setClickMode('continue'); segmentEndRef.current = null; }}
-                    className={`px-2.5 py-1 font-semibold transition-colors ${
-                      clickMode === 'continue' ? `${bk.badge} text-white` : 'bg-white text-gray-500 hover:bg-gray-50'
-                    }`}>
+                    className={`seg-btn ${clickMode === 'continue' ? 'seg-btn-active' : ''}`}>
                     ▶ 계속 듣기
                   </button>
                 </div>
@@ -1707,13 +1701,13 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                 )}
                 <button onClick={handleAnalyzeAudio} disabled={analyzing}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 ${
-                    timings ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : `${bk.badge} text-white hover:opacity-90`
+                    timings ? 'bg-violet-100 text-violet-700 hover:bg-violet-200' : 'bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white hover:brightness-110'
                   }`}>
                   {analyzing ? '⏳ 분석 중…' : timings ? '🔄 음성 다시 분석' : '🎙 음성 분석 실행'}
                 </button>
               </div>
               {(analyzing || analyzeMsg) && (
-                <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+                <p className="text-xs text-gray-600 surface-soft px-3 py-2">
                   {analyzing && <span className="inline-block animate-pulse mr-1">●</span>}
                   {analyzeMsg}
                 </p>
@@ -1746,7 +1740,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           onSeek={seekToSentence} rowRefs={rowRefs} mobileRowRefs={mobileRowRefs}
         />
       ) : (
-        <div className="bg-gray-50 rounded-2xl p-8 text-center text-sm text-gray-400">
+        <div className="surface-soft p-8 text-center text-sm text-gray-500">
           이 챕터의 텍스트를 불러올 수 없어요.
         </div>
       )}
@@ -1784,8 +1778,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         return (
           <div style={{
             position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9990,
-            background: 'rgba(15,23,42,0.96)', backdropFilter: 'blur(8px)',
-            borderTop: '1px solid rgba(255,255,255,0.08)',
+            background: 'linear-gradient(180deg, rgba(30,22,58,0.97), rgba(19,14,40,0.98))',
+            backdropFilter: 'blur(12px) saturate(140%)', WebkitBackdropFilter: 'blur(12px) saturate(140%)',
+            borderTop: '1px solid rgba(196,181,253,0.16)',
             padding: '10px 16px 10px 16px',
             display: 'flex', flexDirection: 'column', gap: 6,
           }}>
@@ -1793,21 +1788,22 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
             <input type="range" min={0} max={audioDuration || 100} step={0.5}
               value={audioCurrentTime}
               onChange={seek}
-              style={{ width: '100%', accentColor: '#6366f1', cursor: 'pointer', height: 4 }}
+              style={{ width: '100%', accentColor: '#a78bfa', cursor: 'pointer', height: 4 }}
             />
             {/* Controls row */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               {/* Play / Pause */}
               <button onClick={togglePlay} style={{
                 width: 40, height: 40, borderRadius: '50%', border: 'none',
-                background: '#6366f1', color: '#fff', fontSize: 18,
+                background: 'linear-gradient(135deg, #8b5cf6, #d946ef)', color: '#fff', fontSize: 18,
+                boxShadow: '0 8px 20px -8px rgba(124,58,237,0.8)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', flexShrink: 0,
               }}>
                 {isPlaying ? '⏸' : '▶'}
               </button>
               {/* Time */}
-              <span style={{ color: '#94a3b8', fontSize: 12, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
+              <span style={{ color: '#c4b5fd', fontSize: 12, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
                 {fmt(audioCurrentTime)} / {fmt(audioDuration)}
               </span>
               {/* Speed buttons — wrap on narrow screens so 7 buttons never overflow */}
@@ -1815,8 +1811,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                 {SPEEDS.map(s => (
                   <button key={s} onClick={() => changeSpeed(s)} style={{
                     padding: '3px 8px', borderRadius: 6, border: 'none',
-                    background: playbackRate === s ? '#6366f1' : 'rgba(255,255,255,0.1)',
-                    color: playbackRate === s ? '#fff' : '#94a3b8',
+                    background: playbackRate === s ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' : 'rgba(255,255,255,0.08)',
+                    color: playbackRate === s ? '#fff' : '#c4b5fd',
                     fontSize: 11, fontWeight: 600, cursor: 'pointer',
                   }}>
                     {s.toFixed(1)}×

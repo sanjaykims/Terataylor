@@ -421,7 +421,7 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
               : `교재 단어 ${vocabPairs.length}개 · 3 WAVES`}
           </div>
           <button onClick={startGame}
-            className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl text-lg hover:bg-indigo-500 transition-all active:scale-95 shadow-lg">
+            className="px-8 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-xl text-lg hover:from-violet-500 hover:to-fuchsia-500 transition-all active:scale-95 shadow-lg">
             🚀 START
           </button>
         </Overlay>}
@@ -463,7 +463,7 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
             onChange={e => handleChange(e.target.value)}
             onKeyDown={e => { if(e.key==='Escape'){setIv('');live.current='';} }}
             placeholder="단어를 타이핑하면 레이저 발사!"
-            className="flex-1 bg-gray-900 text-green-400 font-mono font-bold text-lg px-4 py-3 rounded-xl border-2 border-indigo-700 focus:border-indigo-400 focus:outline-none placeholder-gray-700"
+            className="flex-1 bg-gray-900 text-green-400 font-mono font-bold text-lg px-4 py-3 rounded-xl border-2 border-violet-700 focus:border-violet-400 focus:outline-none placeholder-gray-700"
             autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false}
           />
         </div>

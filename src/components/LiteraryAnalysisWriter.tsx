@@ -38,17 +38,17 @@ function CreativeStoryWriter() {
 
   return (
     <div className="space-y-5">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-        <label className="block text-sm font-semibold text-gray-600 mb-2">📖 스토리 제목</label>
+      <div className="surface p-4">
+        <label className="eyebrow block mb-2">📖 스토리 제목</label>
         <input value={title} onChange={e => setTitle(e.target.value)} placeholder="My Story Title..."
-          className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-base font-semibold focus:outline-none focus:border-indigo-400 transition-colors" />
+          className="field font-semibold" />
       </div>
       <div className="text-xs text-gray-400 flex justify-between px-1">
         <span>💡 3단계 구성으로 스토리를 완성해 보세요!</span>
-        <span className="font-semibold text-indigo-600">총 {totalWords}단어</span>
+        <span className="font-semibold text-violet-600">총 {totalWords}단어</span>
       </div>
       {STORY_SECTIONS.map((sec, i) => (
-        <div key={sec.title} className={`rounded-2xl border-2 ${sec.border} ${sec.bg} p-5 space-y-3`}>
+        <div key={sec.title} className={`rounded-[1.25rem] border ${sec.border} ${sec.bg} p-5 space-y-3 shadow-sm`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-2xl">{sec.emoji}</span>
@@ -68,7 +68,7 @@ function CreativeStoryWriter() {
           </div>
           <textarea value={texts[i]} onChange={e => setTexts(prev => prev.map((t, j) => j === i ? e.target.value : t))}
             placeholder={`Write the ${sec.title.toLowerCase()} of your story here...`}
-            className="w-full h-32 border-2 border-white bg-white rounded-xl px-4 py-3 text-base focus:outline-none focus:border-indigo-300 transition-colors resize-none leading-relaxed" />
+            className="field h-32 resize-none leading-relaxed" />
           <div>
             <button onClick={() => setShowStarters(prev => prev.map((v, j) => j === i ? !v : v))}
               className="text-sm font-semibold text-gray-500 hover:text-gray-700">
@@ -89,11 +89,11 @@ function CreativeStoryWriter() {
       ))}
       <div className="flex justify-end gap-3">
         <button onClick={() => { if (window.confirm('모든 내용을 지우시겠어요?')) { setTexts(['','','']); setTitle(''); } }}
-          className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">
+          className="btn-soft">
           🗑 초기화
         </button>
         <button onClick={() => navigator.clipboard.writeText([title ? `Title: ${title}` : '', ...STORY_SECTIONS.map((s,i) => `[${s.title}]\n${texts[i]}`)].filter(Boolean).join('\n\n'))}
-          className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all">
+          className="btn-primary">
           📋 전체 복사
         </button>
       </div>
@@ -153,14 +153,14 @@ function EssayEditor({ prompt, bookId, onBack }: { prompt: WritingPrompt; bookId
 
       <div className="flex justify-between text-xs text-gray-400 px-1">
         <span>💡 각 섹션을 채워 에세이를 완성하세요</span>
-        <span className={`font-semibold ${totalWords >= 150 ? 'text-emerald-600' : 'text-indigo-600'}`}>
+        <span className={`font-semibold ${totalWords >= 150 ? 'text-emerald-600' : 'text-violet-600'}`}>
           {totalWords}단어 {totalWords >= 150 ? '✓' : `(목표: 150+)`}
         </span>
       </div>
 
       {/* Sections */}
       {prompt.sections.map((sec, i) => (
-        <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-3">
+        <div key={i} className="surface p-5 space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <div className="font-bold text-gray-800">{sec.title}</div>
@@ -168,13 +168,13 @@ function EssayEditor({ prompt, bookId, onBack }: { prompt: WritingPrompt; bookId
             </div>
             <span className="text-xs text-gray-400">{texts[i].trim() ? texts[i].trim().split(/\s+/).length : 0} words</span>
           </div>
-          <div className="text-sm text-gray-600 bg-gray-50 rounded-xl px-3 py-2 leading-relaxed">
+          <div className="surface-soft text-sm text-gray-600 px-3 py-2 leading-relaxed">
             {sec.guide}
           </div>
           <textarea value={texts[i]}
             onChange={e => save(texts.map((t, j) => j === i ? e.target.value : t))}
             placeholder={`Write your ${sec.title.toLowerCase()} here...`}
-            className="w-full h-36 border-2 border-gray-100 bg-gray-50 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-indigo-300 focus:bg-white transition-all resize-none leading-relaxed" />
+            className="field h-36 resize-none leading-relaxed" />
           <div>
             <button onClick={() => setShowStarters(prev => prev.map((v, j) => j === i ? !v : v))}
               className="text-sm font-semibold text-gray-400 hover:text-gray-600">
@@ -185,7 +185,7 @@ function EssayEditor({ prompt, bookId, onBack }: { prompt: WritingPrompt; bookId
                 {sec.starters.map((s, si) => (
                   <button key={si}
                     onClick={() => save(texts.map((t, j) => j === i ? (t ? t + ' ' + s : s) : t))}
-                    className="text-sm bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-all text-left">
+                    className="text-sm bg-violet-50 border border-violet-200 text-violet-700 px-3 py-1.5 rounded-lg hover:bg-violet-100 transition-all text-left">
                     "{s}"
                   </button>
                 ))}
@@ -199,12 +199,12 @@ function EssayEditor({ prompt, bookId, onBack }: { prompt: WritingPrompt; bookId
       <div className="flex gap-3 justify-end">
         {hasContent && (
           <button onClick={() => { if (window.confirm('이 에세이 내용을 지우시겠어요?')) save(prompt.sections.map(() => '')); }}
-            className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">
+            className="btn-soft">
             🗑 초기화
           </button>
         )}
         <button onClick={copyAll}
-          className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all">
+          className="btn-primary">
           📋 전체 복사
         </button>
       </div>
@@ -247,14 +247,14 @@ function PromptGrid({ bookId, onSelect }: { bookId: BookId; onSelect: (p: Writin
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {prompts.map(p => (
           <button key={p.id} onClick={() => onSelect(p)}
-            className="text-left bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:border-indigo-300 hover:shadow-md transition-all group">
+            className="text-left surface surface-hover p-4 group">
             <div className="flex items-start justify-between gap-2">
               <span className="text-3xl">{p.emoji}</span>
               {savedIds.has(p.id) && (
                 <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold shrink-0">작성 중</span>
               )}
             </div>
-            <div className={`font-bold text-sm mt-2 ${bk.color} group-hover:text-indigo-600`}>{p.concept}</div>
+            <div className={`font-bold text-sm mt-2 ${bk.color} group-hover:text-violet-600`}>{p.concept}</div>
             <div className="text-xs text-gray-500 mt-0.5">{p.korConcept}</div>
             <div className="text-xs text-gray-600 mt-2 leading-relaxed line-clamp-2">{p.question}</div>
             <div className="text-xs text-gray-400 mt-2">{p.sections.length}개 섹션 → 에세이 완성</div>
@@ -273,17 +273,13 @@ export default function LiteraryAnalysisWriter({ book }: { book: BookId }) {
   return (
     <div className="space-y-4">
       {/* Mode toggle */}
-      <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
+      <div className="seg grid grid-cols-2">
         <button onClick={() => { setMode('analysis'); setSelectedPrompt(null); }}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-            mode === 'analysis' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
-          }`}>
+          className={`seg-btn ${mode === 'analysis' ? 'seg-btn-active' : ''}`}>
           📚 작품 분석 에세이
         </button>
         <button onClick={() => setMode('creative')}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-            mode === 'creative' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
-          }`}>
+          className={`seg-btn ${mode === 'creative' ? 'seg-btn-active' : ''}`}>
           ✍️ 창작 스토리
         </button>
       </div>

@@ -208,16 +208,16 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-500">
           {vocab?.length
-            ? <><strong className="text-indigo-600">책 지정 단어 {words.length}개</strong> · 카드를 클릭해 뜻을 확인하세요</>
-            : <>본문에서 <strong className="text-indigo-600">{words.length}개</strong> 단어 추출</>}
+            ? <><strong className="text-violet-600">책 지정 단어 {words.length}개</strong> · 카드를 클릭해 뜻을 확인하세요</>
+            : <>본문에서 <strong className="text-violet-600">{words.length}개</strong> 단어 추출</>}
         </div>
         <div className="text-sm font-semibold text-emerald-600">
           ✅ {studiedCount} / {words.length} 완료
-          {studiedCount > 0 && <span className="ml-2 text-indigo-500 font-normal text-xs">→ 게임에서 이 단어만 연습</span>}
+          {studiedCount > 0 && <span className="ml-2 text-violet-500 font-normal text-xs">→ 게임에서 이 단어만 연습</span>}
         </div>
       </div>
 
-      <div className="w-full bg-gray-200 rounded-full h-2">
+      <div className="w-full bg-violet-100 rounded-full h-2">
         <div className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
           style={{ width: `${(studiedCount / words.length) * 100}%` }} />
       </div>
@@ -231,12 +231,12 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
           return (
             <div key={item.word + i}
               onClick={() => handleCardClick(i)}
-              className={`relative rounded-xl p-4 cursor-pointer transition-all select-none border-2 ${
+              className={`relative rounded-[1rem] p-4 cursor-pointer transition-all select-none border-2 ${
                 isStudied
                   ? 'bg-emerald-50 border-emerald-300 opacity-70'
                   : state > 0
-                  ? 'bg-indigo-50 border-indigo-300 shadow-md'
-                  : 'bg-white border-gray-100 hover:border-indigo-200 hover:shadow-sm'
+                  ? 'bg-violet-50 border-violet-300 shadow-md'
+                  : 'surface border-transparent surface-hover'
               }`}>
 
               {/* ✓ button */}
@@ -249,7 +249,7 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
               <button onClick={e => speakWord(e, item.word)}
                 title="발음 듣기 (미국식)"
                 aria-label="발음 듣기"
-                className="absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center bg-blue-500 text-white shadow-md hover:bg-blue-600 active:scale-90 transition-all z-10">
+                className="absolute bottom-2 right-2 w-9 h-9 rounded-full flex items-center justify-center bg-violet-600 text-white shadow-md hover:bg-violet-700 active:scale-90 transition-all z-10">
                 <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor"
                   strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none" />
@@ -262,9 +262,9 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
               {!isStudied && (
                 <div className="space-y-1">
                   {/* Korean — always visible unless studied */}
-                  <div className="font-bold text-base pr-7 text-indigo-800 leading-snug">
+                  <div className="font-bold text-base pr-7 text-violet-900 leading-snug">
                     {def?.loading
-                      ? <span className="text-indigo-300 text-sm animate-pulse">뜻 불러오는 중…</span>
+                      ? <span className="text-violet-400 text-sm animate-pulse">뜻 불러오는 중…</span>
                       : def?.ko
                       ? <span>🇰🇷 {def.ko}</span>
                       : <span className="text-gray-300 text-sm">—</span>}
@@ -278,7 +278,7 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
                     <div
                       onClick={e => handleEnClick(e, i)}
                       title="클릭하면 사라져요"
-                      className="text-xs text-gray-500 leading-snug border-t border-indigo-200 pt-1 mt-1 cursor-pointer hover:line-through hover:text-gray-300 transition-all">
+                      className="text-xs text-gray-500 leading-snug border-t border-violet-200 pt-1 mt-1 cursor-pointer hover:line-through hover:text-gray-300 transition-all">
                       {def?.en ? <>🇺🇸 {def.en}</> : null}
                     </div>
                   )}
@@ -288,17 +288,17 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
                     <div
                       onClick={e => handleWordClick(e, i)}
                       title="클릭하면 사라져요"
-                      className="text-base font-extrabold text-gray-800 border-t border-indigo-300 pt-1 mt-1 pr-9 cursor-pointer hover:line-through hover:text-gray-400 transition-all">
+                      className="text-base font-extrabold text-gray-800 border-t border-violet-300 pt-1 mt-1 pr-9 cursor-pointer hover:line-through hover:text-gray-400 transition-all">
                       {item.word}
                     </div>
                   )}
 
                   {/* Nudge hint */}
                   {state === 0 && !def?.loading && (
-                    <div className="text-xs text-indigo-200 mt-1">클릭 → 🇺🇸</div>
+                    <div className="text-xs text-violet-300 mt-1">클릭 → 🇺🇸</div>
                   )}
                   {state === 1 && (
-                    <div className="text-xs text-indigo-300 mt-1">한 번 더 → 단어</div>
+                    <div className="text-xs text-violet-400 mt-1">한 번 더 → 단어</div>
                   )}
                 </div>
               )}

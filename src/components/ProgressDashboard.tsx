@@ -92,7 +92,7 @@ export default function ProgressDashboard() {
     <div className="text-center py-16 space-y-4">
       <div className="text-red-500 font-semibold">기록을 불러오지 못했어요.</div>
       <div className="text-xs text-gray-400">{error}</div>
-      <button onClick={load} className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700">
+      <button onClick={load} className="btn-primary px-4 py-2 text-sm">
         다시 시도
       </button>
     </div>
@@ -125,12 +125,10 @@ export default function ProgressDashboard() {
   return (
     <div className="space-y-5">
       {/* Sub-nav */}
-      <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1 overflow-x-auto">
+      <div className="seg overflow-x-auto">
         {SECTIONS.map(s => (
           <button key={s.id} onClick={() => setActiveSection(s.id)}
-            className={`flex-1 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
-              activeSection === s.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
-            }`}>
+            className={`seg-btn flex-1 whitespace-nowrap ${activeSection === s.id ? 'seg-btn-active' : ''}`}>
             {s.label}
           </button>
         ))}
@@ -138,7 +136,7 @@ export default function ProgressDashboard() {
 
       {/* Refresh */}
       <div className="flex justify-end">
-        <button onClick={load} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors flex items-center gap-1">
+        <button onClick={load} className="text-xs text-gray-400 hover:text-violet-600 transition-colors flex items-center gap-1">
           🔄 새로고침
         </button>
       </div>
@@ -148,12 +146,12 @@ export default function ProgressDashboard() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: '학습한 단어', value: totalWords, sub: `${masteredWords}개 마스터`, color: 'text-indigo-600' },
-              { label: '게임 플레이', value: `${totalGames}회`, sub: `최고 ${bestScore}점`, color: 'text-orange-500' },
+              { label: '학습한 단어', value: totalWords, sub: `${masteredWords}개 마스터`, color: 'text-violet-600' },
+              { label: '게임 플레이', value: `${totalGames}회`, sub: `최고 ${bestScore}점`, color: 'text-amber-500' },
               { label: '총 학습시간', value: formatDuration(totalStudySecs), sub: `${sessions.length}세션`, color: 'text-emerald-600' },
               { label: '취약 단어', value: `${weakWords.length}개`, sub: '집중 필요', color: 'text-red-500' },
             ].map(stat => (
-              <div key={stat.label} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 text-center">
+              <div key={stat.label} className="surface p-4 text-center">
                 <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
                 <div className="text-xs text-gray-400 mt-1">{stat.sub}</div>
                 <div className="text-xs font-semibold text-gray-600 mt-0.5">{stat.label}</div>
@@ -178,7 +176,7 @@ export default function ProgressDashboard() {
           )}
 
           {Object.keys(featureTime).length > 0 && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+            <div className="surface p-4">
               <div className="font-bold text-gray-700 mb-3">기능별 학습 시간</div>
               <div className="space-y-3">
                 {Object.entries(featureTime).sort((a, b) => b[1] - a[1]).map(([feat, secs]) => (
@@ -187,7 +185,7 @@ export default function ProgressDashboard() {
                       <span className="text-gray-600">{FEATURE_LABELS[feat] ?? feat}</span>
                       <span className="font-semibold text-gray-800">{formatDuration(secs)}</span>
                     </div>
-                    <MiniBar value={secs} max={Math.max(...Object.values(featureTime))} color="bg-indigo-400" />
+                    <MiniBar value={secs} max={Math.max(...Object.values(featureTime))} color="bg-violet-500" />
                   </div>
                 ))}
               </div>
@@ -228,7 +226,7 @@ export default function ProgressDashboard() {
                       <div className="text-xs text-gray-500 shrink-0 w-24 text-right">
                         ✓{w.correct_count} ✗{w.wrong_count} · {pct}%
                       </div>
-                      {w.streak >= 3 && <span className="text-orange-500 text-sm shrink-0">🔥{w.streak}</span>}
+                      {w.streak >= 3 && <span className="text-amber-500 text-sm shrink-0">🔥{w.streak}</span>}
                     </div>
                   );
                 })}
@@ -248,7 +246,7 @@ export default function ProgressDashboard() {
           ) : (
             <>
               {/* Score bar chart (last 8 games) */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+              <div className="surface p-4">
                 <div className="font-bold text-gray-700 mb-3 text-sm">최근 게임 점수</div>
                 <div className="flex items-end gap-2 h-28">
                   {recentGames.reverse().map((g) => (
@@ -257,7 +255,7 @@ export default function ProgressDashboard() {
                       <div
                         className={`w-full rounded-t-lg ${
                           g.game_type === 'space' ? 'bg-slate-600' :
-                          g.game_type === 'quiz'  ? 'bg-orange-400' : 'bg-indigo-400'
+                          g.game_type === 'quiz'  ? 'bg-amber-400' : 'bg-violet-500'
                         }`}
                         style={{ height: `${Math.max(8, (g.score / maxRecentScore) * 80)}px` }}
                       />
@@ -272,7 +270,7 @@ export default function ProgressDashboard() {
               {/* Score list */}
               <div className="space-y-2">
                 {scores.map(g => (
-                  <div key={g.id} className="flex items-center gap-3 bg-white rounded-xl border border-gray-100 px-4 py-3">
+                  <div key={g.id} className="surface surface-hover flex items-center gap-3 px-4 py-3">
                     <span className="text-xl shrink-0">
                       {g.game_type === 'space' ? '🛸' : g.game_type === 'quiz' ? '⚡' : '🎮'}
                     </span>
@@ -284,7 +282,7 @@ export default function ProgressDashboard() {
                         {g.correct != null && g.total != null ? ` · ${g.correct}/${g.total} 정답` : ''}
                       </div>
                     </div>
-                    <div className="font-bold text-lg text-indigo-600 shrink-0">{g.score}점</div>
+                    <div className="font-bold text-lg text-violet-600 shrink-0">{g.score}점</div>
                   </div>
                 ))}
               </div>
@@ -303,7 +301,7 @@ export default function ProgressDashboard() {
           ) : sessions.slice(0, 100).map((s, idx) => {
             const f = parseFeature(s.feature);
             return (
-              <div key={idx} className="flex items-center gap-3 bg-white rounded-xl border border-gray-100 px-4 py-3">
+              <div key={idx} className="surface surface-hover flex items-center gap-3 px-4 py-3">
                 <span className="text-xl shrink-0">{FEATURE_LABELS[f.base]?.split(' ')[0] ?? '📖'}</span>
                 <div className="flex-1">
                   <div className="font-semibold text-gray-800 text-sm">

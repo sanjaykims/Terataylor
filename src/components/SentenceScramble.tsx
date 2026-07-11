@@ -153,52 +153,52 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <div className="surface flex items-center justify-between p-4">
         <div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-700 font-semibold">
             {mode === 'vocab' ? '표현 맞추기' : '문장 퍼즐'} {sentIdx + 1} / {totalCount}
           </div>
-          <div className="text-xs text-gray-400">{completed.size}개 완료</div>
+          <div className="text-xs text-gray-500">{completed.size}개 완료</div>
         </div>
         <div className="flex items-center gap-4">
           {streak >= 2 && (
-            <div className="text-orange-500 font-bold text-sm">🔥 {streak}연속!</div>
+            <div className="text-amber-500 font-bold text-sm">🔥 {streak}연속!</div>
           )}
           <div className="text-right">
-            <div className="text-2xl font-bold text-indigo-600">{score}</div>
-            <div className="text-xs text-gray-400">점수</div>
+            <div className="text-2xl font-bold text-violet-600">{score}</div>
+            <div className="text-xs text-gray-500">점수</div>
           </div>
         </div>
       </div>
 
       {/* Vocab hint card — shows the English meaning; user arranges the term */}
       {mode === 'vocab' && currentHint && (
-        <div className="bg-indigo-50 border-2 border-indigo-200 rounded-2xl px-5 py-4 space-y-1">
-          <div className="text-xs font-semibold text-indigo-400 uppercase tracking-wide">🇺🇸 English meaning</div>
+        <div className="surface-soft border-2 border-violet-200 px-5 py-4 space-y-1">
+          <div className="eyebrow text-violet-500">🇺🇸 English meaning</div>
           <div className="text-lg font-bold text-gray-800 leading-snug">{currentHint.meaning}</div>
           {currentHint.korean && (
-            <div className="text-sm text-indigo-600 font-semibold">🇰🇷 {currentHint.korean}</div>
+            <div className="text-sm text-violet-600 font-semibold">🇰🇷 {currentHint.korean}</div>
           )}
-          <div className="text-xs text-gray-400 pt-1">아래 단어들로 알맞은 표현을 순서대로 완성하세요</div>
+          <div className="text-xs text-gray-500 pt-1">아래 단어들로 알맞은 표현을 순서대로 완성하세요</div>
         </div>
       )}
 
       {/* Progress bar */}
-      <div className="w-full bg-gray-200 rounded-full h-2">
+      <div className="w-full bg-violet-100 rounded-full h-2">
         <div
-          className="bg-indigo-500 h-2 rounded-full transition-all duration-500"
+          className="bg-gradient-to-r from-violet-500 to-fuchsia-500 h-2 rounded-full transition-all duration-500"
           style={{ width: `${totalCount > 0 ? (completed.size / totalCount) * 100 : 0}%` }}
         />
       </div>
 
       {/* Answer area */}
-      <div className={`min-h-20 rounded-2xl border-2 p-4 flex flex-wrap gap-2 items-center transition-all ${
+      <div className={`min-h-20 rounded-[1.25rem] border-2 p-4 flex flex-wrap gap-2 items-center transition-all ${
         checked
-          ? isCorrect ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-300'
-          : 'bg-white border-gray-200'
+          ? isCorrect ? 'bg-emerald-50 border-emerald-400' : 'bg-red-50 border-red-300'
+          : 'surface border-black/5'
       }`}>
         {placed.length === 0 && (
-          <span className="text-gray-300 text-sm">
+          <span className="text-gray-400 text-sm">
             {mode === 'vocab' ? '아래 단어들로 표현을 순서대로 완성하세요…' : '아래 단어를 클릭해서 문장을 완성하세요…'}
           </span>
         )}
@@ -210,9 +210,9 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
               key={token.id}
               onClick={() => returnWord(token)}
               className={`px-3 py-2 rounded-xl text-base font-medium transition-all active:scale-95 ${
-                wordCorrect ? 'bg-green-500 text-white' :
+                wordCorrect ? 'bg-emerald-500 text-white' :
                 wordWrong ? 'bg-red-400 text-white' :
-                'bg-indigo-100 text-indigo-800 hover:bg-indigo-200'
+                'bg-violet-100 text-violet-800 hover:bg-violet-200'
               }`}
             >
               {token.word}
@@ -224,7 +224,7 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
       {/* Feedback */}
       {checked && (
         <div className={`rounded-xl p-3 text-sm font-semibold ${
-          isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-600'
+          isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-600'
         }`}>
           {isCorrect
             ? <>✅ 정답! {streak >= 2 ? `🔥 ${streak}연속!` : ''} +{10 + (streak - 1) * 2}점</>
@@ -234,13 +234,13 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
       )}
 
       {/* Word bank */}
-      <div className="bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 p-4">
+      <div className="surface-soft border-2 border-dashed border-violet-200 p-4">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">단어 뱅크</span>
+          <span className="eyebrow">단어 뱅크</span>
           <button
             onClick={() => !checked && setBank(prev => shuffle(prev))}
             disabled={checked}
-            className="text-xs text-gray-400 hover:text-gray-600 disabled:opacity-30 transition-colors"
+            className="text-xs text-gray-500 hover:text-violet-600 disabled:opacity-30 transition-colors"
           >
             🔀 섞기
           </button>
@@ -250,7 +250,7 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
             <button
               key={token.id}
               onClick={() => pickWord(token)}
-              className="px-3 py-2 rounded-xl bg-white border-2 border-gray-200 text-base font-medium text-gray-700 hover:border-indigo-400 hover:text-indigo-700 transition-all active:scale-95 shadow-sm"
+              className="px-3 py-2 rounded-xl bg-white border-2 border-gray-200 text-base font-medium text-gray-700 hover:border-violet-400 hover:text-violet-700 transition-all active:scale-95 shadow-sm"
             >
               {token.word}
             </button>
@@ -264,7 +264,7 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
           <button
             onClick={checkAnswer}
             disabled={placed.length !== originalWords.length}
-            className="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-bold disabled:opacity-40 hover:bg-indigo-700 transition-all active:scale-95 shadow-sm"
+            className="btn-primary flex-1 disabled:opacity-40"
           >
             확인하기 ✓
           </button>
@@ -278,7 +278,7 @@ export default function SentenceScramble({ text, vocab, selectedWords }: Props) 
         )}
         <button
           onClick={() => setSentIdx(prev => (prev - 1 + totalCount) % totalCount)}
-          className="px-4 py-3 rounded-xl bg-gray-100 text-gray-600 font-semibold hover:bg-gray-200 transition-all"
+          className="btn-soft px-4"
         >
           ← 이전
         </button>

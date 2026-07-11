@@ -88,7 +88,7 @@ export default function A2PhotoViewer() {
     <div className="space-y-3">
       {/* Toolbar */}
       <div className="flex items-center justify-between">
-        <span className="text-sm font-bold text-indigo-700">
+        <span className="text-sm font-bold text-violet-700">
           📄 지문 사진 {images.length > 0 && `(${images.length}장)`}
         </span>
         <div className="flex items-center gap-2">
@@ -111,7 +111,7 @@ export default function A2PhotoViewer() {
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-all"
+            className="btn-primary px-3 py-1.5 text-xs disabled:opacity-50"
           >
             {uploading ? '⏳ 저장 중…' : '+ 사진 추가'}
           </button>
@@ -124,16 +124,16 @@ export default function A2PhotoViewer() {
       {images.length === 0 ? (
         <div
           onClick={() => fileRef.current?.click()}
-          className="border-2 border-dashed border-indigo-200 bg-indigo-50/60 rounded-2xl p-10 text-center cursor-pointer hover:opacity-80 transition-all"
+          className="border-2 border-dashed border-violet-200 bg-violet-50/60 rounded-2xl p-10 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50 transition-all"
         >
           <div className="text-4xl mb-3">📸</div>
-          <div className="text-sm font-bold text-indigo-700">교재 사진 업로드</div>
+          <div className="text-sm font-bold text-violet-700">교재 사진 업로드</div>
           <div className="text-xs text-gray-400 mt-1.5">여러 장 동시에 선택 가능</div>
         </div>
       ) : (
         <div className="space-y-3">
           {images.map((src, i) => (
-            <div key={i} className="relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div key={i} className="surface relative overflow-hidden">
               <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
                 <span className="bg-black/40 text-white text-[11px] px-2 py-0.5 rounded-full font-semibold">
                   {i + 1} / {images.length}
@@ -153,7 +153,7 @@ export default function A2PhotoViewer() {
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="w-full py-3 border-2 border-dashed border-indigo-200 rounded-2xl text-xs font-semibold text-indigo-500 hover:bg-indigo-50 disabled:opacity-50 transition-all"
+            className="w-full py-3 border-2 border-dashed border-violet-200 rounded-2xl text-xs font-semibold text-violet-600 hover:border-violet-400 hover:bg-violet-50 disabled:opacity-50 transition-all"
           >
             {uploading ? '⏳ 저장 중…' : '+ 사진 더 추가하기'}
           </button>

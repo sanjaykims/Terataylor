@@ -129,7 +129,7 @@ export default function ImageUploadInput(props: Props) {
         onClick={() => fileRef.current?.click()}
         onDragOver={e => e.preventDefault()}
         onDrop={e => { e.preventDefault(); addFiles(e.dataTransfer.files); }}
-        className="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/50 transition-all select-none"
+        className="border-2 border-dashed border-violet-200 rounded-xl p-5 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50/60 transition-all select-none"
       >
         <div className="text-3xl mb-1">📷</div>
         <div className="text-sm text-gray-500 font-medium">클릭하거나 사진을 드래그</div>
@@ -143,7 +143,7 @@ export default function ImageUploadInput(props: Props) {
         <div className="flex flex-wrap gap-2">
           {images.map((img, i) => (
             <div key={i} className="relative group">
-              <img src={img.url} alt="" className="w-20 h-20 object-cover rounded-xl border-2 border-gray-200" />
+              <img src={img.url} alt="" className="w-20 h-20 object-cover rounded-xl border-2 border-violet-200" />
               <button onClick={() => removeImage(i)}
                 className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-bold">
                 ×
@@ -151,7 +151,7 @@ export default function ImageUploadInput(props: Props) {
             </div>
           ))}
           <button onClick={() => fileRef.current?.click()}
-            className="w-20 h-20 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:border-indigo-300 hover:text-indigo-400 transition-all text-2xl">
+            className="w-20 h-20 border-2 border-dashed border-violet-200 rounded-xl flex items-center justify-center text-violet-300 hover:border-violet-400 hover:text-violet-500 transition-all text-2xl">
             +
           </button>
         </div>
@@ -160,7 +160,7 @@ export default function ImageUploadInput(props: Props) {
       {/* Extract button */}
       {images.length > 0 && status !== 'done' && (
         <button onClick={extract} disabled={status === 'extracting'}
-          className="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 disabled:opacity-60 transition-all flex items-center justify-center gap-2">
+          className="btn-primary w-full py-2.5 disabled:opacity-60 flex items-center justify-center gap-2">
           {status === 'extracting'
             ? <><span className="inline-block animate-spin">⟳</span> AI가 분석 중...</>
             : mode === 'text' ? '📝 텍스트 추출하기' : '📚 단어 추출하기'}
@@ -174,7 +174,7 @@ export default function ImageUploadInput(props: Props) {
         <div className="space-y-2">
           <p className="text-xs text-gray-500 font-semibold">추출된 텍스트 확인 및 수정:</p>
           <textarea value={rawText} onChange={e => setRawText(e.target.value)}
-            className="w-full h-44 border-2 border-indigo-200 bg-indigo-50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 resize-none leading-relaxed" />
+            className="field w-full h-44 resize-none leading-relaxed" />
           <button onClick={confirm}
             className="w-full py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all">
             ✓ 이 텍스트로 사용하기
@@ -186,10 +186,10 @@ export default function ImageUploadInput(props: Props) {
       {status === 'review' && mode === 'vocab' && (
         <div className="space-y-2">
           <p className="text-xs text-gray-500 font-semibold">추출된 단어 {vocabRows.length}개 확인 및 수정:</p>
-          <div className="max-h-60 overflow-y-auto space-y-1.5 border-2 border-indigo-200 bg-indigo-50 rounded-xl p-2">
+          <div className="max-h-60 overflow-y-auto space-y-1.5 surface-soft p-2">
             <div className="grid grid-cols-[6rem_1fr_1fr_1.5rem] gap-1 px-1 pb-1">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">단어</span>
-              <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wide">🇰🇷 한국어</span>
+              <span className="text-[10px] font-bold text-violet-500 uppercase tracking-wide">🇰🇷 한국어</span>
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">🇺🇸 English</span>
               <span />
             </div>
@@ -197,15 +197,15 @@ export default function ImageUploadInput(props: Props) {
               <div key={i} className="grid grid-cols-[6rem_1fr_1fr_1.5rem] gap-1 items-center">
                 <input value={item.word}
                   onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, word: e.target.value } : v))}
-                  className="px-2 py-1 rounded-lg border border-gray-200 text-sm font-semibold bg-white"
+                  className="px-2 py-1 rounded-lg border border-gray-200 text-sm font-semibold bg-white text-gray-800"
                   placeholder="단어" />
                 <input value={item.korean ?? ''}
                   onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, korean: e.target.value } : v))}
-                  className="px-2 py-1 rounded-lg border border-indigo-200 text-sm bg-white"
+                  className="px-2 py-1 rounded-lg border border-violet-200 text-sm bg-white text-gray-800"
                   placeholder="한국어 뜻" />
                 <input value={item.definition}
                   onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, definition: e.target.value } : v))}
-                  className="px-2 py-1 rounded-lg border border-gray-200 text-sm bg-white text-gray-500"
+                  className="px-2 py-1 rounded-lg border border-gray-200 text-sm bg-white text-gray-600"
                   placeholder="English def" />
                 <button onClick={() => setVocabRows(prev => prev.filter((_, j) => j !== i))}
                   className="text-gray-300 hover:text-red-400 transition-colors font-bold text-center">✕</button>
@@ -213,7 +213,7 @@ export default function ImageUploadInput(props: Props) {
             ))}
             <button
               onClick={() => setVocabRows(prev => [...prev, { word: '', definition: '', korean: '' }])}
-              className="w-full text-xs text-indigo-400 hover:text-indigo-600 py-1 transition-colors">
+              className="w-full text-xs text-violet-500 hover:text-violet-700 py-1 transition-colors">
               + 단어 추가
             </button>
           </div>
@@ -225,7 +225,7 @@ export default function ImageUploadInput(props: Props) {
       )}
 
       {status === 'done' && (
-        <button onClick={() => setStatus('review')} className="text-xs text-indigo-400 hover:text-indigo-600 hover:underline transition-colors">
+        <button onClick={() => setStatus('review')} className="text-xs text-violet-500 hover:text-violet-700 hover:underline transition-colors">
           다시 편집하기
         </button>
       )}

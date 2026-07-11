@@ -45,21 +45,21 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
 
   // ── Audio upload section (always shown at top) ──────────────────────────
   const audioSection = onAudioUpload ? (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+    <div className="surface p-4">
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
           🎵 섀도잉 오디오 (mp3)
         </span>
         {audioUrl ? (
           <button onClick={onClearAudio}
-            className="text-xs text-gray-400 hover:text-red-500 transition-colors">
+            className="text-xs text-gray-500 hover:text-red-500 transition-colors">
             🗑 삭제
           </button>
         ) : (
           <button
             onClick={() => audioFileRef.current?.click()}
             disabled={audioUploading}
-            className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-all"
+            className="btn-primary px-3 py-1.5 text-xs disabled:opacity-50"
           >
             {audioUploading ? '⏳ 업로드 중…' : '+ mp3 업로드'}
           </button>
@@ -71,7 +71,7 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
       {!audioUrl && !audioUploading && (
         <button
           onClick={() => audioFileRef.current?.click()}
-          className="mt-3 w-full border-2 border-dashed border-indigo-200 rounded-xl py-3 text-xs text-indigo-400 hover:bg-indigo-50 transition-all"
+          className="mt-3 w-full border-2 border-dashed border-violet-200 rounded-xl py-3 text-xs text-violet-500 hover:bg-violet-50 transition-all"
         >
           클릭해서 mp3 파일 선택
         </button>
@@ -83,7 +83,7 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
     return (
       <div className="space-y-4">
         {audioSection}
-        <div className="text-center py-10 text-gray-400">
+        <div className="text-center py-10 text-gray-500">
           위에 지문 사진을 업로드하면 섀도잉을 시작할 수 있어요!
         </div>
       </div>
@@ -98,18 +98,18 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
       {/* Controls */}
       {audioUrl ? (
         /* ── MP3 모드 — audio player already shown above, just show hint ── */
-        <div className="bg-indigo-50 rounded-2xl px-4 py-3">
-          <p className="text-xs text-indigo-600 font-medium">
+        <div className="surface-soft px-4 py-3">
+          <p className="text-xs text-violet-700 font-medium">
             💡 오디오를 듣고 아래 문장을 따라 읽어 보세요 (섀도잉)
           </p>
         </div>
       ) : (
         /* ── TTS 모드 ── */
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="surface p-5">
           <div className="flex flex-wrap items-center gap-4 mb-4">
             <button onClick={handlePlayPause}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white transition-all shadow-md active:scale-95 ${
-                isPlaying ? 'bg-orange-500 hover:bg-orange-600' : 'bg-indigo-600 hover:bg-indigo-700'
+                isPlaying ? 'bg-amber-500 hover:bg-amber-600' : 'bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600'
               }`}>
               {isPlaying ? <><span className="text-xl">⏸</span> 일시정지</>
                 : state === 'paused' ? <><span className="text-xl">▶️</span> 계속</>
@@ -137,12 +137,10 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-gray-600">속도</span>
-              <div className="flex gap-1">
+              <div className="seg">
                 {RATES.map(r => (
                   <button key={r} onClick={() => setRate(r)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                      rate === r ? 'bg-indigo-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}>
+                    className={`seg-btn text-sm font-bold ${rate === r ? 'seg-btn-active' : ''}`}>
                     {r === 1.0 ? '1x' : `${r}x`}
                   </button>
                 ))}
@@ -160,14 +158,14 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
               {shadowMode && (
                 <div className="flex items-center gap-1">
                   <span className="text-xs text-gray-500">대기</span>
-                  {PAUSE_TIMES.map(p => (
-                    <button key={p} onClick={() => setShadowPause(p)}
-                      className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${
-                        shadowPause === p ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}>
-                      {p}초
-                    </button>
-                  ))}
+                  <div className="seg">
+                    {PAUSE_TIMES.map(p => (
+                      <button key={p} onClick={() => setShadowPause(p)}
+                        className={`seg-btn text-xs font-bold ${shadowPause === p ? 'seg-btn-active' : ''}`}>
+                        {p}초
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -183,8 +181,8 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
       )}
 
       {/* Sentence list — shown in both modes */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-2 max-h-[55vh] overflow-y-auto">
-        <div className="text-xs text-gray-400 mb-3 font-medium">
+      <div className="surface p-5 space-y-2 max-h-[55vh] overflow-y-auto">
+        <div className="text-xs text-gray-500 mb-3 font-medium">
           {audioUrl
             ? `총 ${sentences.length}문장 · 오디오를 들으며 따라 읽어보세요`
             : `문장을 클릭하면 그 문장부터 재생됩니다 · 총 ${sentences.length}문장`}
@@ -198,13 +196,13 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
               className={`group flex gap-3 p-3 rounded-xl transition-all ${
                 audioUrl ? 'cursor-default' : 'cursor-pointer'
               } ${isCurrentSentence
-                  ? 'bg-indigo-50 border-2 border-indigo-400'
+                  ? 'bg-violet-50 border-2 border-violet-400'
                   : 'border-2 border-transparent hover:bg-gray-50 hover:border-gray-200'
               }`}>
               <span className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                isCurrentSentence ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
+                isCurrentSentence ? 'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
               }`}>{i + 1}</span>
-              <p className={`text-left leading-relaxed ${isCurrentSentence ? 'text-indigo-900 font-semibold text-base' : 'text-gray-700 text-base'}`}>
+              <p className={`text-left leading-relaxed ${isCurrentSentence ? 'text-violet-900 font-semibold text-base' : 'text-gray-700 text-base'}`}>
                 {sentence}
               </p>
             </div>

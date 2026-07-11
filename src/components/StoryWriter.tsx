@@ -123,25 +123,25 @@ export default function StoryWriter() {
   return (
     <div className="space-y-5">
       {/* Title */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <label className="block text-sm font-semibold text-gray-600 mb-2">📖 스토리 제목 (Title)</label>
+      <div className="surface p-5">
+        <label className="eyebrow block mb-2">📖 스토리 제목 (Title)</label>
         <input
           type="text"
           value={storyTitle}
           onChange={e => setStoryTitle(e.target.value)}
           placeholder="My Story Title..."
-          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg font-semibold focus:outline-none focus:border-indigo-400 transition-colors"
+          className="field text-lg font-semibold"
         />
       </div>
 
       <div className="text-xs text-gray-500 flex justify-between">
         <span>💡 3단계 구성으로 스토리를 완성해 보세요! (V1 핵심 기술)</span>
-        <span className="font-semibold text-indigo-600">총 {totalWords}단어</span>
+        <span className="font-semibold text-violet-600">총 {totalWords}단어</span>
       </div>
 
       {/* Three sections */}
       {SECTIONS.map((sec, i) => (
-        <div key={sec.title} className={`rounded-2xl border-2 ${sec.borderColor} ${sec.bgColor} p-5 space-y-3`}>
+        <div key={sec.title} className={`rounded-[1.25rem] border ${sec.borderColor} ${sec.bgColor} p-5 space-y-3 shadow-sm`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-2xl">{sec.emoji}</span>
@@ -170,7 +170,7 @@ export default function StoryWriter() {
             value={sections[i].text}
             onChange={e => updateSection(i, e.target.value)}
             placeholder={`Write the ${sec.title.toLowerCase()} of your story here...`}
-            className="w-full h-32 border-2 border-white bg-white rounded-xl px-4 py-3 text-base focus:outline-none focus:border-indigo-300 transition-colors resize-none leading-relaxed"
+            className="field h-32 resize-none leading-relaxed"
           />
 
           {/* Sentence starters */}
@@ -202,13 +202,13 @@ export default function StoryWriter() {
       <div className="flex gap-3 justify-end">
         <button
           onClick={handleClear}
-          className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all"
+          className="btn-soft"
         >
           🗑 초기화
         </button>
         <button
           onClick={handleCopyAll}
-          className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all active:scale-95"
+          className="btn-primary active:scale-95"
         >
           📋 전체 복사
         </button>
