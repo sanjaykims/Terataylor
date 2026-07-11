@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import LessonScheduleWidget from './components/LessonScheduleWidget';
+import CoralineHero from './components/CoralineHero';
 import BookReader from './components/BookReader';
 
 // Non-default-view components — loaded on demand to keep the initial bundle lean.
@@ -289,20 +290,23 @@ export default function App() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white/75 backdrop-blur-md shadow-sm border-b border-white/60 sticky top-0 z-20">
+      <header className="glass-night shadow-sm sticky top-0 z-20 border-b border-violet-300/15">
         <div className={`${containerW} mx-auto px-4 py-3 flex items-center justify-between transition-all`}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-xl shadow-md shadow-blue-500/30 bg-gradient-to-br from-blue-500 to-indigo-600">T</div>
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-xl shadow-lg shadow-fuchsia-500/40 bg-gradient-to-br from-violet-500 via-fuchsia-500 to-indigo-600 ring-1 ring-white/25">T</div>
             <div>
-              <div className="font-display font-extrabold text-gray-900 leading-tight text-lg tracking-tight">Taylor's English</div>
-              <div className="text-xs text-gray-400 font-medium">청담어학원 Tera 예습 도우미</div>
+              <div className="font-display font-extrabold text-white leading-tight text-lg tracking-tight">Taylor's English</div>
+              <div className="text-xs text-violet-200/70 font-medium">청담어학원 Tera 예습 도우미</div>
             </div>
           </div>
-          <span className="text-sm font-semibold text-gray-500 hidden sm:inline">안녕, Taylor! 👋</span>
+          <span className="text-sm font-semibold text-violet-100/80 hidden sm:inline">안녕, 태윤아! ✨</span>
         </div>
       </header>
 
       <div className={`${containerW} mx-auto px-4 py-5 space-y-5 transition-all`}>
+
+        {/* ── CORALINE HERO (home showpiece) ────────────────────────────── */}
+        {mainTab === 'v1' && v1Book === 'coraline' && <CoralineHero />}
 
         {/* ── MAIN TABS ─────────────────────────────────────────────────── */}
         <div className="grid grid-cols-3 gap-3">
@@ -346,10 +350,10 @@ export default function App() {
               onTouchStart={t.preload}
               className={`py-4 rounded-2xl font-bold text-base transition-all duration-200 flex flex-col items-center gap-1 border ${
                 mainTab === t.id
-                  ? `${t.active} text-white shadow-lg -translate-y-0.5 border-transparent`
-                  : 'bg-white/80 text-gray-500 hover:bg-white hover:-translate-y-0.5 hover:shadow-md shadow-sm border-white/70'
+                  ? `${t.active} text-white shadow-xl -translate-y-0.5 border-white/25`
+                  : 'glass-night text-violet-100/80 hover:-translate-y-0.5 hover:text-white hover:border-violet-300/40'
               }`}>
-              <span className="text-2xl drop-shadow-sm">{t.icon}</span>
+              <span className="text-2xl drop-shadow-[0_2px_6px_rgba(0,0,0,.4)]">{t.icon}</span>
               <span className="text-sm">{t.label}</span>
               <span className={`text-xs font-normal ${mainTab === t.id ? t.dim : 'text-gray-400'}`}>{t.sub}</span>
             </button>
@@ -367,16 +371,18 @@ export default function App() {
               const active = v1Book === bid;
               return (
                 <button key={bid} onClick={() => setV1Book(bid)}
-                  className={`rounded-2xl p-4 text-left transition-all border-2 ${
-                    active ? `${b.bg} ${b.border} shadow-md` : 'bg-white border-gray-100 hover:border-gray-200 shadow-sm'
+                  className={`glass-night rounded-2xl p-4 text-left transition-all duration-200 ${
+                    active
+                      ? `ring-2 -translate-y-0.5 ${bid === 'edward' ? 'ring-blue-400/70 shadow-lg shadow-blue-500/25' : 'ring-fuchsia-400/70 shadow-lg shadow-fuchsia-500/25'}`
+                      : 'opacity-80 hover:opacity-100 hover:-translate-y-0.5'
                   }`}>
-                  <div className="text-2xl mb-1">{b.emoji}</div>
-                  <div className={`font-bold text-sm leading-tight ${active ? b.color : 'text-gray-700'}`}>{b.shortTitle}</div>
-                  <div className="text-xs text-gray-400 mt-0.5">{b.author}</div>
+                  <div className="text-2xl mb-1 drop-shadow-[0_2px_6px_rgba(0,0,0,.5)]">{b.emoji}</div>
+                  <div className={`font-bold text-sm leading-tight ${active ? 'text-white' : 'text-violet-100/80'}`}>{b.shortTitle}</div>
+                  <div className="text-xs text-violet-200/55 mt-0.5">{b.author}</div>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {b.themes.slice(0, 2).map(th => (
                       <span key={th} className={`text-xs px-1.5 py-0.5 rounded-md font-semibold ${
-                        active ? `${b.badge} text-white` : 'bg-gray-100 text-gray-500'
+                        active ? `${b.badge} text-white` : 'bg-white/10 text-violet-100/70'
                       }`}>{th}</span>
                     ))}
                   </div>

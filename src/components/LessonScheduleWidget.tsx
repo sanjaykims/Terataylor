@@ -10,6 +10,9 @@ function fmtDate(s: string) {
   return `${Number(m)}/${Number(d)} (수)`;
 }
 
+// Light accents that read well on the dark "Other World" background.
+const lessonText: Record<string, string> = { edward: 'text-sky-300', coraline: 'text-fuchsia-300' };
+
 export default function LessonScheduleWidget() {
   const today = kstToday();
 
@@ -35,61 +38,61 @@ export default function LessonScheduleWidget() {
   const bk = BOOKS[currentBook];
 
   return (
-    <div className={`rounded-2xl shadow-sm border-2 ${bk.border} ${bk.bg} p-4 space-y-3`}>
+    <div className="glass-night rounded-2xl p-4 space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className={`font-bold text-sm ${bk.color} flex items-center gap-1.5`}>
+        <div className="font-bold text-sm text-violet-100 flex items-center gap-1.5">
           📅 V1 Tera 수업 일정
-          <span className="text-xs font-normal text-gray-400">여름학기 2026</span>
+          <span className="text-xs font-normal text-violet-200/50">여름학기 2026</span>
         </div>
-        <span className="text-xs text-gray-400">총 12회 수업</span>
+        <span className="text-xs text-violet-200/50">총 12회 수업</span>
       </div>
 
       {termEnded ? (
-        <div className="text-center py-3 font-bold text-emerald-600 text-lg">
+        <div className="text-center py-3 font-bold text-emerald-300 text-lg">
           🎉 여름학기 수업 완료!
         </div>
       ) : isHolidayToday ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm font-semibold text-amber-700">
+        <div className="bg-amber-400/10 border border-amber-300/25 rounded-xl px-4 py-3 text-sm font-semibold text-amber-200">
           🏖️ {HOLIDAY.note}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
           {/* Current lesson */}
           {current && (
-            <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
-              <div className="text-xs text-gray-400 font-semibold mb-1">
+            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+              <div className="text-xs text-violet-200/60 font-semibold mb-1">
                 {isToday(current.date) ? '🟢 오늘 수업' : '✅ 지난 수업'}
               </div>
-              <div className={`font-bold text-sm ${bk.color}`}>Lesson {String(current.lesson).padStart(2,'0')}</div>
-              <div className="text-xs text-gray-600 mt-0.5">{BOOKS[current.book].shortTitle}</div>
-              <div className="text-xs font-semibold text-gray-700 mt-1">{current.pages}</div>
-              <div className="text-xs text-gray-400 mt-0.5">{fmtDate(current.date)}</div>
+              <div className={`font-bold text-sm ${lessonText[current.book]}`}>Lesson {String(current.lesson).padStart(2,'0')}</div>
+              <div className="text-xs text-violet-100/70 mt-0.5">{BOOKS[current.book].shortTitle}</div>
+              <div className="text-xs font-semibold text-violet-50 mt-1">{current.pages}</div>
+              <div className="text-xs text-violet-200/50 mt-0.5">{fmtDate(current.date)}</div>
             </div>
           )}
 
           {/* Next lesson */}
           {next && (
-            <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
               <div className="flex items-center justify-between mb-1">
-                <div className="text-xs text-gray-400 font-semibold">📌 다음 수업</div>
+                <div className="text-xs text-violet-200/60 font-semibold">📌 다음 수업</div>
                 {dTag && (
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full text-white ${
                     daysUntil === 0 ? 'bg-red-500' : daysUntil! <= 3 ? 'bg-orange-500' : 'bg-gray-400'
                   }`}>{dTag}</span>
                 )}
               </div>
-              <div className={`font-bold text-sm ${BOOKS[next.book].color}`}>Lesson {String(next.lesson).padStart(2,'0')}</div>
-              <div className="text-xs text-gray-600 mt-0.5">{BOOKS[next.book].shortTitle}</div>
-              <div className="text-xs font-semibold text-gray-700 mt-1">{next.pages}</div>
-              <div className="text-xs text-gray-400 mt-0.5">{fmtDate(next.date)}</div>
+              <div className={`font-bold text-sm ${lessonText[next.book]}`}>Lesson {String(next.lesson).padStart(2,'0')}</div>
+              <div className="text-xs text-violet-100/70 mt-0.5">{BOOKS[next.book].shortTitle}</div>
+              <div className="text-xs font-semibold text-violet-50 mt-1">{next.pages}</div>
+              <div className="text-xs text-violet-200/50 mt-0.5">{fmtDate(next.date)}</div>
             </div>
           )}
 
           {!current && next && (
-            <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
-              <div className="text-xs text-gray-400 font-semibold mb-1">📖 첫 수업</div>
-              <div className="text-xs text-gray-600">June 3 — 준비하세요!</div>
+            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+              <div className="text-xs text-violet-200/60 font-semibold mb-1">📖 첫 수업</div>
+              <div className="text-xs text-violet-100/70">June 3 — 준비하세요!</div>
             </div>
           )}
         </div>
@@ -97,22 +100,22 @@ export default function LessonScheduleWidget() {
 
       {/* Homework */}
       {current && !isToday(current.date) && (
-        <div className="bg-white rounded-xl px-3 py-2 flex items-start gap-2">
+        <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 flex items-start gap-2">
           <span className="text-base shrink-0">📝</span>
           <div>
-            <div className="text-xs font-bold text-gray-600">이번 주 숙제</div>
-            <div className="text-xs text-gray-700 mt-0.5">{current.homework}</div>
+            <div className="text-xs font-bold text-violet-200/70">이번 주 숙제</div>
+            <div className="text-sm text-violet-50 mt-0.5">{current.homework}</div>
           </div>
         </div>
       )}
 
       {/* Progress bar */}
       <div>
-        <div className="flex justify-between text-xs text-gray-400 mb-1">
+        <div className="flex justify-between text-xs text-violet-200/60 mb-1">
           <span>학기 진도</span>
           <span className="font-semibold">{done} / {total} 완료 ({pct}%)</span>
         </div>
-        <div className="w-full bg-white rounded-full h-2.5 border border-gray-200 overflow-hidden">
+        <div className="w-full bg-white/10 rounded-full h-2.5 border border-white/10 overflow-hidden">
           <div className={`h-full rounded-full transition-all duration-700 ${bk.badge}`}
             style={{ width: `${pct}%` }} />
         </div>
@@ -124,8 +127,8 @@ export default function LessonScheduleWidget() {
               <div key={l.lesson} title={`Lesson ${l.lesson} (${l.book === 'edward' ? 'ET' : 'CL'})`}
                 className={`flex-1 h-1.5 rounded-full transition-all ${
                   isCur ? bk.badge + ' opacity-100' :
-                  past ? (l.book === 'edward' ? 'bg-blue-400' : 'bg-purple-400') :
-                  'bg-gray-200'
+                  past ? (l.book === 'edward' ? 'bg-sky-400' : 'bg-fuchsia-400') :
+                  'bg-white/12'
                 }`} />
             );
           })}
