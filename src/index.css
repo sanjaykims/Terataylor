@@ -265,9 +265,16 @@ button:not(:disabled):active,
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  /* On narrow screens, more tabs than fit scroll horizontally instead of
+     squeezing labels into unreadable, overlapping slivers. */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 .seg-btn {
-  flex: 1 1 0; min-width: 0; padding: .55rem .6rem; border-radius: .72rem;
+  /* Grow to share the row evenly when everything fits; never shrink past
+     readable content width — the row scrolls instead of crushing text. */
+  flex: 1 1 auto; min-width: max-content; padding: .55rem .75rem; border-radius: .72rem;
   font-weight: 700; font-size: .8125rem; line-height: 1.1;
   color: rgba(221,214,254,.72); white-space: nowrap;
   transition: color .18s ease, background .22s var(--ease-out-quint), box-shadow .22s var(--ease-out-quint);

@@ -3,6 +3,7 @@ import LessonScheduleWidget from './components/LessonScheduleWidget';
 import CoralineHero from './components/CoralineHero';
 import CoralineWorld from './components/CoralineWorld';
 import { getStreak } from './lib/streak';
+import { decideWorldMode, markWorldSeen } from './lib/worldVisit';
 import BookReader from './components/BookReader';
 
 // Non-default-view components — loaded on demand to keep the initial bundle lean.
@@ -82,13 +83,14 @@ async function migrateFromLocalStorage(): Promise<void> {
 
 export default function App() {
   const [appReady,  setAppReady]  = useState(false);
-  // Cinematic Coraline intro — shown once per browser session, revisitable from
-  // the header. Kept out of appReady so it can play over the loading splash too.
-  const [showWorld, setShowWorld] = useState(() => {
-    try { return sessionStorage.getItem('taylor_world_seen') !== '1'; } catch { return true; }
-  });
+  // Cinematic Coraline intro. The full five-scene journey only plays once,
+  // ever — after that, opening the app on a new day gets a short "welcome
+  // back" beat, and any later open the same day skips straight to studying.
+  // Always re-watchable in full from the header's 🌙 다른 세계 button. Kept
+  // out of appReady so it can play over the loading splash too.
+  const [worldMode, setWorldMode] = useState(decideWorldMode);
   const [streak, setStreak] = useState(getStreak);
-  const enterApp = () => { try { sessionStorage.setItem('taylor_world_seen', '1'); } catch { /* ignore */ } setStreak(getStreak()); setShowWorld(false); };
+  const enterApp = () => { markWorldSeen(); setStreak(getStreak()); setWorldMode(null); };
   const [mainTab,   setMainTab]   = useState<MainTab>('v1');
   const [a2Tab,     setA2Tab]     = useState<A2Tab>('shadowing');
   const [v1Tab,     setV1Tab]     = useState<V1Tab>('reading');
@@ -283,19 +285,20 @@ export default function App() {
   const containerW = 'max-w-[1600px]';
 
   // ── Cinematic Coraline intro (plays while data loads behind it) ──────────
-  if (showWorld) {
-    return <CoralineWorld onEnter={enterApp} />;
+  if (worldMode) {
+    return <CoralineWorld mode={worldMode} onEnter={enterApp} />;
   }
 
-  // ── Loading screen ───────────────────────────────────────────────────────
+  // ── Loading screen (same "Other World" night sky Taylor just stepped into,
+  // so a same-day reopen never flashes back to a stale light-mode screen) ───
   if (!appReady) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-3xl mx-auto animate-pulse">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-3xl mx-auto animate-pulse bg-gradient-to-br from-violet-500 via-fuchsia-500 to-indigo-600 shadow-lg shadow-fuchsia-500/40 ring-1 ring-white/25">
             T
           </div>
-          <div className="text-sm text-gray-500">데이터 불러오는 중...</div>
+          <div className="text-sm text-violet-200/70">데이터 불러오는 중...</div>
         </div>
       </div>
     );
@@ -305,30 +308,30 @@ export default function App() {
     <div className="min-h-screen">
       {/* Header */}
       <header className="glass-night shadow-sm sticky top-0 z-20 border-b border-violet-300/15">
-        <div className={`${containerW} mx-auto px-4 py-3 flex items-center justify-between transition-all`}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-xl shadow-lg shadow-fuchsia-500/40 bg-gradient-to-br from-violet-500 via-fuchsia-500 to-indigo-600 ring-1 ring-white/25">T</div>
-            <div>
-              <div className="font-display font-extrabold text-white leading-tight text-lg tracking-tight">Taylor's English</div>
-              <div className="text-xs text-violet-200/70 font-medium">청담어학원 Tera 예습 도우미</div>
+        <div className={`${containerW} mx-auto px-4 py-3 flex items-center justify-between gap-2 transition-all`}>
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="w-10 h-10 shrink-0 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-xl shadow-lg shadow-fuchsia-500/40 bg-gradient-to-br from-violet-500 via-fuchsia-500 to-indigo-600 ring-1 ring-white/25">T</div>
+            <div className="min-w-0">
+              <div className="font-display font-extrabold text-white leading-tight text-lg tracking-tight truncate">Taylor's English</div>
+              <div className="text-xs text-violet-200/70 font-medium truncate hidden sm:block">청담어학원 Tera 예습 도우미</div>
             </div>
           </div>
-          <div className="flex items-center gap-2.5">
-            <span className="text-sm font-semibold text-violet-100/80 hidden sm:inline">안녕, 태윤아! ✨</span>
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+            <span className="text-sm font-semibold text-violet-100/80 hidden md:inline">안녕, 태윤아! ✨</span>
             {streak.count >= 1 && (
               <span
                 title={`${streak.count}일 연속 공부 중`}
-                className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-2.5 py-1.5 text-xs font-extrabold text-amber-200 ring-1 ring-amber-300/30"
+                className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-amber-400/15 px-2.5 py-1.5 text-xs font-extrabold text-amber-200 ring-1 ring-amber-300/30"
               >
                 🔥 {streak.count}
               </span>
             )}
             <button
-              onClick={() => setShowWorld(true)}
+              onClick={() => setWorldMode('full')}
               title="다른 세계 다시 보기"
-              className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold text-violet-100 ring-1 ring-white/15 hover:bg-white/15 hover:text-white"
+              className="shrink-0 whitespace-nowrap rounded-full bg-white/10 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-violet-100 ring-1 ring-white/15 hover:bg-white/15 hover:text-white"
             >
-              🌙 다른 세계
+              🌙 <span className="hidden sm:inline">다른 세계</span>
             </button>
           </div>
         </div>
