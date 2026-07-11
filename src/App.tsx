@@ -287,18 +287,18 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-10">
+      <header className="bg-white/75 backdrop-blur-md shadow-sm border-b border-white/60 sticky top-0 z-20">
         <div className={`${containerW} mx-auto px-4 py-3 flex items-center justify-between transition-all`}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">T</div>
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-xl shadow-md shadow-blue-500/30 bg-gradient-to-br from-blue-500 to-indigo-600">T</div>
             <div>
-              <div className="font-bold text-gray-900 leading-tight">Taylor's English</div>
-              <div className="text-xs text-gray-400">청담어학원 Tera 예습 도우미</div>
+              <div className="font-display font-extrabold text-gray-900 leading-tight text-lg tracking-tight">Taylor's English</div>
+              <div className="text-xs text-gray-400 font-medium">청담어학원 Tera 예습 도우미</div>
             </div>
           </div>
-          <span className="text-sm text-gray-500 hidden sm:inline">안녕, Taylor! 👋</span>
+          <span className="text-sm font-semibold text-gray-500 hidden sm:inline">안녕, Taylor! 👋</span>
         </div>
       </header>
 
@@ -309,7 +309,7 @@ export default function App() {
           {([
             {
               id: 'a2', icon: '🎧', label: 'A2 읽기/듣기', sub: '섀도잉 · 쓰기',
-              active: 'bg-indigo-600 shadow-indigo-200', dim: 'text-indigo-200',
+              active: 'bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-indigo-300/60', dim: 'text-indigo-100',
               preload: () => {
                 import('./components/ShadowingPlayer');
                 import('./components/VocabularyPanel');
@@ -321,7 +321,7 @@ export default function App() {
             },
             {
               id: 'v1', icon: '📖', label: 'V1 소설', sub: '원서읽기 · 단어장',
-              active: 'bg-purple-600 shadow-purple-200', dim: 'text-purple-200',
+              active: 'bg-gradient-to-br from-purple-500 to-purple-600 shadow-purple-300/60', dim: 'text-purple-100',
               preload: () => {
                 import('./components/VocabularyPanel');
                 import('./components/GamesPanel');
@@ -330,7 +330,7 @@ export default function App() {
             },
             {
               id: 'progress', icon: '📊', label: '성장 기록', sub: '단어 · 점수',
-              active: 'bg-emerald-600 shadow-emerald-200', dim: 'text-emerald-200',
+              active: 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-300/60', dim: 'text-emerald-100',
               preload: () => { import('./components/ProgressDashboard'); },
             },
           ] as { id: MainTab; icon: string; label: string; sub: string; active: string; dim: string; preload: () => void }[]).map(t => (
@@ -344,10 +344,12 @@ export default function App() {
               }}
               onMouseEnter={t.preload}
               onTouchStart={t.preload}
-              className={`py-4 rounded-2xl font-bold text-base transition-all flex flex-col items-center gap-1 ${
-                mainTab === t.id ? `${t.active} text-white shadow-lg` : 'bg-white text-gray-500 hover:bg-gray-50 shadow-sm'
+              className={`py-4 rounded-2xl font-bold text-base transition-all duration-200 flex flex-col items-center gap-1 border ${
+                mainTab === t.id
+                  ? `${t.active} text-white shadow-lg -translate-y-0.5 border-transparent`
+                  : 'bg-white/80 text-gray-500 hover:bg-white hover:-translate-y-0.5 hover:shadow-md shadow-sm border-white/70'
               }`}>
-              <span className="text-2xl">{t.icon}</span>
+              <span className="text-2xl drop-shadow-sm">{t.icon}</span>
               <span className="text-sm">{t.label}</span>
               <span className={`text-xs font-normal ${mainTab === t.id ? t.dim : 'text-gray-400'}`}>{t.sub}</span>
             </button>
