@@ -386,7 +386,7 @@ export default function App() {
               }`}>
               <span className="text-2xl drop-shadow-[0_2px_6px_rgba(0,0,0,.4)]">{t.icon}</span>
               <span className="text-sm">{t.label}</span>
-              <span className={`text-xs font-normal ${mainTab === t.id ? t.dim : 'text-gray-400'}`}>{t.sub}</span>
+              <span className={`text-xs font-normal ${mainTab === t.id ? t.dim : 'text-violet-200/50'}`}>{t.sub}</span>
             </button>
           ))}
         </div>
@@ -425,14 +425,14 @@ export default function App() {
 
         {/* ── A2 INPUT PANEL ────────────────────────────────────────────── */}
         {mainTab === 'a2' && a2Tab !== 'opinion' && a2Tab !== 'reading' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="surface overflow-hidden">
             <button onClick={() => setShowA2Input(!showA2Input)}
-              className="w-full px-5 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-              <span className="font-semibold text-gray-700 flex items-center gap-2">
+              className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-violet-50/60 transition-colors">
+              <span className="font-bold text-gray-800 flex items-center gap-2">
                 📸 교재 입력
                 <span className="text-xs font-normal text-gray-400">지문 · 단어 · 오디오</span>
               </span>
-              <span className="text-gray-400 text-sm">{showA2Input ? '▲ 접기' : '▼ 펼치기'}</span>
+              <span className="text-violet-400 text-sm font-semibold">{showA2Input ? '▲ 접기' : '▼ 펼치기'}</span>
             </button>
             {showA2Input && (
               <div className="px-5 pb-5 space-y-4">
@@ -452,7 +452,7 @@ export default function App() {
         {/* ── A2 CONTENT ────────────────────────────────────────────────── */}
         {mainTab === 'a2' && (
           <>
-            <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
+            <div className="seg">
               {([
                 { id: 'reading',    label: '📄 지문 보기' },
                 { id: 'shadowing',  label: '🎧 섀도잉' },
@@ -461,9 +461,7 @@ export default function App() {
                 { id: 'games',      label: '🎮 게임' },
               ] as { id: A2Tab; label: string }[]).map(t => (
                 <button key={t.id} onClick={() => { if (t.id !== a2Tab) { sessionSwitch('a2', t.id); setA2Tab(t.id); } }}
-                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                    a2Tab === t.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
-                  }`}>{t.label}</button>
+                  className={`seg-btn ${a2Tab === t.id ? 'seg-btn-active' : ''}`}>{t.label}</button>
               ))}
             </div>
             {a2Tab === 'reading'    && <Suspense fallback={<TabSpinner />}><A2PhotoViewer /></Suspense>}
@@ -486,16 +484,14 @@ export default function App() {
         {/* ── V1 CONTENT ────────────────────────────────────────────────── */}
         {mainTab === 'v1' && (
           <>
-            <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1 gap-1">
+            <div className="seg">
               {([
                 { id: 'reading',    label: '📖 원서 읽기' },
                 { id: 'vocabulary', label: '📚 단어장' },
                 { id: 'games',      label: '🎮 게임' },
               ] as { id: V1Tab; label: string }[]).map(t => (
                 <button key={t.id} onClick={() => { if (t.id !== v1Tab) { sessionSwitch('v1', t.id); setV1Tab(t.id); } }}
-                  className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
-                    v1Tab === t.id ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
-                  }`}>{t.label}</button>
+                  className={`seg-btn ${v1Tab === t.id ? 'seg-btn-active' : ''}`}>{t.label}</button>
               ))}
             </div>
             {v1Tab === 'reading' && <BookReader key={v1Book} bookId={v1Book} onLessonVocabLoad={handleV1VocabLoad} />}
@@ -510,20 +506,18 @@ export default function App() {
               return (
                 <>
                   {/* Chapter selector — two rows of 3 */}
-                  <div className="grid grid-cols-3 gap-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-1">
+                  <div className="seg grid grid-cols-3">
                     {([1, 2, 3, 4, 5, 6] as const).map(ch => (
                       <button key={ch}
                         onClick={() => { setV1VocabCh(ch); setV1StudiedWords([]); }}
-                        className={`py-2.5 rounded-xl text-sm font-bold transition-all ${
-                          v1VocabCh === ch ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
-                        }`}>
+                        className={`seg-btn ${v1VocabCh === ch ? 'seg-btn-active' : ''}`}>
                         {chLabel(ch)}
                       </button>
                     ))}
                   </div>
                   {/* Per-chapter vocab photo upload + panel */}
                   <Suspense fallback={<TabSpinner />}>
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                    <div className="surface p-4">
                       <ImageUploadInput
                         key={`vocab-upload-${v1Book}-ch${v1VocabCh}`}
                         mode="vocab"
