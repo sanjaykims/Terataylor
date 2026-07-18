@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { csGet, csSet, csDel } from '../lib/cloudStorage';
+import Icon from './Icon';
 
 const STORAGE_KEY = 'a2_photos';
 
@@ -79,7 +80,7 @@ export default function A2PhotoViewer() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="text-xs text-gray-400 animate-pulse">불러오는 중...</div>
+        <div className="text-xs text-muted animate-pulse">불러오는 중...</div>
       </div>
     );
   }
@@ -89,7 +90,7 @@ export default function A2PhotoViewer() {
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <span className="text-sm font-bold text-violet-700">
-          📄 지문 사진 {images.length > 0 && `(${images.length}장)`}
+          지문 사진 {images.length > 0 && `(${images.length}장)`}
         </span>
         <div className="flex items-center gap-2">
           {images.length > 0 && (
@@ -99,19 +100,19 @@ export default function A2PhotoViewer() {
                 <button onClick={handleClear}
                   className="text-xs text-red-500 font-semibold hover:text-red-700">삭제</button>
                 <button onClick={() => setConfirmClear(false)}
-                  className="text-xs text-gray-400 hover:text-gray-600">취소</button>
+                  className="text-xs text-muted hover:text-gray-600">취소</button>
               </div>
             ) : (
               <button onClick={() => setConfirmClear(true)}
-                className="text-xs text-gray-400 hover:text-red-500 transition-colors">
-                🗑 전체 삭제
+                className="text-xs text-muted hover:text-red-500 transition-colors inline-flex items-center gap-1">
+                <Icon name="trash" className="h-3.5 w-3.5" /> 전체 삭제
               </button>
             )
           )}
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="btn-primary px-3 py-1.5 text-xs disabled:opacity-50"
+            className="btn-primary px-3 py-1.5 text-xs"
           >
             {uploading ? '⏳ 저장 중…' : '+ 사진 추가'}
           </button>
@@ -123,12 +124,15 @@ export default function A2PhotoViewer() {
       {/* Empty state */}
       {images.length === 0 ? (
         <div
+          role="button" tabIndex={0}
+          aria-label="교재 사진 업로드"
           onClick={() => fileRef.current?.click()}
-          className="border-2 border-dashed border-violet-200 bg-violet-50/60 rounded-2xl p-10 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50 transition-all"
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileRef.current?.click(); } }}
+          className="border-2 border-dashed border-violet-200 bg-violet-50/60 rounded-2xl p-10 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50 transition-[border-color,background-color]"
         >
-          <div className="text-4xl mb-3">📸</div>
+          <Icon name="camera" className="h-10 w-10 mx-auto mb-3 text-violet-400" />
           <div className="text-sm font-bold text-violet-700">교재 사진 업로드</div>
-          <div className="text-xs text-gray-400 mt-1.5">여러 장 동시에 선택 가능</div>
+          <div className="text-xs text-muted mt-1.5">여러 장 동시에 선택 가능</div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -153,7 +157,7 @@ export default function A2PhotoViewer() {
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="w-full py-3 border-2 border-dashed border-violet-200 rounded-2xl text-xs font-semibold text-violet-600 hover:border-violet-400 hover:bg-violet-50 disabled:opacity-50 transition-all"
+            className="w-full py-3 border-2 border-dashed border-violet-200 rounded-2xl text-xs font-semibold text-violet-600 hover:border-violet-400 hover:bg-violet-50 disabled:opacity-60 disabled:cursor-not-allowed transition-[border-color,background-color]"
           >
             {uploading ? '⏳ 저장 중…' : '+ 사진 더 추가하기'}
           </button>

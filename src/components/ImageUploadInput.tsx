@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import type { VocabItem } from '../lib/types';
+import Icon from './Icon';
 
 interface BaseProps {
   label: string;
@@ -106,9 +107,9 @@ export default function ImageUploadInput(props: Props) {
         </div>
         <button
           onClick={onClear}
-          className="text-xs text-gray-400 hover:text-red-500 transition-colors ml-3 shrink-0"
+          className="text-xs text-muted hover:text-red-500 transition-colors ml-3 shrink-0 inline-flex items-center gap-1"
           title="삭제 후 다시 업로드">
-          🗑 삭제
+          <Icon name="trash" className="h-3.5 w-3.5" /> 삭제
         </button>
       </div>
     );
@@ -122,18 +123,21 @@ export default function ImageUploadInput(props: Props) {
           <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">✓ 완료</span>
         )}
       </div>
-      {hint && <p className="text-xs text-gray-400">{hint}</p>}
+      {hint && <p className="text-xs text-muted">{hint}</p>}
 
-      {/* Drop zone */}
+      {/* Drop zone — a real keyboard-operable control (role=button + Enter/Space) */}
       <div
+        role="button" tabIndex={0}
+        aria-label={`${label} 업로드`}
         onClick={() => fileRef.current?.click()}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileRef.current?.click(); } }}
         onDragOver={e => e.preventDefault()}
         onDrop={e => { e.preventDefault(); addFiles(e.dataTransfer.files); }}
-        className="border-2 border-dashed border-violet-200 rounded-xl p-5 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50/60 transition-all select-none"
+        className="border-2 border-dashed border-violet-200 rounded-xl p-5 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50/60 transition-[border-color,background-color] select-none"
       >
-        <div className="text-3xl mb-1">📷</div>
+        <Icon name={mode === 'text' ? 'document' : 'camera'} className="h-8 w-8 mx-auto mb-1.5 text-violet-400" />
         <div className="text-sm text-gray-500 font-medium">클릭하거나 사진을 드래그</div>
-        <div className="text-xs text-gray-400 mt-0.5">여러 장 선택 가능</div>
+        <div className="text-xs text-muted mt-0.5">여러 장 선택 가능</div>
         <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
           onChange={e => addFiles(e.target.files)} />
       </div>
@@ -151,7 +155,7 @@ export default function ImageUploadInput(props: Props) {
             </div>
           ))}
           <button onClick={() => fileRef.current?.click()}
-            className="w-20 h-20 border-2 border-dashed border-violet-200 rounded-xl flex items-center justify-center text-violet-300 hover:border-violet-400 hover:text-violet-500 transition-all text-2xl">
+            className="w-20 h-20 border-2 border-dashed border-violet-200 rounded-xl flex items-center justify-center text-violet-300 hover:border-violet-400 hover:text-violet-500 text-2xl">
             +
           </button>
         </div>
@@ -163,7 +167,7 @@ export default function ImageUploadInput(props: Props) {
           className="btn-primary w-full py-2.5 disabled:opacity-60 flex items-center justify-center gap-2">
           {status === 'extracting'
             ? <><span className="inline-block animate-spin">⟳</span> AI가 분석 중...</>
-            : mode === 'text' ? '📝 텍스트 추출하기' : '📚 단어 추출하기'}
+            : mode === 'text' ? '텍스트 추출하기' : '단어 추출하기'}
         </button>
       )}
 
@@ -176,7 +180,7 @@ export default function ImageUploadInput(props: Props) {
           <textarea value={rawText} onChange={e => setRawText(e.target.value)}
             className="field w-full h-44 resize-none leading-relaxed" />
           <button onClick={confirm}
-            className="w-full py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all">
+            className="w-full py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700">
             ✓ 이 텍스트로 사용하기
           </button>
         </div>
@@ -188,27 +192,28 @@ export default function ImageUploadInput(props: Props) {
           <p className="text-xs text-gray-500 font-semibold">추출된 단어 {vocabRows.length}개 확인 및 수정:</p>
           <div className="max-h-60 overflow-y-auto space-y-1.5 surface-soft p-2">
             <div className="grid grid-cols-[6rem_1fr_1fr_1.5rem] gap-1 px-1 pb-1">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">단어</span>
-              <span className="text-[10px] font-bold text-violet-500 uppercase tracking-wide">🇰🇷 한국어</span>
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">🇺🇸 English</span>
+              <span className="text-[10px] font-bold text-muted uppercase tracking-wide">단어</span>
+              <span className="text-[10px] font-bold text-violet-500 uppercase tracking-wide flex items-center gap-1"><span className="lang-tag">KO</span> 한국어</span>
+              <span className="text-[10px] font-bold text-muted uppercase tracking-wide flex items-center gap-1"><span className="lang-tag">EN</span> English</span>
               <span />
             </div>
             {vocabRows.map((item, i) => (
               <div key={i} className="grid grid-cols-[6rem_1fr_1fr_1.5rem] gap-1 items-center">
                 <input value={item.word}
                   onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, word: e.target.value } : v))}
-                  className="px-2 py-1 rounded-lg border border-gray-200 text-sm font-semibold bg-white text-gray-800"
+                  className="field text-sm font-semibold px-2 py-1"
                   placeholder="단어" />
                 <input value={item.korean ?? ''}
                   onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, korean: e.target.value } : v))}
-                  className="px-2 py-1 rounded-lg border border-violet-200 text-sm bg-white text-gray-800"
+                  className="field text-sm px-2 py-1"
                   placeholder="한국어 뜻" />
                 <input value={item.definition}
                   onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, definition: e.target.value } : v))}
-                  className="px-2 py-1 rounded-lg border border-gray-200 text-sm bg-white text-gray-600"
+                  className="field text-sm px-2 py-1"
                   placeholder="English def" />
                 <button onClick={() => setVocabRows(prev => prev.filter((_, j) => j !== i))}
-                  className="text-gray-300 hover:text-red-400 transition-colors font-bold text-center">✕</button>
+                  aria-label="단어 삭제"
+                  className="text-gray-400 hover:text-red-500 transition-colors font-bold text-center">✕</button>
               </div>
             ))}
             <button
@@ -218,7 +223,7 @@ export default function ImageUploadInput(props: Props) {
             </button>
           </div>
           <button onClick={confirm}
-            className="w-full py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all">
+            className="w-full py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700">
             ✓ 이 단어 목록으로 사용하기 ({vocabRows.filter(v => v.word.trim()).length}개)
           </button>
         </div>

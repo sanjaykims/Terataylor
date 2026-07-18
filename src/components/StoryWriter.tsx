@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Icon from './Icon';
 
 interface StorySection {
   title: string;
@@ -144,13 +145,13 @@ export default function StoryWriter() {
         <div key={sec.title} className={`rounded-[1.25rem] border ${sec.borderColor} ${sec.bgColor} p-5 space-y-3 shadow-sm`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">{sec.emoji}</span>
+              <span className={`shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-extrabold ${sec.color} ${sec.borderColor}`}>{i + 1}</span>
               <div>
                 <div className={`font-bold text-lg ${sec.color}`}>{sec.title}</div>
                 <div className="text-xs text-gray-500">{sec.korTitle}</div>
               </div>
             </div>
-            <div className="text-right text-xs text-gray-400">
+            <div className="text-right text-xs text-muted">
               {sections[i].text.trim() ? sections[i].text.trim().split(/\s+/).length : 0} words
             </div>
           </div>
@@ -159,7 +160,7 @@ export default function StoryWriter() {
           <div className="flex flex-col gap-1">
             {sec.prompts.map((p, pi) => (
               <div key={pi} className="flex items-start gap-2 text-sm text-gray-600">
-                <span className="text-gray-400 mt-0.5">•</span>
+                <span className="text-muted mt-0.5">•</span>
                 <span>{p}</span>
               </div>
             ))}
@@ -187,7 +188,7 @@ export default function StoryWriter() {
                   <button
                     key={si}
                     onClick={() => insertStarter(i, starter)}
-                    className="text-sm bg-white hover:bg-white/80 border border-gray-200 px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900 transition-all hover:shadow-sm text-left"
+                    className="text-sm bg-white hover:bg-violet-50 border border-gray-200 px-3 py-1.5 rounded-lg text-gray-600 hover:text-violet-700 transition-[background-color,color] text-left"
                   >
                     "{starter}"
                   </button>
@@ -202,15 +203,15 @@ export default function StoryWriter() {
       <div className="flex gap-3 justify-end">
         <button
           onClick={handleClear}
-          className="btn-soft"
+          className="btn-soft inline-flex items-center gap-1.5"
         >
-          🗑 초기화
+          <Icon name="trash" className="h-4 w-4" /> 초기화
         </button>
         <button
           onClick={handleCopyAll}
-          className="btn-primary active:scale-95"
+          className="btn-primary inline-flex items-center gap-1.5"
         >
-          📋 전체 복사
+          <Icon name="copy" className="h-4 w-4" /> 전체 복사
         </button>
       </div>
     </div>

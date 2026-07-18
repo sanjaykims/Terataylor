@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Icon from './Icon';
 
 interface OpinionSection {
   id: string;
@@ -122,15 +123,15 @@ export default function OpinionWriter() {
         <span className="font-semibold text-violet-600">총 {totalWords}단어</span>
       </div>
 
-      {OPINION_SECTIONS.map(sec => (
+      {OPINION_SECTIONS.map((sec, i) => (
         <div key={sec.id} className="surface p-5 space-y-3">
           <div className="flex items-center gap-2">
-            <span className="text-xl">{sec.emoji}</span>
+            <span className="fill-accent shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">{i + 1}</span>
             <div>
               <div className="font-bold text-gray-800">{sec.title}</div>
               <div className="text-xs text-gray-500">{sec.korTitle}</div>
             </div>
-            <div className="ml-auto text-xs text-gray-400">
+            <div className="ml-auto text-xs text-muted">
               {sections[sec.id].text.trim() ? sections[sec.id].text.trim().split(/\s+/).length : 0} words
             </div>
           </div>
@@ -155,7 +156,7 @@ export default function OpinionWriter() {
                   <button
                     key={si}
                     onClick={() => insertStarter(sec.id, s)}
-                    className="text-sm bg-violet-50 hover:bg-violet-100 border border-violet-200 px-3 py-1.5 rounded-lg text-violet-700 transition-all"
+                    className="text-sm bg-violet-50 hover:bg-violet-100 border border-violet-200 px-3 py-1.5 rounded-lg text-violet-700"
                   >
                     "{s}"
                   </button>
@@ -167,11 +168,11 @@ export default function OpinionWriter() {
       ))}
 
       <div className="flex gap-3 justify-end">
-        <button onClick={handleClear} className="btn-soft">
-          🗑 초기화
+        <button onClick={handleClear} className="btn-soft inline-flex items-center gap-1.5">
+          <Icon name="trash" className="h-4 w-4" /> 초기화
         </button>
-        <button onClick={handleCopy} className="btn-primary active:scale-95">
-          📋 전체 복사
+        <button onClick={handleCopy} className="btn-primary inline-flex items-center gap-1.5">
+          <Icon name="copy" className="h-4 w-4" /> 전체 복사
         </button>
       </div>
     </div>

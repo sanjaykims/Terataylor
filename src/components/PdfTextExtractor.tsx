@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { SCHEDULE, BOOKS, type BookId } from '../data/syllabus';
+import Icon from './Icon';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -102,11 +103,11 @@ export default function PdfTextExtractor({ bookId, onExtracted, savedSummary, on
     return (
       <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
         <div>
-          <span className="text-sm font-semibold text-gray-700 mr-2">📄 소설 지문</span>
+          <span className="text-sm font-semibold text-gray-700 mr-2">소설 지문</span>
           <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">✓ {savedSummary}</span>
         </div>
-        <button onClick={onClear} className="text-xs text-gray-400 hover:text-red-500 transition-colors ml-3 shrink-0">
-          🗑 삭제
+        <button onClick={onClear} className="text-xs text-muted hover:text-red-500 transition-colors ml-3 shrink-0 inline-flex items-center gap-1">
+          <Icon name="trash" className="h-3.5 w-3.5" /> 삭제
         </button>
       </div>
     );
@@ -114,33 +115,37 @@ export default function PdfTextExtractor({ bookId, onExtracted, savedSummary, on
 
   return (
     <div className="space-y-3">
-      <div className="text-sm font-semibold text-gray-700">📄 소설 지문 (PDF)</div>
+      <div className="text-sm font-semibold text-gray-700">소설 지문 (PDF)</div>
 
       {/* File drop zone */}
       {!file ? (
-        <div onClick={() => fileRef.current?.click()}
+        <div role="button" tabIndex={0}
+          aria-label={`${bk.shortTitle} PDF 파일 업로드`}
+          onClick={() => fileRef.current?.click()}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileRef.current?.click(); } }}
           onDragOver={e => e.preventDefault()}
           onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-          className={`border-2 border-dashed ${bk.border} ${bk.bg} rounded-xl p-5 text-center cursor-pointer hover:opacity-80 transition-all`}>
-          <div className="text-3xl mb-1">{bk.emoji}</div>
+          className={`border-2 border-dashed ${bk.border} ${bk.bg} rounded-xl p-5 text-center cursor-pointer hover:opacity-80 transition-opacity`}>
+          <Icon name="document" className={`h-8 w-8 mx-auto mb-1.5 ${bk.color}`} />
           <div className={`text-sm font-semibold ${bk.color}`}>
             {bk.shortTitle} PDF 파일 업로드
           </div>
-          <div className="text-xs text-gray-400 mt-1">클릭하거나 드래그해서 파일 선택</div>
+          <div className="text-xs text-muted mt-1">클릭하거나 드래그해서 파일 선택</div>
           <input ref={fileRef} type="file" accept=".pdf,application/pdf" className="hidden"
             onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
         </div>
       ) : (
         <div className={`flex items-center gap-3 ${bk.bg} border ${bk.border} rounded-xl px-4 py-3`}>
-          <span className="text-2xl">📄</span>
+          <Icon name="document" className={`h-6 w-6 shrink-0 ${bk.color}`} />
           <div className="flex-1 min-w-0">
             <div className={`text-sm font-semibold ${bk.color} truncate`}>{file.name}</div>
-            <div className="text-xs text-gray-400">
+            <div className="text-xs text-muted">
               {(file.size / 1024 / 1024).toFixed(1)}MB{totalPages ? ` · 총 ${totalPages}페이지` : ''}
             </div>
           </div>
           <button onClick={() => { setFile(null); setStatus('idle'); setTotal(null); }}
-            className="text-xs text-gray-400 hover:text-red-500 transition-colors shrink-0">✕</button>
+            aria-label="파일 제거"
+            className="text-xs text-muted hover:text-red-500 transition-colors shrink-0">✕</button>
         </div>
       )}
 
@@ -150,20 +155,20 @@ export default function PdfTextExtractor({ bookId, onExtracted, savedSummary, on
           {/* Quick-fill buttons from syllabus */}
           {(currentLesson || nextLesson) && (
             <div className="space-y-1">
-              <div className="text-xs text-gray-400 font-semibold">빠른 선택:</div>
+              <div className="text-xs text-muted font-semibold">빠른 선택:</div>
               <div className="flex flex-wrap gap-2">
                 {currentLesson && (
                   <button onClick={() => quickFill(currentLesson.pages)}
-                    className={`text-xs px-3 py-1.5 rounded-lg font-semibold border ${bk.border} ${bk.bg} ${bk.color} hover:opacity-80 transition-all`}>
-                    ✅ Lesson {String(currentLesson.lesson).padStart(2,'0')} · {currentLesson.pages}
-                    <span className="text-gray-400 font-normal ml-1">{fmtDate(currentLesson.date)}</span>
+                    className={`text-xs px-3 py-1.5 rounded-lg font-semibold border ${bk.border} ${bk.bg} ${bk.color} hover:opacity-80 transition-opacity`}>
+                    Lesson {String(currentLesson.lesson).padStart(2,'0')} · {currentLesson.pages}
+                    <span className="text-muted font-normal ml-1">{fmtDate(currentLesson.date)}</span>
                   </button>
                 )}
                 {nextLesson && (
                   <button onClick={() => quickFill(nextLesson.pages)}
-                    className={`text-xs px-3 py-1.5 rounded-lg font-semibold border ${bk.border} ${bk.bg} ${bk.color} hover:opacity-80 transition-all`}>
-                    📌 Lesson {String(nextLesson.lesson).padStart(2,'0')} · {nextLesson.pages}
-                    <span className="text-gray-400 font-normal ml-1">{fmtDate(nextLesson.date)}</span>
+                    className={`text-xs px-3 py-1.5 rounded-lg font-semibold border ${bk.border} ${bk.bg} ${bk.color} hover:opacity-80 transition-opacity`}>
+                    Lesson {String(nextLesson.lesson).padStart(2,'0')} · {nextLesson.pages}
+                    <span className="text-muted font-normal ml-1">{fmtDate(nextLesson.date)}</span>
                   </button>
                 )}
                 {/* Homework pages */}
@@ -172,7 +177,7 @@ export default function PdfTextExtractor({ bookId, onExtracted, savedSummary, on
                   if (!r) return null;
                   return (
                     <button onClick={() => { setStart(String(r.start)); setEnd(String(r.end)); }}
-                      className="text-xs px-3 py-1.5 rounded-lg font-semibold border border-amber-300 bg-amber-50 text-amber-700 hover:opacity-80 transition-all">
+                      className="text-xs px-3 py-1.5 rounded-lg font-semibold border border-amber-300 bg-amber-50 text-amber-700 hover:opacity-80 transition-opacity">
                       📝 숙제 {currentLesson.homework.replace('Read ', '')}
                     </button>
                   );
@@ -187,15 +192,15 @@ export default function PdfTextExtractor({ bookId, onExtracted, savedSummary, on
             <input type="number" min="1" max={totalPages ?? 999} value={startPage}
               onChange={e => setStart(e.target.value)}
               className="field w-16 px-2 py-1.5 text-center" />
-            <span className="text-gray-400">~</span>
+            <span className="text-muted">~</span>
             <input type="number" min="1" max={totalPages ?? 999} value={endPage}
               onChange={e => setEnd(e.target.value)}
               className="field w-16 px-2 py-1.5 text-center" />
-            <span className="text-xs text-gray-400">페이지</span>
+            <span className="text-xs text-muted">페이지</span>
           </div>
 
           <button onClick={extract} disabled={status === 'extracting'}
-            className={`w-full py-2.5 text-white rounded-xl font-semibold text-sm transition-all disabled:opacity-60 flex items-center justify-center gap-2 ${bk.badge}`}>
+            className={`w-full py-2.5 text-white rounded-xl font-semibold text-sm transition-opacity disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${bk.badge}`}>
             {status === 'extracting'
               ? <><span className="animate-spin inline-block">⟳</span> 추출 중...</>
               : `📖 pp. ${startPage}~${endPage} 텍스트 추출`}
@@ -214,7 +219,7 @@ export default function PdfTextExtractor({ bookId, onExtracted, savedSummary, on
           <textarea value={preview} onChange={e => setPreview(e.target.value)}
             className="field w-full h-44 resize-none leading-relaxed" />
           <button onClick={confirm}
-            className="w-full py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all">
+            className="w-full py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700">
             ✓ 이 텍스트로 사용하기
           </button>
         </div>
