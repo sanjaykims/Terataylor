@@ -4,9 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This App Is
 
-**Taylor's English** is a web-based English learning companion for students in the Tera C1 curriculum at Cheongdam Language School (청담어학원). It supports two distinct curricula:
-- **A2** — listening/reading with sentence shadowing and opinion writing
-- **V1** — literature analysis for novels (*Edward* and *Coraline*) with chapter reading, vocab, and essay prompts
+**Hearth** is a warm editorial-tech **design system** implemented as a React app, with a
+**Workspace-settings** UI kit as the reference product surface (sidebar + topbar + tabs +
+forms + members table + billing + invite dialog). It was implemented from the "Hearth
+Design System" handoff bundle exported from Claude Design (claude.ai/design).
+
+> This repo previously hosted "Taylor's English" (a Coraline-themed kids' learning app);
+> it was intentionally replaced with the Hearth implementation. Git history retains the old app.
 
 ## Commands
 
@@ -17,68 +21,48 @@ npm run lint      # ESLint check
 npm run preview   # Preview production build locally
 ```
 
-There are no tests. Deployment is via Vercel (auto-deploy on push to main).
-
-> ⚠️ Vercel runs its own build on push and, if it fails, **silently keeps serving
-> the previous build** (a broken change looks "live" but isn't). To catch this
-> before pushing, enable the pre-push build guard once per clone:
->
-> ```bash
-> git config core.hooksPath .githooks   # runs `npm run build` before every push
-> ```
->
-> CI (`.github/workflows/ci.yml`) also runs `npm run build`; always confirm the
-> commit's ✅/❌ check after pushing.
+There are no tests. Deployment is via Vercel (auto-deploy on push to main). A pre-push hook
+(`.githooks`, enable once with `git config core.hooksPath .githooks`) runs `npm run build`;
+CI (`.github/workflows/ci.yml`) also runs the build — confirm the ✅/❌ check after pushing.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | React 19 + TypeScript, Vite 8, Tailwind CSS 4 |
-| Backend | Supabase (PostgreSQL, Edge Functions, Storage) |
-| Speech | Browser Web Speech API (no API key required) |
-| PDF | PDF.js + Hugging Face Transformers (client-side extraction) |
+| Frontend | React 19 + TypeScript, Vite 8 |
+| Styling | Plain CSS custom properties (OKLCH tokens) — **no Tailwind, no CSS framework** |
+| Fonts | Newsreader (display) + Geist (body) + Geist Mono (outlier), via Google Fonts |
+| Icons | Lucide-style inline SVG, `currentColor` |
 
 ## Architecture
 
-### Data Flow
+- `src/index.css` — the whole design system: OKLCH color tokens (light + `[data-theme="dark"]`),
+  typography/spacing/elevation/motion tokens, a base reset, and every component's CSS bundled
+  (so components are dependency-free — no runtime `<style>` injection).
+- `src/components/hearth.tsx` — the component library ported to TSX: `Button`, `IconButton`,
+  `Input`, `Textarea`, `Select`, `Checkbox`, `RadioGroup`, `Switch`, `Field`, `Badge`, `Tag`,
+  `Callout`, `Tooltip`, `Card`, `Tabs`, plus the `Ic` icon renderer and `icons` glyph map.
+  Each component reads its brand from CSS vars via a `hearth-*` class; markup + behaviour only.
+- `src/App.tsx` — the Workspace-settings surface (`Sidebar`, `Topbar`, `GeneralPanel`,
+  `MembersPanel`, `BillingPanel`, `InviteDialog`) composing the primitives. Layout uses inline
+  styles referencing the CSS-var tokens.
+- `src/main.tsx` — mounts `<App/>`.
 
-All user data, progress, and uploaded media live in Supabase — there is no local-only state beyond in-memory React state. On first load, any legacy `localStorage` data is automatically migrated to Supabase.
+## Design non-negotiables (Hearth discipline — "made, not generated")
 
-```
-App.tsx (tab router: a2 | v1 | progress)
-  ├── A2 tab  → ShadowingPlayer, VocabularyPanel, OpinionWriter, StoryWriter, ImageUploadInput
-  ├── V1 tab  → BookReader, VocabularyPanel, LiteraryAnalysisWriter, GamesPanel
-  └── Progress tab → ProgressDashboard, LessonScheduleWidget
-```
+- **One accent** (signal orange, `--accent`), used as a highlighter — ≤3% of any viewport
+  (links, focus rings, active nav/tab, one CTA). Never a big colour block.
+- **Warm surfaces**: `--paper` (warm oat, never `#fff`), `--ink` (warm near-black, never `#000`);
+  neutrals carry a trace of warm chroma.
+- **No gradients, no gradient orbs, no background images/textures, no emoji in product UI.**
+  Status = icon + colour + label. Depth from surface tint + weight, not decoration.
+- **Type pairing**: `--font-display` (Newsreader) for display/headings, `--font-body` (Geist)
+  for UI/body, `--font-mono` (Geist Mono) for eyebrows/table headers/wordmark/data. Max 3 families.
+- **Eight interaction states** on every control, a visible `:focus-visible` ring
+  (`2px solid var(--focus)`), ≥44px hit targets, **border-width constant across states** (no
+  layout shift). Motion animates transform/opacity only, named easings, quiet.
+- Reference all colour/space/type/motion via the CSS-var tokens in `src/index.css`; never
+  improvise a hex/oklch inline.
 
-### Key Source Directories
-
-- `src/components/` — All React UI components; each is a self-contained feature
-- `src/lib/` — Backend integration layer:
-  - `supabase.ts` — client init (credentials hardcoded as public anon key — safe)
-  - `cloudStorage.ts` — CRUD abstraction over the `taylor_app_data` key-value table
-  - `chapterStorage.ts` — Chapter-level persistence (text, Korean translation, audio URL, vocab)
-  - `tracker.ts` — Logs session times, vocab quiz results, and game scores to Supabase tables
-  - `audioAlign.ts` — Audio/text synchronization logic
-- `src/hooks/useSpeechSynthesis.ts` — Manages sentence-level TTS playback, speed (0.5–1×), and shadow mode (read → pause → student repeats)
-- `src/utils/textUtils.ts` — `parseSentences()` and `extractVocabulary()` with stopword filtering
-- `src/data/syllabus.ts` — Static curriculum data: book metadata, lesson schedule, writing prompts. Update this file (not the DB) to change curriculum content.
-
-### Supabase Schema Key Points
-
-- `taylor_app_data` — Generic key-value store (UPSERT semantics) for app state
-- Separate tables track vocab progress, game scores, and session analytics
-- Edge Functions handle: OCR (image → text), dictionary lookup (English + Korean definitions), and serve as a proxy for external APIs
-- Edge functions auto-deploy via `.github/workflows/deploy-functions.yml` whenever `supabase/functions/**` changes on `main`. One-time setup: add a Supabase access token (dashboard → Account → Access Tokens) as the GitHub repo secret `SUPABASE_ACCESS_TOKEN`. Manual fallback: `supabase functions deploy <name> --project-ref aeygqjuhqjvlhjrslbxd`
-- `supabase/functions/deepgram-listen` proxies Deepgram transcription; configure `DEEPGRAM_API_KEY` as a Supabase secret, not a `VITE_` client env var
-- Audio files are stored in a Supabase Storage bucket and referenced by URL in chapter records
-
-### Navigation / Routing
-
-There is no client-side routing library. `App.tsx` manages a `mainTab` state (`a2 | v1 | progress`) with nested tab states per section. Tab switches flush analytics via `tracker.ts`.
-
-### Curriculum Content Updates
-
-- Lesson schedule, writing prompts, and book metadata → edit `src/data/syllabus.ts`
-- Chapter text, Korean translations, audio, and vocabulary → managed at runtime via the V1 BookReader UI and persisted to Supabase; no code change needed
+The full design guidance and rationale live in the handoff bundle's `readme.md`, and the
+`hearth-design` skill (if installed) carries the same rules.
