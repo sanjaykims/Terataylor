@@ -3,6 +3,7 @@ import { extractVocabulary } from '../utils/textUtils';
 import { supabase } from '../lib/supabase';
 import { csGet, csSet } from '../lib/cloudStorage';
 import type { VocabItem } from '../lib/types';
+import Icon from './Icon';
 
 interface Props {
   text: string;
@@ -211,8 +212,9 @@ export default function VocabularyPanel({ text, vocab, onStudiedChange, onVocabU
             ? <><strong className="text-violet-600">책 지정 단어 {words.length}개</strong> · 카드를 클릭해 뜻을 확인하세요</>
             : <>본문에서 <strong className="text-violet-600">{words.length}개</strong> 단어 추출</>}
         </div>
-        <div className="text-sm font-semibold text-emerald-600">
-          ✅ {studiedCount} / {words.length} 완료
+        <div className="text-sm font-semibold text-emerald-600 flex items-center gap-1.5">
+          <Icon name="check" className="h-4 w-4" />
+          {studiedCount} / {words.length} 완료
           {studiedCount > 0 && <span className="ml-2 text-violet-500 font-normal text-xs">→ 게임에서 이 단어만 연습</span>}
         </div>
       </div>

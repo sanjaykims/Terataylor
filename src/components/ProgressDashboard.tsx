@@ -240,7 +240,12 @@ export default function ProgressDashboard() {
                       <div className="text-xs text-gray-500 shrink-0 w-24 text-right">
                         ✓{w.correct_count} ✗{w.wrong_count} · {pct}%
                       </div>
-                      {w.streak >= 3 && <span className="text-amber-500 text-sm shrink-0">🔥{w.streak}</span>}
+                      {w.streak >= 3 && (
+                        <span className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded-full"
+                          style={{ color: 'var(--accent-ink)', background: 'var(--accent-wash)' }}>
+                          <Icon name="target" className="h-3 w-3" />{w.streak}
+                        </span>
+                      )}
                     </div>
                   );
                 })}

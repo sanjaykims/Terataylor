@@ -42,8 +42,9 @@ export default function LessonScheduleWidget() {
       </div>
 
       {termEnded ? (
-        <div className="text-center py-3 font-bold text-emerald-600 text-lg">
-          🎉 여름학기 수업 완료!
+        <div className="text-center py-3 font-bold text-emerald-600 text-lg flex items-center justify-center gap-2">
+          <Icon name="check" className="h-5 w-5" />
+          여름학기 수업 완료!
         </div>
       ) : isHolidayToday ? (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm font-semibold text-amber-700">

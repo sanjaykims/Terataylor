@@ -5,11 +5,11 @@
    tokens (@theme) so the old Coraline violet/gray/dark resolves to warm-oat
    paper + signal-orange accent.
    ============================================================================ */
-@import "tailwindcss";
-
 /* — Webfonts: Newsreader + Nanum Myeongjo (KO display serif),
-     Geist + Noto Sans KR (KO body), Geist Mono (outlier) — */
+     Geist + Noto Sans KR (KO body), Geist Mono (outlier).
+     Must precede @import "tailwindcss" so it stays ahead of all emitted rules. — */
 @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Nanum+Myeongjo:wght@400;700;800&family=Geist:wght@300..700&family=Noto+Sans+KR:wght@400;500;700&family=Geist+Mono:wght@400..600&display=swap');
+@import "tailwindcss";
 
 /* ── Tailwind palette → Hearth remap ─────────────────────────────────────────
    The restored components carry ~450 Tailwind colour utilities in the Coraline

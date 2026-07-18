@@ -1485,8 +1485,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   if (initState === 'loading') {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="text-center space-y-2">
-          <div className="text-3xl animate-pulse">{bk.emoji}</div>
+        <div className="text-center space-y-3 flex flex-col items-center">
+          <div className="w-8 h-8 border-2 rounded-full animate-spin"
+            style={{ borderColor: 'var(--rule-2)', borderTopColor: 'var(--accent)' }} />
           <div className="text-xs text-muted">불러오는 중...</div>
         </div>
       </div>
@@ -1499,7 +1500,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       <div className="space-y-4">
         <div className={`${bk.bg} border-2 ${bk.border} rounded-2xl p-4`}>
           <div className={`font-bold text-sm ${bk.color} mb-1`}>
-            {bk.emoji} {bk.shortTitle} — 전체 원서 읽기
+            {bk.shortTitle} — 전체 원서 읽기
           </div>
           <div className="text-xs text-gray-500 leading-relaxed">
             PDF를 업로드하면 챕터별로 자동 분리해서 한/영 대역으로 읽을 수 있어요.
@@ -1550,7 +1551,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <span className={`text-sm font-bold shrink-0 ${bk.color}`}>{bk.emoji} {bk.shortTitle}</span>
+          <span className={`text-sm font-bold shrink-0 ${bk.color}`}>{bk.shortTitle}</span>
           {detectedNote && (
             <span className="text-xs text-muted truncate">{detectedNote}</span>
           )}

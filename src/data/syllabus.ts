@@ -64,7 +64,7 @@ export const SCHEDULE: LessonEntry[] = [
   { lesson:  9, date: '2026-08-05', book: 'coraline', pages: 'Ch. 5~6',   homework: 'Read Ch. 7~9' },
   { lesson: 10, date: '2026-08-12', book: 'coraline', pages: 'Ch. 7~9',   homework: 'Read Ch. 10~11' },
   { lesson: 11, date: '2026-08-19', book: 'coraline', pages: 'Ch. 10~11', homework: 'Read Ch. 12~13' },
-  { lesson: 12, date: '2026-08-26', book: 'coraline', pages: 'Ch. 12~13', homework: 'Term End 🎉' },
+  { lesson: 12, date: '2026-08-26', book: 'coraline', pages: 'Ch. 12~13', homework: 'Term End' },
 ];
 
 export const HOLIDAY = { date: '2026-07-29', note: 'NO CLASS (7/28 ~ 7/31 여름방학 휴원)' };
