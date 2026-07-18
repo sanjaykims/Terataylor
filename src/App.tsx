@@ -1,245 +1,510 @@
-// Hearth UI kit — Workspace settings app. Composes the DS primitives.
-// Ported from the Hearth handoff (ui_kits/webapp/Screens.jsx).
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import LessonScheduleWidget from './components/LessonScheduleWidget';
+import Icon, { type IconName } from './components/Icon';
 
-import { useState, type CSSProperties } from 'react';
+// Non-default-view components — loaded on demand to keep the initial bundle lean.
+// BookReader is the largest component; lazy-loading it keeps switching to V1 off
+// the interaction's critical path (a spinner shows instantly, then it mounts).
+const BookReader        = lazy(() => import('./components/BookReader'));
+const ShadowingPlayer   = lazy(() => import('./components/ShadowingPlayer'));
+const VocabularyPanel   = lazy(() => import('./components/VocabularyPanel'));
+const OpinionWriter     = lazy(() => import('./components/OpinionWriter'));
+const GamesPanel        = lazy(() => import('./components/GamesPanel'));
+const ProgressDashboard = lazy(() => import('./components/ProgressDashboard'));
+const ImageUploadInput  = lazy(() => import('./components/ImageUploadInput'));
+const A2PhotoViewer     = lazy(() => import('./components/A2PhotoViewer'));
+
+const TabSpinner = () => (
+  <div className="flex items-center justify-center py-16">
+    <div className="w-8 h-8 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+  </div>
+);
+import { sessionFlush, sessionSwitch, sessionSetDetail, sessionPause, sessionResume } from './lib/tracker';
+import { supabase } from './lib/supabase';
 import {
-  Button, IconButton, Input, Select, Checkbox, RadioGroup, Switch, Field,
-  Badge, Tag, Callout, Tooltip, Card, Tabs, Ic, icons,
-} from './components/hearth';
+  csGet, csSet, csSetJSON, csDel, csGetAppState, csSetBatch,
+} from './lib/cloudStorage';
+import { migrateChaptersFromLocalStorage, loadChapterVocab } from './lib/chapterStorage';
+import type { VocabItem } from './lib/types';
+import { BOOKS, currentLesson, type BookId } from './data/syllabus';
 
-const NAV = [
-  { id: 'home', label: 'Home', icon: 'home' },
-  { id: 'projects', label: 'Projects', icon: 'grid' },
-  { id: 'members', label: 'Members', icon: 'users' },
-  { id: 'analytics', label: 'Analytics', icon: 'chart' },
-  { id: 'settings', label: 'Settings', icon: 'cog' },
-];
+type MainTab = 'a2' | 'v1' | 'progress';
+type A2Tab   = 'reading' | 'shadowing' | 'vocabulary' | 'opinion' | 'games';
+type V1Tab   = 'reading' | 'vocabulary' | 'games';
 
-function Sidebar({ active, onNav }: { active: string; onNav: (id: string) => void }) {
-  return (
-    <aside style={{ width: 244, flex: '0 0 244px', background: 'var(--paper-2)', borderRight: '1px solid var(--rule)',
-      display: 'flex', flexDirection: 'column', padding: '20px 14px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 8px 22px' }}>
-        <span style={{ width: 15, height: 15, background: 'var(--accent)', borderRadius: 3, transform: 'rotate(45deg)' }} />
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.25rem', letterSpacing: '-0.03em' }}>Hearth</span>
-      </div>
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {NAV.map((n) => {
-          const on = active === n.id;
-          return (
-            <button key={n.id} onClick={() => onNav(n.id)} style={{
-              display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', border: 0, cursor: 'pointer',
-              borderRadius: 'var(--radius-md)', fontFamily: 'var(--font-body)', fontSize: '0.9rem', textAlign: 'left',
-              fontWeight: on ? 600 : 500,
-              background: on ? 'var(--accent-wash)' : 'transparent',
-              color: on ? 'var(--accent-strong)' : 'var(--ink-2)' }}>
-              <Ic d={icons[n.icon]} size={18} />{n.label}
-            </button>
-          );
-        })}
-      </nav>
-      <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 8px',
-        borderTop: '1px solid var(--rule)' }}>
-        <span style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--ink)', color: 'var(--paper)',
-          display: 'grid', placeItems: 'center', fontSize: '0.8rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>RK</span>
-        <div style={{ lineHeight: 1.2, overflow: 'hidden' }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Rae Kim</div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>Owner</div>
-        </div>
-      </div>
-    </aside>
-  );
-}
+// Bumped on every V1 book switch; a late vocab load checks it before writing.
+let v1BookSeqRef = 0;
 
-function Topbar({ onInvite }: { onInvite: () => void }) {
-  return (
-    <header style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px 32px', borderBottom: '1px solid var(--rule)' }}>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--muted)' }}>Acme Studio</div>
-        <h1 style={{ margin: '2px 0 0', fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', fontWeight: 600, letterSpacing: '-0.025em' }}>Workspace settings</h1>
-      </div>
-      <div style={{ position: 'relative', width: 240 }}>
-        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', pointerEvents: 'none' }}><Ic d={icons.search} size={17} /></span>
-        <Input placeholder="Search settings…" style={{ paddingLeft: 38 }} />
-      </div>
-      <Button variant="accent" iconStart={<Ic d={icons.plus} size={18} />} onClick={onInvite}>Invite people</Button>
-    </header>
-  );
-}
+// ── One-time migration from localStorage → Supabase ───────────────────────
+async function migrateFromLocalStorage(): Promise<void> {
+  try {
+    const flag = await csGet('_migrated');
+    if (flag) return;
+  } catch { return; }
 
-function GeneralPanel() {
-  const [name, setName] = useState('Acme Studio');
-  const [region, setRegion] = useState('us');
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 20, alignItems: 'start', maxWidth: 860 }}>
-      <Card title="Workspace details" description="Shown to everyone in this workspace.">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Field label="Workspace name" required>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
-          </Field>
-          <Field label="Data region" helper="Where your projects are stored.">
-            <Select value={region} onChange={(e) => setRegion(e.target.value)}
-              options={[{ value: 'us', label: 'United States' }, { value: 'eu', label: 'Europe (Frankfurt)' }, { value: 'ap', label: 'Asia-Pacific (Seoul)' }]} />
-          </Field>
-          <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
-            <Button variant="primary">Save changes</Button>
-            <Button variant="ghost">Discard</Button>
-          </div>
-        </div>
-      </Card>
-      <Card title="Preferences">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Switch label="Weekly digest email" checked onChange={() => {}} />
-          <Switch label="Notify on new members" checked onChange={() => {}} />
-          <Switch label="Public project gallery" onChange={() => {}} />
-          <Checkbox label="Require 2-factor for all members" checked onChange={() => {}} />
-        </div>
-      </Card>
-    </div>
-  );
-}
+  const entries: { key: string; value: string }[] = [];
 
-const MEMBERS: { n: string; e: string; role: string; tone: 'accent' | 'info' | 'neutral'; team: string; i: string }[] = [
-  { n: 'Rae Kim', e: 'rae@acme.studio', role: 'Owner', tone: 'accent', team: 'Design', i: 'RK' },
-  { n: 'Jun Park', e: 'jun@acme.studio', role: 'Admin', tone: 'info', team: 'Engineering', i: 'JP' },
-  { n: 'Mara Vos', e: 'mara@acme.studio', role: 'Member', tone: 'neutral', team: 'Design', i: 'MV' },
-  { n: 'Theo Lang', e: 'theo@acme.studio', role: 'Member', tone: 'neutral', team: 'Growth', i: 'TL' },
-];
-
-function MembersPanel() {
-  const [q, setQ] = useState('');
-  const rows = MEMBERS.filter((m) => m.n.toLowerCase().includes(q.toLowerCase()));
-  const colStyle: CSSProperties = { display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 44px', gap: 12 };
-  return (
-    <div style={{ maxWidth: 860 }}>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        <div style={{ position: 'relative', flex: 1, maxWidth: 300 }}>
-          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }}><Ic d={icons.search} size={17} /></span>
-          <Input placeholder="Filter members…" value={q} onChange={(e) => setQ(e.target.value)} style={{ paddingLeft: 38 }} />
-        </div>
-        <Button variant="secondary">Export</Button>
-      </div>
-      <Card>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ ...colStyle, padding: '0 4px 12px',
-            fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-            <span>Member</span><span>Role</span><span>Team</span><span></span>
-          </div>
-          {rows.map((m) => (
-            <div key={m.e} style={{ ...colStyle, alignItems: 'center', padding: '12px 4px', borderTop: '1px solid var(--rule)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-                <span style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--paper-3)', color: 'var(--ink-2)',
-                  display: 'grid', placeItems: 'center', fontSize: '0.78rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{m.i}</span>
-                <div style={{ lineHeight: 1.25 }}>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{m.n}</div>
-                  <div style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>{m.e}</div>
-                </div>
-              </div>
-              <span><Badge tone={m.tone}>{m.role}</Badge></span>
-              <span><Tag>{m.team}</Tag></span>
-              <Tooltip label="Manage"><IconButton label="Manage member"><Ic d={icons.dots} /></IconButton></Tooltip>
-            </div>
-          ))}
-          {rows.length === 0 && <div style={{ padding: '20px 4px', color: 'var(--muted)', fontSize: '0.88rem' }}>No members match “{q}”.</div>}
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-function BillingPanel() {
-  const [cycle, setCycle] = useState('yr');
-  const plans = [
-    { id: 'starter', name: 'Starter', price: '$0', note: 'Up to 3 projects', active: false },
-    { id: 'studio', name: 'Studio', price: cycle === 'yr' ? '$24' : '$30', note: 'Unlimited projects', active: true },
-    { id: 'agency', name: 'Agency', price: cycle === 'yr' ? '$80' : '$99', note: 'SSO + audit log', active: false },
+  const map: [string, string][] = [
+    ['v1_book',  'taylor_v1_book'],
+    ['a2_text',  'taylor_a2_text'],
+    ['a2_vocab', 'taylor_a2_vocab'],
+    ['v1_text',  'taylor_v1_text'],
+    ['v1_vocab', 'taylor_v1_vocab'],
   ];
-  return (
-    <div style={{ maxWidth: 860, display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <Callout tone="info" title="You're on the Studio plan">Your next invoice is $288 on 1 Aug 2026.</Callout>
-      <div>
-        <div style={{ marginBottom: 14 }}>
-          <RadioGroup name="cycle" value={cycle} onChange={setCycle}
-            options={[{ value: 'mo', label: 'Monthly' }, { value: 'yr', label: 'Yearly · save 20%' }]} />
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
-          {plans.map((p) => (
-            <Card key={p.id} elevation={p.active ? 'raised' : 'flat'}
-              footer={<Button size="sm" variant={p.active ? 'accent' : 'secondary'} fullWidth>{p.active ? 'Current plan' : 'Choose'}</Button>}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.05rem' }}>{p.name}</span>
-                {p.active && <Badge tone="accent">Active</Badge>}
-              </div>
-              <div style={{ margin: '10px 0 4px', fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 600, letterSpacing: '-0.02em' }}>
-                {p.price}<span style={{ fontSize: '0.8rem', color: 'var(--muted)', fontFamily: 'var(--font-body)', fontWeight: 400 }}> /mo</span>
-              </div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--neutral)' }}>{p.note}</div>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+  for (const [newKey, lsKey] of map) {
+    const val = localStorage.getItem(lsKey);
+    if (val) entries.push({ key: newKey, value: val });
+  }
 
-function InviteDialog({ onClose }: { onClose: () => void }) {
-  const [sent, setSent] = useState(false);
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState('member');
-  return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-modal)' as unknown as number, background: 'oklch(20% 0.01 60 / 0.4)',
-      display: 'grid', placeItems: 'center', padding: 20 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: 440, maxWidth: '100%', background: 'var(--paper)',
-        borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-overlay)', padding: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18 }}>
-          <div>
-            <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', fontWeight: 600, letterSpacing: '-0.02em' }}>Invite people</h2>
-            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: 'var(--neutral)' }}>They'll get an email to join Acme Studio.</p>
-          </div>
-          <IconButton label="Close" onClick={onClose}><Ic d={icons.x} /></IconButton>
-        </div>
-        {sent ? (
-          <Callout tone="success" title="Invitation sent">We emailed {email || 'your teammate'}.</Callout>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Field label="Email address" required>
-              <Input type="email" placeholder="teammate@acme.studio" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </Field>
-            <Field label="Role">
-              <RadioGroup name="invrole" value={role} onChange={setRole}
-                options={[{ value: 'member', label: 'Member — can view and edit projects' }, { value: 'admin', label: 'Admin — can manage members and billing' }]} />
-            </Field>
-          </div>
-        )}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 22 }}>
-          <Button variant="ghost" onClick={onClose}>{sent ? 'Done' : 'Cancel'}</Button>
-          {!sent && <Button variant="accent" onClick={() => setSent(true)}>Send invite</Button>}
-        </div>
-      </div>
-    </div>
-  );
+  // Essays
+  const bookIds = ['edward', 'coraline'] as const;
+  const promptIds = [
+    'dynamic-character', 'symbolism', 'love-loss', 'response-journal',
+    'mood-tone', 'compare-contrast', 'true-bravery',
+  ];
+  for (const bid of bookIds) {
+    for (const pid of promptIds) {
+      const val = localStorage.getItem(`taylor_essay_${bid}_${pid}`);
+      if (val) entries.push({ key: `essay_${bid}_${pid}`, value: val });
+    }
+  }
+
+  if (entries.length > 0) await csSetBatch(entries);
+
+  // Mark migrated NOW, before the chapter step. If chapters fail, the flag still
+  // stops a re-run from re-pushing these legacy app-state values over data the
+  // user has since changed in the cloud. Chapters are re-derivable via re-upload.
+  await csSet('_migrated', '1');
+
+  // Chapters live in chapterStorage — delegate
+  await migrateChaptersFromLocalStorage();
 }
 
 export default function App() {
-  const [nav, setNav] = useState('settings');
-  const [tab, setTab] = useState('general');
-  const [invite, setInvite] = useState(false);
-  const tabs = [{ value: 'general', label: 'General' }, { value: 'members', label: 'Members', count: 4 }, { value: 'billing', label: 'Billing' }];
+  const [appReady,  setAppReady]  = useState(false);
+  const [mainTab,   setMainTab]   = useState<MainTab>('v1');
+  const [a2Tab,     setA2Tab]     = useState<A2Tab>('shadowing');
+  const [v1Tab,     setV1Tab]     = useState<V1Tab>('reading');
+  const [showA2Input, setShowA2Input] = useState(true);
+
+  // ── Content state (loaded from Supabase on mount) ───────────────────────
+  // The book follows the academy schedule: opening the app lands on the book
+  // of this week's class (Edward through 7/8, Coraline from 7/9). Manual
+  // switching still works within a session.
+  const [v1Book,   setV1BookState]  = useState<BookId>(currentLesson().book);
+  const [a2Text,   setA2TextState]  = useState('');
+  const [a2Vocab,  setA2VocabState] = useState<VocabItem[] | null>(null);
+  const [a2AudioUrl, setA2AudioUrl] = useState<string | null>(null);
+  const [v1Vocab1, setV1Vocab1]     = useState<VocabItem[] | null>(null);
+  const [v1Vocab2, setV1Vocab2]     = useState<VocabItem[] | null>(null);
+  const [v1Vocab3, setV1Vocab3]     = useState<VocabItem[] | null>(null);
+  const [v1Vocab4, setV1Vocab4]     = useState<VocabItem[] | null>(null);
+  const [v1Vocab5, setV1Vocab5]     = useState<VocabItem[] | null>(null);
+  const [v1Vocab6, setV1Vocab6]     = useState<VocabItem[] | null>(null);
+  const [v1VocabCh, setV1VocabCh]   = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
+  const [a2StudiedWords, setA2StudiedWords] = useState<string[]>([]);
+  const [v1StudiedWords, setV1StudiedWords] = useState<string[]>([]);
+
+  // ── Load everything from Supabase on mount ──────────────────────────────
+  useEffect(() => {
+    migrateFromLocalStorage()
+      .catch(() => {})
+      .finally(async () => {
+        try {
+          const data = await csGetAppState();
+          // Deliberately NOT restoring data.v1_book: the schedule decides which
+          // book the app opens on, so it advances by itself between terms.
+          const book = currentLesson().book;
+          if (data.a2_text)      setA2TextState(data.a2_text);
+          if (data.a2_vocab) {
+            try {
+              setA2VocabState(JSON.parse(data.a2_vocab));
+            } catch {
+              // Ignore malformed legacy cache and continue loading the app.
+            }
+          }
+          // Cache-bust: Storage serves the public object with a long max-age, so
+          // a re-uploaded a2.mp3 (same URL) would otherwise play last week's file.
+          if (data.a2_audio_url) setA2AudioUrl(`${data.a2_audio_url}?t=${Date.now()}`);
+          const [vc1, vc2, vc3, vc4, vc5, vc6] = await Promise.all([
+            loadChapterVocab(book, 1).catch(() => null),
+            loadChapterVocab(book, 2).catch(() => null),
+            loadChapterVocab(book, 3).catch(() => null),
+            loadChapterVocab(book, 4).catch(() => null),
+            loadChapterVocab(book, 5).catch(() => null),
+            loadChapterVocab(book, 6).catch(() => null),
+          ]);
+          if (vc1) setV1Vocab1(vc1 as VocabItem[]);
+          if (vc2) setV1Vocab2(vc2 as VocabItem[]);
+          if (vc3) setV1Vocab3(vc3 as VocabItem[]);
+          if (vc4) setV1Vocab4(vc4 as VocabItem[]);
+          if (vc5) setV1Vocab5(vc5 as VocabItem[]);
+          if (vc6) setV1Vocab6(vc6 as VocabItem[]);
+        } catch {
+          // ignore
+        } finally {
+          setAppReady(true);
+        }
+      });
+  }, []);
+
+  // ── Persisting setters (fire-and-forget to Supabase) ────────────────────
+  const setV1Book = (b: BookId) => {
+    setV1BookState(b);
+    setV1VocabCh(1);
+    setV1StudiedWords([]);   // don't carry one book's studied words into the other's games
+    setV1Vocab1(null);
+    setV1Vocab2(null);
+    setV1Vocab3(null);
+    setV1Vocab4(null);
+    setV1Vocab5(null);
+    setV1Vocab6(null);
+    csSet('v1_book', b).catch(() => {});
+    // Generation guard: a quick Coraline→Edward switch must not let the slower
+    // first request land its vocab under the second book's slots.
+    const seq = ++v1BookSeqRef;
+    Promise.all([
+      loadChapterVocab(b, 1).catch(() => null),
+      loadChapterVocab(b, 2).catch(() => null),
+      loadChapterVocab(b, 3).catch(() => null),
+      loadChapterVocab(b, 4).catch(() => null),
+      loadChapterVocab(b, 5).catch(() => null),
+      loadChapterVocab(b, 6).catch(() => null),
+    ]).then(([vc1, vc2, vc3, vc4, vc5, vc6]) => {
+      if (seq !== v1BookSeqRef) return; // a newer book switch superseded this
+      if (vc1) setV1Vocab1(vc1 as VocabItem[]);
+      if (vc2) setV1Vocab2(vc2 as VocabItem[]);
+      if (vc3) setV1Vocab3(vc3 as VocabItem[]);
+      if (vc4) setV1Vocab4(vc4 as VocabItem[]);
+      if (vc5) setV1Vocab5(vc5 as VocabItem[]);
+      if (vc6) setV1Vocab6(vc6 as VocabItem[]);
+    });
+  };
+  const setA2Text = (t: string) => {
+    setA2TextState(t);
+    if (t) csSet('a2_text', t).catch(() => {});
+    else csDel('a2_text').catch(() => {});
+  };
+  const setA2Vocab = (v: VocabItem[] | null) => {
+    setA2VocabState(v);
+    setA2StudiedWords([]); // a new/cleared vocab list invalidates the old studied set
+    if (v) csSetJSON('a2_vocab', v).catch(() => {});
+    else csDel('a2_vocab').catch(() => {});
+  };
+  const setV1ChVocab = (ch: 1 | 2 | 3 | 4 | 5 | 6, v: VocabItem[] | null) => {
+    if (ch === 1) setV1Vocab1(v);
+    else if (ch === 2) setV1Vocab2(v);
+    else if (ch === 3) setV1Vocab3(v);
+    else if (ch === 4) setV1Vocab4(v);
+    else if (ch === 5) setV1Vocab5(v);
+    else setV1Vocab6(v);
+    const key = `chapter_${v1Book}_${ch}_vocab`;
+    if (v) csSet(key, JSON.stringify(v)).catch(() => {});
+    else csDel(key).catch(() => {});
+  };
+  // Mirror the current book in a ref so a late vocab callback from a just-
+  // unmounted BookReader (book switch) can't drop the old book's vocab into the
+  // new book's slots.
+  const v1BookRef = useRef(v1Book);
+  v1BookRef.current = v1Book;
+  const handleV1VocabLoad = (vocab: VocabItem[], chapter: number, forBook: BookId) => {
+    if (forBook !== v1BookRef.current) return;
+    if (chapter === 1) setV1Vocab1(vocab);
+    else if (chapter === 2) setV1Vocab2(vocab);
+    else if (chapter === 3) setV1Vocab3(vocab);
+    else if (chapter === 4) setV1Vocab4(vocab);
+    else if (chapter === 5) setV1Vocab5(vocab);
+    else if (chapter === 6) setV1Vocab6(vocab);
+  };
+
+  // ── Audio (Supabase Storage) ─────────────────────────────────────────────
+  const [audioUploading, setAudioUploading] = useState(false);
+
+  const handleAudioUpload = async (file: File) => {
+    setAudioUploading(true);
+    try {
+      const { error } = await supabase.storage
+        .from('taylor-audio')
+        .upload('a2.mp3', file, { upsert: true, contentType: 'audio/mpeg' });
+      if (error) throw error;
+      const { data } = supabase.storage.from('taylor-audio').getPublicUrl('a2.mp3');
+      const url = `${data.publicUrl}?t=${Date.now()}`; // cache-bust
+      await csSet('a2_audio_url', data.publicUrl);
+      setA2AudioUrl(url);
+    } catch (err) {
+      console.error('Audio upload failed:', err);
+    } finally {
+      setAudioUploading(false);
+    }
+  };
+
+  const clearAudio = async () => {
+    await supabase.storage.from('taylor-audio').remove(['a2.mp3']).catch(() => {});
+    await csDel('a2_audio_url').catch(() => {});
+    setA2AudioUrl(null);
+  };
+
+  // ── Session tracking (engine lives in lib/tracker) ───────────────────────
+  useEffect(() => {
+    // Pause (not flush) while hidden so a phone on the home screen or an
+    // overnight background tab records no time — and a close WHILE hidden can't
+    // dump the hidden hours as study time.
+    const vis = () => (document.hidden ? sessionPause() : sessionResume());
+    const unload = () => sessionFlush(true); // keepalive so the final row survives teardown
+    window.addEventListener('pagehide', unload);   // fires reliably on mobile
+    window.addEventListener('beforeunload', unload);
+    document.addEventListener('visibilitychange', vis);
+    return () => {
+      window.removeEventListener('pagehide', unload);
+      window.removeEventListener('beforeunload', unload);
+      document.removeEventListener('visibilitychange', vis);
+    };
+  }, []);
+
+  // The V1 vocab tab studies a specific book+chapter — attribute time to it.
+  useEffect(() => {
+    if (mainTab === 'v1' && v1Tab === 'vocabulary') {
+      sessionSetDetail(`${v1Book}:ch${v1VocabCh}`);
+    }
+  }, [mainTab, v1Tab, v1Book, v1VocabCh]);
+
+  // ── Saved summary banners ────────────────────────────────────────────────
+  const wc = (t: string) => t.trim().split(/\s+/).filter(Boolean).length;
+  const a2TextSummary  = a2Text  ? `저장됨 (${wc(a2Text)}단어)` : undefined;
+  const a2VocabSummary = a2Vocab?.length ? `저장됨 (${a2Vocab.length}개)` : undefined;
+
+  const containerW = 'max-w-[1120px]';
+
+  // ── Loading screen — warm Hearth paper ───────────────────────────────────
+  if (!appReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center" style={{ display: 'grid', gap: 14, placeItems: 'center' }}>
+          <span style={{ width: 16, height: 16, background: 'var(--accent)', borderRadius: 3, transform: 'rotate(45deg)' }} className="animate-pulse" />
+          <div className="text-sm text-muted">데이터 불러오는 중…</div>
+        </div>
+      </div>
+    );
+  }
+
+  const MAIN_TABS = [
+    { id: 'a2' as const, icon: 'headphones' as IconName, label: 'A2 읽기/듣기', preload: () => {
+        import('./components/ShadowingPlayer'); import('./components/VocabularyPanel');
+        import('./components/OpinionWriter'); import('./components/GamesPanel');
+        import('./components/ImageUploadInput'); import('./components/A2PhotoViewer');
+      } },
+    { id: 'v1' as const, icon: 'book' as IconName, label: 'V1 소설', preload: () => {
+        import('./components/VocabularyPanel'); import('./components/GamesPanel'); import('./components/ImageUploadInput');
+      } },
+    { id: 'progress' as const, icon: 'chart' as IconName, label: '성장 기록', preload: () => { import('./components/ProgressDashboard'); } },
+  ];
+
   return (
-    <div style={{ display: 'flex', height: '100vh', background: 'var(--paper)', color: 'var(--ink)', fontFamily: 'var(--font-body)' }}>
-      <Sidebar active={nav} onNav={setNav} />
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Topbar onInvite={() => setInvite(true)} />
-        <div style={{ padding: '20px 32px 8px' }}>
-          <Tabs tabs={tabs} value={tab} onChange={setTab} />
+    <div className="min-h-screen">
+      {/* Topbar — warm paper, hairline rule, Newsreader wordmark + mono eyebrow */}
+      <header className="sticky top-0 z-20" style={{ background: 'var(--paper)', borderBottom: '1px solid var(--rule)' }}>
+        <div className={`${containerW} mx-auto px-6`} style={{ display: 'flex', alignItems: 'center', gap: 16, minHeight: 68 }}>
+          <span style={{ width: 15, height: 15, background: 'var(--accent)', borderRadius: 3, transform: 'rotate(45deg)', flex: '0 0 auto' }} />
+          <div className="min-w-0" style={{ flex: 1 }}>
+            <div className="eyebrow" style={{ fontSize: '0.6rem' }}>청담어학원 Tera</div>
+            <h1 className="font-display" style={{ fontSize: 'var(--text-md)', fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.1 }}>Taylor's English</h1>
+          </div>
+          <span className="text-muted hidden md:inline" style={{ fontSize: '0.85rem' }}>안녕, 태윤아</span>
         </div>
-        <div style={{ flex: 1, overflow: 'auto', padding: '16px 32px 40px' }}>
-          {tab === 'general' && <GeneralPanel />}
-          {tab === 'members' && <MembersPanel />}
-          {tab === 'billing' && <BillingPanel />}
+        {/* Main section nav — Hearth tabs (accent underline) */}
+        <div className={`${containerW} mx-auto px-6`}>
+          <div className="hearth-tabs" role="tablist">
+            {MAIN_TABS.map(t => (
+              <button key={t.id} role="tab" type="button" aria-selected={mainTab === t.id}
+                className="hearth-tab"
+                onClick={() => {
+                  if (t.id === mainTab) return;
+                  if (t.id === 'progress') sessionPause();
+                  else sessionSwitch(t.id, t.id === 'a2' ? a2Tab : v1Tab);
+                  setMainTab(t.id);
+                }}
+                onMouseEnter={t.preload} onTouchStart={t.preload}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  <Icon name={t.icon} className="h-4 w-4" />{t.label}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
-      </main>
-      {invite && <InviteDialog onClose={() => setInvite(false)} />}
+      </header>
+
+      <div className={`${containerW} mx-auto px-6 py-6 space-y-5`}>
+
+        {/* ── V1: LESSON SCHEDULE WIDGET ────────────────────────────────── */}
+        {mainTab === 'v1' && <LessonScheduleWidget />}
+
+        {/* ── V1: BOOK SELECTOR ─────────────────────────────────────────── */}
+        {mainTab === 'v1' && (
+          <div className="grid grid-cols-2 gap-3">
+            {(['edward', 'coraline'] as BookId[]).map(bid => {
+              const b = BOOKS[bid];
+              const active = v1Book === bid;
+              return (
+                <button key={bid} onClick={() => setV1Book(bid)}
+                  className="surface p-4 text-left transition-[border-color,transform] duration-200"
+                  style={active
+                    ? { borderColor: 'var(--accent)', boxShadow: 'inset 0 0 0 1px var(--accent)' }
+                    : { opacity: 0.9 }}>
+                  <div className="eyebrow">{active ? '학습 중' : '선택'}</div>
+                  <div className="font-display" style={{ fontSize: 'var(--text-md)', fontWeight: 600, letterSpacing: '-0.015em', color: 'var(--ink)', marginTop: 2 }}>{b.shortTitle}</div>
+                  <div className="text-muted" style={{ fontSize: '0.8rem', marginTop: 2 }}>{b.author}</div>
+                  <div className="flex flex-wrap gap-1.5" style={{ marginTop: 10 }}>
+                    {b.themes.slice(0, 2).map(th => (
+                      <span key={th} className="chip" style={{ fontSize: '0.72rem' }}>{th}</span>
+                    ))}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ── A2 INPUT PANEL ────────────────────────────────────────────── */}
+        {mainTab === 'a2' && a2Tab !== 'opinion' && a2Tab !== 'reading' && (
+          <div className="surface overflow-hidden">
+            <button onClick={() => setShowA2Input(!showA2Input)}
+              className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-violet-50/60 transition-colors">
+              <span className="font-bold text-gray-800 flex items-center gap-2">
+                <Icon name="camera" className="h-5 w-5 text-violet-500" />
+                교재 입력
+                <span className="text-xs font-normal text-muted">지문 · 단어 · 오디오</span>
+              </span>
+              <span className="text-violet-500 text-sm font-semibold">{showA2Input ? '접기' : '펼치기'}</span>
+            </button>
+            {showA2Input && (
+              <div className="px-5 pb-5 space-y-4">
+                <Suspense fallback={<TabSpinner />}>
+                  <ImageUploadInput mode="text" label="지문 사진" hint="교재 본문 페이지 — 여러 장 가능"
+                    savedSummary={a2TextSummary} onClear={() => setA2Text('')} onExtracted={setA2Text} />
+                  <hr className="border-gray-100" />
+                  <ImageUploadInput mode="vocab" label="단어 사진" hint="책에서 지정한 단어 목록 사진"
+                    savedSummary={a2VocabSummary} onClear={() => setA2Vocab(null)} onExtracted={setA2Vocab} />
+                </Suspense>
+              </div>
+            )}
+          </div>
+        )}
+
+
+        {/* ── A2 CONTENT ────────────────────────────────────────────────── */}
+        {mainTab === 'a2' && (
+          <>
+            <div className="seg">
+              {([
+                { id: 'reading',    label: '지문 보기' },
+                { id: 'shadowing',  label: '섀도잉' },
+                { id: 'vocabulary', label: '단어장' },
+                { id: 'opinion',    label: '의견 쓰기' },
+                { id: 'games',      label: '게임' },
+              ] as { id: A2Tab; label: string }[]).map(t => (
+                <button key={t.id} onClick={() => { if (t.id !== a2Tab) { sessionSwitch('a2', t.id); setA2Tab(t.id); } }}
+                  className={`seg-btn ${a2Tab === t.id ? 'seg-btn-active' : ''}`}>{t.label}</button>
+              ))}
+            </div>
+            {a2Tab === 'reading'    && <Suspense fallback={<TabSpinner />}><A2PhotoViewer /></Suspense>}
+            {a2Tab === 'shadowing'  && (
+              <Suspense fallback={<TabSpinner />}>
+                <ShadowingPlayer
+                  text={a2Text} audioUrl={a2AudioUrl}
+                  audioUploading={audioUploading}
+                  onAudioUpload={handleAudioUpload}
+                  onClearAudio={clearAudio}
+                />
+              </Suspense>
+            )}
+            {a2Tab === 'vocabulary' && <Suspense fallback={<TabSpinner />}><VocabularyPanel text={a2Text} vocab={a2Vocab} onStudiedChange={setA2StudiedWords} onVocabUpdate={setA2Vocab} /></Suspense>}
+            {a2Tab === 'opinion'    && <Suspense fallback={<TabSpinner />}><OpinionWriter /></Suspense>}
+            {a2Tab === 'games'      && <Suspense fallback={<TabSpinner />}><GamesPanel text={a2Text} vocab={a2Vocab} selectedWords={a2StudiedWords} /></Suspense>}
+          </>
+        )}
+
+        {/* ── V1 CONTENT ────────────────────────────────────────────────── */}
+        {mainTab === 'v1' && (
+          <>
+            <div className="seg">
+              {([
+                { id: 'reading',    label: '원서 읽기' },
+                { id: 'vocabulary', label: '단어장' },
+                { id: 'games',      label: '게임' },
+              ] as { id: V1Tab; label: string }[]).map(t => (
+                <button key={t.id} onClick={() => { if (t.id !== v1Tab) { sessionSwitch('v1', t.id); setV1Tab(t.id); } }}
+                  className={`seg-btn ${v1Tab === t.id ? 'seg-btn-active' : ''}`}>{t.label}</button>
+              ))}
+            </div>
+            {v1Tab === 'reading' && <Suspense fallback={<TabSpinner />}><BookReader key={v1Book} bookId={v1Book} onLessonVocabLoad={handleV1VocabLoad} /></Suspense>}
+            {v1Tab === 'vocabulary' && (() => {
+              const vocabByChapter: Record<number, VocabItem[] | null> = {
+                1: v1Vocab1, 2: v1Vocab2, 3: v1Vocab3,
+                4: v1Vocab4, 5: v1Vocab5, 6: v1Vocab6,
+              };
+              const activeVocab = vocabByChapter[v1VocabCh];
+              const activeSummary = activeVocab?.length ? `저장됨 (${activeVocab.length}개)` : undefined;
+              const chLabel = (ch: number) => `Ch.0${ch} 단어장`;
+              return (
+                <>
+                  {/* Chapter selector — real 3-col grid so 6 chapters wrap to
+                      two readable rows on phones (a bare .seg would scroll). */}
+                  <div className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl border border-violet-300/15"
+                       style={{ background: 'linear-gradient(180deg, rgba(30,27,75,.6), rgba(17,14,46,.7))' }}>
+                    {([1, 2, 3, 4, 5, 6] as const).map(ch => (
+                      <button key={ch}
+                        onClick={() => { setV1VocabCh(ch); setV1StudiedWords([]); }}
+                        className={`seg-btn text-center justify-center ${v1VocabCh === ch ? 'seg-btn-active' : ''}`}>
+                        {chLabel(ch)}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Per-chapter vocab photo upload + panel */}
+                  <Suspense fallback={<TabSpinner />}>
+                    <div className="surface p-4">
+                      <ImageUploadInput
+                        key={`vocab-upload-${v1Book}-ch${v1VocabCh}`}
+                        mode="vocab"
+                        label={`${chLabel(v1VocabCh)} 사진`}
+                        hint="단어장 사진을 올리면 자동으로 목록이 만들어져요"
+                        savedSummary={activeSummary}
+                        onClear={() => setV1ChVocab(v1VocabCh, null)}
+                        onExtracted={vocab => setV1ChVocab(v1VocabCh, vocab)}
+                      />
+                    </div>
+                    <VocabularyPanel
+                      key={`vocab-panel-${v1Book}-ch${v1VocabCh}`}
+                      text=""
+                      vocab={activeVocab}
+                      onStudiedChange={setV1StudiedWords}
+                      onVocabUpdate={vocab => setV1ChVocab(v1VocabCh, vocab)}
+                    />
+                  </Suspense>
+                </>
+              );
+            })()}
+            {v1Tab === 'games' && (
+              <Suspense fallback={<TabSpinner />}>
+                <GamesPanel
+                  text=""
+                  vocab={
+                    v1VocabCh === 1 ? v1Vocab1 :
+                    v1VocabCh === 2 ? v1Vocab2 :
+                    v1VocabCh === 3 ? v1Vocab3 :
+                    v1VocabCh === 4 ? v1Vocab4 :
+                    v1VocabCh === 5 ? v1Vocab5 :
+                    v1Vocab6
+                  }
+                  selectedWords={v1StudiedWords}
+                />
+              </Suspense>
+            )}
+          </>
+        )}
+
+        {/* ── PROGRESS ──────────────────────────────────────────────────── */}
+        {mainTab === 'progress' && <Suspense fallback={<TabSpinner />}><ProgressDashboard /></Suspense>}
+      </div>
     </div>
   );
 }

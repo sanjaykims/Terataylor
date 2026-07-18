@@ -1,12 +1,93 @@
 /* ============================================================================
-   Hearth Design System — warm editorial-tech. Tokens + base + component CSS.
-   Ported from the Hearth handoff bundle (claude.ai/design). One stylesheet so
-   components stay dependency-free (no runtime <style> injection).
+   Hearth Design System — warm editorial-tech, applied to the Taylor's English
+   study app. Hearth tokens are the source of truth; Tailwind is enabled for the
+   learning components' layout utilities, with its palette remapped to Hearth
+   tokens (@theme) so the old Coraline violet/gray/dark resolves to warm-oat
+   paper + signal-orange accent.
    ============================================================================ */
+@import "tailwindcss";
 
 /* — Webfonts: Newsreader + Nanum Myeongjo (KO display serif),
      Geist + Noto Sans KR (KO body), Geist Mono (outlier) — */
 @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Nanum+Myeongjo:wght@400;700;800&family=Geist:wght@300..700&family=Noto+Sans+KR:wght@400;500;700&family=Geist+Mono:wght@400..600&display=swap');
+
+/* ── Tailwind palette → Hearth remap ─────────────────────────────────────────
+   The restored components carry ~450 Tailwind colour utilities in the Coraline
+   language (violet accent, cool grays, white cards). Remap those families to
+   Hearth's warm system so every `bg-violet-600` / `text-gray-500` / `bg-white`
+   reads as orange-accent / warm-neutral / paper without touching the markup.
+   Latin sans is Geist; serif display is Newsreader/Nanum. */
+@theme {
+  --font-sans: "Geist", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader", "Nanum Myeongjo", ui-serif, Georgia, serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  --color-white: var(--paper);
+  --color-black: var(--ink);
+
+  /* Warm neutral ramp (gray + slate) */
+  --color-gray-50:  oklch(97.5% 0.010 80);
+  --color-gray-100: oklch(94.5% 0.013 80);
+  --color-gray-200: oklch(88% 0.010 78);
+  --color-gray-300: oklch(80% 0.012 76);
+  --color-gray-400: oklch(64% 0.010 66);
+  --color-gray-500: oklch(50% 0.010 62);
+  --color-gray-600: oklch(40% 0.012 60);
+  --color-gray-700: oklch(32% 0.012 58);
+  --color-gray-800: oklch(26% 0.013 56);
+  --color-gray-900: oklch(21% 0.014 55);
+  --color-slate-50:  oklch(97.5% 0.010 80);
+  --color-slate-200: oklch(88% 0.010 78);
+  --color-slate-600: oklch(40% 0.012 60);
+  --color-slate-800: oklch(26% 0.013 56);
+
+  /* Accent (signal orange) — remaps violet / fuchsia / purple / indigo */
+  --color-violet-50:  oklch(96% 0.03 55);
+  --color-violet-100: oklch(94% 0.045 55);
+  --color-violet-200: oklch(88% 0.07 50);
+  --color-violet-300: oklch(80% 0.11 47);
+  --color-violet-400: oklch(72% 0.16 44);
+  --color-violet-500: oklch(64% 0.205 42);
+  --color-violet-600: oklch(55% 0.195 40);
+  --color-violet-700: oklch(48% 0.17 39);
+  --color-violet-800: oklch(40% 0.14 38);
+  --color-violet-900: oklch(32% 0.10 38);
+  --color-fuchsia-300: oklch(80% 0.11 47);
+  --color-fuchsia-400: oklch(72% 0.16 44);
+  --color-fuchsia-500: oklch(64% 0.205 42);
+  --color-fuchsia-600: oklch(55% 0.195 40);
+  --color-purple-500: oklch(64% 0.205 42);
+  --color-purple-600: oklch(55% 0.195 40);
+  --color-purple-700: oklch(48% 0.17 39);
+  --color-indigo-200: oklch(88% 0.07 50);
+  --color-indigo-500: oklch(64% 0.205 42);
+  --color-indigo-600: oklch(55% 0.195 40);
+
+  /* Keep semantic hues, tuned warm to match Hearth's semantic tokens */
+  --color-emerald-50:  oklch(93% 0.05 150);
+  --color-emerald-100: oklch(90% 0.06 150);
+  --color-emerald-300: oklch(78% 0.12 150);
+  --color-emerald-400: oklch(70% 0.14 150);
+  --color-emerald-500: oklch(62% 0.15 150);
+  --color-emerald-600: oklch(55% 0.14 150);
+  --color-emerald-700: oklch(46% 0.12 152);
+  --color-amber-50:  oklch(96% 0.04 82);
+  --color-amber-100: oklch(94% 0.07 82);
+  --color-amber-200: oklch(90% 0.10 82);
+  --color-amber-300: oklch(84% 0.12 80);
+  --color-amber-400: oklch(80% 0.14 78);
+  --color-amber-500: oklch(72% 0.15 75);
+  --color-red-50:  oklch(94% 0.05 25);
+  --color-red-100: oklch(90% 0.06 25);
+  --color-red-400: oklch(68% 0.19 27);
+  --color-red-500: oklch(57% 0.205 25);
+  --color-red-600: oklch(50% 0.19 25);
+  --color-red-700: oklch(44% 0.17 25);
+  --color-blue-300: oklch(80% 0.09 240);
+  --color-blue-500: oklch(58% 0.13 240);
+  --color-sky-300: oklch(80% 0.09 240);
+  --color-sky-400: oklch(72% 0.11 240);
+}
 
 /* ── Colour tokens — OKLCH, one warm anchor hue, one accent ─────────────────── */
 :root {
@@ -412,3 +493,119 @@ h1, h2, h3, h4 { margin: 0; }
 .hearth-tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);}
 .hearth-tab__count{margin-left:var(--space-xs,8px);font-size:var(--text-sm);color:var(--muted);
   font-variant-numeric:tabular-nums;}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Shared study-app classes — the de-slopped components reference these; here they
+   are (re)defined in Hearth's warm-oat / signal-orange language.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.font-display { font-family: var(--font-display); }
+
+/* Always-visible keyboard focus ring (Hearth: 2px accent, no layout shift). */
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--radius-xs); }
+:focus:not(:focus-visible) { outline: none; }
+
+/* Content surface — a flat warm-paper card (Hearth Card, flat variant). */
+.surface {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-whisper);
+}
+.surface-soft {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+}
+.surface-hover { transition: border-color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out); }
+@media (hover:hover) { .surface-hover:hover { border-color: var(--ink-2); transform: translateY(-2px); } }
+
+/* Dark Coraline chrome → a warm raised surface. */
+.glass-night {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+}
+
+/* Eyebrow / small-caps label — mono, the Hearth outlier register. */
+.eyebrow {
+  font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600;
+  letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--muted);
+}
+
+/* Segmented control (sub-tab bars / mode switches). */
+.seg {
+  display: flex; gap: .25rem; padding: .25rem; border-radius: var(--radius-lg);
+  background: var(--paper-3); border: 1px solid var(--rule);
+  overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+}
+.seg-btn {
+  flex: 1 1 auto; min-width: max-content; padding: .5rem .85rem; border-radius: var(--radius-md);
+  font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); line-height: 1.1;
+  color: var(--neutral); white-space: nowrap; background: transparent; border: 0; cursor: pointer;
+  transition: color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
+}
+@media (hover:hover) { .seg-btn:hover { color: var(--ink); } }
+.seg-btn-active { color: var(--ink); font-weight: 600; background: var(--paper); box-shadow: var(--shadow-whisper); }
+
+/* Buttons. Primary = ink surface (Hearth's crafted primary); accent stays the
+   one highlighter, applied only where a single CTA is intended. */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs);
+  background: var(--ink); color: var(--paper); font-family: var(--font-body); font-weight: 600;
+  font-size: var(--text-base); height: var(--control-h); padding: 0 var(--space-lg);
+  border: 1px solid transparent; border-radius: var(--radius-md); cursor: pointer; white-space: nowrap;
+  transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+@media (hover:hover) { .btn-primary:hover { background: var(--ink-2); } }
+.btn-primary:active { transform: translateY(1px); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-soft {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs);
+  background: var(--paper); color: var(--ink); font-family: var(--font-body); font-weight: 500;
+  font-size: var(--text-base); height: var(--control-h); padding: 0 var(--space-md);
+  border: 1px solid var(--rule-2); border-radius: var(--radius-md); cursor: pointer; white-space: nowrap;
+  transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+@media (hover:hover) { .btn-soft:hover { background: var(--paper-2); border-color: var(--ink-2); } }
+.btn-soft:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Solid accent fill for small active marks/badges. */
+.fill-accent { background: var(--accent-strong); color: var(--accent-ink); }
+
+/* Progress / meter fill — the orange accent. */
+.progress-fill { background: var(--accent); border-radius: var(--radius-full); }
+
+/* Muted secondary text (AA on paper). */
+.text-muted { color: var(--muted); }
+
+/* Small typographic KO/EN language tag. */
+.lang-tag {
+  display: inline-flex; align-items: center; padding: .05rem .3rem; border-radius: var(--radius-xs);
+  font-family: var(--font-mono); font-size: .6rem; font-weight: 600; letter-spacing: .04em;
+  background: var(--paper-3); color: var(--ink-2);
+}
+
+/* Text field / textarea. No fixed height so `h-*` utilities can size textareas. */
+.field {
+  width: 100%; background: var(--paper); color: var(--ink);
+  border: 1px solid var(--rule-2); border-radius: var(--radius-md);
+  padding: .62rem var(--space-md); font-family: var(--font-body); font-size: var(--text-base);
+  transition: border-color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+}
+.field::placeholder { color: var(--muted); }
+.field:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--ink-2); }
+.field:disabled { opacity: .55; cursor: not-allowed; }
+
+/* Accent chip / pill. */
+.chip {
+  display: inline-flex; align-items: center; gap: .3rem; padding: .28rem .65rem;
+  border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 500;
+  background: var(--paper-3); color: var(--ink-2); border: 1px solid var(--rule);
+}
+
+/* Active reading-row highlight pulse (BookReader / shadowing). */
+@keyframes sentence-pulse { 0%,100% { box-shadow: 0 0 0 0 var(--accent-wash); } 50% { box-shadow: 0 0 0 6px transparent; } }
+.sentence-active { animation: sentence-pulse 1.6s ease-in-out infinite; }
+.animate-rise { animation: rise-in .4s var(--ease-out) both; }
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

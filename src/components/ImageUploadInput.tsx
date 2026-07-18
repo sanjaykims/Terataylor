@@ -1,0 +1,239 @@
+import { useState, useRef } from 'react';
+import { supabase } from '../lib/supabase';
+import type { VocabItem } from '../lib/types';
+import Icon from './Icon';
+
+interface BaseProps {
+  label: string;
+  hint?: string;
+  savedSummary?: string;   // non-empty = already saved; show saved state
+  onClear?: () => void;    // called when user wants to clear saved data
+}
+interface TextProps  extends BaseProps { mode: 'text';  onExtracted: (text: string)      => void; }
+interface VocabProps extends BaseProps { mode: 'vocab'; onExtracted: (items: VocabItem[]) => void; }
+type Props = TextProps | VocabProps;
+
+interface ImageEntry { file: File; url: string; }
+
+// Resize + compress to JPEG (keeps Claude API payload small)
+function compressImage(file: File, maxPx = 1400): Promise<{ data: string; type: string }> {
+  return new Promise(resolve => {
+    const img = new Image();
+    const blobUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(blobUrl);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      const [header, data] = dataUrl.split(',');
+      const type = header.match(/data:([^;]+)/)?.[1] ?? 'image/jpeg';
+      resolve({ data, type });
+    };
+    img.src = blobUrl;
+  });
+}
+
+export default function ImageUploadInput(props: Props) {
+  const { mode, label, hint, savedSummary, onClear } = props;
+  const [images, setImages]     = useState<ImageEntry[]>([]);
+  const [status, setStatus]     = useState<'idle' | 'extracting' | 'review' | 'done'>('idle');
+  const [rawText, setRawText]   = useState('');
+  const [vocabRows, setVocabRows] = useState<VocabItem[]>([]);
+  const [error, setError]       = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const addFiles = (files: FileList | null) => {
+    if (!files) return;
+    const entries: ImageEntry[] = Array.from(files).map(f => ({ file: f, url: URL.createObjectURL(f) }));
+    setImages(prev => [...prev, ...entries]);
+    if (status === 'done') setStatus('idle');
+  };
+
+  const removeImage = (i: number) => {
+    setImages(prev => {
+      URL.revokeObjectURL(prev[i].url);
+      return prev.filter((_, j) => j !== i);
+    });
+  };
+
+  const extract = async () => {
+    if (!images.length) return;
+    setStatus('extracting');
+    setError('');
+    try {
+      const compressed = await Promise.all(images.map(img => compressImage(img.file)));
+      const { data, error: fnErr } = await supabase.functions.invoke('ocr-extract', {
+        body: { images: compressed, mode },
+      });
+      if (fnErr) throw new Error(fnErr.message);
+      const result: string = data.result ?? '';
+
+      if (mode === 'vocab') {
+        const match = result.match(/\[[\s\S]*\]/);
+        if (!match) throw new Error('단어 목록을 파싱할 수 없어요. 다시 시도해 주세요.');
+        const items: VocabItem[] = JSON.parse(match[0]);
+        setVocabRows(items);
+      } else {
+        setRawText(result);
+      }
+      setStatus('review');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '추출 실패');
+      setStatus('idle');
+    }
+  };
+
+  const confirm = () => {
+    if (mode === 'text') {
+      (props as TextProps).onExtracted(rawText);
+    } else {
+      (props as VocabProps).onExtracted(vocabRows.filter(v => v.word.trim()));
+    }
+    setStatus('done');
+  };
+
+  // If parent already has saved data, show a compact saved banner
+  if (savedSummary) {
+    return (
+      <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+        <div>
+          <span className="text-sm font-semibold text-gray-700 mr-2">{label}</span>
+          <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+            ✓ {savedSummary}
+          </span>
+        </div>
+        <button
+          onClick={onClear}
+          className="text-xs text-muted hover:text-red-500 transition-colors ml-3 shrink-0 inline-flex items-center gap-1"
+          title="삭제 후 다시 업로드">
+          <Icon name="trash" className="h-3.5 w-3.5" /> 삭제
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-semibold text-gray-700">{label}</span>
+        {status === 'done' && (
+          <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">✓ 완료</span>
+        )}
+      </div>
+      {hint && <p className="text-xs text-muted">{hint}</p>}
+
+      {/* Drop zone — a real keyboard-operable control (role=button + Enter/Space) */}
+      <div
+        role="button" tabIndex={0}
+        aria-label={`${label} 업로드`}
+        onClick={() => fileRef.current?.click()}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileRef.current?.click(); } }}
+        onDragOver={e => e.preventDefault()}
+        onDrop={e => { e.preventDefault(); addFiles(e.dataTransfer.files); }}
+        className="border-2 border-dashed border-violet-200 rounded-xl p-5 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50/60 transition-[border-color,background-color] select-none"
+      >
+        <Icon name={mode === 'text' ? 'document' : 'camera'} className="h-8 w-8 mx-auto mb-1.5 text-violet-400" />
+        <div className="text-sm text-gray-500 font-medium">클릭하거나 사진을 드래그</div>
+        <div className="text-xs text-muted mt-0.5">여러 장 선택 가능</div>
+        <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
+          onChange={e => addFiles(e.target.files)} />
+      </div>
+
+      {/* Thumbnails */}
+      {images.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {images.map((img, i) => (
+            <div key={i} className="relative group">
+              <img src={img.url} alt="" className="w-20 h-20 object-cover rounded-xl border-2 border-violet-200" />
+              <button onClick={() => removeImage(i)}
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                ×
+              </button>
+            </div>
+          ))}
+          <button onClick={() => fileRef.current?.click()}
+            className="w-20 h-20 border-2 border-dashed border-violet-200 rounded-xl flex items-center justify-center text-violet-300 hover:border-violet-400 hover:text-violet-500 text-2xl">
+            +
+          </button>
+        </div>
+      )}
+
+      {/* Extract button */}
+      {images.length > 0 && status !== 'done' && (
+        <button onClick={extract} disabled={status === 'extracting'}
+          className="btn-primary w-full py-2.5 disabled:opacity-60 flex items-center justify-center gap-2">
+          {status === 'extracting'
+            ? <><span className="inline-block animate-spin">⟳</span> AI가 분석 중...</>
+            : mode === 'text' ? '텍스트 추출하기' : '단어 추출하기'}
+        </button>
+      )}
+
+      {error && <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+
+      {/* Review: text */}
+      {status === 'review' && mode === 'text' && (
+        <div className="space-y-2">
+          <p className="text-xs text-gray-500 font-semibold">추출된 텍스트 확인 및 수정:</p>
+          <textarea value={rawText} onChange={e => setRawText(e.target.value)}
+            className="field w-full h-44 resize-none leading-relaxed" />
+          <button onClick={confirm}
+            className="w-full py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700">
+            ✓ 이 텍스트로 사용하기
+          </button>
+        </div>
+      )}
+
+      {/* Review: vocab */}
+      {status === 'review' && mode === 'vocab' && (
+        <div className="space-y-2">
+          <p className="text-xs text-gray-500 font-semibold">추출된 단어 {vocabRows.length}개 확인 및 수정:</p>
+          <div className="max-h-60 overflow-y-auto space-y-1.5 surface-soft p-2">
+            <div className="grid grid-cols-[6rem_1fr_1fr_1.5rem] gap-1 px-1 pb-1">
+              <span className="text-[10px] font-bold text-muted uppercase tracking-wide">단어</span>
+              <span className="text-[10px] font-bold text-violet-500 uppercase tracking-wide flex items-center gap-1"><span className="lang-tag">KO</span> 한국어</span>
+              <span className="text-[10px] font-bold text-muted uppercase tracking-wide flex items-center gap-1"><span className="lang-tag">EN</span> English</span>
+              <span />
+            </div>
+            {vocabRows.map((item, i) => (
+              <div key={i} className="grid grid-cols-[6rem_1fr_1fr_1.5rem] gap-1 items-center">
+                <input value={item.word}
+                  onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, word: e.target.value } : v))}
+                  className="field text-sm font-semibold px-2 py-1"
+                  placeholder="단어" />
+                <input value={item.korean ?? ''}
+                  onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, korean: e.target.value } : v))}
+                  className="field text-sm px-2 py-1"
+                  placeholder="한국어 뜻" />
+                <input value={item.definition}
+                  onChange={e => setVocabRows(prev => prev.map((v, j) => j === i ? { ...v, definition: e.target.value } : v))}
+                  className="field text-sm px-2 py-1"
+                  placeholder="English def" />
+                <button onClick={() => setVocabRows(prev => prev.filter((_, j) => j !== i))}
+                  aria-label="단어 삭제"
+                  className="text-gray-400 hover:text-red-500 transition-colors font-bold text-center">✕</button>
+              </div>
+            ))}
+            <button
+              onClick={() => setVocabRows(prev => [...prev, { word: '', definition: '', korean: '' }])}
+              className="w-full text-xs text-violet-500 hover:text-violet-700 py-1 transition-colors">
+              + 단어 추가
+            </button>
+          </div>
+          <button onClick={confirm}
+            className="w-full py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700">
+            ✓ 이 단어 목록으로 사용하기 ({vocabRows.filter(v => v.word.trim()).length}개)
+          </button>
+        </div>
+      )}
+
+      {status === 'done' && (
+        <button onClick={() => setStatus('review')} className="text-xs text-violet-500 hover:text-violet-700 hover:underline transition-colors">
+          다시 편집하기
+        </button>
+      )}
+    </div>
+  );
+}
