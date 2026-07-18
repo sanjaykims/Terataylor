@@ -4,8 +4,9 @@
    components stay dependency-free (no runtime <style> injection).
    ============================================================================ */
 
-/* — Webfonts: Newsreader (display), Geist (body), Geist Mono (outlier) — */
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap');
+/* — Webfonts: Newsreader (display) + Nanum Myeongjo (Korean display serif),
+     Geist (body), Geist Mono (outlier) — */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Nanum+Myeongjo:wght@400;700;800&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap');
 
 /* ── Colour tokens — OKLCH, one warm anchor hue, one accent ─────────────────── */
 :root {
@@ -67,9 +68,12 @@
 
 /* ── Typography tokens ──────────────────────────────────────────────────────── */
 :root {
-  --font-display:  "Newsreader", ui-serif, Georgia, serif;
+  /* Latin renders in Newsreader; Korean glyphs (absent from Newsreader) fall to
+     Nanum Myeongjo — one cohesive serif register across scripts. */
+  --font-display:  "Newsreader", "Nanum Myeongjo", ui-serif, Georgia, serif;
   --font-body:     "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono:     "Geist Mono", ui-monospace, "SF Mono", monospace;
+  --font-display-ko: "Nanum Myeongjo", serif;  /* explicit Korean serif when needed */
 
   --text-xs:   0.64rem;
   --text-sm:   0.8rem;
