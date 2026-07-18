@@ -407,7 +407,7 @@ export default function App() {
               const active = v1Book === bid;
               return (
                 <button key={bid} onClick={() => setV1Book(bid)}
-                  className={`glass-night rounded-2xl p-4 text-left transition-all duration-200 ${
+                  className={`glass-night rounded-2xl p-4 text-left transition-[transform,box-shadow,opacity,border-color] duration-200 ${
                     active
                       ? `ring-2 -translate-y-0.5 ${bid === 'edward' ? 'ring-blue-400/70 shadow-lg shadow-blue-500/25' : 'ring-fuchsia-400/70 shadow-lg shadow-fuchsia-500/25'}`
                       : 'opacity-80 hover:opacity-100 hover:-translate-y-0.5'
