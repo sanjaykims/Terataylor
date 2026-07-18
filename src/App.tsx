@@ -5,9 +5,11 @@ import CoralineWorld from './components/CoralineWorld';
 import { getStreak } from './lib/streak';
 import { decideWorldMode, markWorldSeen } from './lib/worldVisit';
 import Icon, { type IconName } from './components/Icon';
-import BookReader from './components/BookReader';
 
 // Non-default-view components — loaded on demand to keep the initial bundle lean.
+// BookReader is the largest component; lazy-loading it keeps switching to V1 off
+// the interaction's critical path (a spinner shows instantly, then it mounts).
+const BookReader        = lazy(() => import('./components/BookReader'));
 const ShadowingPlayer   = lazy(() => import('./components/ShadowingPlayer'));
 const VocabularyPanel   = lazy(() => import('./components/VocabularyPanel'));
 const OpinionWriter     = lazy(() => import('./components/OpinionWriter'));
@@ -500,7 +502,7 @@ export default function App() {
                   className={`seg-btn ${v1Tab === t.id ? 'seg-btn-active' : ''}`}>{t.label}</button>
               ))}
             </div>
-            {v1Tab === 'reading' && <BookReader key={v1Book} bookId={v1Book} onLessonVocabLoad={handleV1VocabLoad} />}
+            {v1Tab === 'reading' && <Suspense fallback={<TabSpinner />}><BookReader key={v1Book} bookId={v1Book} onLessonVocabLoad={handleV1VocabLoad} /></Suspense>}
             {v1Tab === 'vocabulary' && (() => {
               const vocabByChapter: Record<number, VocabItem[] | null> = {
                 1: v1Vocab1, 2: v1Vocab2, 3: v1Vocab3,

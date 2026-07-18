@@ -681,11 +681,59 @@ interface SentenceRowsProps {
   activeIdx: number; activeWordIdx: number; hasKo: boolean; hasAudio: boolean;
   mobileView: 'en' | 'ko';
   onSeek: (i: number) => void;
-  rowRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
-  mobileRowRefs: React.MutableRefObject<(HTMLParagraphElement | null)[]>;
+  setRowRef: (i: number, el: HTMLDivElement | null) => void;
+  setMobileRowRef: (i: number, el: HTMLParagraphElement | null) => void;
 }
+// One desktop row, memoized. Inactive rows receive wordIdx=-1 (a stable value),
+// so an audio word-advance re-renders ONLY the active row instead of the whole
+// chapter (the previous full-grid re-render was ~466ms of INP on big chapters).
+type RowProps = {
+  i: number; en: string; ko: string; active: boolean; wordIdx: number;
+  hasKo: boolean; hasAudio: boolean; onSeek: (i: number) => void;
+  setRowRef: (i: number, el: HTMLDivElement | null) => void;
+};
+const Row = memo(function Row({ i, en, ko, active, wordIdx, hasKo, hasAudio, onSeek, setRowRef }: RowProps) {
+  return (
+    <div ref={el => setRowRef(i, el)} onClick={() => hasAudio && onSeek(i)}
+      className={`grid grid-cols-2 items-start border-b border-violet-50 last:border-0 transition-colors ${
+        active ? 'bg-amber-50/80' : 'hover:bg-violet-50/40'
+      } ${hasAudio ? 'cursor-pointer' : ''}`}>
+      <div className="px-4 py-3 border-r border-violet-100/70">
+        <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-800'}`}>
+          {active ? renderWords(en, wordIdx) : en}
+        </p>
+      </div>
+      <div className="px-4 py-3">
+        {ko ? (
+          <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-700'}`}>{ko}</p>
+        ) : (i === 0 && !hasKo ? (
+          <p className="text-xs text-muted">번역 버튼을 눌러주세요</p>
+        ) : null)}
+      </div>
+    </div>
+  );
+});
+
+// One mobile row, memoized (same rationale).
+type MobileRowProps = {
+  i: number; text: string; active: boolean; wordIdx: number; variant: 'en' | 'ko';
+  hasAudio: boolean; onSeek: (i: number) => void;
+  setMobileRowRef: (i: number, el: HTMLParagraphElement | null) => void;
+};
+const MobileRow = memo(function MobileRow({ i, text, active, wordIdx, variant, hasAudio, onSeek, setMobileRowRef }: MobileRowProps) {
+  const inactive = variant === 'en' ? 'text-gray-800' : 'text-gray-700';
+  return (
+    <p ref={el => setMobileRowRef(i, el)} onClick={() => hasAudio && onSeek(i)}
+      className={`text-sm leading-relaxed border-b border-violet-50 pb-3 last:border-0 last:pb-0 transition-colors ${
+        active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : inactive
+      }`}>
+      {variant === 'en' && active ? renderWords(text, wordIdx) : text}
+    </p>
+  );
+});
+
 const SentenceRows = memo(function SentenceRows(
-  { enRows, koRows, maxRows, activeIdx, activeWordIdx, hasKo, hasAudio, mobileView, onSeek, rowRefs, mobileRowRefs }: SentenceRowsProps,
+  { enRows, koRows, maxRows, activeIdx, activeWordIdx, hasKo, hasAudio, mobileView, onSeek, setRowRef, setMobileRowRef }: SentenceRowsProps,
 ) {
   return (
     <>
@@ -702,25 +750,9 @@ const SentenceRows = memo(function SentenceRows(
         {Array.from({ length: maxRows }).map((_, i) => {
           const active = i === activeIdx;
           return (
-            <div key={i}
-              ref={el => { rowRefs.current[i] = el; }}
-              onClick={() => hasAudio && onSeek(i)}
-              className={`grid grid-cols-2 items-start border-b border-violet-50 last:border-0 transition-colors ${
-                active ? 'bg-amber-50/80' : 'hover:bg-violet-50/40'
-              } ${hasAudio ? 'cursor-pointer' : ''}`}>
-              <div className={`px-4 py-3 border-r border-violet-100/70`}>
-                <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-800'}`}>
-                  {active ? renderWords(enRows[i] ?? '', activeWordIdx) : (enRows[i] ?? '')}
-                </p>
-              </div>
-              <div className="px-4 py-3">
-                {koRows[i] ? (
-                  <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-700'}`}>{koRows[i]}</p>
-                ) : (i === 0 && !hasKo ? (
-                  <p className="text-xs text-muted">번역 버튼을 눌러주세요</p>
-                ) : null)}
-              </div>
-            </div>
+            <Row key={i} i={i} en={enRows[i] ?? ''} ko={koRows[i] ?? ''} active={active}
+              wordIdx={active ? activeWordIdx : -1} hasKo={hasKo} hasAudio={hasAudio}
+              onSeek={onSeek} setRowRef={setRowRef} />
           );
         })}
       </div>
@@ -729,23 +761,14 @@ const SentenceRows = memo(function SentenceRows(
       <div className="sm:hidden surface p-4 space-y-3">
         {mobileView === 'en'
           ? enRows.map((p, i) => (
-              <p key={i}
-                ref={el => { mobileRowRefs.current[i] = el; }}
-                onClick={() => hasAudio && onSeek(i)}
-                className={`text-sm leading-relaxed border-b border-violet-50 pb-3 last:border-0 last:pb-0 transition-colors ${
-                  i === activeIdx ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-800'
-                }`}>
-                {i === activeIdx ? renderWords(p, activeWordIdx) : p}
-              </p>
+              <MobileRow key={i} i={i} text={p} active={i === activeIdx}
+                wordIdx={i === activeIdx ? activeWordIdx : -1} variant="en"
+                hasAudio={hasAudio} onSeek={onSeek} setMobileRowRef={setMobileRowRef} />
             ))
           : koRows.filter(Boolean).length > 0
           ? koRows.map((p, i) => (
-              <p key={i}
-                ref={el => { mobileRowRefs.current[i] = el; }}
-                onClick={() => hasAudio && onSeek(i)}
-                className={`text-sm leading-relaxed border-b border-violet-50 pb-3 last:border-0 last:pb-0 transition-colors ${
-                  i === activeIdx ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-700'
-                }`}>{p}</p>
+              <MobileRow key={i} i={i} text={p} active={i === activeIdx} wordIdx={-1} variant="ko"
+                hasAudio={hasAudio} onSeek={onSeek} setMobileRowRef={setMobileRowRef} />
             ))
           : <div className="text-center py-8"><p className="text-xs text-muted">번역 버튼을 눌러서 한국어 번역을 불러오세요</p></div>}
       </div>
@@ -833,6 +856,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const loadSeqRef  = useRef(0); // bumped per loadChapter; guards stale writes
   const rowRefs       = useRef<(HTMLDivElement | null)[]>([]);
   const mobileRowRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+  // Stable ref setters so the memoized <Row>/<MobileRow> children never see a
+  // changing prop (the ref mutation lives here, where it's a real useRef).
+  const setRowRef       = useCallback((i: number, el: HTMLDivElement | null) => { rowRefs.current[i] = el; }, []);
+  const setMobileRowRef = useCallback((i: number, el: HTMLParagraphElement | null) => { mobileRowRefs.current[i] = el; }, []);
 
   // Maps book chapter numbers (e.g. 7) → lesson chapter index (e.g. 2).
   const bookChapterToLessonMap = useMemo(() => buildBookChapterToLessonMap(bookId), [bookId]);
@@ -1743,7 +1770,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           enRows={enRows} koRows={koRows} maxRows={maxRows}
           activeIdx={activeIdx} activeWordIdx={activeWordIdx}
           hasKo={!!koText} hasAudio={!!audioUrl} mobileView={mobileView}
-          onSeek={seekToSentence} rowRefs={rowRefs} mobileRowRefs={mobileRowRefs}
+          onSeek={seekToSentence} setRowRef={setRowRef} setMobileRowRef={setMobileRowRef}
         />
       ) : (
         <div className="surface-soft p-8 text-center text-sm text-gray-500">
