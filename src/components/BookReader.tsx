@@ -14,6 +14,7 @@ import {
 import { sessionSetDetail } from '../lib/tracker';
 import type { VocabItem } from '../lib/types';
 import type { WordTimestamp } from '../lib/audioAlign';
+import Icon from './Icon';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -692,10 +693,10 @@ const SentenceRows = memo(function SentenceRows(
       <div className="hidden sm:block surface overflow-hidden">
         <div className="grid grid-cols-2 border-b border-violet-100/70">
           <div className="px-4 py-2.5 border-r border-violet-100/70">
-            <span className="eyebrow text-violet-500/80">🇺🇸 English</span>
+            <span className="eyebrow text-violet-500/80 inline-flex items-center gap-1"><span className="lang-tag">EN</span> English</span>
           </div>
           <div className="px-4 py-2.5">
-            <span className="eyebrow text-violet-500/80">🇰🇷 한국어</span>
+            <span className="eyebrow text-violet-500/80 inline-flex items-center gap-1"><span className="lang-tag">KO</span> 한국어</span>
           </div>
         </div>
         {Array.from({ length: maxRows }).map((_, i) => {
@@ -707,7 +708,7 @@ const SentenceRows = memo(function SentenceRows(
               className={`grid grid-cols-2 items-start border-b border-violet-50 last:border-0 transition-colors ${
                 active ? 'bg-amber-50/80' : 'hover:bg-violet-50/40'
               } ${hasAudio ? 'cursor-pointer' : ''}`}>
-              <div className={`px-4 py-3 border-r border-violet-100/70 ${active ? 'border-l-2 border-l-amber-400' : ''}`}>
+              <div className={`px-4 py-3 border-r border-violet-100/70`}>
                 <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-800'}`}>
                   {active ? renderWords(enRows[i] ?? '', activeWordIdx) : (enRows[i] ?? '')}
                 </p>
@@ -716,7 +717,7 @@ const SentenceRows = memo(function SentenceRows(
                 {koRows[i] ? (
                   <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-700'}`}>{koRows[i]}</p>
                 ) : (i === 0 && !hasKo ? (
-                  <p className="text-xs text-gray-400 italic">번역 버튼을 눌러주세요</p>
+                  <p className="text-xs text-muted">번역 버튼을 눌러주세요</p>
                 ) : null)}
               </div>
             </div>
@@ -746,7 +747,7 @@ const SentenceRows = memo(function SentenceRows(
                   i === activeIdx ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-700'
                 }`}>{p}</p>
             ))
-          : <div className="text-center py-8"><p className="text-xs text-gray-400">번역 버튼을 눌러서 한국어 번역을 불러오세요</p></div>}
+          : <div className="text-center py-8"><p className="text-xs text-muted">번역 버튼을 눌러서 한국어 번역을 불러오세요</p></div>}
       </div>
     </>
   );
@@ -1459,7 +1460,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       <div className="flex items-center justify-center py-16">
         <div className="text-center space-y-2">
           <div className="text-3xl animate-pulse">{bk.emoji}</div>
-          <div className="text-xs text-gray-400">불러오는 중...</div>
+          <div className="text-xs text-muted">불러오는 중...</div>
         </div>
       </div>
     );
@@ -1480,27 +1481,30 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
 
         {extracting ? (
           <div className="surface p-6 space-y-3">
-            <div className="text-sm font-semibold text-gray-700 text-center">📖 챕터 분석 중...</div>
+            <div className="text-sm font-semibold text-gray-700 text-center">챕터 분석 중...</div>
             <div className="w-full bg-violet-100/70 rounded-full h-3 overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-200 bg-gradient-to-r from-violet-600 to-fuchsia-600"
+                className="progress-fill h-full transition-[width] duration-200"
                 style={{ width: progress.total ? `${(progress.done / progress.total) * 100}%` : '0%' }}
               />
             </div>
-            <div className="text-xs text-gray-400 text-center">
+            <div className="text-xs text-muted text-center">
               {progress.done} / {progress.total} 페이지
             </div>
           </div>
         ) : (
           <div
+            role="button" tabIndex={0}
+            aria-label={`${bk.shortTitle} PDF 업로드`}
             onClick={() => fileRef.current?.click()}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileRef.current?.click(); } }}
             onDragOver={e => e.preventDefault()}
             onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-            className={`border-2 border-dashed ${bk.border} ${bk.bg} rounded-2xl p-10 text-center cursor-pointer hover:opacity-80 transition-all`}
+            className={`border-2 border-dashed ${bk.border} ${bk.bg} rounded-2xl p-10 text-center cursor-pointer hover:opacity-80 transition-opacity`}
           >
-            <div className="text-4xl mb-3">{bk.emoji}</div>
+            <Icon name="document" className={`h-10 w-10 mx-auto mb-3 ${bk.color}`} />
             <div className={`text-sm font-bold ${bk.color}`}>{bk.shortTitle} PDF 업로드</div>
-            <div className="text-xs text-gray-400 mt-1.5">클릭하거나 드래그해서 파일 선택</div>
+            <div className="text-xs text-muted mt-1.5">클릭하거나 드래그해서 파일 선택</div>
             <input ref={fileRef} type="file" accept=".pdf,application/pdf" className="hidden"
               onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
           </div>
@@ -1517,21 +1521,21 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   return (
     <div className={`space-y-3 ${audioUrl ? 'pb-28' : ''}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className={`text-sm font-bold ${bk.color}`}>{bk.emoji} {bk.shortTitle}</span>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className={`text-sm font-bold shrink-0 ${bk.color}`}>{bk.emoji} {bk.shortTitle}</span>
           {detectedNote && (
-            <span className="text-xs text-gray-400">{detectedNote}</span>
+            <span className="text-xs text-muted truncate">{detectedNote}</span>
           )}
         </div>
         {confirmClear ? (
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500">정말 삭제할까요?</span>
             <button onClick={handleClearBook} className="text-xs text-red-500 font-semibold hover:text-red-700">삭제</button>
-            <button onClick={() => setConfirmClear(false)} className="text-xs text-gray-400 hover:text-gray-600">취소</button>
+            <button onClick={() => setConfirmClear(false)} className="text-xs text-muted hover:text-gray-600">취소</button>
           </div>
         ) : (
-          <button onClick={() => setConfirmClear(true)} className="text-xs text-gray-400 hover:text-red-500 transition-colors">🗑 삭제</button>
+          <button onClick={() => setConfirmClear(true)} className="text-xs text-muted hover:text-red-500 transition-colors inline-flex items-center gap-1"><Icon name="trash" className="h-3.5 w-3.5" /> 삭제</button>
         )}
       </div>
 
@@ -1542,9 +1546,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
             {visibleChapters.map(ch => (
               <button key={ch} onClick={() => selectChapter(ch)}
-                className={`shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition-all border relative ${
+                className={`shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition-colors border relative ${
                   selectedChapter === ch
-                    ? 'bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white border-transparent shadow-sm shadow-violet-500/30'
+                    ? 'fill-accent border-transparent shadow-sm shadow-violet-500/30'
                     : 'bg-white border-violet-100 text-gray-600 hover:border-violet-300 hover:text-violet-700'
                 }`}>
                 Ch.{String(ch).padStart(2, '0')}
@@ -1566,7 +1570,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
             : ` / ${totalChapters}`}
         </span>
         {enText && (
-          <span className="text-xs text-gray-400">{enText.trim().split(/\s+/).length}단어</span>
+          <span className="text-xs text-muted">{enText.trim().split(/\s+/).length}단어</span>
         )}
       </div>
 
@@ -1574,8 +1578,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       <div className="sm:hidden seg">
         {(['en', 'ko'] as const).map(v => (
           <button key={v} onClick={() => setMobileView(v)}
-            className={`seg-btn ${mobileView === v ? 'seg-btn-active' : ''}`}>
-            {v === 'en' ? '🇺🇸 영어' : '🇰🇷 한국어'}
+            className={`seg-btn inline-flex items-center justify-center gap-1.5 ${mobileView === v ? 'seg-btn-active' : ''}`}>
+            <span className="lang-tag">{v === 'en' ? 'EN' : 'KO'}</span>{v === 'en' ? '영어' : '한국어'}
           </button>
         ))}
       </div>
@@ -1583,19 +1587,19 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       {/* Translation controls */}
       {!chapterLoading && enText && !koText && !translating && (
         <button onClick={handleTranslate}
-          className="btn-primary w-full text-sm">
-          🌏 이 챕터 한국어로 번역하기
+          className="btn-primary w-full text-sm inline-flex items-center justify-center gap-2">
+          <Icon name="globe" className="h-4 w-4" /> 이 챕터 한국어로 번역하기
         </button>
       )}
       {translating && (
         <div className="surface-soft px-4 py-3 space-y-2">
           <div className="text-xs text-gray-600 font-semibold text-center">번역 중...</div>
           <div className="w-full bg-violet-100/70 rounded-full h-2 overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-violet-600 to-fuchsia-600"
+            <div className="progress-fill h-full transition-[width] duration-300"
               style={{ width: txProgress.total ? `${(txProgress.done / txProgress.total) * 100}%` : '15%' }} />
           </div>
           {txProgress.total > 0 && (
-            <div className="text-xs text-gray-400 text-center">{txProgress.done} / {txProgress.total} 구간</div>
+            <div className="text-xs text-muted text-center">{txProgress.done} / {txProgress.total} 구간</div>
           )}
         </div>
       )}
@@ -1606,8 +1610,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
             ⚠️ 영어와 한국어 문장 수가 맞지 않아요. 정렬하려면 다시 번역하세요.
           </span>
           <button onClick={handleTranslate}
-            className="shrink-0 px-3 py-1.5 bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white rounded-lg text-xs font-semibold hover:brightness-110 transition-all">
-            🔄 다시 번역
+            className="shrink-0 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5">
+            <Icon name="refresh" className="h-3.5 w-3.5" /> 다시 번역
           </button>
         </div>
       )}
@@ -1615,8 +1619,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         <div className="px-1 flex items-center justify-between">
           <span className="text-xs text-emerald-600 font-semibold">✓ 번역 저장됨</span>
           <button onClick={handleTranslate}
-            className="text-xs text-gray-400 hover:text-violet-600 transition-colors font-semibold">
-            🔄 다시 번역 (문장 정렬)
+            className="text-xs text-muted hover:text-violet-600 transition-colors font-semibold inline-flex items-center gap-1.5">
+            <Icon name="refresh" className="h-3.5 w-3.5" /> 다시 번역 (문장 정렬)
           </button>
         </div>
       )}
@@ -1625,15 +1629,15 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         <div className="surface p-4 space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              🎧 섀도잉 오디오
+              <Icon name="headphones" className="h-4 w-4 text-violet-500" /> 섀도잉 오디오
             </span>
             <div className="flex items-center gap-2">
               {audioUrl && (
                 <button onClick={handleDeleteAudio}
-                  className="text-xs text-gray-400 hover:text-red-500 transition-colors">🗑 삭제</button>
+                  className="text-xs text-muted hover:text-red-500 transition-colors inline-flex items-center gap-1"><Icon name="trash" className="h-3.5 w-3.5" /> 삭제</button>
               )}
               <button onClick={() => audioFileRef.current?.click()} disabled={audioUploading}
-                className="px-3 py-1.5 bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white rounded-lg text-xs font-semibold hover:brightness-110 disabled:opacity-50 transition-all">
+                className="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-semibold disabled:opacity-60 disabled:cursor-not-allowed">
                 {audioUploading
                   ? `⏳ ${uploadProgress.done}/${uploadProgress.total} 업로드 중…`
                   : audioUrl ? '📁 추가 업로드' : '+ mp3 업로드'}
@@ -1677,13 +1681,13 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                 <div className="seg">
                   <button
                     onClick={() => setClickMode('sentence')}
-                    className={`seg-btn ${clickMode === 'sentence' ? 'seg-btn-active' : ''}`}>
-                    🔂 한 문장
+                    className={`seg-btn inline-flex items-center gap-1.5 ${clickMode === 'sentence' ? 'seg-btn-active' : ''}`}>
+                    <Icon name="repeat" className="h-3.5 w-3.5" /> 한 문장
                   </button>
                   <button
                     onClick={() => { setClickMode('continue'); segmentEndRef.current = null; }}
-                    className={`seg-btn ${clickMode === 'continue' ? 'seg-btn-active' : ''}`}>
-                    ▶ 계속 듣기
+                    className={`seg-btn inline-flex items-center gap-1.5 ${clickMode === 'continue' ? 'seg-btn-active' : ''}`}>
+                    <Icon name="play" className="h-3.5 w-3.5" /> 계속 듣기
                   </button>
                 </div>
               </div>
@@ -1691,8 +1695,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
               {/* Real speech alignment */}
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 {timings && timings.length === enRows.length ? (
-                  <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
-                    🎯 음성 분석 적용됨 — 실제 발화에 맞춰 하이라이트
+                  <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
+                    <Icon name="target" className="h-3.5 w-3.5" /> 음성 분석 적용됨 — 실제 발화에 맞춰 하이라이트
                   </span>
                 ) : (
                   <span className="text-xs text-amber-600 font-semibold">
@@ -1700,10 +1704,12 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                   </span>
                 )}
                 <button onClick={handleAnalyzeAudio} disabled={analyzing}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 ${
-                    timings ? 'bg-violet-100 text-violet-700 hover:bg-violet-200' : 'bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white hover:brightness-110'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-60 disabled:cursor-not-allowed ${
+                    timings ? 'bg-violet-100 text-violet-700 hover:bg-violet-200' : 'bg-violet-600 text-white hover:bg-violet-700'
                   }`}>
-                  {analyzing ? '⏳ 분석 중…' : timings ? '🔄 음성 다시 분석' : '🎙 음성 분석 실행'}
+                  <span className="inline-flex items-center gap-1.5">
+                    {analyzing ? '분석 중…' : <><Icon name={timings ? 'refresh' : 'mic'} className="h-3.5 w-3.5" /> {timings ? '음성 다시 분석' : '음성 분석 실행'}</>}
+                  </span>
                 </button>
               </div>
               {(analyzing || analyzeMsg) && (
@@ -1712,13 +1718,13 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                   {analyzeMsg}
                 </p>
               )}
-              <p className="text-xs text-gray-400">
-                💡 재생하면 문장이 실시간으로 하이라이트돼요. ‘🔂 한 문장’은 클릭한 문장만 듣고 멈추고, ‘▶ 계속 듣기’는 그 문장부터 이어서 들어요.
+              <p className="text-xs text-muted">
+                💡 재생하면 문장이 실시간으로 하이라이트돼요. ‘한 문장’은 클릭한 문장만 듣고 멈추고, ‘계속 듣기’는 그 문장부터 이어서 들어요.
               </p>
             </>
           ) : (
             <button onClick={() => audioFileRef.current?.click()} disabled={audioUploading}
-              className={`w-full border-2 border-dashed ${bk.border} rounded-xl py-3 text-xs ${bk.color} hover:opacity-80 disabled:opacity-50 transition-all`}>
+              className={`w-full border-2 border-dashed ${bk.border} rounded-xl py-3 text-xs ${bk.color} hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed transition-opacity`}>
               {audioUploading
                 ? `⏳ ${uploadProgress.done}/${uploadProgress.total} 업로드 중…`
                 : '클릭해서 mp3 선택 · 여러 파일 한 번에 가능 · 파일명에 챕터 번호 포함 시 자동 분류'}
@@ -1730,7 +1736,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       {/* Reader */}
       {chapterLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="text-xs text-gray-400 animate-pulse">챕터 불러오는 중...</div>
+          <div className="text-xs text-muted animate-pulse">챕터 불러오는 중...</div>
         </div>
       ) : enText ? (
         <SentenceRows
@@ -1793,14 +1799,14 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
             {/* Controls row */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               {/* Play / Pause */}
-              <button onClick={togglePlay} style={{
+              <button onClick={togglePlay} aria-label={isPlaying ? '일시정지' : '재생'} style={{
                 width: 40, height: 40, borderRadius: '50%', border: 'none',
-                background: 'linear-gradient(135deg, #8b5cf6, #d946ef)', color: '#fff', fontSize: 18,
+                background: '#7c3aed', color: '#fff',
                 boxShadow: '0 8px 20px -8px rgba(124,58,237,0.8)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', flexShrink: 0,
               }}>
-                {isPlaying ? '⏸' : '▶'}
+                <Icon name={isPlaying ? 'pause' : 'play'} className="h-5 w-5" />
               </button>
               {/* Time */}
               <span style={{ color: '#c4b5fd', fontSize: 12, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
