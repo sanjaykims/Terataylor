@@ -3,12 +3,19 @@
 /* ── Design tokens (from the ui-ux-pro-max design system for a friendly,
       readable kids' education product) ────────────────────────────────────── */
 :root {
-  --brand:          #2563eb;  /* learning blue */
-  --brand-strong:   #1d4ed8;
+  /* Coraline "Other World" brand accent — the single source of truth for the
+     violet/fuchsia identity every surface used to hardcode inline. */
+  --accent:         #7c3aed;  /* violet */
+  --accent-2:       #db2777;  /* fuchsia */
+  --accent-ink:     #ffffff;  /* text on an --accent fill (AA on #7c3aed) */
+  --grad-brand:     linear-gradient(100deg, var(--accent) 0%, var(--accent-2) 100%);
+
+  --brand:          var(--accent);        /* focus ring / selection follow the accent */
+  --brand-strong:   #6d28d9;
   --play:           #f59e0b;  /* play yellow */
   --fun:            #ec4899;  /* fun pink */
   --ink:            #0f172a;
-  --muted-ink:      #64748b;
+  --muted-ink:      #64748b;  /* AA on white — use via .text-muted, not text-gray-400 */
 
   --radius-card:    1rem;
   --radius-pill:    999px;
@@ -286,31 +293,48 @@ button:not(:disabled):active,
   box-shadow: 0 8px 18px -8px rgba(124,58,237,.75), inset 0 1px 0 rgba(255,255,255,.28);
 }
 
-/* Buttons. */
+/* Buttons. The primary gradient is the ONE sanctioned utility treatment —
+   components reference this token instead of hand-rolling their own gradients. */
 .btn-primary {
-  background: linear-gradient(100deg, #7c3aed 0%, #db2777 100%);
-  color: #fff; font-weight: 800;
+  background: var(--grad-brand);
+  color: var(--accent-ink); font-weight: 800;
   border-radius: .9rem; padding: .72rem 1.25rem;
   box-shadow: 0 12px 26px -12px rgba(219,39,119,.7), inset 0 1px 0 rgba(255,255,255,.25);
   transition: transform .2s var(--ease-out-quint), box-shadow .2s var(--ease-out-quint), filter .2s ease;
 }
 .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 18px 34px -14px rgba(219,39,119,.8), inset 0 1px 0 rgba(255,255,255,.3); filter: brightness(1.04); }
+.btn-primary:disabled { opacity: .6; filter: saturate(.7); cursor: not-allowed; transform: none; }
 .btn-soft {
   background: #f2eeff; color: #5b21b6; font-weight: 700;
   border: 1px solid rgba(124,58,237,.14); border-radius: .9rem; padding: .62rem 1rem;
   transition: background .18s ease, transform .2s var(--ease-out-quint);
 }
 .btn-soft:hover { background: #e9e2ff; transform: translateY(-1px); }
+.btn-soft:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
-/* Refined text fields on light surfaces. */
+/* Solid brand fill — the "active = solid violet" language for small elements
+   (badges, active pills, quiz surfaces) that are too small to render a gradient. */
+.fill-accent { background: var(--accent); color: var(--accent-ink); }
+
+/* Progress / meter fill — defined once so no bar re-improvises a gradient. */
+.progress-fill { background: var(--accent); border-radius: 999px; }
+
+/* Meta / secondary text that still clears AA on light surfaces (replaces the
+   sub-3:1 text-gray-400/300 default the components kept reaching for). */
+.text-muted { color: var(--muted-ink); }
+
+/* Refined text fields on light surfaces. Border-width is constant across every
+   state (state goes to colour + ring); the accessible :focus-visible outline is
+   NOT suppressed, so keyboard users keep the app-wide ring. */
 .field {
   width: 100%; background: #fff; color: var(--ink);
   border: 1.5px solid rgba(124,58,237,.16); border-radius: .85rem;
   padding: .72rem .95rem; font-size: .95rem;
   transition: border-color .18s ease, box-shadow .18s ease;
 }
-.field::placeholder { color: #a99fc9; }
-.field:focus { outline: none; border-color: #a78bfa; box-shadow: 0 0 0 4px rgba(167,139,250,.2); }
+.field::placeholder { color: #877c9e; }         /* ~3.4:1 on white — legible guidance */
+.field:focus { border-color: #a78bfa; box-shadow: 0 0 0 4px rgba(167,139,250,.38); }
+.field:disabled { background: #f4f2fb; opacity: .7; cursor: not-allowed; }
 
 /* Accent chip / pill on light surfaces. */
 .chip {
@@ -318,6 +342,14 @@ button:not(:disabled):active,
   padding: .28rem .65rem; border-radius: 999px;
   font-size: .75rem; font-weight: 700;
   background: rgba(124,58,237,.09); color: #6d28d9;
+}
+/* Small typographic language tag (EN/KO) — platform-stable replacement for
+   regional-flag emoji, which silently degrade to bare letters on Windows. */
+.lang-tag {
+  display: inline-flex; align-items: center;
+  padding: .05rem .3rem; border-radius: .3rem;
+  font-size: .625rem; font-weight: 800; letter-spacing: .04em;
+  background: rgba(124,58,237,.12); color: #6d28d9;
 }
 
 /* ── Respect reduced-motion (accessibility) ────────────────────────────────── */

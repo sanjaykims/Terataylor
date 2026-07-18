@@ -4,6 +4,7 @@ import CoralineHero from './components/CoralineHero';
 import CoralineWorld from './components/CoralineWorld';
 import { getStreak } from './lib/streak';
 import { decideWorldMode, markWorldSeen } from './lib/worldVisit';
+import Icon, { type IconName } from './components/Icon';
 import BookReader from './components/BookReader';
 
 // Non-default-view components — loaded on demand to keep the initial bundle lean.
@@ -308,7 +309,7 @@ export default function App() {
     <div className="min-h-screen">
       {/* Header */}
       <header className="glass-night shadow-sm sticky top-0 z-20 border-b border-violet-300/15">
-        <div className={`${containerW} mx-auto px-4 py-3 flex items-center justify-between gap-2 transition-all`}>
+        <div className={`${containerW} mx-auto px-4 py-3 flex items-center justify-between gap-2`}>
           <div className="flex min-w-0 items-center gap-3">
             <div className="w-10 h-10 shrink-0 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-xl shadow-lg shadow-fuchsia-500/40 bg-gradient-to-br from-violet-500 via-fuchsia-500 to-indigo-600 ring-1 ring-white/25">T</div>
             <div className="min-w-0">
@@ -329,15 +330,16 @@ export default function App() {
             <button
               onClick={() => setWorldMode('full')}
               title="다른 세계 다시 보기"
-              className="shrink-0 whitespace-nowrap rounded-full bg-white/10 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-violet-100 ring-1 ring-white/15 hover:bg-white/15 hover:text-white"
+              className="shrink-0 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white/10 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-violet-100 ring-1 ring-white/15 hover:bg-white/15 hover:text-white"
             >
-              🌙 <span className="hidden sm:inline">다른 세계</span>
+              <Icon name="moon" className="h-3.5 w-3.5 text-amber-200" />
+              <span className="hidden sm:inline">다른 세계</span>
             </button>
           </div>
         </div>
       </header>
 
-      <div className={`${containerW} mx-auto px-4 py-5 space-y-5 transition-all`}>
+      <div className={`${containerW} mx-auto px-4 py-5 space-y-5`}>
 
         {/* ── CORALINE HERO (home showpiece) ────────────────────────────── */}
         {mainTab === 'v1' && v1Book === 'coraline' && <CoralineHero />}
@@ -346,8 +348,7 @@ export default function App() {
         <div className="grid grid-cols-3 gap-3">
           {([
             {
-              id: 'a2', icon: '🎧', label: 'A2 읽기/듣기', sub: '섀도잉 · 쓰기',
-              active: 'bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-indigo-300/60', dim: 'text-indigo-100',
+              id: 'a2', icon: 'headphones', label: 'A2 읽기/듣기', sub: '섀도잉 · 쓰기',
               preload: () => {
                 import('./components/ShadowingPlayer');
                 import('./components/VocabularyPanel');
@@ -358,8 +359,7 @@ export default function App() {
               },
             },
             {
-              id: 'v1', icon: '📖', label: 'V1 소설', sub: '원서읽기 · 단어장',
-              active: 'bg-gradient-to-br from-purple-500 to-purple-600 shadow-purple-300/60', dim: 'text-purple-100',
+              id: 'v1', icon: 'book', label: 'V1 소설', sub: '원서읽기 · 단어장',
               preload: () => {
                 import('./components/VocabularyPanel');
                 import('./components/GamesPanel');
@@ -367,31 +367,33 @@ export default function App() {
               },
             },
             {
-              id: 'progress', icon: '📊', label: '성장 기록', sub: '단어 · 점수',
-              active: 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-300/60', dim: 'text-emerald-100',
+              id: 'progress', icon: 'chart', label: '성장 기록', sub: '단어 · 점수',
               preload: () => { import('./components/ProgressDashboard'); },
             },
-          ] as { id: MainTab; icon: string; label: string; sub: string; active: string; dim: string; preload: () => void }[]).map(t => (
-            <button key={t.id}
-              onClick={() => {
-                if (t.id === mainTab) return; // re-tapping the active tab is a no-op
-                // Browsing the dashboard is not studying — pause the clock.
-                if (t.id === 'progress') sessionPause();
-                else sessionSwitch(t.id, t.id === 'a2' ? a2Tab : v1Tab);
-                setMainTab(t.id);
-              }}
-              onMouseEnter={t.preload}
-              onTouchStart={t.preload}
-              className={`py-4 rounded-2xl font-bold text-base transition-all duration-200 flex flex-col items-center gap-1 border ${
-                mainTab === t.id
-                  ? `${t.active} text-white shadow-xl -translate-y-0.5 border-white/25`
-                  : 'glass-night text-violet-100/80 hover:-translate-y-0.5 hover:text-white hover:border-violet-300/40'
-              }`}>
-              <span className="text-2xl drop-shadow-[0_2px_6px_rgba(0,0,0,.4)]">{t.icon}</span>
-              <span className="text-sm">{t.label}</span>
-              <span className={`text-xs font-normal ${mainTab === t.id ? t.dim : 'text-violet-200/50'}`}>{t.sub}</span>
-            </button>
-          ))}
+          ] as { id: MainTab; icon: IconName; label: string; sub: string; preload: () => void }[]).map(t => {
+            const activeTab = mainTab === t.id;
+            return (
+              <button key={t.id}
+                onClick={() => {
+                  if (t.id === mainTab) return; // re-tapping the active tab is a no-op
+                  // Browsing the dashboard is not studying — pause the clock.
+                  if (t.id === 'progress') sessionPause();
+                  else sessionSwitch(t.id, t.id === 'a2' ? a2Tab : v1Tab);
+                  setMainTab(t.id);
+                }}
+                onMouseEnter={t.preload}
+                onTouchStart={t.preload}
+                className={`py-4 px-2 rounded-2xl font-bold text-base flex flex-col items-center gap-1.5 border transition-[color,background-color,border-color,box-shadow] duration-200 ${
+                  activeTab
+                    ? 'bg-violet-600 text-white shadow-xl shadow-violet-900/40 border-white/25'
+                    : 'glass-night text-violet-100/80 hover:text-white hover:border-violet-300/40'
+                }`}>
+                <Icon name={t.icon} className={`h-7 w-7 ${activeTab ? 'text-white' : 'text-violet-200'}`} />
+                <span className="text-sm whitespace-nowrap">{t.label}</span>
+                <span className={`text-[11px] font-normal whitespace-nowrap ${activeTab ? 'text-violet-100/90' : 'text-violet-200/50'}`}>{t.sub}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* ── V1: LESSON SCHEDULE WIDGET ────────────────────────────────── */}
@@ -432,18 +434,19 @@ export default function App() {
             <button onClick={() => setShowA2Input(!showA2Input)}
               className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-violet-50/60 transition-colors">
               <span className="font-bold text-gray-800 flex items-center gap-2">
-                📸 교재 입력
-                <span className="text-xs font-normal text-gray-400">지문 · 단어 · 오디오</span>
+                <Icon name="camera" className="h-5 w-5 text-violet-500" />
+                교재 입력
+                <span className="text-xs font-normal text-muted">지문 · 단어 · 오디오</span>
               </span>
-              <span className="text-violet-400 text-sm font-semibold">{showA2Input ? '▲ 접기' : '▼ 펼치기'}</span>
+              <span className="text-violet-500 text-sm font-semibold">{showA2Input ? '접기' : '펼치기'}</span>
             </button>
             {showA2Input && (
               <div className="px-5 pb-5 space-y-4">
                 <Suspense fallback={<TabSpinner />}>
-                  <ImageUploadInput mode="text" label="📄 지문 사진" hint="교재 본문 페이지 — 여러 장 가능"
+                  <ImageUploadInput mode="text" label="지문 사진" hint="교재 본문 페이지 — 여러 장 가능"
                     savedSummary={a2TextSummary} onClear={() => setA2Text('')} onExtracted={setA2Text} />
                   <hr className="border-gray-100" />
-                  <ImageUploadInput mode="vocab" label="📚 단어 사진" hint="책에서 지정한 단어 목록 사진"
+                  <ImageUploadInput mode="vocab" label="단어 사진" hint="책에서 지정한 단어 목록 사진"
                     savedSummary={a2VocabSummary} onClear={() => setA2Vocab(null)} onExtracted={setA2Vocab} />
                 </Suspense>
               </div>
@@ -457,11 +460,11 @@ export default function App() {
           <>
             <div className="seg">
               {([
-                { id: 'reading',    label: '📄 지문 보기' },
-                { id: 'shadowing',  label: '🎧 섀도잉' },
-                { id: 'vocabulary', label: '📚 단어장' },
-                { id: 'opinion',    label: '✍️ 의견 쓰기' },
-                { id: 'games',      label: '🎮 게임' },
+                { id: 'reading',    label: '지문 보기' },
+                { id: 'shadowing',  label: '섀도잉' },
+                { id: 'vocabulary', label: '단어장' },
+                { id: 'opinion',    label: '의견 쓰기' },
+                { id: 'games',      label: '게임' },
               ] as { id: A2Tab; label: string }[]).map(t => (
                 <button key={t.id} onClick={() => { if (t.id !== a2Tab) { sessionSwitch('a2', t.id); setA2Tab(t.id); } }}
                   className={`seg-btn ${a2Tab === t.id ? 'seg-btn-active' : ''}`}>{t.label}</button>
@@ -489,9 +492,9 @@ export default function App() {
           <>
             <div className="seg">
               {([
-                { id: 'reading',    label: '📖 원서 읽기' },
-                { id: 'vocabulary', label: '📚 단어장' },
-                { id: 'games',      label: '🎮 게임' },
+                { id: 'reading',    label: '원서 읽기' },
+                { id: 'vocabulary', label: '단어장' },
+                { id: 'games',      label: '게임' },
               ] as { id: V1Tab; label: string }[]).map(t => (
                 <button key={t.id} onClick={() => { if (t.id !== v1Tab) { sessionSwitch('v1', t.id); setV1Tab(t.id); } }}
                   className={`seg-btn ${v1Tab === t.id ? 'seg-btn-active' : ''}`}>{t.label}</button>
@@ -508,12 +511,14 @@ export default function App() {
               const chLabel = (ch: number) => `Ch.0${ch} 단어장`;
               return (
                 <>
-                  {/* Chapter selector — two rows of 3 */}
-                  <div className="seg grid grid-cols-3">
+                  {/* Chapter selector — real 3-col grid so 6 chapters wrap to
+                      two readable rows on phones (a bare .seg would scroll). */}
+                  <div className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl border border-violet-300/15"
+                       style={{ background: 'linear-gradient(180deg, rgba(30,27,75,.6), rgba(17,14,46,.7))' }}>
                     {([1, 2, 3, 4, 5, 6] as const).map(ch => (
                       <button key={ch}
                         onClick={() => { setV1VocabCh(ch); setV1StudiedWords([]); }}
-                        className={`seg-btn ${v1VocabCh === ch ? 'seg-btn-active' : ''}`}>
+                        className={`seg-btn text-center justify-center ${v1VocabCh === ch ? 'seg-btn-active' : ''}`}>
                         {chLabel(ch)}
                       </button>
                     ))}
@@ -524,7 +529,7 @@ export default function App() {
                       <ImageUploadInput
                         key={`vocab-upload-${v1Book}-ch${v1VocabCh}`}
                         mode="vocab"
-                        label={`📚 ${chLabel(v1VocabCh)} 사진`}
+                        label={`${chLabel(v1VocabCh)} 사진`}
                         hint="단어장 사진을 올리면 자동으로 목록이 만들어져요"
                         savedSummary={activeSummary}
                         onClear={() => setV1ChVocab(v1VocabCh, null)}
