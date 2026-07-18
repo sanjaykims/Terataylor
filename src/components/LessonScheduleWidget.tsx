@@ -1,4 +1,5 @@
 import { SCHEDULE, BOOKS, HOLIDAY, kstToday } from '../data/syllabus';
+import Icon from './Icon';
 
 // All date logic on 'YYYY-MM-DD' strings compared in the academy's timezone
 // (KST), so it is correct regardless of the viewing device's timezone. Day
@@ -42,7 +43,8 @@ export default function LessonScheduleWidget() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="font-bold text-sm text-violet-100 flex items-center gap-1.5">
-          📅 V1 Tera 수업 일정
+          <Icon name="calendar" className="h-4 w-4 text-violet-300" />
+          V1 Tera 수업 일정
           <span className="text-xs font-normal text-violet-200/50">여름학기 2026</span>
         </div>
         <span className="text-xs text-violet-200/50">총 12회 수업</span>
@@ -60,9 +62,10 @@ export default function LessonScheduleWidget() {
         <div className="grid grid-cols-2 gap-3">
           {/* Current lesson */}
           {current && (
-            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-              <div className="text-xs text-violet-200/60 font-semibold mb-1">
-                {isToday(current.date) ? '🟢 오늘 수업' : '✅ 지난 수업'}
+            <div className="bg-white/5 rounded-xl p-3">
+              <div className="text-xs text-violet-200/60 font-semibold mb-1 flex items-center gap-1.5">
+                <span className={`inline-block w-2 h-2 rounded-full ${isToday(current.date) ? 'bg-emerald-400' : 'bg-white/30'}`} />
+                {isToday(current.date) ? '오늘 수업' : '지난 수업'}
               </div>
               <div className={`font-bold text-sm ${lessonText[current.book]}`}>Lesson {String(current.lesson).padStart(2,'0')}</div>
               <div className="text-xs text-violet-100/70 mt-0.5">{BOOKS[current.book].shortTitle}</div>
@@ -73,9 +76,11 @@ export default function LessonScheduleWidget() {
 
           {/* Next lesson */}
           {next && (
-            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+            <div className="bg-white/5 rounded-xl p-3">
               <div className="flex items-center justify-between mb-1">
-                <div className="text-xs text-violet-200/60 font-semibold">📌 다음 수업</div>
+                <div className="text-xs text-violet-200/60 font-semibold flex items-center gap-1.5">
+                  <Icon name="pin" className="h-3.5 w-3.5" /> 다음 수업
+                </div>
                 {dTag && (
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full text-white ${
                     daysUntil === 0 ? 'bg-red-500' : daysUntil! <= 3 ? 'bg-orange-500' : 'bg-gray-400'
@@ -90,8 +95,10 @@ export default function LessonScheduleWidget() {
           )}
 
           {!current && next && (
-            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-              <div className="text-xs text-violet-200/60 font-semibold mb-1">📖 첫 수업</div>
+            <div className="bg-white/5 rounded-xl p-3">
+              <div className="text-xs text-violet-200/60 font-semibold mb-1 flex items-center gap-1.5">
+                <Icon name="book" className="h-3.5 w-3.5" /> 첫 수업
+              </div>
               <div className="text-xs text-violet-100/70">June 3 — 준비하세요!</div>
             </div>
           )}
@@ -100,8 +107,8 @@ export default function LessonScheduleWidget() {
 
       {/* Homework */}
       {current && !isToday(current.date) && (
-        <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 flex items-start gap-2">
-          <span className="text-base shrink-0">📝</span>
+        <div className="bg-white/5 rounded-xl px-3 py-2 flex items-start gap-2">
+          <Icon name="document" className="h-4 w-4 shrink-0 text-violet-300 mt-0.5" />
           <div>
             <div className="text-xs font-bold text-violet-200/70">이번 주 숙제</div>
             <div className="text-sm text-violet-50 mt-0.5">{current.homework}</div>
@@ -116,7 +123,7 @@ export default function LessonScheduleWidget() {
           <span className="font-semibold">{done} / {total} 완료 ({pct}%)</span>
         </div>
         <div className="w-full bg-white/10 rounded-full h-2.5 border border-white/10 overflow-hidden">
-          <div className={`h-full rounded-full transition-all duration-700 ${bk.badge}`}
+          <div className={`h-full rounded-full transition-[width] duration-700 ${bk.badge}`}
             style={{ width: `${pct}%` }} />
         </div>
         <div className="flex mt-1 gap-0.5">
@@ -125,7 +132,7 @@ export default function LessonScheduleWidget() {
             const isCur = current?.lesson === l.lesson;
             return (
               <div key={l.lesson} title={`Lesson ${l.lesson} (${l.book === 'edward' ? 'ET' : 'CL'})`}
-                className={`flex-1 h-1.5 rounded-full transition-all ${
+                className={`flex-1 h-1.5 rounded-full transition-colors ${
                   isCur ? bk.badge + ' opacity-100' :
                   past ? (l.book === 'edward' ? 'bg-sky-400' : 'bg-fuchsia-400') :
                   'bg-white/12'

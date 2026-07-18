@@ -6,10 +6,10 @@ import type { VocabItem } from '../lib/types';
 
 type GameType = 'scramble' | 'quiz' | 'space';
 
-const TABS: { id: GameType; label: string; active: string }[] = [
-  { id: 'scramble', label: '🎮 문장 퍼즐',  active: 'bg-indigo-600 text-white shadow-sm' },
-  { id: 'quiz',     label: '⚡ 단어 퀴즈',  active: 'bg-orange-500 text-white shadow-sm' },
-  { id: 'space',    label: '🛸 우주 게임',  active: 'bg-slate-800 text-green-400 shadow-sm' },
+const TABS: { id: GameType; label: string }[] = [
+  { id: 'scramble', label: '문장 퍼즐' },
+  { id: 'quiz',     label: '단어 퀴즈' },
+  { id: 'space',    label: '우주 게임' },
 ];
 
 interface Props {
@@ -23,7 +23,7 @@ export default function GamesPanel({ text, vocab, selectedWords }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="seg grid grid-cols-3">
+      <div className="seg">
         {TABS.map(t => (
           <button key={t.id} onClick={() => setGame(t.id)}
             className={`seg-btn ${game === t.id ? 'seg-btn-active' : ''}`}>
