@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { parseSentences } from '../utils/textUtils';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
+import Icon from './Icon';
 
 interface Props {
   text: string;
@@ -71,7 +72,7 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
       {!audioUrl && !audioUploading && (
         <button
           onClick={() => audioFileRef.current?.click()}
-          className="mt-3 w-full border-2 border-dashed border-violet-200 rounded-xl py-3 text-xs text-violet-500 hover:bg-violet-50 transition-all"
+          className="mt-3 w-full border-2 border-dashed border-violet-200 rounded-xl py-3 text-xs text-violet-500 hover:bg-violet-50"
         >
           클릭해서 mp3 파일 선택
         </button>
@@ -108,30 +109,30 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
         <div className="surface p-5">
           <div className="flex flex-wrap items-center gap-4 mb-4">
             <button onClick={handlePlayPause}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white transition-all shadow-md active:scale-95 ${
-                isPlaying ? 'bg-amber-500 hover:bg-amber-600' : 'bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600'
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white shadow-md ${
+                isPlaying ? 'bg-amber-500 hover:bg-amber-600' : 'bg-violet-600 hover:bg-violet-700'
               }`}>
-              {isPlaying ? <><span className="text-xl">⏸</span> 일시정지</>
-                : state === 'paused' ? <><span className="text-xl">▶️</span> 계속</>
-                : <><span className="text-xl">▶️</span> 재생</>}
+              {isPlaying ? <><Icon name="pause" className="h-5 w-5" /> 일시정지</>
+                : state === 'paused' ? <><Icon name="play" className="h-5 w-5" /> 계속</>
+                : <><Icon name="play" className="h-5 w-5" /> 재생</>}
             </button>
 
             <button onClick={stop} disabled={!isActive}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl font-semibold bg-gray-100 hover:bg-gray-200 disabled:opacity-40 transition-all">
-              <span className="text-xl">⏹</span> 정지
+              className="flex items-center gap-2 px-4 py-3 rounded-xl font-semibold bg-gray-100 hover:bg-gray-200 disabled:opacity-60 disabled:cursor-not-allowed">
+              <Icon name="stop" className="h-5 w-5" /> 정지
             </button>
 
             <button onClick={() => skipPrev(sentences, rate, shadowMode, shadowPause)}
-              disabled={!isActive || currentIndex <= 0}
-              className="px-3 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-40 transition-all text-xl" title="이전 문장">⏮</button>
+              disabled={!isActive || currentIndex <= 0} aria-label="이전 문장"
+              className="px-3 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-60 disabled:cursor-not-allowed" title="이전 문장"><Icon name="prev" className="h-5 w-5" /></button>
 
             <button onClick={() => replayCurrent(sentences, rate, shadowMode, shadowPause)}
-              disabled={!isActive}
-              className="px-3 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-40 transition-all text-xl" title="현재 문장 다시">🔄</button>
+              disabled={!isActive} aria-label="현재 문장 다시"
+              className="px-3 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-60 disabled:cursor-not-allowed" title="현재 문장 다시"><Icon name="replay" className="h-5 w-5" /></button>
 
             <button onClick={() => skipNext(sentences, rate, shadowMode, shadowPause)}
-              disabled={!isActive || currentIndex >= sentences.length - 1}
-              className="px-3 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-40 transition-all text-xl" title="다음 문장">⏭</button>
+              disabled={!isActive || currentIndex >= sentences.length - 1} aria-label="다음 문장"
+              className="px-3 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-60 disabled:cursor-not-allowed" title="다음 문장"><Icon name="next" className="h-5 w-5" /></button>
           </div>
 
           <div className="flex flex-wrap items-center gap-6">
@@ -148,13 +149,16 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <div onClick={() => setShadowMode(!shadowMode)}
-                  className={`relative w-12 h-6 rounded-full transition-colors ${shadowMode ? 'bg-purple-600' : 'bg-gray-300'}`}>
-                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${shadowMode ? 'translate-x-7' : 'translate-x-1'}`} />
-                </div>
-                <span className="text-sm font-semibold text-gray-700">🎙 섀도잉 모드</span>
-              </label>
+              <button type="button" role="switch" aria-checked={shadowMode}
+                onClick={() => setShadowMode(!shadowMode)}
+                className="flex items-center gap-2 select-none">
+                <span className={`relative w-12 h-6 rounded-full transition-colors ${shadowMode ? 'bg-violet-600' : 'bg-gray-300'}`}>
+                  <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${shadowMode ? 'translate-x-7' : 'translate-x-1'}`} />
+                </span>
+                <span className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                  <Icon name="mic" className="h-4 w-4 text-violet-500" /> 섀도잉 모드
+                </span>
+              </button>
               {shadowMode && (
                 <div className="flex items-center gap-1">
                   <span className="text-xs text-gray-500">대기</span>
@@ -172,8 +176,8 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
           </div>
 
           {isWaiting && shadowMode && (
-            <div className="mt-3 flex items-center gap-2 text-purple-700 font-semibold animate-pulse">
-              <span className="text-xl">🎙</span>
+            <div className="mt-3 flex items-center gap-2 text-violet-700 font-semibold animate-pulse">
+              <Icon name="mic" className="h-5 w-5" />
               <span>지금 따라 말해보세요! ({shadowPause}초)</span>
             </div>
           )}
@@ -193,14 +197,14 @@ export default function ShadowingPlayer({ text, audioUrl, audioUploading, onAudi
             <div key={i}
               ref={el => { sentenceRefs.current[i] = el; }}
               onClick={() => !audioUrl && handleSentenceClick(i)}
-              className={`group flex gap-3 p-3 rounded-xl transition-all ${
+              className={`group flex gap-3 p-3 rounded-xl transition-[background-color,border-color] ${
                 audioUrl ? 'cursor-default' : 'cursor-pointer'
               } ${isCurrentSentence
                   ? 'bg-violet-50 border-2 border-violet-400'
                   : 'border-2 border-transparent hover:bg-gray-50 hover:border-gray-200'
               }`}>
               <span className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                isCurrentSentence ? 'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
+                isCurrentSentence ? 'fill-accent' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
               }`}>{i + 1}</span>
               <p className={`text-left leading-relaxed ${isCurrentSentence ? 'text-violet-900 font-semibold text-base' : 'text-gray-700 text-base'}`}>
                 {sentence}

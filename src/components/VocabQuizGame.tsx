@@ -248,26 +248,27 @@ export default function VocabQuizGame({ text, bookVocab }: { text: string; bookV
       {/* Progress bar */}
       <div className="w-full bg-violet-100 rounded-full h-1.5">
         <div
-          className="bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-full transition-all"
+          className="progress-fill h-1.5 transition-[width]"
           style={{ width: `${(qIndex / questions.length) * 100}%` }}
         />
       </div>
 
-      {/* Timer bar */}
+      {/* Timer bar — only WIDTH tweens; the urgency color must snap, not
+          crossfade over the 1s window (or the red "almost out" arrives late). */}
       <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-1000 ease-linear ${timerColor}`}
+          className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${timerColor}`}
           style={{ width: `${timerPct}%` }}
         />
       </div>
-      <div className={`text-right text-xs font-bold -mt-2 ${timeLeft <= 3 ? 'text-red-500' : 'text-gray-400'}`}>
+      <div className={`text-right text-xs font-bold -mt-2 ${timeLeft <= 3 ? 'text-red-500' : 'text-muted'}`}>
         {timeLeft}초
       </div>
 
       {/* Word card */}
-      <div className="bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white rounded-[1.25rem] p-8 text-center shadow-lg">
+      <div className="bg-violet-600 text-white rounded-[1.25rem] p-6 sm:p-8 text-center shadow-lg">
         <div className="text-xs uppercase tracking-widest text-violet-200 mb-2">이 단어의 뜻은?</div>
-        <div className="font-display text-4xl font-bold">{q.word}</div>
+        <div className="font-display text-3xl sm:text-4xl font-bold break-words">{q.word}</div>
       </div>
 
       {/* Options */}
@@ -290,7 +291,7 @@ export default function VocabQuizGame({ text, bookVocab }: { text: string; bookV
               key={i}
               onClick={() => handleSelect(opt)}
               disabled={selected !== null}
-              className={`w-full p-4 rounded-xl text-left text-sm leading-snug font-medium transition-all ${cls}`}
+              className={`w-full p-4 rounded-xl text-left text-sm leading-snug font-medium ${cls}`}
             >
               <span className="font-bold mr-2 opacity-60">{String.fromCharCode(65 + i)}.</span>
               {opt}

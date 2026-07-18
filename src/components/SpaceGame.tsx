@@ -410,8 +410,8 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
           <div style={{fontSize:56}}>🛸</div>
           <div className="text-white font-bold text-2xl tracking-wide">VOCAB INVADERS</div>
           <div className="text-gray-300 text-sm text-center px-8 leading-relaxed">
-            외계인에 적힌 <span className="text-blue-300 font-bold">🇰🇷 한국어 뜻</span>을 보고<br/>
-            <span className="text-yellow-300 font-bold">🇺🇸 영어 단어를 타이핑</span>하면 레이저 발사! ♥
+            외계인에 적힌 <span className="text-blue-300 font-bold">한국어 뜻</span>을 보고<br/>
+            <span className="text-yellow-300 font-bold">영어 단어를 타이핑</span>하면 레이저 발사! ♥
           </div>
           <div className="text-gray-500 text-xs">
             {selectedWords?.length
@@ -421,7 +421,7 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
               : `교재 단어 ${vocabPairs.length}개 · 3 WAVES`}
           </div>
           <button onClick={startGame}
-            className="px-8 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-xl text-lg hover:from-violet-500 hover:to-fuchsia-500 transition-all active:scale-95 shadow-lg">
+            className="px-8 py-3 bg-violet-600 text-white font-bold rounded-xl text-lg hover:bg-violet-500 shadow-lg">
             🚀 START
           </button>
         </Overlay>}
@@ -439,7 +439,7 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
           <div className="text-yellow-300 text-2xl font-bold">{score}점</div>
           <div className="text-gray-300 text-sm">Taylor, 다시 도전! 💪</div>
           <button onClick={startGame}
-            className="px-8 py-3 bg-red-600 text-white font-bold rounded-xl text-lg hover:bg-red-500 transition-all active:scale-95">
+            className="px-8 py-3 bg-red-600 text-white font-bold rounded-xl text-lg hover:bg-red-500">
             🔄 RETRY
           </button>
         </Overlay>}
@@ -450,7 +450,7 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
           <div className="text-white text-3xl font-bold">{score}점</div>
           <div className="text-green-400 text-sm">모든 외계인 격추! 최고야 Taylor! 🎊</div>
           <button onClick={startGame}
-            className="px-8 py-3 bg-yellow-500 text-white font-bold rounded-xl text-lg hover:bg-yellow-400 transition-all active:scale-95">
+            className="px-8 py-3 bg-yellow-500 text-white font-bold rounded-xl text-lg hover:bg-yellow-400">
             🚀 PLAY AGAIN
           </button>
         </Overlay>}
@@ -463,7 +463,7 @@ export default function SpaceGame({ text, bookVocab, selectedWords }: { text: st
             onChange={e => handleChange(e.target.value)}
             onKeyDown={e => { if(e.key==='Escape'){setIv('');live.current='';} }}
             placeholder="단어를 타이핑하면 레이저 발사!"
-            className="flex-1 bg-gray-900 text-green-400 font-mono font-bold text-lg px-4 py-3 rounded-xl border-2 border-violet-700 focus:border-violet-400 focus:outline-none placeholder-gray-700"
+            className="flex-1 bg-gray-900 text-green-400 font-mono font-bold text-lg px-4 py-3 rounded-xl border-2 border-violet-700 focus:border-violet-400 focus:ring-2 focus:ring-violet-400 placeholder-gray-400"
             autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false}
           />
         </div>
