@@ -5,7 +5,8 @@ description: Query or refresh the Terataylor Graphify knowledge graph
 
 # Workflow: Graphify
 
-Use this workflow before broad manual source exploration.
+Use this workflow before broad manual source exploration. Codex, Claude Code,
+and Antigravity must use Graphify first for future development in this repo.
 
 1. If `graphify` is not on PATH, install it in a temp venv:
 

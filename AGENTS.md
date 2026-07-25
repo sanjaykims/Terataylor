@@ -5,9 +5,11 @@ architecture notes, commands, and design constraints for this repo.
 
 ## Graphify First
 
-This repo commits a Graphify snapshot in `graphify-out/`. For codebase
-questions, architecture work, impact analysis, and "where is X?" exploration,
-consult Graphify before broad source browsing.
+This repo commits a Graphify snapshot in `graphify-out/`. For all future
+development in this repo, Codex, Claude Code, and Antigravity must use
+Graphify before broad source exploration. For codebase questions, architecture
+work, impact analysis, and "where is X?" exploration, consult Graphify before
+broad source browsing.
 
 If `graphify` is not already on PATH, install it in a temp venv:
 

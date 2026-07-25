@@ -7,6 +7,9 @@ description: Consult the Graphify knowledge graph at graphify-out/ for codebase 
 
 This project has a Graphify knowledge graph at `graphify-out/`.
 
+For all future development in this repo, Codex, Claude Code, and Antigravity
+must use Graphify before broad source exploration.
+
 Rules:
 
 - For codebase or architecture questions, when `graphify-out/graph.json`

@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Graphify First
 
-This repo commits a Graphify snapshot in `graphify-out/`. Before broad source
-exploration, architecture work, impact analysis, or "where is X?" searches,
-ask Graphify first:
+This repo commits a Graphify snapshot in `graphify-out/`. For all future
+development in this repo, Codex, Claude Code, and Antigravity must use
+Graphify before broad source exploration. Before architecture work, impact
+analysis, or "where is X?" searches, ask Graphify first:
 
 ```bash
 graphify query "<question>"
