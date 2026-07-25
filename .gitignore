@@ -10,6 +10,9 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+graphify-out/cache/
+graphify-out/.graphify_root
+graphify-out/manifest.json
 *.local
 
 # Editor directories and files

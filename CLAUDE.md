@@ -2,6 +2,37 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Graphify First
+
+This repo commits a Graphify snapshot in `graphify-out/`. Before broad source
+exploration, architecture work, impact analysis, or "where is X?" searches,
+ask Graphify first:
+
+```bash
+graphify query "<question>"
+graphify explain "<node>"
+graphify path "<A>" "<B>"
+```
+
+If `graphify` is not on PATH, install it in the standard temp venv:
+
+```bash
+GRAPHIFY_VENV="${TMPDIR:-/tmp}/graphify-phase-a-venv"
+python3.14 -m venv "$GRAPHIFY_VENV"
+"$GRAPHIFY_VENV/bin/python" -m pip install graphifyy
+export PATH="$GRAPHIFY_VENV/bin:$PATH"
+```
+
+Read `graphify-out/GRAPH_REPORT.md` only for broad architecture review or when
+query/path/explain do not return enough context. After code changes, refresh
+the snapshot with:
+
+```bash
+graphify extract . --code-only --out .
+graphify cluster-only . --graph graphify-out/graph.json --no-label
+graphify tree --graph graphify-out/graph.json --output graphify-out/GRAPH_TREE.html --root . --label Terataylor
+```
+
 ## What This App Is
 
 **Hearth** is a warm editorial-tech **design system** implemented as a React app, with a

@@ -1,0 +1,13 @@
+graphify-out/
+.git/
+.claude/
+.agents/
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.env
+.env.*
+*.local
+*.tsbuildinfo
+.DS_Store

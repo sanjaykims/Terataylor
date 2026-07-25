@@ -139,7 +139,9 @@ export default function App() {
   // Mirror the current book in a ref so a late vocab callback from a just-
   // unmounted BookReader (book switch) can't drop old vocab into new slots.
   const v1BookRef = useRef(v1Book);
-  v1BookRef.current = v1Book;
+  useEffect(() => {
+    v1BookRef.current = v1Book;
+  }, [v1Book]);
   const handleV1VocabLoad = (vocab: VocabItem[], chapter: number, forBook: BookId) => {
     if (forBook !== v1BookRef.current) return;
     if (chapter === 1) setV1Vocab1(vocab); else if (chapter === 2) setV1Vocab2(vocab);
