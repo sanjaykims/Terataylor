@@ -1,82 +1,6 @@
 {
   "communities": {
     "0": [
-      "src_components_bookreader",
-      "src_components_bookreader_bookreader",
-      "src_components_bookreader_buildbookchaptertolessonmap",
-      "src_components_bookreader_buildxingframe",
-      "src_components_bookreader_chapter_heading",
-      "src_components_bookreader_chapter_number_words",
-      "src_components_bookreader_chapternumberforms",
-      "src_components_bookreader_cleanchaptertext",
-      "src_components_bookreader_cleanpagetext",
-      "src_components_bookreader_detectrunningheaders",
-      "src_components_bookreader_extractallpages",
-      "src_components_bookreader_extractfnerror",
-      "src_components_bookreader_findchapterannouncement",
-      "src_components_bookreader_findmp3sync",
-      "src_components_bookreader_initstate",
-      "src_components_bookreader_isxingframe",
-      "src_components_bookreader_lessonchapterrangesfor",
-      "src_components_bookreader_lookslikemetareply",
-      "src_components_bookreader_mergemp3files",
-      "src_components_bookreader_mobilerow",
-      "src_components_bookreader_mobilerowprops",
-      "src_components_bookreader_number_words",
-      "src_components_bookreader_parsefilenamechapters",
-      "src_components_bookreader_parsemp3frame",
-      "src_components_bookreader_renderwords",
-      "src_components_bookreader_roman_numerals",
-      "src_components_bookreader_row",
-      "src_components_bookreader_rowprops",
-      "src_components_bookreader_sentencerows",
-      "src_components_bookreader_sentencerowsprops",
-      "src_components_bookreader_skipid3v2",
-      "src_components_bookreader_slicemp3bodyfromtime",
-      "src_components_bookreader_splitintochapters",
-      "src_components_bookreader_splitkorows",
-      "src_components_bookreader_splittosentences",
-      "src_components_bookreader_striptofirstchapterheading",
-      "src_components_bookreader_stripurls",
-      "src_components_bookreader_translatesentences",
-      "src_components_bookreader_trimid3v1",
-      "src_components_bookreader_trimmp3bodyattime",
-      "src_lib_chapterstorage",
-      "src_lib_chapterstorage_audiopath",
-      "src_lib_chapterstorage_clearbook",
-      "src_lib_chapterstorage_deletechapteraudio",
-      "src_lib_chapterstorage_deletechaptertimings",
-      "src_lib_chapterstorage_getchapterswithaudio",
-      "src_lib_chapterstorage_gettranslatedchapters",
-      "src_lib_chapterstorage_hasbook",
-      "src_lib_chapterstorage_loadchapteraudio",
-      "src_lib_chapterstorage_loadchaptercount",
-      "src_lib_chapterstorage_loadchapteren",
-      "src_lib_chapterstorage_loadchapterko",
-      "src_lib_chapterstorage_loadchaptertimings",
-      "src_lib_chapterstorage_loadchaptervocab",
-      "src_lib_chapterstorage_migratechaptersfromlocalstorage",
-      "src_lib_chapterstorage_savebookchapters",
-      "src_lib_chapterstorage_savechapteraudio",
-      "src_lib_chapterstorage_savechaptercount",
-      "src_lib_chapterstorage_savechapteren",
-      "src_lib_chapterstorage_savechapterko",
-      "src_lib_chapterstorage_savechaptertimings",
-      "src_lib_chapterstorage_savechaptervocab",
-      "src_lib_cloudstorage",
-      "src_lib_cloudstorage_csdel",
-      "src_lib_cloudstorage_csdelpattern",
-      "src_lib_cloudstorage_csget",
-      "src_lib_cloudstorage_csgetappstate",
-      "src_lib_cloudstorage_csgetjson",
-      "src_lib_cloudstorage_csgetkeysbypattern",
-      "src_lib_cloudstorage_cskeyexists",
-      "src_lib_cloudstorage_csset",
-      "src_lib_cloudstorage_cssetbatch",
-      "src_lib_cloudstorage_cssetjson",
-      "src_lib_cloudstorage_row"
-    ],
-    "1": [
       "src_components_gamespanel",
       "src_components_gamespanel_gamespanel",
       "src_components_gamespanel_gametype",
@@ -125,7 +49,141 @@
       "src_utils_textutils_stopwords",
       "src_utils_textutils_vocabword"
     ],
+    "1": [
+      "src_app",
+      "src_app_app",
+      "src_app_bookreader",
+      "src_app_gamespanel",
+      "src_app_imageuploadinput",
+      "src_app_maintab",
+      "src_app_progressdashboard",
+      "src_app_tabspinner",
+      "src_app_v1tab",
+      "src_app_vocabularypanel",
+      "src_components_icon",
+      "src_components_icon_icon",
+      "src_components_icon_iconname",
+      "src_components_icon_paths",
+      "src_components_icon_solid",
+      "src_components_icon_stroke",
+      "src_components_progressdashboard",
+      "src_components_progressdashboard_book_labels",
+      "src_components_progressdashboard_feature_icons",
+      "src_components_progressdashboard_feature_labels",
+      "src_components_progressdashboard_formatdate",
+      "src_components_progressdashboard_formatduration",
+      "src_components_progressdashboard_formatsessionwhen",
+      "src_components_progressdashboard_game_labels",
+      "src_components_progressdashboard_kst_date",
+      "src_components_progressdashboard_kst_time",
+      "src_components_progressdashboard_minibar",
+      "src_components_progressdashboard_parsefeature",
+      "src_components_progressdashboard_progressdashboard",
+      "src_lib_cloudstorage_csgetappstate",
+      "src_lib_tracker",
+      "src_lib_tracker_fetchgamescores",
+      "src_lib_tracker_fetchstudysessions",
+      "src_lib_tracker_fetchvocabprogress",
+      "src_lib_tracker_gamescore",
+      "src_lib_tracker_segstart",
+      "src_lib_tracker_sessionflush",
+      "src_lib_tracker_sessionpause",
+      "src_lib_tracker_sessionresume",
+      "src_lib_tracker_sessionsetdetail",
+      "src_lib_tracker_sessionswitch",
+      "src_lib_tracker_studysession",
+      "src_lib_tracker_tracksession",
+      "src_lib_tracker_vocablocks",
+      "src_lib_tracker_vocabprogress",
+      "src_main"
+    ],
     "2": [
+      "src_components_bookreader",
+      "src_components_bookreader_bookreader",
+      "src_components_bookreader_buildbookchaptertolessonmap",
+      "src_components_bookreader_buildxingframe",
+      "src_components_bookreader_chapter_heading",
+      "src_components_bookreader_chapter_number_words",
+      "src_components_bookreader_chapternumberforms",
+      "src_components_bookreader_cleanchaptertext",
+      "src_components_bookreader_cleanpagetext",
+      "src_components_bookreader_detectrunningheaders",
+      "src_components_bookreader_extractallpages",
+      "src_components_bookreader_extractfnerror",
+      "src_components_bookreader_findchapterannouncement",
+      "src_components_bookreader_findmp3sync",
+      "src_components_bookreader_initstate",
+      "src_components_bookreader_isxingframe",
+      "src_components_bookreader_lessonchapterrangesfor",
+      "src_components_bookreader_lookslikemetareply",
+      "src_components_bookreader_mergemp3files",
+      "src_components_bookreader_mobilerow",
+      "src_components_bookreader_mobilerowprops",
+      "src_components_bookreader_number_words",
+      "src_components_bookreader_parsefilenamechapters",
+      "src_components_bookreader_parsemp3frame",
+      "src_components_bookreader_renderwords",
+      "src_components_bookreader_roman_numerals",
+      "src_components_bookreader_row",
+      "src_components_bookreader_rowprops",
+      "src_components_bookreader_sentencerows",
+      "src_components_bookreader_sentencerowsprops",
+      "src_components_bookreader_skipid3v2",
+      "src_components_bookreader_slicemp3bodyfromtime",
+      "src_components_bookreader_splitintochapters",
+      "src_components_bookreader_splitkorows",
+      "src_components_bookreader_splittosentences",
+      "src_components_bookreader_striptofirstchapterheading",
+      "src_components_bookreader_stripurls",
+      "src_components_bookreader_translatesentences",
+      "src_components_bookreader_trimid3v1",
+      "src_components_bookreader_trimmp3bodyattime",
+      "src_lib_chapterstorage_loadchapteren",
+      "src_lib_chapterstorage_loadchapterko"
+    ],
+    "3": [
+      "src_app_migratefromlocalstorage",
+      "src_components_vocabularypanel",
+      "src_components_vocabularypanel_cardstate",
+      "src_components_vocabularypanel_defentry",
+      "src_components_vocabularypanel_iskorean",
+      "src_components_vocabularypanel_sessioncache",
+      "src_components_vocabularypanel_vocabularypanel",
+      "src_lib_chapterstorage",
+      "src_lib_chapterstorage_audiopath",
+      "src_lib_chapterstorage_clearbook",
+      "src_lib_chapterstorage_deletechapteraudio",
+      "src_lib_chapterstorage_deletechaptertimings",
+      "src_lib_chapterstorage_getchapterswithaudio",
+      "src_lib_chapterstorage_gettranslatedchapters",
+      "src_lib_chapterstorage_hasbook",
+      "src_lib_chapterstorage_loadchapteraudio",
+      "src_lib_chapterstorage_loadchaptercount",
+      "src_lib_chapterstorage_loadchaptertimings",
+      "src_lib_chapterstorage_loadchaptervocab",
+      "src_lib_chapterstorage_migratechaptersfromlocalstorage",
+      "src_lib_chapterstorage_savebookchapters",
+      "src_lib_chapterstorage_savechapteraudio",
+      "src_lib_chapterstorage_savechaptercount",
+      "src_lib_chapterstorage_savechapteren",
+      "src_lib_chapterstorage_savechapterko",
+      "src_lib_chapterstorage_savechaptertimings",
+      "src_lib_chapterstorage_savechaptervocab",
+      "src_lib_cloudstorage",
+      "src_lib_cloudstorage_csdel",
+      "src_lib_cloudstorage_csdelpattern",
+      "src_lib_cloudstorage_csget",
+      "src_lib_cloudstorage_csgetjson",
+      "src_lib_cloudstorage_csgetkeysbypattern",
+      "src_lib_cloudstorage_cskeyexists",
+      "src_lib_cloudstorage_csset",
+      "src_lib_cloudstorage_cssetbatch",
+      "src_lib_cloudstorage_cssetjson",
+      "src_lib_cloudstorage_row",
+      "src_lib_supabase",
+      "src_lib_supabase_supabase"
+    ],
+    "4": [
       "eslint",
       "eslint_js",
       "eslint_plugin_react_hooks",
@@ -156,37 +214,7 @@
       "vite",
       "vitejs_plugin_react"
     ],
-    "3": [
-      "src_components_progressdashboard",
-      "src_components_progressdashboard_book_labels",
-      "src_components_progressdashboard_feature_icons",
-      "src_components_progressdashboard_feature_labels",
-      "src_components_progressdashboard_formatdate",
-      "src_components_progressdashboard_formatduration",
-      "src_components_progressdashboard_formatsessionwhen",
-      "src_components_progressdashboard_game_labels",
-      "src_components_progressdashboard_kst_date",
-      "src_components_progressdashboard_kst_time",
-      "src_components_progressdashboard_minibar",
-      "src_components_progressdashboard_parsefeature",
-      "src_components_progressdashboard_progressdashboard",
-      "src_lib_tracker",
-      "src_lib_tracker_fetchgamescores",
-      "src_lib_tracker_fetchstudysessions",
-      "src_lib_tracker_fetchvocabprogress",
-      "src_lib_tracker_gamescore",
-      "src_lib_tracker_segstart",
-      "src_lib_tracker_sessionflush",
-      "src_lib_tracker_sessionpause",
-      "src_lib_tracker_sessionresume",
-      "src_lib_tracker_sessionsetdetail",
-      "src_lib_tracker_sessionswitch",
-      "src_lib_tracker_studysession",
-      "src_lib_tracker_tracksession",
-      "src_lib_tracker_vocablocks",
-      "src_lib_tracker_vocabprogress"
-    ],
-    "4": [
+    "5": [
       "ref_dom",
       "ref_src",
       "ref_vite_client",
@@ -210,30 +238,6 @@
       "tsconfig_app_compileroptions_verbatimmodulesyntax",
       "tsconfig_app_include",
       "tsconfig_app_json_ref_es2023"
-    ],
-    "5": [
-      "src_components_icon",
-      "src_components_icon_icon",
-      "src_components_icon_iconname",
-      "src_components_icon_paths",
-      "src_components_icon_solid",
-      "src_components_icon_stroke",
-      "src_components_imageuploadinput",
-      "src_components_imageuploadinput_baseprops",
-      "src_components_imageuploadinput_compressimage",
-      "src_components_imageuploadinput_imageentry",
-      "src_components_imageuploadinput_imageuploadinput",
-      "src_components_imageuploadinput_props",
-      "src_components_imageuploadinput_textprops",
-      "src_components_imageuploadinput_vocabprops",
-      "src_components_vocabularypanel",
-      "src_components_vocabularypanel_cardstate",
-      "src_components_vocabularypanel_defentry",
-      "src_components_vocabularypanel_iskorean",
-      "src_components_vocabularypanel_sessioncache",
-      "src_components_vocabularypanel_vocabularypanel",
-      "src_lib_supabase",
-      "src_lib_supabase_supabase"
     ],
     "6": [
       "huggingface_transformers",
@@ -351,20 +355,6 @@
       "scripts_split_book_chapters_upserts"
     ],
     "12": [
-      "src_app",
-      "src_app_app",
-      "src_app_bookreader",
-      "src_app_gamespanel",
-      "src_app_imageuploadinput",
-      "src_app_maintab",
-      "src_app_migratefromlocalstorage",
-      "src_app_progressdashboard",
-      "src_app_tabspinner",
-      "src_app_v1tab",
-      "src_app_vocabularypanel",
-      "src_main"
-    ],
-    "13": [
       "scripts_trim_audio_head",
       "scripts_trim_audio_head_cut",
       "scripts_trim_audio_head_dur",
@@ -377,7 +367,7 @@
       "scripts_trim_audio_head_sbheaders",
       "scripts_trim_audio_head_targetch"
     ],
-    "14": [
+    "13": [
       "scripts_fix_dropcaps",
       "scripts_fix_dropcaps_count",
       "scripts_fix_dropcaps_fail",
@@ -387,6 +377,16 @@
       "scripts_fix_dropcaps_proper",
       "scripts_fix_dropcaps_sentencecasetoken",
       "scripts_fix_dropcaps_upserts"
+    ],
+    "14": [
+      "src_components_imageuploadinput",
+      "src_components_imageuploadinput_baseprops",
+      "src_components_imageuploadinput_compressimage",
+      "src_components_imageuploadinput_imageentry",
+      "src_components_imageuploadinput_imageuploadinput",
+      "src_components_imageuploadinput_props",
+      "src_components_imageuploadinput_textprops",
+      "src_components_imageuploadinput_vocabprops"
     ],
     "15": [
       "scripts_realign_ch03_ko",
@@ -440,21 +440,21 @@
     ]
   },
   "cohesion": {
-    "0": 0.06627175120325805,
-    "1": 0.07678075855689177,
-    "2": 0.06896551724137931,
-    "3": 0.12698412698412698,
-    "4": 0.08695652173913043,
-    "5": 0.12987012987012986,
+    "0": 0.07678075855689177,
+    "1": 0.08019323671497584,
+    "2": 0.0975609756097561,
+    "3": 0.10897435897435898,
+    "4": 0.06896551724137931,
+    "5": 0.08695652173913043,
     "6": 0.09523809523809523,
     "7": 0.09523809523809523,
     "8": 0.10526315789473684,
     "9": 0.19117647058823528,
     "10": 0.2692307692307692,
     "11": 0.16666666666666666,
-    "12": 0.18181818181818182,
-    "13": 0.2,
-    "14": 0.3055555555555556,
+    "12": 0.2,
+    "13": 0.3055555555555556,
+    "14": 0.35714285714285715,
     "15": 0.5238095238095238,
     "16": 0.3333333333333333,
     "17": 0.4,
@@ -477,24 +477,29 @@
       "degree": 17
     },
     {
+      "id": "src_app_app",
+      "label": "App()",
+      "degree": 16
+    },
+    {
       "id": "tsconfig_node_compileroptions",
       "label": "compilerOptions",
       "degree": 16
     },
     {
-      "id": "src_lib_types_vocabitem",
-      "label": "VocabItem",
-      "degree": 12
-    },
-    {
       "id": "src_lib_cloudstorage_csset",
       "label": "csSet()",
-      "degree": 11
+      "degree": 14
+    },
+    {
+      "id": "src_lib_types_vocabitem",
+      "label": "VocabItem",
+      "degree": 13
     },
     {
       "id": "src_lib_cloudstorage_csget",
       "label": "csGet()",
-      "degree": 9
+      "degree": 11
     },
     {
       "id": "src_components_bookreader_mergemp3files",
@@ -510,14 +515,53 @@
       "id": "src_components_spacegame_spacegame",
       "label": "SpaceGame()",
       "degree": 8
-    },
-    {
-      "id": "src_utils_textutils_extractvocabulary",
-      "label": "extractVocabulary()",
-      "degree": 8
     }
   ],
   "surprises": [
+    {
+      "source": "App()",
+      "target": "currentLesson()",
+      "source_files": [
+        "src/App.tsx",
+        "src/data/syllabus.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "App()",
+      "target": "loadChapterVocab()",
+      "source_files": [
+        "src/App.tsx",
+        "src/lib/chapterStorage.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "App()",
+      "target": "csDel()",
+      "source_files": [
+        "src/App.tsx",
+        "src/lib/cloudStorage.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "App()",
+      "target": "csSet()",
+      "source_files": [
+        "src/App.tsx",
+        "src/lib/cloudStorage.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    },
     {
       "source": "BookReader()",
       "target": "kstToday()",
@@ -528,66 +572,22 @@
       "confidence": "EXTRACTED",
       "relation": "calls",
       "why": "bridges separate communities"
-    },
-    {
-      "source": "BookReader()",
-      "target": "alignFromWordTimestamps()",
-      "source_files": [
-        "src/components/BookReader.tsx",
-        "src/lib/audioAlign.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "bridges separate communities"
-    },
-    {
-      "source": "BookReader()",
-      "target": "sessionSetDetail()",
-      "source_files": [
-        "src/components/BookReader.tsx",
-        "src/lib/tracker.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "bridges separate communities"
-    },
-    {
-      "source": "Props",
-      "target": "VocabItem",
-      "source_files": [
-        "src/components/GamesPanel.tsx",
-        "src/lib/types.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "peripheral node `Props` unexpectedly reaches hub `VocabItem`"
-    },
-    {
-      "source": "VocabProps",
-      "target": "VocabItem",
-      "source_files": [
-        "src/components/ImageUploadInput.tsx",
-        "src/lib/types.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "bridges separate communities"
     }
   ],
   "questions": [
     {
       "type": "bridge_node",
-      "question": "Why does `VocabItem` connect `Community 1` to `Community 0`, `Community 5`?",
-      "why": "High betweenness centrality (0.031) - this node is a cross-community bridge."
+      "question": "Why does `VocabItem` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 14`?",
+      "why": "High betweenness centrality (0.033) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
-      "question": "Why does `BookReader()` connect `Community 0` to `Community 9`, `Community 10`, `Community 3`?",
-      "why": "High betweenness centrality (0.013) - this node is a cross-community bridge."
+      "question": "Why does `BookReader()` connect `Community 2` to `Community 9`, `Community 10`, `Community 3`, `Community 1`?",
+      "why": "High betweenness centrality (0.014) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
-      "question": "Why does `devDependencies` connect `Community 2` to `Community 6`?",
+      "question": "Why does `devDependencies` connect `Community 4` to `Community 6`?",
       "why": "High betweenness centrality (0.013) - this node is a cross-community bridge."
     },
     {
@@ -598,17 +598,17 @@
     {
       "type": "low_cohesion",
       "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.06627175120325805 - nodes in this community are weakly interconnected."
-    },
-    {
-      "type": "low_cohesion",
-      "question": "Should `Community 1` be split into smaller, more focused modules?",
       "why": "Cohesion score 0.07678075855689177 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
+      "question": "Should `Community 1` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.08019323671497584 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
       "question": "Should `Community 2` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.06896551724137931 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.0975609756097561 - nodes in this community are weakly interconnected."
     }
   ]
 }

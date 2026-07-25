@@ -15,8 +15,8 @@
       "_origin": "ast",
       "community": 21,
       "norm_label": "pre-push",
-      "community_name": "Community 21",
-      "id": "githooks_pre_push"
+      "id": "githooks_pre_push",
+      "community_name": "Community 21"
     },
     {
       "label": "pre-push script",
@@ -30,8 +30,8 @@
       "_origin": "ast",
       "community": 21,
       "norm_label": "pre-push script",
-      "community_name": "Community 21",
-      "id": "githooks_pre_push__entry"
+      "id": "githooks_pre_push__entry",
+      "community_name": "Community 21"
     },
     {
       "label": "eslint.config.js",
@@ -41,8 +41,8 @@
       "_origin": "ast",
       "community": 22,
       "norm_label": "eslint.config.js",
-      "community_name": "Community 22",
-      "id": "eslint_config"
+      "id": "eslint_config",
+      "community_name": "Community 22"
     },
     {
       "label": "package.json",
@@ -52,8 +52,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "package.json",
-      "community_name": "Community 6",
-      "id": "package"
+      "id": "package",
+      "community_name": "Community 6"
     },
     {
       "label": "name",
@@ -63,8 +63,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "name",
-      "community_name": "Community 6",
-      "id": "package_name"
+      "id": "package_name",
+      "community_name": "Community 6"
     },
     {
       "label": "private",
@@ -74,8 +74,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "private",
-      "community_name": "Community 6",
-      "id": "package_private"
+      "id": "package_private",
+      "community_name": "Community 6"
     },
     {
       "label": "version",
@@ -85,8 +85,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "version",
-      "community_name": "Community 6",
-      "id": "package_version"
+      "id": "package_version",
+      "community_name": "Community 6"
     },
     {
       "label": "type",
@@ -96,8 +96,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "type",
-      "community_name": "Community 6",
-      "id": "package_type"
+      "id": "package_type",
+      "community_name": "Community 6"
     },
     {
       "label": "scripts",
@@ -107,8 +107,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "scripts",
-      "community_name": "Community 6",
-      "id": "package_scripts"
+      "id": "package_scripts",
+      "community_name": "Community 6"
     },
     {
       "label": "dev",
@@ -118,8 +118,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "dev",
-      "community_name": "Community 6",
-      "id": "package_scripts_dev"
+      "id": "package_scripts_dev",
+      "community_name": "Community 6"
     },
     {
       "label": "build",
@@ -129,8 +129,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "build",
-      "community_name": "Community 6",
-      "id": "package_scripts_build"
+      "id": "package_scripts_build",
+      "community_name": "Community 6"
     },
     {
       "label": "lint",
@@ -140,8 +140,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "lint",
-      "community_name": "Community 6",
-      "id": "package_scripts_lint"
+      "id": "package_scripts_lint",
+      "community_name": "Community 6"
     },
     {
       "label": "preview",
@@ -151,8 +151,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "preview",
-      "community_name": "Community 6",
-      "id": "package_scripts_preview"
+      "id": "package_scripts_preview",
+      "community_name": "Community 6"
     },
     {
       "label": "dependencies",
@@ -162,8 +162,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "dependencies",
-      "community_name": "Community 6",
-      "id": "package_dependencies"
+      "id": "package_dependencies",
+      "community_name": "Community 6"
     },
     {
       "label": "@huggingface/transformers",
@@ -173,8 +173,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "@huggingface/transformers",
-      "community_name": "Community 6",
-      "id": "package_dependencies_huggingface_transformers"
+      "id": "package_dependencies_huggingface_transformers",
+      "community_name": "Community 6"
     },
     {
       "label": "@huggingface/transformers",
@@ -184,8 +184,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "@huggingface/transformers",
-      "community_name": "Community 6",
-      "id": "huggingface_transformers"
+      "id": "huggingface_transformers",
+      "community_name": "Community 6"
     },
     {
       "label": "@supabase/supabase-js",
@@ -195,8 +195,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "@supabase/supabase-js",
-      "community_name": "Community 6",
-      "id": "package_dependencies_supabase_supabase_js"
+      "id": "package_dependencies_supabase_supabase_js",
+      "community_name": "Community 6"
     },
     {
       "label": "@supabase/supabase-js",
@@ -206,8 +206,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "@supabase/supabase-js",
-      "community_name": "Community 6",
-      "id": "supabase_supabase_js"
+      "id": "supabase_supabase_js",
+      "community_name": "Community 6"
     },
     {
       "label": "pdfjs-dist",
@@ -217,8 +217,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "pdfjs-dist",
-      "community_name": "Community 6",
-      "id": "package_dependencies_pdfjs_dist"
+      "id": "package_dependencies_pdfjs_dist",
+      "community_name": "Community 6"
     },
     {
       "label": "pdfjs-dist",
@@ -228,8 +228,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "pdfjs-dist",
-      "community_name": "Community 6",
-      "id": "pdfjs_dist"
+      "id": "pdfjs_dist",
+      "community_name": "Community 6"
     },
     {
       "label": "react",
@@ -239,8 +239,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "react",
-      "community_name": "Community 6",
-      "id": "package_dependencies_react"
+      "id": "package_dependencies_react",
+      "community_name": "Community 6"
     },
     {
       "label": "react",
@@ -250,8 +250,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "react",
-      "community_name": "Community 6",
-      "id": "react"
+      "id": "react",
+      "community_name": "Community 6"
     },
     {
       "label": "react-dom",
@@ -261,8 +261,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "react-dom",
-      "community_name": "Community 6",
-      "id": "package_dependencies_react_dom"
+      "id": "package_dependencies_react_dom",
+      "community_name": "Community 6"
     },
     {
       "label": "react-dom",
@@ -272,8 +272,8 @@
       "_origin": "ast",
       "community": 6,
       "norm_label": "react-dom",
-      "community_name": "Community 6",
-      "id": "react_dom"
+      "id": "react_dom",
+      "community_name": "Community 6"
     },
     {
       "label": "devDependencies",
@@ -281,10 +281,10 @@
       "source_file": "package.json",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "devdependencies",
-      "community_name": "Community 2",
-      "id": "package_devdependencies"
+      "id": "package_devdependencies",
+      "community_name": "Community 4"
     },
     {
       "label": "@eslint/js",
@@ -292,10 +292,10 @@
       "source_file": "package.json",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@eslint/js",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_eslint_js"
+      "id": "package_devdependencies_eslint_js",
+      "community_name": "Community 4"
     },
     {
       "label": "@eslint/js",
@@ -303,10 +303,10 @@
       "source_file": "package.json",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@eslint/js",
-      "community_name": "Community 2",
-      "id": "eslint_js"
+      "id": "eslint_js",
+      "community_name": "Community 4"
     },
     {
       "label": "@tailwindcss/vite",
@@ -314,10 +314,10 @@
       "source_file": "package.json",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@tailwindcss/vite",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_tailwindcss_vite"
+      "id": "package_devdependencies_tailwindcss_vite",
+      "community_name": "Community 4"
     },
     {
       "label": "@tailwindcss/vite",
@@ -325,10 +325,10 @@
       "source_file": "package.json",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@tailwindcss/vite",
-      "community_name": "Community 2",
-      "id": "tailwindcss_vite"
+      "id": "tailwindcss_vite",
+      "community_name": "Community 4"
     },
     {
       "label": "@types/node",
@@ -336,10 +336,10 @@
       "source_file": "package.json",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@types/node",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_types_node"
+      "id": "package_devdependencies_types_node",
+      "community_name": "Community 4"
     },
     {
       "label": "@types/node",
@@ -347,10 +347,10 @@
       "source_file": "package.json",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@types/node",
-      "community_name": "Community 2",
-      "id": "types_node"
+      "id": "types_node",
+      "community_name": "Community 4"
     },
     {
       "label": "@types/react",
@@ -358,10 +358,10 @@
       "source_file": "package.json",
       "source_location": "L23",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@types/react",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_types_react"
+      "id": "package_devdependencies_types_react",
+      "community_name": "Community 4"
     },
     {
       "label": "@types/react",
@@ -369,10 +369,10 @@
       "source_file": "package.json",
       "source_location": "L23",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@types/react",
-      "community_name": "Community 2",
-      "id": "types_react"
+      "id": "types_react",
+      "community_name": "Community 4"
     },
     {
       "label": "@types/react-dom",
@@ -380,10 +380,10 @@
       "source_file": "package.json",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@types/react-dom",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_types_react_dom"
+      "id": "package_devdependencies_types_react_dom",
+      "community_name": "Community 4"
     },
     {
       "label": "@types/react-dom",
@@ -391,10 +391,10 @@
       "source_file": "package.json",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@types/react-dom",
-      "community_name": "Community 2",
-      "id": "types_react_dom"
+      "id": "types_react_dom",
+      "community_name": "Community 4"
     },
     {
       "label": "@vitejs/plugin-react",
@@ -402,10 +402,10 @@
       "source_file": "package.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@vitejs/plugin-react",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_vitejs_plugin_react"
+      "id": "package_devdependencies_vitejs_plugin_react",
+      "community_name": "Community 4"
     },
     {
       "label": "@vitejs/plugin-react",
@@ -413,10 +413,10 @@
       "source_file": "package.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "@vitejs/plugin-react",
-      "community_name": "Community 2",
-      "id": "vitejs_plugin_react"
+      "id": "vitejs_plugin_react",
+      "community_name": "Community 4"
     },
     {
       "label": "eslint",
@@ -424,10 +424,10 @@
       "source_file": "package.json",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "eslint",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_eslint"
+      "id": "package_devdependencies_eslint",
+      "community_name": "Community 4"
     },
     {
       "label": "eslint",
@@ -435,10 +435,10 @@
       "source_file": "package.json",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "eslint",
-      "community_name": "Community 2",
-      "id": "eslint"
+      "id": "eslint",
+      "community_name": "Community 4"
     },
     {
       "label": "eslint-plugin-react-hooks",
@@ -446,10 +446,10 @@
       "source_file": "package.json",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "eslint-plugin-react-hooks",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_eslint_plugin_react_hooks"
+      "id": "package_devdependencies_eslint_plugin_react_hooks",
+      "community_name": "Community 4"
     },
     {
       "label": "eslint-plugin-react-hooks",
@@ -457,10 +457,10 @@
       "source_file": "package.json",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "eslint-plugin-react-hooks",
-      "community_name": "Community 2",
-      "id": "eslint_plugin_react_hooks"
+      "id": "eslint_plugin_react_hooks",
+      "community_name": "Community 4"
     },
     {
       "label": "eslint-plugin-react-refresh",
@@ -468,10 +468,10 @@
       "source_file": "package.json",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "eslint-plugin-react-refresh",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_eslint_plugin_react_refresh"
+      "id": "package_devdependencies_eslint_plugin_react_refresh",
+      "community_name": "Community 4"
     },
     {
       "label": "eslint-plugin-react-refresh",
@@ -479,10 +479,10 @@
       "source_file": "package.json",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "eslint-plugin-react-refresh",
-      "community_name": "Community 2",
-      "id": "eslint_plugin_react_refresh"
+      "id": "eslint_plugin_react_refresh",
+      "community_name": "Community 4"
     },
     {
       "label": "globals",
@@ -490,10 +490,10 @@
       "source_file": "package.json",
       "source_location": "L29",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "globals",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_globals"
+      "id": "package_devdependencies_globals",
+      "community_name": "Community 4"
     },
     {
       "label": "globals",
@@ -501,10 +501,10 @@
       "source_file": "package.json",
       "source_location": "L29",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "globals",
-      "community_name": "Community 2",
-      "id": "globals"
+      "id": "globals",
+      "community_name": "Community 4"
     },
     {
       "label": "tailwindcss",
@@ -512,10 +512,10 @@
       "source_file": "package.json",
       "source_location": "L30",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "tailwindcss",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_tailwindcss"
+      "id": "package_devdependencies_tailwindcss",
+      "community_name": "Community 4"
     },
     {
       "label": "tailwindcss",
@@ -523,10 +523,10 @@
       "source_file": "package.json",
       "source_location": "L30",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "tailwindcss",
-      "community_name": "Community 2",
-      "id": "tailwindcss"
+      "id": "tailwindcss",
+      "community_name": "Community 4"
     },
     {
       "label": "typescript",
@@ -534,10 +534,10 @@
       "source_file": "package.json",
       "source_location": "L31",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "typescript",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_typescript"
+      "id": "package_devdependencies_typescript",
+      "community_name": "Community 4"
     },
     {
       "label": "typescript",
@@ -545,10 +545,10 @@
       "source_file": "package.json",
       "source_location": "L31",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "typescript",
-      "community_name": "Community 2",
-      "id": "typescript"
+      "id": "typescript",
+      "community_name": "Community 4"
     },
     {
       "label": "typescript-eslint",
@@ -556,10 +556,10 @@
       "source_file": "package.json",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "typescript-eslint",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_typescript_eslint"
+      "id": "package_devdependencies_typescript_eslint",
+      "community_name": "Community 4"
     },
     {
       "label": "typescript-eslint",
@@ -567,10 +567,10 @@
       "source_file": "package.json",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "typescript-eslint",
-      "community_name": "Community 2",
-      "id": "typescript_eslint"
+      "id": "typescript_eslint",
+      "community_name": "Community 4"
     },
     {
       "label": "vite",
@@ -578,10 +578,10 @@
       "source_file": "package.json",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "vite",
-      "community_name": "Community 2",
-      "id": "package_devdependencies_vite"
+      "id": "package_devdependencies_vite",
+      "community_name": "Community 4"
     },
     {
       "label": "vite",
@@ -589,10 +589,10 @@
       "source_file": "package.json",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 2,
+      "community": 4,
       "norm_label": "vite",
-      "community_name": "Community 2",
-      "id": "vite"
+      "id": "vite",
+      "community_name": "Community 4"
     },
     {
       "label": "fix-dropcaps.mjs",
@@ -600,10 +600,10 @@
       "source_file": "scripts/fix-dropcaps.mjs",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "fix-dropcaps.mjs",
-      "community_name": "Community 14",
-      "id": "scripts_fix_dropcaps"
+      "id": "scripts_fix_dropcaps",
+      "community_name": "Community 13"
     },
     {
       "label": "COUNT",
@@ -611,10 +611,10 @@
       "source_file": "scripts/fix-dropcaps.mjs",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "count",
-      "community_name": "Community 14",
-      "id": "scripts_fix_dropcaps_count"
+      "id": "scripts_fix_dropcaps_count",
+      "community_name": "Community 13"
     },
     {
       "label": "headers",
@@ -622,10 +622,10 @@
       "source_file": "scripts/fix-dropcaps.mjs",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "headers",
-      "community_name": "Community 14",
-      "id": "scripts_fix_dropcaps_headers"
+      "id": "scripts_fix_dropcaps_headers",
+      "community_name": "Community 13"
     },
     {
       "label": "fail()",
@@ -633,10 +633,10 @@
       "source_file": "scripts/fix-dropcaps.mjs",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "fail()",
-      "community_name": "Community 14",
-      "id": "scripts_fix_dropcaps_fail"
+      "id": "scripts_fix_dropcaps_fail",
+      "community_name": "Community 13"
     },
     {
       "label": "PROPER",
@@ -644,10 +644,10 @@
       "source_file": "scripts/fix-dropcaps.mjs",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "proper",
-      "community_name": "Community 14",
-      "id": "scripts_fix_dropcaps_proper"
+      "id": "scripts_fix_dropcaps_proper",
+      "community_name": "Community 13"
     },
     {
       "label": "sentenceCaseToken()",
@@ -655,10 +655,10 @@
       "source_file": "scripts/fix-dropcaps.mjs",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "sentencecasetoken()",
-      "community_name": "Community 14",
-      "id": "scripts_fix_dropcaps_sentencecasetoken"
+      "id": "scripts_fix_dropcaps_sentencecasetoken",
+      "community_name": "Community 13"
     },
     {
       "label": "fixOpeningLine()",
@@ -666,10 +666,10 @@
       "source_file": "scripts/fix-dropcaps.mjs",
       "source_location": "L42",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "fixopeningline()",
-      "community_name": "Community 14",
-      "id": "scripts_fix_dropcaps_fixopeningline"
+      "id": "scripts_fix_dropcaps_fixopeningline",
+      "community_name": "Community 13"
     },
     {
       "label": "fixText()",
@@ -677,10 +677,10 @@
       "source_file": "scripts/fix-dropcaps.mjs",
       "source_location": "L91",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "fixtext()",
-      "community_name": "Community 14",
-      "id": "scripts_fix_dropcaps_fixtext"
+      "id": "scripts_fix_dropcaps_fixtext",
+      "community_name": "Community 13"
     },
     {
       "label": "upserts",
@@ -688,10 +688,10 @@
       "source_file": "scripts/fix-dropcaps.mjs",
       "source_location": "L118",
       "_origin": "ast",
-      "community": 14,
+      "community": 13,
       "norm_label": "upserts",
-      "community_name": "Community 14",
-      "id": "scripts_fix_dropcaps_upserts"
+      "id": "scripts_fix_dropcaps_upserts",
+      "community_name": "Community 13"
     },
     {
       "label": "inspect-audio.mjs",
@@ -701,8 +701,8 @@
       "_origin": "ast",
       "community": 17,
       "norm_label": "inspect-audio.mjs",
-      "community_name": "Community 17",
-      "id": "scripts_inspect_audio"
+      "id": "scripts_inspect_audio",
+      "community_name": "Community 17"
     },
     {
       "label": "COUNT",
@@ -712,8 +712,8 @@
       "_origin": "ast",
       "community": 17,
       "norm_label": "count",
-      "community_name": "Community 17",
-      "id": "scripts_inspect_audio_count"
+      "id": "scripts_inspect_audio_count",
+      "community_name": "Community 17"
     },
     {
       "label": "headers",
@@ -723,8 +723,8 @@
       "_origin": "ast",
       "community": 17,
       "norm_label": "headers",
-      "community_name": "Community 17",
-      "id": "scripts_inspect_audio_headers"
+      "id": "scripts_inspect_audio_headers",
+      "community_name": "Community 17"
     },
     {
       "label": "mmss()",
@@ -734,8 +734,8 @@
       "_origin": "ast",
       "community": 17,
       "norm_label": "mmss()",
-      "community_name": "Community 17",
-      "id": "scripts_inspect_audio_mmss"
+      "id": "scripts_inspect_audio_mmss",
+      "community_name": "Community 17"
     },
     {
       "label": "cutDur",
@@ -745,8 +745,8 @@
       "_origin": "ast",
       "community": 17,
       "norm_label": "cutdur",
-      "community_name": "Community 17",
-      "id": "scripts_inspect_audio_cutdur"
+      "id": "scripts_inspect_audio_cutdur",
+      "community_name": "Community 17"
     },
     {
       "label": "realign-ch03-ko.mjs",
@@ -756,8 +756,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "realign-ch03-ko.mjs",
-      "community_name": "Community 15",
-      "id": "scripts_realign_ch03_ko"
+      "id": "scripts_realign_ch03_ko",
+      "community_name": "Community 15"
     },
     {
       "label": "splitToSentences()",
@@ -767,8 +767,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "splittosentences()",
-      "community_name": "Community 15",
-      "id": "scripts_realign_ch03_ko_splittosentences"
+      "id": "scripts_realign_ch03_ko_splittosentences",
+      "community_name": "Community 15"
     },
     {
       "label": "alignKoreanToEnglish()",
@@ -778,8 +778,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "alignkoreantoenglish()",
-      "community_name": "Community 15",
-      "id": "scripts_realign_ch03_ko_alignkoreantoenglish"
+      "id": "scripts_realign_ch03_ko_alignkoreantoenglish",
+      "community_name": "Community 15"
     },
     {
       "label": "sbGet()",
@@ -789,8 +789,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "sbget()",
-      "community_name": "Community 15",
-      "id": "scripts_realign_ch03_ko_sbget"
+      "id": "scripts_realign_ch03_ko_sbget",
+      "community_name": "Community 15"
     },
     {
       "label": "sbUpsert()",
@@ -800,8 +800,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "sbupsert()",
-      "community_name": "Community 15",
-      "id": "scripts_realign_ch03_ko_sbupsert"
+      "id": "scripts_realign_ch03_ko_sbupsert",
+      "community_name": "Community 15"
     },
     {
       "label": "translateBatch()",
@@ -811,8 +811,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "translatebatch()",
-      "community_name": "Community 15",
-      "id": "scripts_realign_ch03_ko_translatebatch"
+      "id": "scripts_realign_ch03_ko_translatebatch",
+      "community_name": "Community 15"
     },
     {
       "label": "main()",
@@ -822,8 +822,8 @@
       "_origin": "ast",
       "community": 15,
       "norm_label": "main()",
-      "community_name": "Community 15",
-      "id": "scripts_realign_ch03_ko_main"
+      "id": "scripts_realign_ch03_ko_main",
+      "community_name": "Community 15"
     },
     {
       "label": "split-audiobook.mjs",
@@ -833,8 +833,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "split-audiobook.mjs",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook"
+      "id": "scripts_split_audiobook",
+      "community_name": "Community 8"
     },
     {
       "label": "srcUrlRaw",
@@ -844,8 +844,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "srcurlraw",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_srcurlraw"
+      "id": "scripts_split_audiobook_srcurlraw",
+      "community_name": "Community 8"
     },
     {
       "label": "boundaries",
@@ -855,8 +855,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "boundaries",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_boundaries"
+      "id": "scripts_split_audiobook_boundaries",
+      "community_name": "Community 8"
     },
     {
       "label": "directDownloadUrl()",
@@ -866,8 +866,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "directdownloadurl()",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_directdownloadurl"
+      "id": "scripts_split_audiobook_directdownloadurl",
+      "community_name": "Community 8"
     },
     {
       "label": "sbHeaders",
@@ -877,8 +877,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "sbheaders",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_sbheaders"
+      "id": "scripts_split_audiobook_sbheaders",
+      "community_name": "Community 8"
     },
     {
       "label": "publicUrlOf()",
@@ -888,8 +888,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "publicurlof()",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_publicurlof"
+      "id": "scripts_split_audiobook_publicurlof",
+      "community_name": "Community 8"
     },
     {
       "label": "fail()",
@@ -899,8 +899,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "fail()",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_fail"
+      "id": "scripts_split_audiobook_fail",
+      "community_name": "Community 8"
     },
     {
       "label": "mmss()",
@@ -910,8 +910,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "mmss()",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_mmss"
+      "id": "scripts_split_audiobook_mmss",
+      "community_name": "Community 8"
     },
     {
       "label": "ONES",
@@ -921,8 +921,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "ones",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_ones"
+      "id": "scripts_split_audiobook_ones",
+      "community_name": "Community 8"
     },
     {
       "label": "TEENS",
@@ -932,8 +932,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "teens",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_teens"
+      "id": "scripts_split_audiobook_teens",
+      "community_name": "Community 8"
     },
     {
       "label": "WORD2NUM",
@@ -943,8 +943,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "word2num",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_word2num"
+      "id": "scripts_split_audiobook_word2num",
+      "community_name": "Community 8"
     },
     {
       "label": "buf",
@@ -954,8 +954,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "buf",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_buf"
+      "id": "scripts_split_audiobook_buf",
+      "community_name": "Community 8"
     },
     {
       "label": "total",
@@ -965,8 +965,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "total",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_total"
+      "id": "scripts_split_audiobook_total",
+      "community_name": "Community 8"
     },
     {
       "label": "tok()",
@@ -976,8 +976,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "tok()",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_tok"
+      "id": "scripts_split_audiobook_tok",
+      "community_name": "Community 8"
     },
     {
       "label": "candidates",
@@ -987,8 +987,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "candidates",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_candidates"
+      "id": "scripts_split_audiobook_candidates",
+      "community_name": "Community 8"
     },
     {
       "label": "cuts",
@@ -998,8 +998,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "cuts",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_cuts"
+      "id": "scripts_split_audiobook_cuts",
+      "community_name": "Community 8"
     },
     {
       "label": "starts",
@@ -1009,8 +1009,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "starts",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_starts"
+      "id": "scripts_split_audiobook_starts",
+      "community_name": "Community 8"
     },
     {
       "label": "ends",
@@ -1020,8 +1020,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "ends",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_ends"
+      "id": "scripts_split_audiobook_ends",
+      "community_name": "Community 8"
     },
     {
       "label": "kv",
@@ -1031,8 +1031,8 @@
       "_origin": "ast",
       "community": 8,
       "norm_label": "kv",
-      "community_name": "Community 8",
-      "id": "scripts_split_audiobook_kv"
+      "id": "scripts_split_audiobook_kv",
+      "community_name": "Community 8"
     },
     {
       "label": "split-book-chapters.mjs",
@@ -1042,8 +1042,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "split-book-chapters.mjs",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters"
+      "id": "scripts_split_book_chapters",
+      "community_name": "Community 11"
     },
     {
       "label": "RANGES",
@@ -1053,8 +1053,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "ranges",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters_ranges"
+      "id": "scripts_split_book_chapters_ranges",
+      "community_name": "Community 11"
     },
     {
       "label": "headers",
@@ -1064,8 +1064,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "headers",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters_headers"
+      "id": "scripts_split_book_chapters_headers",
+      "community_name": "Community 11"
     },
     {
       "label": "fail()",
@@ -1075,8 +1075,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "fail()",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters_fail"
+      "id": "scripts_split_book_chapters_fail",
+      "community_name": "Community 11"
     },
     {
       "label": "NUM_WORDS",
@@ -1086,8 +1086,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "num_words",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters_num_words"
+      "id": "scripts_split_book_chapters_num_words",
+      "community_name": "Community 11"
     },
     {
       "label": "ROMAN",
@@ -1097,8 +1097,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "roman",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters_roman"
+      "id": "scripts_split_book_chapters_roman",
+      "community_name": "Community 11"
     },
     {
       "label": "HEADING",
@@ -1108,8 +1108,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "heading",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters_heading"
+      "id": "scripts_split_book_chapters_heading",
+      "community_name": "Community 11"
     },
     {
       "label": "lines",
@@ -1119,8 +1119,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "lines",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters_lines"
+      "id": "scripts_split_book_chapters_lines",
+      "community_name": "Community 11"
     },
     {
       "label": "headingIdx",
@@ -1130,8 +1130,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "headingidx",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters_headingidx"
+      "id": "scripts_split_book_chapters_headingidx",
+      "community_name": "Community 11"
     },
     {
       "label": "chapters",
@@ -1141,8 +1141,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "chapters",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters_chapters"
+      "id": "scripts_split_book_chapters_chapters",
+      "community_name": "Community 11"
     },
     {
       "label": "lessons",
@@ -1152,8 +1152,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "lessons",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters_lessons"
+      "id": "scripts_split_book_chapters_lessons",
+      "community_name": "Community 11"
     },
     {
       "label": "upserts",
@@ -1163,8 +1163,8 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "upserts",
-      "community_name": "Community 11",
-      "id": "scripts_split_book_chapters_upserts"
+      "id": "scripts_split_book_chapters_upserts",
+      "community_name": "Community 11"
     },
     {
       "label": "trim-audio-head.mjs",
@@ -1172,10 +1172,10 @@
       "source_file": "scripts/trim-audio-head.mjs",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "trim-audio-head.mjs",
-      "community_name": "Community 13",
-      "id": "scripts_trim_audio_head"
+      "id": "scripts_trim_audio_head",
+      "community_name": "Community 12"
     },
     {
       "label": "lesson",
@@ -1183,10 +1183,10 @@
       "source_file": "scripts/trim-audio-head.mjs",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "lesson",
-      "community_name": "Community 13",
-      "id": "scripts_trim_audio_head_lesson"
+      "id": "scripts_trim_audio_head_lesson",
+      "community_name": "Community 12"
     },
     {
       "label": "targetCh",
@@ -1194,10 +1194,10 @@
       "source_file": "scripts/trim-audio-head.mjs",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "targetch",
-      "community_name": "Community 13",
-      "id": "scripts_trim_audio_head_targetch"
+      "id": "scripts_trim_audio_head_targetch",
+      "community_name": "Community 12"
     },
     {
       "label": "sbHeaders",
@@ -1205,10 +1205,10 @@
       "source_file": "scripts/trim-audio-head.mjs",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "sbheaders",
-      "community_name": "Community 13",
-      "id": "scripts_trim_audio_head_sbheaders"
+      "id": "scripts_trim_audio_head_sbheaders",
+      "community_name": "Community 12"
     },
     {
       "label": "fail()",
@@ -1216,10 +1216,10 @@
       "source_file": "scripts/trim-audio-head.mjs",
       "source_location": "L30",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "fail()",
-      "community_name": "Community 13",
-      "id": "scripts_trim_audio_head_fail"
+      "id": "scripts_trim_audio_head_fail",
+      "community_name": "Community 12"
     },
     {
       "label": "numberForms()",
@@ -1227,10 +1227,10 @@
       "source_file": "scripts/trim-audio-head.mjs",
       "source_location": "L34",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "numberforms()",
-      "community_name": "Community 13",
-      "id": "scripts_trim_audio_head_numberforms"
+      "id": "scripts_trim_audio_head_numberforms",
+      "community_name": "Community 12"
     },
     {
       "label": "findAnnouncement()",
@@ -1238,10 +1238,10 @@
       "source_file": "scripts/trim-audio-head.mjs",
       "source_location": "L47",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "findannouncement()",
-      "community_name": "Community 13",
-      "id": "scripts_trim_audio_head_findannouncement"
+      "id": "scripts_trim_audio_head_findannouncement",
+      "community_name": "Community 12"
     },
     {
       "label": "dur()",
@@ -1249,10 +1249,10 @@
       "source_file": "scripts/trim-audio-head.mjs",
       "source_location": "L63",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "dur()",
-      "community_name": "Community 13",
-      "id": "scripts_trim_audio_head_dur"
+      "id": "scripts_trim_audio_head_dur",
+      "community_name": "Community 12"
     },
     {
       "label": "mmss()",
@@ -1260,10 +1260,10 @@
       "source_file": "scripts/trim-audio-head.mjs",
       "source_location": "L65",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "mmss()",
-      "community_name": "Community 13",
-      "id": "scripts_trim_audio_head_mmss"
+      "id": "scripts_trim_audio_head_mmss",
+      "community_name": "Community 12"
     },
     {
       "label": "cut",
@@ -1271,10 +1271,10 @@
       "source_file": "scripts/trim-audio-head.mjs",
       "source_location": "L92",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "cut",
-      "community_name": "Community 13",
-      "id": "scripts_trim_audio_head_cut"
+      "id": "scripts_trim_audio_head_cut",
+      "community_name": "Community 12"
     },
     {
       "label": "inBuf",
@@ -1282,10 +1282,131 @@
       "source_file": "scripts/trim-audio-head.mjs",
       "source_location": "L101",
       "_origin": "ast",
-      "community": 13,
+      "community": 12,
       "norm_label": "inbuf",
-      "community_name": "Community 13",
-      "id": "scripts_trim_audio_head_inbuf"
+      "id": "scripts_trim_audio_head_inbuf",
+      "community_name": "Community 12"
+    },
+    {
+      "label": "App.tsx",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "app.tsx",
+      "id": "src_app",
+      "community_name": "Community 1"
+    },
+    {
+      "label": "BookReader",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L6",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "bookreader",
+      "id": "src_app_bookreader",
+      "community_name": "Community 1"
+    },
+    {
+      "label": "VocabularyPanel",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L7",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "vocabularypanel",
+      "id": "src_app_vocabularypanel",
+      "community_name": "Community 1"
+    },
+    {
+      "label": "GamesPanel",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L8",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "gamespanel",
+      "id": "src_app_gamespanel",
+      "community_name": "Community 1"
+    },
+    {
+      "label": "ProgressDashboard",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L9",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "progressdashboard",
+      "id": "src_app_progressdashboard",
+      "community_name": "Community 1"
+    },
+    {
+      "label": "ImageUploadInput",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L10",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "imageuploadinput",
+      "id": "src_app_imageuploadinput",
+      "community_name": "Community 1"
+    },
+    {
+      "label": "TabSpinner()",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "tabspinner()",
+      "id": "src_app_tabspinner",
+      "community_name": "Community 1"
+    },
+    {
+      "label": "MainTab",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L25",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "maintab",
+      "id": "src_app_maintab",
+      "community_name": "Community 1"
+    },
+    {
+      "label": "V1Tab",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L26",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "v1tab",
+      "id": "src_app_v1tab",
+      "community_name": "Community 1"
+    },
+    {
+      "label": "migrateFromLocalStorage()",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L32",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "migratefromlocalstorage()",
+      "id": "src_app_migratefromlocalstorage",
+      "community_name": "Community 3"
+    },
+    {
+      "label": "App()",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L64",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "app()",
+      "id": "src_app_app",
+      "community_name": "Community 1"
     },
     {
       "label": "BookReader.tsx",
@@ -1293,10 +1414,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "bookreader.tsx",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader"
+      "id": "src_components_bookreader",
+      "community_name": "Community 2"
     },
     {
       "label": "NUMBER_WORDS",
@@ -1304,10 +1425,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "number_words",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_number_words"
+      "id": "src_components_bookreader_number_words",
+      "community_name": "Community 2"
     },
     {
       "label": "ROMAN_NUMERALS",
@@ -1315,10 +1436,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L34",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "roman_numerals",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_roman_numerals"
+      "id": "src_components_bookreader_roman_numerals",
+      "community_name": "Community 2"
     },
     {
       "label": "CHAPTER_HEADING",
@@ -1326,10 +1447,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L37",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "chapter_heading",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_chapter_heading"
+      "id": "src_components_bookreader_chapter_heading",
+      "community_name": "Community 2"
     },
     {
       "label": "splitIntoChapters()",
@@ -1337,10 +1458,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L42",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "splitintochapters()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_splitintochapters"
+      "id": "src_components_bookreader_splitintochapters",
+      "community_name": "Community 2"
     },
     {
       "label": "detectRunningHeaders()",
@@ -1348,10 +1469,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L101",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "detectrunningheaders()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_detectrunningheaders"
+      "id": "src_components_bookreader_detectrunningheaders",
+      "community_name": "Community 2"
     },
     {
       "label": "stripUrls()",
@@ -1359,10 +1480,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L121",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "stripurls()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_stripurls"
+      "id": "src_components_bookreader_stripurls",
+      "community_name": "Community 2"
     },
     {
       "label": "cleanPageText()",
@@ -1370,10 +1491,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L125",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "cleanpagetext()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_cleanpagetext"
+      "id": "src_components_bookreader_cleanpagetext",
+      "community_name": "Community 2"
     },
     {
       "label": "cleanChapterText()",
@@ -1381,10 +1502,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L141",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "cleanchaptertext()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_cleanchaptertext"
+      "id": "src_components_bookreader_cleanchaptertext",
+      "community_name": "Community 2"
     },
     {
       "label": "stripToFirstChapterHeading()",
@@ -1392,10 +1513,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L186",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "striptofirstchapterheading()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_striptofirstchapterheading"
+      "id": "src_components_bookreader_striptofirstchapterheading",
+      "community_name": "Community 2"
     },
     {
       "label": "extractAllPages()",
@@ -1403,10 +1524,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L198",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "extractallpages()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_extractallpages"
+      "id": "src_components_bookreader_extractallpages",
+      "community_name": "Community 2"
     },
     {
       "label": "splitToSentences()",
@@ -1414,10 +1535,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L222",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "splittosentences()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_splittosentences"
+      "id": "src_components_bookreader_splittosentences",
+      "community_name": "Community 2"
     },
     {
       "label": "splitKoRows()",
@@ -1425,10 +1546,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L240",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "splitkorows()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_splitkorows"
+      "id": "src_components_bookreader_splitkorows",
+      "community_name": "Community 2"
     },
     {
       "label": "looksLikeMetaReply()",
@@ -1436,10 +1557,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L253",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "lookslikemetareply()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_lookslikemetareply"
+      "id": "src_components_bookreader_lookslikemetareply",
+      "community_name": "Community 2"
     },
     {
       "label": "extractFnError()",
@@ -1447,10 +1568,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L263",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "extractfnerror()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_extractfnerror"
+      "id": "src_components_bookreader_extractfnerror",
+      "community_name": "Community 2"
     },
     {
       "label": "translateSentences()",
@@ -1458,10 +1579,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L277",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "translatesentences()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_translatesentences"
+      "id": "src_components_bookreader_translatesentences",
+      "community_name": "Community 2"
     },
     {
       "label": "lessonChapterRangesFor()",
@@ -1469,10 +1590,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L351",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "lessonchapterrangesfor()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_lessonchapterrangesfor"
+      "id": "src_components_bookreader_lessonchapterrangesfor",
+      "community_name": "Community 2"
     },
     {
       "label": "buildBookChapterToLessonMap()",
@@ -1480,10 +1601,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L359",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "buildbookchaptertolessonmap()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_buildbookchaptertolessonmap"
+      "id": "src_components_bookreader_buildbookchaptertolessonmap",
+      "community_name": "Community 2"
     },
     {
       "label": "skipId3v2()",
@@ -1491,10 +1612,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L377",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "skipid3v2()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_skipid3v2"
+      "id": "src_components_bookreader_skipid3v2",
+      "community_name": "Community 2"
     },
     {
       "label": "trimId3v1()",
@@ -1502,10 +1623,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L388",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "trimid3v1()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_trimid3v1"
+      "id": "src_components_bookreader_trimid3v1",
+      "community_name": "Community 2"
     },
     {
       "label": "findMp3Sync()",
@@ -1513,10 +1634,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L400",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "findmp3sync()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_findmp3sync"
+      "id": "src_components_bookreader_findmp3sync",
+      "community_name": "Community 2"
     },
     {
       "label": "parseMp3Frame()",
@@ -1524,10 +1645,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L416",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "parsemp3frame()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_parsemp3frame"
+      "id": "src_components_bookreader_parsemp3frame",
+      "community_name": "Community 2"
     },
     {
       "label": "isXingFrame()",
@@ -1535,10 +1656,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L444",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "isxingframe()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_isxingframe"
+      "id": "src_components_bookreader_isxingframe",
+      "community_name": "Community 2"
     },
     {
       "label": "buildXingFrame()",
@@ -1546,10 +1667,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L455",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "buildxingframe()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_buildxingframe"
+      "id": "src_components_bookreader_buildxingframe",
+      "community_name": "Community 2"
     },
     {
       "label": "mergeMp3Files()",
@@ -1557,10 +1678,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L493",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "mergemp3files()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_mergemp3files"
+      "id": "src_components_bookreader_mergemp3files",
+      "community_name": "Community 2"
     },
     {
       "label": "CHAPTER_NUMBER_WORDS",
@@ -1568,10 +1689,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L539",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "chapter_number_words",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_chapter_number_words"
+      "id": "src_components_bookreader_chapter_number_words",
+      "community_name": "Community 2"
     },
     {
       "label": "parseFilenameChapters()",
@@ -1579,10 +1700,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L549",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "parsefilenamechapters()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_parsefilenamechapters"
+      "id": "src_components_bookreader_parsefilenamechapters",
+      "community_name": "Community 2"
     },
     {
       "label": "chapterNumberForms()",
@@ -1590,10 +1711,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L575",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "chapternumberforms()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_chapternumberforms"
+      "id": "src_components_bookreader_chapternumberforms",
+      "community_name": "Community 2"
     },
     {
       "label": "findChapterAnnouncement()",
@@ -1601,10 +1722,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L586",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "findchapterannouncement()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_findchapterannouncement"
+      "id": "src_components_bookreader_findchapterannouncement",
+      "community_name": "Community 2"
     },
     {
       "label": "trimMp3BodyAtTime()",
@@ -1612,10 +1733,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L620",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "trimmp3bodyattime()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_trimmp3bodyattime"
+      "id": "src_components_bookreader_trimmp3bodyattime",
+      "community_name": "Community 2"
     },
     {
       "label": "sliceMp3BodyFromTime()",
@@ -1623,10 +1744,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L650",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "slicemp3bodyfromtime()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_slicemp3bodyfromtime"
+      "id": "src_components_bookreader_slicemp3bodyfromtime",
+      "community_name": "Community 2"
     },
     {
       "label": "renderWords()",
@@ -1634,10 +1755,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L664",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "renderwords()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_renderwords"
+      "id": "src_components_bookreader_renderwords",
+      "community_name": "Community 2"
     },
     {
       "label": "SentenceRowsProps",
@@ -1645,10 +1766,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L679",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "sentencerowsprops",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_sentencerowsprops"
+      "id": "src_components_bookreader_sentencerowsprops",
+      "community_name": "Community 2"
     },
     {
       "label": "RowProps",
@@ -1656,10 +1777,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L690",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "rowprops",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_rowprops"
+      "id": "src_components_bookreader_rowprops",
+      "community_name": "Community 2"
     },
     {
       "label": "Row",
@@ -1667,10 +1788,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L695",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "row",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_row"
+      "id": "src_components_bookreader_row",
+      "community_name": "Community 2"
     },
     {
       "label": "MobileRowProps",
@@ -1678,10 +1799,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L718",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "mobilerowprops",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_mobilerowprops"
+      "id": "src_components_bookreader_mobilerowprops",
+      "community_name": "Community 2"
     },
     {
       "label": "MobileRow",
@@ -1689,10 +1810,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L723",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "mobilerow",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_mobilerow"
+      "id": "src_components_bookreader_mobilerow",
+      "community_name": "Community 2"
     },
     {
       "label": "SentenceRows",
@@ -1700,10 +1821,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L735",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "sentencerows",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_sentencerows"
+      "id": "src_components_bookreader_sentencerows",
+      "community_name": "Community 2"
     },
     {
       "label": "InitState",
@@ -1711,10 +1832,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L780",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "initstate",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_initstate"
+      "id": "src_components_bookreader_initstate",
+      "community_name": "Community 2"
     },
     {
       "label": "BookReader()",
@@ -1722,10 +1843,10 @@
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L782",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "bookreader()",
-      "community_name": "Community 0",
-      "id": "src_components_bookreader_bookreader"
+      "id": "src_components_bookreader_bookreader",
+      "community_name": "Community 2"
     },
     {
       "label": "GamesPanel.tsx",
@@ -1733,10 +1854,10 @@
       "source_file": "src/components/GamesPanel.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "gamespanel.tsx",
-      "community_name": "Community 1",
-      "id": "src_components_gamespanel"
+      "id": "src_components_gamespanel",
+      "community_name": "Community 0"
     },
     {
       "label": "GameType",
@@ -1744,10 +1865,10 @@
       "source_file": "src/components/GamesPanel.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "gametype",
-      "community_name": "Community 1",
-      "id": "src_components_gamespanel_gametype"
+      "id": "src_components_gamespanel_gametype",
+      "community_name": "Community 0"
     },
     {
       "label": "TABS",
@@ -1755,10 +1876,10 @@
       "source_file": "src/components/GamesPanel.tsx",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "tabs",
-      "community_name": "Community 1",
-      "id": "src_components_gamespanel_tabs"
+      "id": "src_components_gamespanel_tabs",
+      "community_name": "Community 0"
     },
     {
       "label": "Props",
@@ -1766,10 +1887,10 @@
       "source_file": "src/components/GamesPanel.tsx",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "props",
-      "community_name": "Community 1",
-      "id": "src_components_gamespanel_props"
+      "id": "src_components_gamespanel_props",
+      "community_name": "Community 0"
     },
     {
       "label": "GamesPanel()",
@@ -1777,10 +1898,10 @@
       "source_file": "src/components/GamesPanel.tsx",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "gamespanel()",
-      "community_name": "Community 1",
-      "id": "src_components_gamespanel_gamespanel"
+      "id": "src_components_gamespanel_gamespanel",
+      "community_name": "Community 0"
     },
     {
       "label": "Icon.tsx",
@@ -1788,10 +1909,10 @@
       "source_file": "src/components/Icon.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 1,
       "norm_label": "icon.tsx",
-      "community_name": "Community 5",
-      "id": "src_components_icon"
+      "id": "src_components_icon",
+      "community_name": "Community 1"
     },
     {
       "label": "IconName",
@@ -1799,10 +1920,10 @@
       "source_file": "src/components/Icon.tsx",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 5,
+      "community": 1,
       "norm_label": "iconname",
-      "community_name": "Community 5",
-      "id": "src_components_icon_iconname"
+      "id": "src_components_icon_iconname",
+      "community_name": "Community 1"
     },
     {
       "label": "STROKE",
@@ -1810,10 +1931,10 @@
       "source_file": "src/components/Icon.tsx",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 5,
+      "community": 1,
       "norm_label": "stroke",
-      "community_name": "Community 5",
-      "id": "src_components_icon_stroke"
+      "id": "src_components_icon_stroke",
+      "community_name": "Community 1"
     },
     {
       "label": "SOLID",
@@ -1821,10 +1942,10 @@
       "source_file": "src/components/Icon.tsx",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 5,
+      "community": 1,
       "norm_label": "solid",
-      "community_name": "Community 5",
-      "id": "src_components_icon_solid"
+      "id": "src_components_icon_solid",
+      "community_name": "Community 1"
     },
     {
       "label": "PATHS",
@@ -1832,10 +1953,10 @@
       "source_file": "src/components/Icon.tsx",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 5,
+      "community": 1,
       "norm_label": "paths",
-      "community_name": "Community 5",
-      "id": "src_components_icon_paths"
+      "id": "src_components_icon_paths",
+      "community_name": "Community 1"
     },
     {
       "label": "Icon()",
@@ -1843,10 +1964,10 @@
       "source_file": "src/components/Icon.tsx",
       "source_location": "L51",
       "_origin": "ast",
-      "community": 5,
+      "community": 1,
       "norm_label": "icon()",
-      "community_name": "Community 5",
-      "id": "src_components_icon_icon"
+      "id": "src_components_icon_icon",
+      "community_name": "Community 1"
     },
     {
       "label": "ImageUploadInput.tsx",
@@ -1854,10 +1975,10 @@
       "source_file": "src/components/ImageUploadInput.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 14,
       "norm_label": "imageuploadinput.tsx",
-      "community_name": "Community 5",
-      "id": "src_components_imageuploadinput"
+      "id": "src_components_imageuploadinput",
+      "community_name": "Community 14"
     },
     {
       "label": "BaseProps",
@@ -1865,10 +1986,10 @@
       "source_file": "src/components/ImageUploadInput.tsx",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 5,
+      "community": 14,
       "norm_label": "baseprops",
-      "community_name": "Community 5",
-      "id": "src_components_imageuploadinput_baseprops"
+      "id": "src_components_imageuploadinput_baseprops",
+      "community_name": "Community 14"
     },
     {
       "label": "TextProps",
@@ -1876,10 +1997,10 @@
       "source_file": "src/components/ImageUploadInput.tsx",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 5,
+      "community": 14,
       "norm_label": "textprops",
-      "community_name": "Community 5",
-      "id": "src_components_imageuploadinput_textprops"
+      "id": "src_components_imageuploadinput_textprops",
+      "community_name": "Community 14"
     },
     {
       "label": "VocabProps",
@@ -1887,10 +2008,10 @@
       "source_file": "src/components/ImageUploadInput.tsx",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 5,
+      "community": 14,
       "norm_label": "vocabprops",
-      "community_name": "Community 5",
-      "id": "src_components_imageuploadinput_vocabprops"
+      "id": "src_components_imageuploadinput_vocabprops",
+      "community_name": "Community 14"
     },
     {
       "label": "Props",
@@ -1898,10 +2019,10 @@
       "source_file": "src/components/ImageUploadInput.tsx",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 5,
+      "community": 14,
       "norm_label": "props",
-      "community_name": "Community 5",
-      "id": "src_components_imageuploadinput_props"
+      "id": "src_components_imageuploadinput_props",
+      "community_name": "Community 14"
     },
     {
       "label": "ImageEntry",
@@ -1909,10 +2030,10 @@
       "source_file": "src/components/ImageUploadInput.tsx",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 5,
+      "community": 14,
       "norm_label": "imageentry",
-      "community_name": "Community 5",
-      "id": "src_components_imageuploadinput_imageentry"
+      "id": "src_components_imageuploadinput_imageentry",
+      "community_name": "Community 14"
     },
     {
       "label": "compressImage()",
@@ -1920,10 +2041,10 @@
       "source_file": "src/components/ImageUploadInput.tsx",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 5,
+      "community": 14,
       "norm_label": "compressimage()",
-      "community_name": "Community 5",
-      "id": "src_components_imageuploadinput_compressimage"
+      "id": "src_components_imageuploadinput_compressimage",
+      "community_name": "Community 14"
     },
     {
       "label": "ImageUploadInput()",
@@ -1931,10 +2052,10 @@
       "source_file": "src/components/ImageUploadInput.tsx",
       "source_location": "L39",
       "_origin": "ast",
-      "community": 5,
+      "community": 14,
       "norm_label": "imageuploadinput()",
-      "community_name": "Community 5",
-      "id": "src_components_imageuploadinput_imageuploadinput"
+      "id": "src_components_imageuploadinput_imageuploadinput",
+      "community_name": "Community 14"
     },
     {
       "label": "LessonScheduleWidget.tsx",
@@ -1944,8 +2065,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "lessonschedulewidget.tsx",
-      "community_name": "Community 9",
-      "id": "src_components_lessonschedulewidget"
+      "id": "src_components_lessonschedulewidget",
+      "community_name": "Community 9"
     },
     {
       "label": "utcDays()",
@@ -1955,8 +2076,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "utcdays()",
-      "community_name": "Community 9",
-      "id": "src_components_lessonschedulewidget_utcdays"
+      "id": "src_components_lessonschedulewidget_utcdays",
+      "community_name": "Community 9"
     },
     {
       "label": "daysDiff()",
@@ -1966,8 +2087,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "daysdiff()",
-      "community_name": "Community 9",
-      "id": "src_components_lessonschedulewidget_daysdiff"
+      "id": "src_components_lessonschedulewidget_daysdiff",
+      "community_name": "Community 9"
     },
     {
       "label": "fmtDate()",
@@ -1977,8 +2098,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "fmtdate()",
-      "community_name": "Community 9",
-      "id": "src_components_lessonschedulewidget_fmtdate"
+      "id": "src_components_lessonschedulewidget_fmtdate",
+      "community_name": "Community 9"
     },
     {
       "label": "LessonScheduleWidget()",
@@ -1988,8 +2109,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "lessonschedulewidget()",
-      "community_name": "Community 9",
-      "id": "src_components_lessonschedulewidget_lessonschedulewidget"
+      "id": "src_components_lessonschedulewidget_lessonschedulewidget",
+      "community_name": "Community 9"
     },
     {
       "label": "ProgressDashboard.tsx",
@@ -1997,10 +2118,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "progressdashboard.tsx",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard"
+      "id": "src_components_progressdashboard",
+      "community_name": "Community 1"
     },
     {
       "label": "GAME_LABELS",
@@ -2008,10 +2129,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "game_labels",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_game_labels"
+      "id": "src_components_progressdashboard_game_labels",
+      "community_name": "Community 1"
     },
     {
       "label": "FEATURE_LABELS",
@@ -2019,10 +2140,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "feature_labels",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_feature_labels"
+      "id": "src_components_progressdashboard_feature_labels",
+      "community_name": "Community 1"
     },
     {
       "label": "FEATURE_ICONS",
@@ -2030,10 +2151,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "feature_icons",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_feature_icons"
+      "id": "src_components_progressdashboard_feature_icons",
+      "community_name": "Community 1"
     },
     {
       "label": "BOOK_LABELS",
@@ -2041,10 +2162,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "book_labels",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_book_labels"
+      "id": "src_components_progressdashboard_book_labels",
+      "community_name": "Community 1"
     },
     {
       "label": "parseFeature()",
@@ -2052,10 +2173,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "parsefeature()",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_parsefeature"
+      "id": "src_components_progressdashboard_parsefeature",
+      "community_name": "Community 1"
     },
     {
       "label": "formatDuration()",
@@ -2063,10 +2184,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L34",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "formatduration()",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_formatduration"
+      "id": "src_components_progressdashboard_formatduration",
+      "community_name": "Community 1"
     },
     {
       "label": "KST_DATE",
@@ -2074,10 +2195,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "kst_date",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_kst_date"
+      "id": "src_components_progressdashboard_kst_date",
+      "community_name": "Community 1"
     },
     {
       "label": "KST_TIME",
@@ -2085,10 +2206,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "kst_time",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_kst_time"
+      "id": "src_components_progressdashboard_kst_time",
+      "community_name": "Community 1"
     },
     {
       "label": "formatDate()",
@@ -2096,10 +2217,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L48",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "formatdate()",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_formatdate"
+      "id": "src_components_progressdashboard_formatdate",
+      "community_name": "Community 1"
     },
     {
       "label": "formatSessionWhen()",
@@ -2107,10 +2228,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L54",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "formatsessionwhen()",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_formatsessionwhen"
+      "id": "src_components_progressdashboard_formatsessionwhen",
+      "community_name": "Community 1"
     },
     {
       "label": "MiniBar()",
@@ -2118,10 +2239,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L61",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "minibar()",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_minibar"
+      "id": "src_components_progressdashboard_minibar",
+      "community_name": "Community 1"
     },
     {
       "label": "ProgressDashboard()",
@@ -2129,10 +2250,10 @@
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L69",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "progressdashboard()",
-      "community_name": "Community 3",
-      "id": "src_components_progressdashboard_progressdashboard"
+      "id": "src_components_progressdashboard_progressdashboard",
+      "community_name": "Community 1"
     },
     {
       "label": "SentenceScramble.tsx",
@@ -2140,10 +2261,10 @@
       "source_file": "src/components/SentenceScramble.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "sentencescramble.tsx",
-      "community_name": "Community 1",
-      "id": "src_components_sentencescramble"
+      "id": "src_components_sentencescramble",
+      "community_name": "Community 0"
     },
     {
       "label": "WordToken",
@@ -2151,10 +2272,10 @@
       "source_file": "src/components/SentenceScramble.tsx",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "wordtoken",
-      "community_name": "Community 1",
-      "id": "src_components_sentencescramble_wordtoken"
+      "id": "src_components_sentencescramble_wordtoken",
+      "community_name": "Community 0"
     },
     {
       "label": "shuffle()",
@@ -2162,10 +2283,10 @@
       "source_file": "src/components/SentenceScramble.tsx",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "shuffle()",
-      "community_name": "Community 1",
-      "id": "src_components_sentencescramble_shuffle"
+      "id": "src_components_sentencescramble_shuffle",
+      "community_name": "Community 0"
     },
     {
       "label": "isKorean()",
@@ -2173,10 +2294,10 @@
       "source_file": "src/components/SentenceScramble.tsx",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "iskorean()",
-      "community_name": "Community 1",
-      "id": "src_components_sentencescramble_iskorean"
+      "id": "src_components_sentencescramble_iskorean",
+      "community_name": "Community 0"
     },
     {
       "label": "VocabPuzzle",
@@ -2184,10 +2305,10 @@
       "source_file": "src/components/SentenceScramble.tsx",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "vocabpuzzle",
-      "community_name": "Community 1",
-      "id": "src_components_sentencescramble_vocabpuzzle"
+      "id": "src_components_sentencescramble_vocabpuzzle",
+      "community_name": "Community 0"
     },
     {
       "label": "Props",
@@ -2195,10 +2316,10 @@
       "source_file": "src/components/SentenceScramble.tsx",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "props",
-      "community_name": "Community 1",
-      "id": "src_components_sentencescramble_props"
+      "id": "src_components_sentencescramble_props",
+      "community_name": "Community 0"
     },
     {
       "label": "SentenceScramble()",
@@ -2206,10 +2327,10 @@
       "source_file": "src/components/SentenceScramble.tsx",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "sentencescramble()",
-      "community_name": "Community 1",
-      "id": "src_components_sentencescramble_sentencescramble"
+      "id": "src_components_sentencescramble_sentencescramble",
+      "community_name": "Community 0"
     },
     {
       "label": "SpaceGame.tsx",
@@ -2217,10 +2338,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "spacegame.tsx",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame"
+      "id": "src_components_spacegame",
+      "community_name": "Community 0"
     },
     {
       "label": "ALIEN_COLS",
@@ -2228,10 +2349,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "alien_cols",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_alien_cols"
+      "id": "src_components_spacegame_alien_cols",
+      "community_name": "Community 0"
     },
     {
       "label": "WAVES",
@@ -2239,10 +2360,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "waves",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_waves"
+      "id": "src_components_spacegame_waves",
+      "community_name": "Community 0"
     },
     {
       "label": "DEFAULT_WORDS",
@@ -2250,10 +2371,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "default_words",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_default_words"
+      "id": "src_components_spacegame_default_words",
+      "community_name": "Community 0"
     },
     {
       "label": "nid()",
@@ -2261,10 +2382,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L23",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "nid()",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_nid"
+      "id": "src_components_spacegame_nid",
+      "community_name": "Community 0"
     },
     {
       "label": "actx()",
@@ -2272,10 +2393,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "actx()",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_actx"
+      "id": "src_components_spacegame_actx",
+      "community_name": "Community 0"
     },
     {
       "label": "playLaser()",
@@ -2283,10 +2404,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "playlaser()",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_playlaser"
+      "id": "src_components_spacegame_playlaser",
+      "community_name": "Community 0"
     },
     {
       "label": "playBoom()",
@@ -2294,10 +2415,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L36",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "playboom()",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_playboom"
+      "id": "src_components_spacegame_playboom",
+      "community_name": "Community 0"
     },
     {
       "label": "playDeath()",
@@ -2305,10 +2426,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L45",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "playdeath()",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_playdeath"
+      "id": "src_components_spacegame_playdeath",
+      "community_name": "Community 0"
     },
     {
       "label": "Alien",
@@ -2316,10 +2437,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L55",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "alien",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_alien"
+      "id": "src_components_spacegame_alien",
+      "community_name": "Community 0"
     },
     {
       "label": "Bullet",
@@ -2327,10 +2448,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L56",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "bullet",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_bullet"
+      "id": "src_components_spacegame_bullet",
+      "community_name": "Community 0"
     },
     {
       "label": "Spark",
@@ -2338,10 +2459,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L57",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "spark",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_spark"
+      "id": "src_components_spacegame_spark",
+      "community_name": "Community 0"
     },
     {
       "label": "GStar",
@@ -2349,10 +2470,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L58",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "gstar",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_gstar"
+      "id": "src_components_spacegame_gstar",
+      "community_name": "Community 0"
     },
     {
       "label": "Phase",
@@ -2360,10 +2481,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L60",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "phase",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_phase"
+      "id": "src_components_spacegame_phase",
+      "community_name": "Community 0"
     },
     {
       "label": "rrect()",
@@ -2371,10 +2492,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L62",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "rrect()",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_rrect"
+      "id": "src_components_spacegame_rrect",
+      "community_name": "Community 0"
     },
     {
       "label": "Overlay()",
@@ -2382,10 +2503,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L71",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "overlay()",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_overlay"
+      "id": "src_components_spacegame_overlay",
+      "community_name": "Community 0"
     },
     {
       "label": "SpaceGame()",
@@ -2393,10 +2514,10 @@
       "source_file": "src/components/SpaceGame.tsx",
       "source_location": "L80",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "spacegame()",
-      "community_name": "Community 1",
-      "id": "src_components_spacegame_spacegame"
+      "id": "src_components_spacegame_spacegame",
+      "community_name": "Community 0"
     },
     {
       "label": "VocabQuizGame.tsx",
@@ -2404,10 +2525,10 @@
       "source_file": "src/components/VocabQuizGame.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "vocabquizgame.tsx",
-      "community_name": "Community 1",
-      "id": "src_components_vocabquizgame"
+      "id": "src_components_vocabquizgame",
+      "community_name": "Community 0"
     },
     {
       "label": "WordDef",
@@ -2415,10 +2536,10 @@
       "source_file": "src/components/VocabQuizGame.tsx",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "worddef",
-      "community_name": "Community 1",
-      "id": "src_components_vocabquizgame_worddef"
+      "id": "src_components_vocabquizgame_worddef",
+      "community_name": "Community 0"
     },
     {
       "label": "Question",
@@ -2426,10 +2547,10 @@
       "source_file": "src/components/VocabQuizGame.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "question",
-      "community_name": "Community 1",
-      "id": "src_components_vocabquizgame_question"
+      "id": "src_components_vocabquizgame_question",
+      "community_name": "Community 0"
     },
     {
       "label": "shuffle()",
@@ -2437,10 +2558,10 @@
       "source_file": "src/components/VocabQuizGame.tsx",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "shuffle()",
-      "community_name": "Community 1",
-      "id": "src_components_vocabquizgame_shuffle"
+      "id": "src_components_vocabquizgame_shuffle",
+      "community_name": "Community 0"
     },
     {
       "label": "fetchDef()",
@@ -2448,10 +2569,10 @@
       "source_file": "src/components/VocabQuizGame.tsx",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "fetchdef()",
-      "community_name": "Community 1",
-      "id": "src_components_vocabquizgame_fetchdef"
+      "id": "src_components_vocabquizgame_fetchdef",
+      "community_name": "Community 0"
     },
     {
       "label": "buildQuestions()",
@@ -2459,10 +2580,10 @@
       "source_file": "src/components/VocabQuizGame.tsx",
       "source_location": "L31",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "buildquestions()",
-      "community_name": "Community 1",
-      "id": "src_components_vocabquizgame_buildquestions"
+      "id": "src_components_vocabquizgame_buildquestions",
+      "community_name": "Community 0"
     },
     {
       "label": "GameState",
@@ -2470,10 +2591,10 @@
       "source_file": "src/components/VocabQuizGame.tsx",
       "source_location": "L42",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "gamestate",
-      "community_name": "Community 1",
-      "id": "src_components_vocabquizgame_gamestate"
+      "id": "src_components_vocabquizgame_gamestate",
+      "community_name": "Community 0"
     },
     {
       "label": "VocabQuizGame()",
@@ -2481,10 +2602,10 @@
       "source_file": "src/components/VocabQuizGame.tsx",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "vocabquizgame()",
-      "community_name": "Community 1",
-      "id": "src_components_vocabquizgame_vocabquizgame"
+      "id": "src_components_vocabquizgame_vocabquizgame",
+      "community_name": "Community 0"
     },
     {
       "label": "VocabularyPanel.tsx",
@@ -2492,10 +2613,10 @@
       "source_file": "src/components/VocabularyPanel.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 3,
       "norm_label": "vocabularypanel.tsx",
-      "community_name": "Community 5",
-      "id": "src_components_vocabularypanel"
+      "id": "src_components_vocabularypanel",
+      "community_name": "Community 3"
     },
     {
       "label": "Props",
@@ -2503,10 +2624,10 @@
       "source_file": "src/components/VocabularyPanel.tsx",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "props",
-      "community_name": "Community 1",
-      "id": "src_components_vocabularypanel_props"
+      "id": "src_components_vocabularypanel_props",
+      "community_name": "Community 0"
     },
     {
       "label": "CardState",
@@ -2514,10 +2635,10 @@
       "source_file": "src/components/VocabularyPanel.tsx",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 5,
+      "community": 3,
       "norm_label": "cardstate",
-      "community_name": "Community 5",
-      "id": "src_components_vocabularypanel_cardstate"
+      "id": "src_components_vocabularypanel_cardstate",
+      "community_name": "Community 3"
     },
     {
       "label": "DefEntry",
@@ -2525,10 +2646,10 @@
       "source_file": "src/components/VocabularyPanel.tsx",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 5,
+      "community": 3,
       "norm_label": "defentry",
-      "community_name": "Community 5",
-      "id": "src_components_vocabularypanel_defentry"
+      "id": "src_components_vocabularypanel_defentry",
+      "community_name": "Community 3"
     },
     {
       "label": "isKorean()",
@@ -2536,10 +2657,10 @@
       "source_file": "src/components/VocabularyPanel.tsx",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 5,
+      "community": 3,
       "norm_label": "iskorean()",
-      "community_name": "Community 5",
-      "id": "src_components_vocabularypanel_iskorean"
+      "id": "src_components_vocabularypanel_iskorean",
+      "community_name": "Community 3"
     },
     {
       "label": "sessionCache",
@@ -2547,10 +2668,10 @@
       "source_file": "src/components/VocabularyPanel.tsx",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 5,
+      "community": 3,
       "norm_label": "sessioncache",
-      "community_name": "Community 5",
-      "id": "src_components_vocabularypanel_sessioncache"
+      "id": "src_components_vocabularypanel_sessioncache",
+      "community_name": "Community 3"
     },
     {
       "label": "VocabularyPanel()",
@@ -2558,10 +2679,10 @@
       "source_file": "src/components/VocabularyPanel.tsx",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 5,
+      "community": 3,
       "norm_label": "vocabularypanel()",
-      "community_name": "Community 5",
-      "id": "src_components_vocabularypanel_vocabularypanel"
+      "id": "src_components_vocabularypanel_vocabularypanel",
+      "community_name": "Community 3"
     },
     {
       "label": "syllabus.ts",
@@ -2571,8 +2692,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "syllabus.ts",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus"
+      "id": "src_data_syllabus",
+      "community_name": "Community 9"
     },
     {
       "label": "BookId",
@@ -2582,8 +2703,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "bookid",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus_bookid"
+      "id": "src_data_syllabus_bookid",
+      "community_name": "Community 9"
     },
     {
       "label": "BookInfo",
@@ -2593,8 +2714,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "bookinfo",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus_bookinfo"
+      "id": "src_data_syllabus_bookinfo",
+      "community_name": "Community 9"
     },
     {
       "label": "BOOKS",
@@ -2604,8 +2725,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "books",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus_books"
+      "id": "src_data_syllabus_books",
+      "community_name": "Community 9"
     },
     {
       "label": "LessonEntry",
@@ -2615,8 +2736,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "lessonentry",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus_lessonentry"
+      "id": "src_data_syllabus_lessonentry",
+      "community_name": "Community 9"
     },
     {
       "label": "SCHEDULE",
@@ -2626,8 +2747,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "schedule",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus_schedule"
+      "id": "src_data_syllabus_schedule",
+      "community_name": "Community 9"
     },
     {
       "label": "HOLIDAY",
@@ -2637,8 +2758,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "holiday",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus_holiday"
+      "id": "src_data_syllabus_holiday",
+      "community_name": "Community 9"
     },
     {
       "label": "kstToday()",
@@ -2648,8 +2769,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "ksttoday()",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus_ksttoday"
+      "id": "src_data_syllabus_ksttoday",
+      "community_name": "Community 9"
     },
     {
       "label": "currentLesson()",
@@ -2659,8 +2780,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "currentlesson()",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus_currentlesson"
+      "id": "src_data_syllabus_currentlesson",
+      "community_name": "Community 9"
     },
     {
       "label": "EssaySection",
@@ -2670,8 +2791,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "essaysection",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus_essaysection"
+      "id": "src_data_syllabus_essaysection",
+      "community_name": "Community 9"
     },
     {
       "label": "WritingPrompt",
@@ -2681,8 +2802,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "writingprompt",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus_writingprompt"
+      "id": "src_data_syllabus_writingprompt",
+      "community_name": "Community 9"
     },
     {
       "label": "WRITING_PROMPTS",
@@ -2692,8 +2813,8 @@
       "_origin": "ast",
       "community": 9,
       "norm_label": "writing_prompts",
-      "community_name": "Community 9",
-      "id": "src_data_syllabus_writing_prompts"
+      "id": "src_data_syllabus_writing_prompts",
+      "community_name": "Community 9"
     },
     {
       "label": "audioAlign.ts",
@@ -2703,8 +2824,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "audioalign.ts",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign"
+      "id": "src_lib_audioalign",
+      "community_name": "Community 10"
     },
     {
       "label": "AlignPhase",
@@ -2714,8 +2835,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "alignphase",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_alignphase"
+      "id": "src_lib_audioalign_alignphase",
+      "community_name": "Community 10"
     },
     {
       "label": "AlignProgress",
@@ -2725,8 +2846,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "alignprogress",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_alignprogress"
+      "id": "src_lib_audioalign_alignprogress",
+      "community_name": "Community 10"
     },
     {
       "label": "Chunk",
@@ -2736,8 +2857,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "chunk",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_chunk"
+      "id": "src_lib_audioalign_chunk",
+      "community_name": "Community 10"
     },
     {
       "label": "decodeTo16kMono()",
@@ -2747,8 +2868,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "decodeto16kmono()",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_decodeto16kmono"
+      "id": "src_lib_audioalign_decodeto16kmono",
+      "community_name": "Community 10"
     },
     {
       "label": "getTranscriber()",
@@ -2758,8 +2879,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "gettranscriber()",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_gettranscriber"
+      "id": "src_lib_audioalign_gettranscriber",
+      "community_name": "Community 10"
     },
     {
       "label": "normWord()",
@@ -2769,8 +2890,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "normword()",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_normword"
+      "id": "src_lib_audioalign_normword",
+      "community_name": "Community 10"
     },
     {
       "label": "buildAudioWordList()",
@@ -2780,8 +2901,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "buildaudiowordlist()",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_buildaudiowordlist"
+      "id": "src_lib_audioalign_buildaudiowordlist",
+      "community_name": "Community 10"
     },
     {
       "label": "alignByNW()",
@@ -2791,8 +2912,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "alignbynw()",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_alignbynw"
+      "id": "src_lib_audioalign_alignbynw",
+      "community_name": "Community 10"
     },
     {
       "label": "WordTimestamp",
@@ -2802,8 +2923,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "wordtimestamp",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_wordtimestamp"
+      "id": "src_lib_audioalign_wordtimestamp",
+      "community_name": "Community 10"
     },
     {
       "label": "alignFromWordTimestamps()",
@@ -2813,8 +2934,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "alignfromwordtimestamps()",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_alignfromwordtimestamps"
+      "id": "src_lib_audioalign_alignfromwordtimestamps",
+      "community_name": "Community 10"
     },
     {
       "label": "alignChapterAudio()",
@@ -2824,8 +2945,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "alignchapteraudio()",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_alignchapteraudio"
+      "id": "src_lib_audioalign_alignchapteraudio",
+      "community_name": "Community 10"
     },
     {
       "label": "enforceMonotone()",
@@ -2835,8 +2956,8 @@
       "_origin": "ast",
       "community": 10,
       "norm_label": "enforcemonotone()",
-      "community_name": "Community 10",
-      "id": "src_lib_audioalign_enforcemonotone"
+      "id": "src_lib_audioalign_enforcemonotone",
+      "community_name": "Community 10"
     },
     {
       "label": "chapterStorage.ts",
@@ -2844,10 +2965,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "chapterstorage.ts",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage"
+      "id": "src_lib_chapterstorage",
+      "community_name": "Community 3"
     },
     {
       "label": "saveChapterEn()",
@@ -2855,10 +2976,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "savechapteren()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_savechapteren"
+      "id": "src_lib_chapterstorage_savechapteren",
+      "community_name": "Community 3"
     },
     {
       "label": "saveChapterKo()",
@@ -2866,10 +2987,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "savechapterko()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_savechapterko"
+      "id": "src_lib_chapterstorage_savechapterko",
+      "community_name": "Community 3"
     },
     {
       "label": "loadChapterEn()",
@@ -2877,10 +2998,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "loadchapteren()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_loadchapteren"
+      "id": "src_lib_chapterstorage_loadchapteren",
+      "community_name": "Community 2"
     },
     {
       "label": "loadChapterKo()",
@@ -2888,10 +3009,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 0,
+      "community": 2,
       "norm_label": "loadchapterko()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_loadchapterko"
+      "id": "src_lib_chapterstorage_loadchapterko",
+      "community_name": "Community 2"
     },
     {
       "label": "hasBook()",
@@ -2899,10 +3020,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L37",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "hasbook()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_hasbook"
+      "id": "src_lib_chapterstorage_hasbook",
+      "community_name": "Community 3"
     },
     {
       "label": "clearBook()",
@@ -2910,10 +3031,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "clearbook()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_clearbook"
+      "id": "src_lib_chapterstorage_clearbook",
+      "community_name": "Community 3"
     },
     {
       "label": "getTranslatedChapters()",
@@ -2921,10 +3042,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L56",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "gettranslatedchapters()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_gettranslatedchapters"
+      "id": "src_lib_chapterstorage_gettranslatedchapters",
+      "community_name": "Community 3"
     },
     {
       "label": "saveChapterCount()",
@@ -2932,10 +3053,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L66",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "savechaptercount()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_savechaptercount"
+      "id": "src_lib_chapterstorage_savechaptercount",
+      "community_name": "Community 3"
     },
     {
       "label": "loadChapterCount()",
@@ -2943,10 +3064,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L70",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "loadchaptercount()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_loadchaptercount"
+      "id": "src_lib_chapterstorage_loadchaptercount",
+      "community_name": "Community 3"
     },
     {
       "label": "saveBookChapters()",
@@ -2954,10 +3075,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L86",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "savebookchapters()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_savebookchapters"
+      "id": "src_lib_chapterstorage_savebookchapters",
+      "community_name": "Community 3"
     },
     {
       "label": "audioPath()",
@@ -2965,10 +3086,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L102",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "audiopath()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_audiopath"
+      "id": "src_lib_chapterstorage_audiopath",
+      "community_name": "Community 3"
     },
     {
       "label": "saveChapterAudio()",
@@ -2976,10 +3097,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L104",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "savechapteraudio()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_savechapteraudio"
+      "id": "src_lib_chapterstorage_savechapteraudio",
+      "community_name": "Community 3"
     },
     {
       "label": "loadChapterAudio()",
@@ -2987,10 +3108,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L115",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "loadchapteraudio()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_loadchapteraudio"
+      "id": "src_lib_chapterstorage_loadchapteraudio",
+      "community_name": "Community 3"
     },
     {
       "label": "deleteChapterAudio()",
@@ -2998,10 +3119,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L120",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "deletechapteraudio()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_deletechapteraudio"
+      "id": "src_lib_chapterstorage_deletechapteraudio",
+      "community_name": "Community 3"
     },
     {
       "label": "getChaptersWithAudio()",
@@ -3009,10 +3130,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L125",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "getchapterswithaudio()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_getchapterswithaudio"
+      "id": "src_lib_chapterstorage_getchapterswithaudio",
+      "community_name": "Community 3"
     },
     {
       "label": "saveChapterTimings()",
@@ -3020,10 +3141,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L133",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "savechaptertimings()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_savechaptertimings"
+      "id": "src_lib_chapterstorage_savechaptertimings",
+      "community_name": "Community 3"
     },
     {
       "label": "loadChapterTimings()",
@@ -3031,10 +3152,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L137",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "loadchaptertimings()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_loadchaptertimings"
+      "id": "src_lib_chapterstorage_loadchaptertimings",
+      "community_name": "Community 3"
     },
     {
       "label": "deleteChapterTimings()",
@@ -3042,10 +3163,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L143",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "deletechaptertimings()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_deletechaptertimings"
+      "id": "src_lib_chapterstorage_deletechaptertimings",
+      "community_name": "Community 3"
     },
     {
       "label": "saveChapterVocab()",
@@ -3053,10 +3174,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L148",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "savechaptervocab()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_savechaptervocab"
+      "id": "src_lib_chapterstorage_savechaptervocab",
+      "community_name": "Community 3"
     },
     {
       "label": "loadChapterVocab()",
@@ -3064,10 +3185,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L152",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "loadchaptervocab()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_loadchaptervocab"
+      "id": "src_lib_chapterstorage_loadchaptervocab",
+      "community_name": "Community 3"
     },
     {
       "label": "migrateChaptersFromLocalStorage()",
@@ -3075,10 +3196,10 @@
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L159",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "migratechaptersfromlocalstorage()",
-      "community_name": "Community 0",
-      "id": "src_lib_chapterstorage_migratechaptersfromlocalstorage"
+      "id": "src_lib_chapterstorage_migratechaptersfromlocalstorage",
+      "community_name": "Community 3"
     },
     {
       "label": "cloudStorage.ts",
@@ -3086,10 +3207,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "cloudstorage.ts",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage"
+      "id": "src_lib_cloudstorage",
+      "community_name": "Community 3"
     },
     {
       "label": "Row",
@@ -3097,10 +3218,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "row",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage_row"
+      "id": "src_lib_cloudstorage_row",
+      "community_name": "Community 3"
     },
     {
       "label": "csGet()",
@@ -3108,10 +3229,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "csget()",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage_csget"
+      "id": "src_lib_cloudstorage_csget",
+      "community_name": "Community 3"
     },
     {
       "label": "csGetJSON()",
@@ -3119,10 +3240,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "csgetjson()",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage_csgetjson"
+      "id": "src_lib_cloudstorage_csgetjson",
+      "community_name": "Community 3"
     },
     {
       "label": "csSet()",
@@ -3130,10 +3251,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "csset()",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage_csset"
+      "id": "src_lib_cloudstorage_csset",
+      "community_name": "Community 3"
     },
     {
       "label": "csSetJSON()",
@@ -3141,10 +3262,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "cssetjson()",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage_cssetjson"
+      "id": "src_lib_cloudstorage_cssetjson",
+      "community_name": "Community 3"
     },
     {
       "label": "csDel()",
@@ -3152,10 +3273,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L36",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "csdel()",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage_csdel"
+      "id": "src_lib_cloudstorage_csdel",
+      "community_name": "Community 3"
     },
     {
       "label": "csDelPattern()",
@@ -3163,10 +3284,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "csdelpattern()",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage_csdelpattern"
+      "id": "src_lib_cloudstorage_csdelpattern",
+      "community_name": "Community 3"
     },
     {
       "label": "csSetBatch()",
@@ -3174,10 +3295,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L46",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "cssetbatch()",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage_cssetbatch"
+      "id": "src_lib_cloudstorage_cssetbatch",
+      "community_name": "Community 3"
     },
     {
       "label": "csKeyExists()",
@@ -3185,10 +3306,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L53",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "cskeyexists()",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage_cskeyexists"
+      "id": "src_lib_cloudstorage_cskeyexists",
+      "community_name": "Community 3"
     },
     {
       "label": "csGetKeysByPattern()",
@@ -3196,10 +3317,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L63",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "csgetkeysbypattern()",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage_csgetkeysbypattern"
+      "id": "src_lib_cloudstorage_csgetkeysbypattern",
+      "community_name": "Community 3"
     },
     {
       "label": "csGetAppState()",
@@ -3207,10 +3328,10 @@
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L76",
       "_origin": "ast",
-      "community": 0,
+      "community": 1,
       "norm_label": "csgetappstate()",
-      "community_name": "Community 0",
-      "id": "src_lib_cloudstorage_csgetappstate"
+      "id": "src_lib_cloudstorage_csgetappstate",
+      "community_name": "Community 1"
     },
     {
       "label": "supabase.ts",
@@ -3218,10 +3339,10 @@
       "source_file": "src/lib/supabase.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 3,
       "norm_label": "supabase.ts",
-      "community_name": "Community 5",
-      "id": "src_lib_supabase"
+      "id": "src_lib_supabase",
+      "community_name": "Community 3"
     },
     {
       "label": "supabase",
@@ -3229,10 +3350,10 @@
       "source_file": "src/lib/supabase.ts",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 5,
+      "community": 3,
       "norm_label": "supabase",
-      "community_name": "Community 5",
-      "id": "src_lib_supabase_supabase"
+      "id": "src_lib_supabase_supabase",
+      "community_name": "Community 3"
     },
     {
       "label": "tracker.ts",
@@ -3240,10 +3361,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "tracker.ts",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker"
+      "id": "src_lib_tracker",
+      "community_name": "Community 1"
     },
     {
       "label": "vocabLocks",
@@ -3251,10 +3372,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "vocablocks",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_vocablocks"
+      "id": "src_lib_tracker_vocablocks",
+      "community_name": "Community 1"
     },
     {
       "label": "trackVocabResult()",
@@ -3262,10 +3383,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "trackvocabresult()",
-      "community_name": "Community 1",
-      "id": "src_lib_tracker_trackvocabresult"
+      "id": "src_lib_tracker_trackvocabresult",
+      "community_name": "Community 0"
     },
     {
       "label": "trackGameScore()",
@@ -3273,10 +3394,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L40",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "trackgamescore()",
-      "community_name": "Community 1",
-      "id": "src_lib_tracker_trackgamescore"
+      "id": "src_lib_tracker_trackgamescore",
+      "community_name": "Community 0"
     },
     {
       "label": "trackSession()",
@@ -3284,10 +3405,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L61",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "tracksession()",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_tracksession"
+      "id": "src_lib_tracker_tracksession",
+      "community_name": "Community 1"
     },
     {
       "label": "segStart",
@@ -3295,10 +3416,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L109",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "segstart",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_segstart"
+      "id": "src_lib_tracker_segstart",
+      "community_name": "Community 1"
     },
     {
       "label": "sessionFlush()",
@@ -3306,10 +3427,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L112",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "sessionflush()",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_sessionflush"
+      "id": "src_lib_tracker_sessionflush",
+      "community_name": "Community 1"
     },
     {
       "label": "sessionSwitch()",
@@ -3317,10 +3438,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L123",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "sessionswitch()",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_sessionswitch"
+      "id": "src_lib_tracker_sessionswitch",
+      "community_name": "Community 1"
     },
     {
       "label": "sessionSetDetail()",
@@ -3328,10 +3449,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L134",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "sessionsetdetail()",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_sessionsetdetail"
+      "id": "src_lib_tracker_sessionsetdetail",
+      "community_name": "Community 1"
     },
     {
       "label": "sessionPause()",
@@ -3339,10 +3460,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L142",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "sessionpause()",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_sessionpause"
+      "id": "src_lib_tracker_sessionpause",
+      "community_name": "Community 1"
     },
     {
       "label": "sessionResume()",
@@ -3350,10 +3471,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L148",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "sessionresume()",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_sessionresume"
+      "id": "src_lib_tracker_sessionresume",
+      "community_name": "Community 1"
     },
     {
       "label": "VocabProgress",
@@ -3361,10 +3482,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L154",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "vocabprogress",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_vocabprogress"
+      "id": "src_lib_tracker_vocabprogress",
+      "community_name": "Community 1"
     },
     {
       "label": "GameScore",
@@ -3372,10 +3493,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L158",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "gamescore",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_gamescore"
+      "id": "src_lib_tracker_gamescore",
+      "community_name": "Community 1"
     },
     {
       "label": "StudySession",
@@ -3383,10 +3504,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L163",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "studysession",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_studysession"
+      "id": "src_lib_tracker_studysession",
+      "community_name": "Community 1"
     },
     {
       "label": "fetchVocabProgress()",
@@ -3394,10 +3515,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L167",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "fetchvocabprogress()",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_fetchvocabprogress"
+      "id": "src_lib_tracker_fetchvocabprogress",
+      "community_name": "Community 1"
     },
     {
       "label": "fetchGameScores()",
@@ -3405,10 +3526,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L178",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "fetchgamescores()",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_fetchgamescores"
+      "id": "src_lib_tracker_fetchgamescores",
+      "community_name": "Community 1"
     },
     {
       "label": "fetchStudySessions()",
@@ -3416,10 +3537,10 @@
       "source_file": "src/lib/tracker.ts",
       "source_location": "L188",
       "_origin": "ast",
-      "community": 3,
+      "community": 1,
       "norm_label": "fetchstudysessions()",
-      "community_name": "Community 3",
-      "id": "src_lib_tracker_fetchstudysessions"
+      "id": "src_lib_tracker_fetchstudysessions",
+      "community_name": "Community 1"
     },
     {
       "label": "types.ts",
@@ -3427,10 +3548,10 @@
       "source_file": "src/lib/types.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "types.ts",
-      "community_name": "Community 1",
-      "id": "src_lib_types"
+      "id": "src_lib_types",
+      "community_name": "Community 0"
     },
     {
       "label": "VocabItem",
@@ -3438,10 +3559,10 @@
       "source_file": "src/lib/types.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "vocabitem",
-      "community_name": "Community 1",
-      "id": "src_lib_types_vocabitem"
+      "id": "src_lib_types_vocabitem",
+      "community_name": "Community 0"
     },
     {
       "label": "main.tsx",
@@ -3449,10 +3570,10 @@
       "source_file": "src/main.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 12,
+      "community": 1,
       "norm_label": "main.tsx",
-      "community_name": "Community 12",
-      "id": "src_main"
+      "id": "src_main",
+      "community_name": "Community 1"
     },
     {
       "label": "textUtils.ts",
@@ -3460,10 +3581,10 @@
       "source_file": "src/utils/textUtils.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "textutils.ts",
-      "community_name": "Community 1",
-      "id": "src_utils_textutils"
+      "id": "src_utils_textutils",
+      "community_name": "Community 0"
     },
     {
       "label": "parseSentences()",
@@ -3471,10 +3592,10 @@
       "source_file": "src/utils/textUtils.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "parsesentences()",
-      "community_name": "Community 1",
-      "id": "src_utils_textutils_parsesentences"
+      "id": "src_utils_textutils_parsesentences",
+      "community_name": "Community 0"
     },
     {
       "label": "STOPWORDS",
@@ -3482,10 +3603,10 @@
       "source_file": "src/utils/textUtils.ts",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "stopwords",
-      "community_name": "Community 1",
-      "id": "src_utils_textutils_stopwords"
+      "id": "src_utils_textutils_stopwords",
+      "community_name": "Community 0"
     },
     {
       "label": "VocabWord",
@@ -3493,10 +3614,10 @@
       "source_file": "src/utils/textUtils.ts",
       "source_location": "L40",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "vocabword",
-      "community_name": "Community 1",
-      "id": "src_utils_textutils_vocabword"
+      "id": "src_utils_textutils_vocabword",
+      "community_name": "Community 0"
     },
     {
       "label": "extractVocabulary()",
@@ -3504,10 +3625,10 @@
       "source_file": "src/utils/textUtils.ts",
       "source_location": "L45",
       "_origin": "ast",
-      "community": 1,
+      "community": 0,
       "norm_label": "extractvocabulary()",
-      "community_name": "Community 1",
-      "id": "src_utils_textutils_extractvocabulary"
+      "id": "src_utils_textutils_extractvocabulary",
+      "community_name": "Community 0"
     },
     {
       "label": "deepgram-listen/index.ts",
@@ -3517,8 +3638,8 @@
       "_origin": "ast",
       "community": 18,
       "norm_label": "deepgram-listen/index.ts",
-      "community_name": "Community 18",
-      "id": "supabase_functions_deepgram_listen_index"
+      "id": "supabase_functions_deepgram_listen_index",
+      "community_name": "Community 18"
     },
     {
       "label": "corsHeaders",
@@ -3528,8 +3649,8 @@
       "_origin": "ast",
       "community": 18,
       "norm_label": "corsheaders",
-      "community_name": "Community 18",
-      "id": "supabase_functions_deepgram_listen_index_corsheaders"
+      "id": "supabase_functions_deepgram_listen_index_corsheaders",
+      "community_name": "Community 18"
     },
     {
       "label": "DeepgramWord",
@@ -3539,8 +3660,8 @@
       "_origin": "ast",
       "community": 18,
       "norm_label": "deepgramword",
-      "community_name": "Community 18",
-      "id": "supabase_functions_deepgram_listen_index_deepgramword"
+      "id": "supabase_functions_deepgram_listen_index_deepgramword",
+      "community_name": "Community 18"
     },
     {
       "label": "json()",
@@ -3550,8 +3671,8 @@
       "_origin": "ast",
       "community": 18,
       "norm_label": "json()",
-      "community_name": "Community 18",
-      "id": "supabase_functions_deepgram_listen_index_json"
+      "id": "supabase_functions_deepgram_listen_index_json",
+      "community_name": "Community 18"
     },
     {
       "label": "merge-audio/index.ts",
@@ -3561,8 +3682,8 @@
       "_origin": "ast",
       "community": 16,
       "norm_label": "merge-audio/index.ts",
-      "community_name": "Community 16",
-      "id": "supabase_functions_merge_audio_index"
+      "id": "supabase_functions_merge_audio_index",
+      "community_name": "Community 16"
     },
     {
       "label": "CORS",
@@ -3572,8 +3693,8 @@
       "_origin": "ast",
       "community": 16,
       "norm_label": "cors",
-      "community_name": "Community 16",
-      "id": "supabase_functions_merge_audio_index_cors"
+      "id": "supabase_functions_merge_audio_index_cors",
+      "community_name": "Community 16"
     },
     {
       "label": "skipId3v2()",
@@ -3583,8 +3704,8 @@
       "_origin": "ast",
       "community": 16,
       "norm_label": "skipid3v2()",
-      "community_name": "Community 16",
-      "id": "supabase_functions_merge_audio_index_skipid3v2"
+      "id": "supabase_functions_merge_audio_index_skipid3v2",
+      "community_name": "Community 16"
     },
     {
       "label": "trimId3v1()",
@@ -3594,8 +3715,8 @@
       "_origin": "ast",
       "community": 16,
       "norm_label": "trimid3v1()",
-      "community_name": "Community 16",
-      "id": "supabase_functions_merge_audio_index_trimid3v1"
+      "id": "supabase_functions_merge_audio_index_trimid3v1",
+      "community_name": "Community 16"
     },
     {
       "label": "findSync()",
@@ -3605,8 +3726,8 @@
       "_origin": "ast",
       "community": 16,
       "norm_label": "findsync()",
-      "community_name": "Community 16",
-      "id": "supabase_functions_merge_audio_index_findsync"
+      "id": "supabase_functions_merge_audio_index_findsync",
+      "community_name": "Community 16"
     },
     {
       "label": "bytesPerSec()",
@@ -3616,8 +3737,8 @@
       "_origin": "ast",
       "community": 16,
       "norm_label": "bytespersec()",
-      "community_name": "Community 16",
-      "id": "supabase_functions_merge_audio_index_bytespersec"
+      "id": "supabase_functions_merge_audio_index_bytespersec",
+      "community_name": "Community 16"
     },
     {
       "label": "ocr-extract/index.ts",
@@ -3627,8 +3748,8 @@
       "_origin": "ast",
       "community": 19,
       "norm_label": "ocr-extract/index.ts",
-      "community_name": "Community 19",
-      "id": "supabase_functions_ocr_extract_index"
+      "id": "supabase_functions_ocr_extract_index",
+      "community_name": "Community 19"
     },
     {
       "label": "cors",
@@ -3638,8 +3759,8 @@
       "_origin": "ast",
       "community": 19,
       "norm_label": "cors",
-      "community_name": "Community 19",
-      "id": "supabase_functions_ocr_extract_index_cors"
+      "id": "supabase_functions_ocr_extract_index_cors",
+      "community_name": "Community 19"
     },
     {
       "label": "looksLikeMetaReply()",
@@ -3649,8 +3770,8 @@
       "_origin": "ast",
       "community": 19,
       "norm_label": "lookslikemetareply()",
-      "community_name": "Community 19",
-      "id": "supabase_functions_ocr_extract_index_lookslikemetareply"
+      "id": "supabase_functions_ocr_extract_index_lookslikemetareply",
+      "community_name": "Community 19"
     },
     {
       "label": "tsconfig.app.json",
@@ -3658,10 +3779,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "tsconfig.app.json",
-      "community_name": "Community 4",
-      "id": "tsconfig_app"
+      "id": "tsconfig_app",
+      "community_name": "Community 5"
     },
     {
       "label": "compilerOptions",
@@ -3669,10 +3790,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L2",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "compileroptions",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions"
+      "id": "tsconfig_app_compileroptions",
+      "community_name": "Community 5"
     },
     {
       "label": "tsBuildInfoFile",
@@ -3680,10 +3801,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "tsbuildinfofile",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_tsbuildinfofile"
+      "id": "tsconfig_app_compileroptions_tsbuildinfofile",
+      "community_name": "Community 5"
     },
     {
       "label": "target",
@@ -3691,10 +3812,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L4",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "target",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_target"
+      "id": "tsconfig_app_compileroptions_target",
+      "community_name": "Community 5"
     },
     {
       "label": "lib",
@@ -3702,10 +3823,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "lib",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_lib"
+      "id": "tsconfig_app_compileroptions_lib",
+      "community_name": "Community 5"
     },
     {
       "label": "ES2023",
@@ -3713,10 +3834,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "es2023",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_json_ref_es2023"
+      "id": "tsconfig_app_json_ref_es2023",
+      "community_name": "Community 5"
     },
     {
       "label": "DOM",
@@ -3724,10 +3845,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "dom",
-      "community_name": "Community 4",
-      "id": "ref_dom"
+      "id": "ref_dom",
+      "community_name": "Community 5"
     },
     {
       "label": "module",
@@ -3735,10 +3856,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "module",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_module"
+      "id": "tsconfig_app_compileroptions_module",
+      "community_name": "Community 5"
     },
     {
       "label": "types",
@@ -3746,10 +3867,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "types",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_types"
+      "id": "tsconfig_app_compileroptions_types",
+      "community_name": "Community 5"
     },
     {
       "label": "vite/client",
@@ -3757,10 +3878,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "vite/client",
-      "community_name": "Community 4",
-      "id": "ref_vite_client"
+      "id": "ref_vite_client",
+      "community_name": "Community 5"
     },
     {
       "label": "skipLibCheck",
@@ -3768,10 +3889,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "skiplibcheck",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_skiplibcheck"
+      "id": "tsconfig_app_compileroptions_skiplibcheck",
+      "community_name": "Community 5"
     },
     {
       "label": "moduleResolution",
@@ -3779,10 +3900,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "moduleresolution",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_moduleresolution"
+      "id": "tsconfig_app_compileroptions_moduleresolution",
+      "community_name": "Community 5"
     },
     {
       "label": "allowImportingTsExtensions",
@@ -3790,10 +3911,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "allowimportingtsextensions",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_allowimportingtsextensions"
+      "id": "tsconfig_app_compileroptions_allowimportingtsextensions",
+      "community_name": "Community 5"
     },
     {
       "label": "verbatimModuleSyntax",
@@ -3801,10 +3922,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "verbatimmodulesyntax",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_verbatimmodulesyntax"
+      "id": "tsconfig_app_compileroptions_verbatimmodulesyntax",
+      "community_name": "Community 5"
     },
     {
       "label": "moduleDetection",
@@ -3812,10 +3933,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "moduledetection",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_moduledetection"
+      "id": "tsconfig_app_compileroptions_moduledetection",
+      "community_name": "Community 5"
     },
     {
       "label": "noEmit",
@@ -3823,10 +3944,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "noemit",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_noemit"
+      "id": "tsconfig_app_compileroptions_noemit",
+      "community_name": "Community 5"
     },
     {
       "label": "jsx",
@@ -3834,10 +3955,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "jsx",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_jsx"
+      "id": "tsconfig_app_compileroptions_jsx",
+      "community_name": "Community 5"
     },
     {
       "label": "noUnusedLocals",
@@ -3845,10 +3966,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "nounusedlocals",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_nounusedlocals"
+      "id": "tsconfig_app_compileroptions_nounusedlocals",
+      "community_name": "Community 5"
     },
     {
       "label": "noUnusedParameters",
@@ -3856,10 +3977,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "nounusedparameters",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_nounusedparameters"
+      "id": "tsconfig_app_compileroptions_nounusedparameters",
+      "community_name": "Community 5"
     },
     {
       "label": "erasableSyntaxOnly",
@@ -3867,10 +3988,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "erasablesyntaxonly",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_erasablesyntaxonly"
+      "id": "tsconfig_app_compileroptions_erasablesyntaxonly",
+      "community_name": "Community 5"
     },
     {
       "label": "noFallthroughCasesInSwitch",
@@ -3878,10 +3999,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "nofallthroughcasesinswitch",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_compileroptions_nofallthroughcasesinswitch"
+      "id": "tsconfig_app_compileroptions_nofallthroughcasesinswitch",
+      "community_name": "Community 5"
     },
     {
       "label": "include",
@@ -3889,10 +4010,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "include",
-      "community_name": "Community 4",
-      "id": "tsconfig_app_include"
+      "id": "tsconfig_app_include",
+      "community_name": "Community 5"
     },
     {
       "label": "src",
@@ -3900,10 +4021,10 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "src",
-      "community_name": "Community 4",
-      "id": "ref_src"
+      "id": "ref_src",
+      "community_name": "Community 5"
     },
     {
       "label": "tsconfig.json",
@@ -3913,8 +4034,8 @@
       "_origin": "ast",
       "community": 20,
       "norm_label": "tsconfig.json",
-      "community_name": "Community 20",
-      "id": "tsconfig"
+      "id": "tsconfig",
+      "community_name": "Community 20"
     },
     {
       "label": "files",
@@ -3924,8 +4045,8 @@
       "_origin": "ast",
       "community": 20,
       "norm_label": "files",
-      "community_name": "Community 20",
-      "id": "tsconfig_files"
+      "id": "tsconfig_files",
+      "community_name": "Community 20"
     },
     {
       "label": "references",
@@ -3935,8 +4056,8 @@
       "_origin": "ast",
       "community": 20,
       "norm_label": "references",
-      "community_name": "Community 20",
-      "id": "tsconfig_references"
+      "id": "tsconfig_references",
+      "community_name": "Community 20"
     },
     {
       "label": "tsconfig.node.json",
@@ -3946,8 +4067,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "tsconfig.node.json",
-      "community_name": "Community 7",
-      "id": "tsconfig_node"
+      "id": "tsconfig_node",
+      "community_name": "Community 7"
     },
     {
       "label": "compilerOptions",
@@ -3957,8 +4078,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "compileroptions",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions"
+      "id": "tsconfig_node_compileroptions",
+      "community_name": "Community 7"
     },
     {
       "label": "tsBuildInfoFile",
@@ -3968,8 +4089,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "tsbuildinfofile",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_tsbuildinfofile"
+      "id": "tsconfig_node_compileroptions_tsbuildinfofile",
+      "community_name": "Community 7"
     },
     {
       "label": "target",
@@ -3979,8 +4100,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "target",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_target"
+      "id": "tsconfig_node_compileroptions_target",
+      "community_name": "Community 7"
     },
     {
       "label": "lib",
@@ -3990,8 +4111,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "lib",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_lib"
+      "id": "tsconfig_node_compileroptions_lib",
+      "community_name": "Community 7"
     },
     {
       "label": "ES2023",
@@ -4001,8 +4122,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "es2023",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_json_ref_es2023"
+      "id": "tsconfig_node_json_ref_es2023",
+      "community_name": "Community 7"
     },
     {
       "label": "module",
@@ -4012,8 +4133,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "module",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_module"
+      "id": "tsconfig_node_compileroptions_module",
+      "community_name": "Community 7"
     },
     {
       "label": "types",
@@ -4023,8 +4144,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "types",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_types"
+      "id": "tsconfig_node_compileroptions_types",
+      "community_name": "Community 7"
     },
     {
       "label": "node",
@@ -4034,8 +4155,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "node",
-      "community_name": "Community 7",
-      "id": "ref_node"
+      "id": "ref_node",
+      "community_name": "Community 7"
     },
     {
       "label": "skipLibCheck",
@@ -4045,8 +4166,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "skiplibcheck",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_skiplibcheck"
+      "id": "tsconfig_node_compileroptions_skiplibcheck",
+      "community_name": "Community 7"
     },
     {
       "label": "moduleResolution",
@@ -4056,8 +4177,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "moduleresolution",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_moduleresolution"
+      "id": "tsconfig_node_compileroptions_moduleresolution",
+      "community_name": "Community 7"
     },
     {
       "label": "allowImportingTsExtensions",
@@ -4067,8 +4188,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "allowimportingtsextensions",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_allowimportingtsextensions"
+      "id": "tsconfig_node_compileroptions_allowimportingtsextensions",
+      "community_name": "Community 7"
     },
     {
       "label": "verbatimModuleSyntax",
@@ -4078,8 +4199,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "verbatimmodulesyntax",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_verbatimmodulesyntax"
+      "id": "tsconfig_node_compileroptions_verbatimmodulesyntax",
+      "community_name": "Community 7"
     },
     {
       "label": "moduleDetection",
@@ -4089,8 +4210,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "moduledetection",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_moduledetection"
+      "id": "tsconfig_node_compileroptions_moduledetection",
+      "community_name": "Community 7"
     },
     {
       "label": "noEmit",
@@ -4100,8 +4221,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "noemit",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_noemit"
+      "id": "tsconfig_node_compileroptions_noemit",
+      "community_name": "Community 7"
     },
     {
       "label": "noUnusedLocals",
@@ -4111,8 +4232,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "nounusedlocals",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_nounusedlocals"
+      "id": "tsconfig_node_compileroptions_nounusedlocals",
+      "community_name": "Community 7"
     },
     {
       "label": "noUnusedParameters",
@@ -4122,8 +4243,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "nounusedparameters",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_nounusedparameters"
+      "id": "tsconfig_node_compileroptions_nounusedparameters",
+      "community_name": "Community 7"
     },
     {
       "label": "erasableSyntaxOnly",
@@ -4133,8 +4254,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "erasablesyntaxonly",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_erasablesyntaxonly"
+      "id": "tsconfig_node_compileroptions_erasablesyntaxonly",
+      "community_name": "Community 7"
     },
     {
       "label": "noFallthroughCasesInSwitch",
@@ -4144,8 +4265,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "nofallthroughcasesinswitch",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_compileroptions_nofallthroughcasesinswitch"
+      "id": "tsconfig_node_compileroptions_nofallthroughcasesinswitch",
+      "community_name": "Community 7"
     },
     {
       "label": "include",
@@ -4155,8 +4276,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "include",
-      "community_name": "Community 7",
-      "id": "tsconfig_node_include"
+      "id": "tsconfig_node_include",
+      "community_name": "Community 7"
     },
     {
       "label": "vite.config.ts",
@@ -4166,8 +4287,8 @@
       "_origin": "ast",
       "community": 7,
       "norm_label": "vite.config.ts",
-      "community_name": "Community 7",
-      "id": "ref_vite_config_ts"
+      "id": "ref_vite_config_ts",
+      "community_name": "Community 7"
     },
     {
       "label": "vite.config.ts",
@@ -4177,129 +4298,8 @@
       "_origin": "ast",
       "community": 23,
       "norm_label": "vite.config.ts",
-      "community_name": "Community 23",
-      "id": "vite_config"
-    },
-    {
-      "label": "App.tsx",
-      "file_type": "code",
-      "source_file": "src/App.tsx",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "app.tsx",
-      "id": "src_app",
-      "community_name": "Community 12"
-    },
-    {
-      "label": "BookReader",
-      "file_type": "code",
-      "source_file": "src/App.tsx",
-      "source_location": "L6",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "bookreader",
-      "id": "src_app_bookreader",
-      "community_name": "Community 12"
-    },
-    {
-      "label": "VocabularyPanel",
-      "file_type": "code",
-      "source_file": "src/App.tsx",
-      "source_location": "L7",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "vocabularypanel",
-      "id": "src_app_vocabularypanel",
-      "community_name": "Community 12"
-    },
-    {
-      "label": "GamesPanel",
-      "file_type": "code",
-      "source_file": "src/App.tsx",
-      "source_location": "L8",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "gamespanel",
-      "id": "src_app_gamespanel",
-      "community_name": "Community 12"
-    },
-    {
-      "label": "ProgressDashboard",
-      "file_type": "code",
-      "source_file": "src/App.tsx",
-      "source_location": "L9",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "progressdashboard",
-      "id": "src_app_progressdashboard",
-      "community_name": "Community 12"
-    },
-    {
-      "label": "ImageUploadInput",
-      "file_type": "code",
-      "source_file": "src/App.tsx",
-      "source_location": "L10",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "imageuploadinput",
-      "id": "src_app_imageuploadinput",
-      "community_name": "Community 12"
-    },
-    {
-      "label": "TabSpinner()",
-      "file_type": "code",
-      "source_file": "src/App.tsx",
-      "source_location": "L12",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "tabspinner()",
-      "id": "src_app_tabspinner",
-      "community_name": "Community 12"
-    },
-    {
-      "label": "MainTab",
-      "file_type": "code",
-      "source_file": "src/App.tsx",
-      "source_location": "L25",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "maintab",
-      "id": "src_app_maintab",
-      "community_name": "Community 12"
-    },
-    {
-      "label": "V1Tab",
-      "file_type": "code",
-      "source_file": "src/App.tsx",
-      "source_location": "L26",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "v1tab",
-      "id": "src_app_v1tab",
-      "community_name": "Community 12"
-    },
-    {
-      "label": "migrateFromLocalStorage()",
-      "file_type": "code",
-      "source_file": "src/App.tsx",
-      "source_location": "L32",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "migratefromlocalstorage()",
-      "id": "src_app_migratefromlocalstorage",
-      "community_name": "Community 12"
-    },
-    {
-      "label": "App()",
-      "file_type": "code",
-      "source_file": "src/App.tsx",
-      "source_location": "L64",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "app()",
-      "id": "src_app_app",
-      "community_name": "Community 12"
+      "id": "vite_config",
+      "community_name": "Community 23"
     }
   ],
   "links": [
@@ -5606,6 +5606,660 @@
       "confidence_score": 1.0,
       "source": "scripts_trim_audio_head_findannouncement",
       "target": "scripts_trim_audio_head_numberforms"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L64",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_app_app"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_app_bookreader"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_app_gamespanel"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_app_imageuploadinput"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_app_maintab"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_app_migratefromlocalstorage"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_app_progressdashboard"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_app_tabspinner"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_app_v1tab"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_app_vocabularypanel"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_components_icon"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_components_icon_icon"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_components_icon_iconname"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_components_lessonschedulewidget"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_data_syllabus"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_data_syllabus_bookid"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_data_syllabus_books"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_data_syllabus_currentlesson"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_chapterstorage"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_chapterstorage_loadchaptervocab"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_chapterstorage_migratechaptersfromlocalstorage"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_cloudstorage"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_cloudstorage_csdel"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_cloudstorage_csget"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_cloudstorage_csgetappstate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_cloudstorage_csset"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_cloudstorage_cssetbatch"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_tracker"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_tracker_sessionflush"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_tracker_sessionpause"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_tracker_sessionresume"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_tracker_sessionsetdetail"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_tracker_sessionswitch"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_types"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_lib_types_vocabitem"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/main.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_main",
+      "target": "src_app"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L84",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app_app",
+      "target": "src_app_migratefromlocalstorage"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L61",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app_migratefromlocalstorage",
+      "target": "src_lib_chapterstorage_migratechaptersfromlocalstorage"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app_migratefromlocalstorage",
+      "target": "src_lib_cloudstorage_csget"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L60",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app_migratefromlocalstorage",
+      "target": "src_lib_cloudstorage_csset"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L59",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app_migratefromlocalstorage",
+      "target": "src_lib_cloudstorage_cssetbatch"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "deferred": true,
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L185",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app_app",
+      "target": "src_components_gamespanel"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "deferred": true,
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L185",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app_app",
+      "target": "src_components_imageuploadinput"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "deferred": true,
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L187",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app_app",
+      "target": "src_components_progressdashboard"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "deferred": true,
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L185",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_app_app",
+      "target": "src_components_vocabularypanel"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L72",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_app",
+      "target": "src_data_syllabus_currentlesson"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_app",
+      "target": "src_lib_chapterstorage_loadchaptervocab"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L137",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_app",
+      "target": "src_lib_cloudstorage_csdel"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L105",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_app",
+      "target": "src_lib_cloudstorage_csgetappstate"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L118",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_app",
+      "target": "src_lib_cloudstorage_csset"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L155",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_app",
+      "target": "src_lib_tracker_sessionflush"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L154",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_app",
+      "target": "src_lib_tracker_sessionpause"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L154",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_app",
+      "target": "src_lib_tracker_sessionresume"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L167",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_app",
+      "target": "src_lib_tracker_sessionsetdetail"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L211",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_app",
+      "target": "src_lib_tracker_sessionswitch"
     },
     {
       "relation": "contains",
@@ -10626,18 +11280,6 @@
       "target": "src_lib_types_vocabitem"
     },
     {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/main.tsx",
-      "source_location": "L4",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_main",
-      "target": "src_app"
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/utils/textUtils.ts",
@@ -11293,130 +11935,8 @@
       "confidence_score": 1.0,
       "source": "tsconfig_node_include",
       "target": "ref_vite_config_ts"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.tsx",
-      "source_location": "L64",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_app_app"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.tsx",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_app_bookreader"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.tsx",
-      "source_location": "L8",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_app_gamespanel"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.tsx",
-      "source_location": "L10",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_app_imageuploadinput"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.tsx",
-      "source_location": "L25",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_app_maintab"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.tsx",
-      "source_location": "L32",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_app_migratefromlocalstorage"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.tsx",
-      "source_location": "L9",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_app_progressdashboard"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.tsx",
-      "source_location": "L12",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_app_tabspinner"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.tsx",
-      "source_location": "L26",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_app_v1tab"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_app",
-      "target": "src_app_vocabularypanel"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.tsx",
-      "source_location": "L84",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "src_app_app",
-      "target": "src_app_migratefromlocalstorage"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ebbc1aaec5c207d83510f320c5c65ff00ea3f66a"
+  "built_at_commit": "cb1948dc0e6406cb9b7f5e717ccd06825a687665"
 }
