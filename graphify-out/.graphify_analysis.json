@@ -1,6 +1,65 @@
 {
   "communities": {
     "0": [
+      "src_app",
+      "src_app_app",
+      "src_app_bookreader",
+      "src_app_gamespanel",
+      "src_app_imageuploadinput",
+      "src_app_maintab",
+      "src_app_progressdashboard",
+      "src_app_tabspinner",
+      "src_app_v1tab",
+      "src_app_vocabularypanel",
+      "src_components_icon",
+      "src_components_icon_icon",
+      "src_components_icon_iconname",
+      "src_components_icon_paths",
+      "src_components_icon_solid",
+      "src_components_icon_stroke",
+      "src_components_imageuploadinput",
+      "src_components_imageuploadinput_baseprops",
+      "src_components_imageuploadinput_compressimage",
+      "src_components_imageuploadinput_imageentry",
+      "src_components_imageuploadinput_imageuploadinput",
+      "src_components_imageuploadinput_props",
+      "src_components_imageuploadinput_textprops",
+      "src_components_imageuploadinput_vocabprops",
+      "src_components_progressdashboard",
+      "src_components_progressdashboard_book_labels",
+      "src_components_progressdashboard_feature_icons",
+      "src_components_progressdashboard_feature_labels",
+      "src_components_progressdashboard_formatdate",
+      "src_components_progressdashboard_formatduration",
+      "src_components_progressdashboard_formatsessionwhen",
+      "src_components_progressdashboard_game_labels",
+      "src_components_progressdashboard_kst_date",
+      "src_components_progressdashboard_kst_time",
+      "src_components_progressdashboard_minibar",
+      "src_components_progressdashboard_parsefeature",
+      "src_components_progressdashboard_progressdashboard",
+      "src_lib_supabase",
+      "src_lib_supabase_supabase",
+      "src_lib_supabase_supabase_key",
+      "src_lib_supabase_supabase_url",
+      "src_lib_tracker",
+      "src_lib_tracker_fetchgamescores",
+      "src_lib_tracker_fetchstudysessions",
+      "src_lib_tracker_fetchvocabprogress",
+      "src_lib_tracker_gamescore",
+      "src_lib_tracker_segstart",
+      "src_lib_tracker_sessionflush",
+      "src_lib_tracker_sessionpause",
+      "src_lib_tracker_sessionresume",
+      "src_lib_tracker_sessionsetdetail",
+      "src_lib_tracker_sessionswitch",
+      "src_lib_tracker_studysession",
+      "src_lib_tracker_tracksession",
+      "src_lib_tracker_vocablocks",
+      "src_lib_tracker_vocabprogress",
+      "src_main"
+    ],
+    "1": [
       "src_components_gamespanel",
       "src_components_gamespanel_gamespanel",
       "src_components_gamespanel_gametype",
@@ -38,7 +97,13 @@
       "src_components_vocabquizgame_shuffle",
       "src_components_vocabquizgame_vocabquizgame",
       "src_components_vocabquizgame_worddef",
+      "src_components_vocabularypanel",
+      "src_components_vocabularypanel_cardstate",
+      "src_components_vocabularypanel_defentry",
+      "src_components_vocabularypanel_iskorean",
       "src_components_vocabularypanel_props",
+      "src_components_vocabularypanel_sessioncache",
+      "src_components_vocabularypanel_vocabularypanel",
       "src_lib_tracker_trackgamescore",
       "src_lib_tracker_trackvocabresult",
       "src_lib_types",
@@ -48,54 +113,6 @@
       "src_utils_textutils_parsesentences",
       "src_utils_textutils_stopwords",
       "src_utils_textutils_vocabword"
-    ],
-    "1": [
-      "src_app",
-      "src_app_app",
-      "src_app_bookreader",
-      "src_app_gamespanel",
-      "src_app_imageuploadinput",
-      "src_app_maintab",
-      "src_app_progressdashboard",
-      "src_app_tabspinner",
-      "src_app_v1tab",
-      "src_app_vocabularypanel",
-      "src_components_icon",
-      "src_components_icon_icon",
-      "src_components_icon_iconname",
-      "src_components_icon_paths",
-      "src_components_icon_solid",
-      "src_components_icon_stroke",
-      "src_components_progressdashboard",
-      "src_components_progressdashboard_book_labels",
-      "src_components_progressdashboard_feature_icons",
-      "src_components_progressdashboard_feature_labels",
-      "src_components_progressdashboard_formatdate",
-      "src_components_progressdashboard_formatduration",
-      "src_components_progressdashboard_formatsessionwhen",
-      "src_components_progressdashboard_game_labels",
-      "src_components_progressdashboard_kst_date",
-      "src_components_progressdashboard_kst_time",
-      "src_components_progressdashboard_minibar",
-      "src_components_progressdashboard_parsefeature",
-      "src_components_progressdashboard_progressdashboard",
-      "src_lib_cloudstorage_csgetappstate",
-      "src_lib_tracker",
-      "src_lib_tracker_fetchgamescores",
-      "src_lib_tracker_fetchstudysessions",
-      "src_lib_tracker_fetchvocabprogress",
-      "src_lib_tracker_gamescore",
-      "src_lib_tracker_segstart",
-      "src_lib_tracker_sessionflush",
-      "src_lib_tracker_sessionpause",
-      "src_lib_tracker_sessionresume",
-      "src_lib_tracker_sessionsetdetail",
-      "src_lib_tracker_sessionswitch",
-      "src_lib_tracker_studysession",
-      "src_lib_tracker_tracksession",
-      "src_lib_tracker_vocablocks",
-      "src_lib_tracker_vocabprogress",
-      "src_main"
     ],
     "2": [
       "src_components_bookreader",
@@ -143,12 +160,6 @@
     ],
     "3": [
       "src_app_migratefromlocalstorage",
-      "src_components_vocabularypanel",
-      "src_components_vocabularypanel_cardstate",
-      "src_components_vocabularypanel_defentry",
-      "src_components_vocabularypanel_iskorean",
-      "src_components_vocabularypanel_sessioncache",
-      "src_components_vocabularypanel_vocabularypanel",
       "src_lib_chapterstorage",
       "src_lib_chapterstorage_audiopath",
       "src_lib_chapterstorage_clearbook",
@@ -173,15 +184,14 @@
       "src_lib_cloudstorage_csdel",
       "src_lib_cloudstorage_csdelpattern",
       "src_lib_cloudstorage_csget",
+      "src_lib_cloudstorage_csgetappstate",
       "src_lib_cloudstorage_csgetjson",
       "src_lib_cloudstorage_csgetkeysbypattern",
       "src_lib_cloudstorage_cskeyexists",
       "src_lib_cloudstorage_csset",
       "src_lib_cloudstorage_cssetbatch",
       "src_lib_cloudstorage_cssetjson",
-      "src_lib_cloudstorage_row",
-      "src_lib_supabase",
-      "src_lib_supabase_supabase"
+      "src_lib_cloudstorage_row"
     ],
     "4": [
       "eslint",
@@ -379,16 +389,6 @@
       "scripts_fix_dropcaps_upserts"
     ],
     "14": [
-      "src_components_imageuploadinput",
-      "src_components_imageuploadinput_baseprops",
-      "src_components_imageuploadinput_compressimage",
-      "src_components_imageuploadinput_imageentry",
-      "src_components_imageuploadinput_imageuploadinput",
-      "src_components_imageuploadinput_props",
-      "src_components_imageuploadinput_textprops",
-      "src_components_imageuploadinput_vocabprops"
-    ],
-    "15": [
       "scripts_realign_ch03_ko",
       "scripts_realign_ch03_ko_alignkoreantoenglish",
       "scripts_realign_ch03_ko_main",
@@ -397,7 +397,7 @@
       "scripts_realign_ch03_ko_splittosentences",
       "scripts_realign_ch03_ko_translatebatch"
     ],
-    "16": [
+    "15": [
       "supabase_functions_merge_audio_index",
       "supabase_functions_merge_audio_index_bytespersec",
       "supabase_functions_merge_audio_index_cors",
@@ -405,45 +405,45 @@
       "supabase_functions_merge_audio_index_skipid3v2",
       "supabase_functions_merge_audio_index_trimid3v1"
     ],
-    "17": [
+    "16": [
       "scripts_inspect_audio",
       "scripts_inspect_audio_count",
       "scripts_inspect_audio_cutdur",
       "scripts_inspect_audio_headers",
       "scripts_inspect_audio_mmss"
     ],
-    "18": [
+    "17": [
       "supabase_functions_deepgram_listen_index",
       "supabase_functions_deepgram_listen_index_corsheaders",
       "supabase_functions_deepgram_listen_index_deepgramword",
       "supabase_functions_deepgram_listen_index_json"
     ],
-    "19": [
+    "18": [
       "supabase_functions_ocr_extract_index",
       "supabase_functions_ocr_extract_index_cors",
       "supabase_functions_ocr_extract_index_lookslikemetareply"
     ],
-    "20": [
+    "19": [
       "tsconfig",
       "tsconfig_files",
       "tsconfig_references"
     ],
-    "21": [
+    "20": [
       "githooks_pre_push",
       "githooks_pre_push__entry"
     ],
-    "22": [
+    "21": [
       "eslint_config"
     ],
-    "23": [
+    "22": [
       "vite_config"
     ]
   },
   "cohesion": {
-    "0": 0.07678075855689177,
-    "1": 0.08019323671497584,
+    "0": 0.06516290726817042,
+    "1": 0.07111756168359942,
     "2": 0.0975609756097561,
-    "3": 0.10897435897435898,
+    "3": 0.12878787878787878,
     "4": 0.06896551724137931,
     "5": 0.08695652173913043,
     "6": 0.09523809523809523,
@@ -454,32 +454,31 @@
     "11": 0.16666666666666666,
     "12": 0.2,
     "13": 0.3055555555555556,
-    "14": 0.35714285714285715,
-    "15": 0.5238095238095238,
-    "16": 0.3333333333333333,
-    "17": 0.4,
-    "18": 0.5,
+    "14": 0.5238095238095238,
+    "15": 0.3333333333333333,
+    "16": 0.4,
+    "17": 0.5,
+    "18": 0.6666666666666666,
     "19": 0.6666666666666666,
-    "20": 0.6666666666666666,
+    "20": 1.0,
     "21": 1.0,
-    "22": 1.0,
-    "23": 1.0
+    "22": 1.0
   },
   "gods": [
     {
       "id": "src_components_bookreader_bookreader",
       "label": "BookReader()",
-      "degree": 42
+      "degree": 41
+    },
+    {
+      "id": "src_app_app",
+      "label": "App()",
+      "degree": 17
     },
     {
       "id": "tsconfig_app_compileroptions",
       "label": "compilerOptions",
       "degree": 17
-    },
-    {
-      "id": "src_app_app",
-      "label": "App()",
-      "degree": 16
     },
     {
       "id": "tsconfig_node_compileroptions",
@@ -502,6 +501,11 @@
       "degree": 11
     },
     {
+      "id": "src_components_spacegame_spacegame",
+      "label": "SpaceGame()",
+      "degree": 9
+    },
+    {
       "id": "src_components_bookreader_mergemp3files",
       "label": "mergeMp3Files()",
       "degree": 8
@@ -509,11 +513,6 @@
     {
       "id": "src_components_progressdashboard_progressdashboard",
       "label": "ProgressDashboard()",
-      "degree": 8
-    },
-    {
-      "id": "src_components_spacegame_spacegame",
-      "label": "SpaceGame()",
       "degree": 8
     }
   ],
@@ -553,7 +552,7 @@
     },
     {
       "source": "App()",
-      "target": "csSet()",
+      "target": "csGetAppState()",
       "source_files": [
         "src/App.tsx",
         "src/lib/cloudStorage.ts"
@@ -563,11 +562,11 @@
       "why": "bridges separate communities"
     },
     {
-      "source": "BookReader()",
-      "target": "kstToday()",
+      "source": "App()",
+      "target": "csSet()",
       "source_files": [
-        "src/components/BookReader.tsx",
-        "src/data/syllabus.ts"
+        "src/App.tsx",
+        "src/lib/cloudStorage.ts"
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
@@ -577,18 +576,18 @@
   "questions": [
     {
       "type": "bridge_node",
-      "question": "Why does `VocabItem` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 14`?",
+      "question": "Why does `VocabItem` connect `Community 1` to `Community 0`, `Community 2`?",
       "why": "High betweenness centrality (0.033) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
-      "question": "Why does `BookReader()` connect `Community 2` to `Community 9`, `Community 10`, `Community 3`, `Community 1`?",
+      "question": "Why does `App()` connect `Community 0` to `Community 1`, `Community 3`, `Community 9`?",
       "why": "High betweenness centrality (0.014) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
       "question": "Why does `devDependencies` connect `Community 4` to `Community 6`?",
-      "why": "High betweenness centrality (0.013) - this node is a cross-community bridge."
+      "why": "High betweenness centrality (0.012) - this node is a cross-community bridge."
     },
     {
       "type": "isolated_nodes",
@@ -598,12 +597,12 @@
     {
       "type": "low_cohesion",
       "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.07678075855689177 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.06516290726817042 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 1` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.08019323671497584 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.07111756168359942 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
