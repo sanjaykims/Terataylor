@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback, memo } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { BOOKS, SCHEDULE, kstToday, type BookId } from '../data/syllabus';
+import { BOOKS, SCHEDULE, type BookId } from '../data/syllabus';
 import { supabase } from '../lib/supabase';
 import {
   hasBook, clearBook, loadChapterEn, loadChapterKo,
@@ -782,17 +782,16 @@ type InitState = 'loading' | 'no-book' | 'has-book';
 export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: BookId; onLessonVocabLoad?: (vocab: VocabItem[], chapter: number, forBook: BookId) => void }) {
   const bk = BOOKS[bookId];
 
-  // Compute the current/upcoming lesson chapter BEFORE useState so it can be
-  // used as the initial value. bookId changes cause remount via key={v1Book}.
+  // Chapter the reader opens on a fresh connect. Product decision: always land
+  // on Chapter 4 (rather than the date-derived current lesson). Clamp to the
+  // number of chapters the book actually has so shorter books still land on a
+  // real chapter. Computed BEFORE useState so it seeds the initial value;
+  // bookId changes cause remount via key={v1Book}.
+  const DEFAULT_CHAPTER = 4;
   const initialLessonChapter = (() => {
     const bookLessons = SCHEDULE.filter(l => l.book === bookId && (l.pdfPages || CH_RANGE.test(l.pages)));
-    if (bookLessons.length === 0) return 1;
-    // Compare KST calendar dates (string vs string) so the selected chapter is
-    // correct regardless of the device timezone. Class day stays on that lesson
-    // (>= today); it advances to the next lesson the day after.
-    const today = kstToday();
-    const target = bookLessons.find(l => l.date >= today) ?? bookLessons.at(-1)!;
-    return bookLessons.indexOf(target) + 1;
+    if (bookLessons.length === 0) return DEFAULT_CHAPTER;
+    return Math.min(DEFAULT_CHAPTER, bookLessons.length);
   })();
 
   const [initState,       setInitState]       = useState<InitState>('loading');
