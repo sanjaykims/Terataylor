@@ -1,15 +1,15 @@
-# Graph Report - .  (2026-07-25)
+# Graph Report - .  (2026-07-31)
 
 ## Corpus Check
 - cluster-only mode — file stats not available
 
 ## Summary
-- 390 nodes · 663 edges · 24 communities (19 shown, 5 thin omitted)
+- 392 nodes · 670 edges · 23 communities (18 shown, 5 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f1c6fb6e`
+- Built from commit: `2a4b9eb3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -35,19 +35,18 @@
 - Community 18
 - Community 19
 - Community 20
-- Community 21
 
 ## God Nodes (most connected - your core abstractions)
-1. `BookReader()` - 42 edges
-2. `compilerOptions` - 17 edges
-3. `App()` - 16 edges
+1. `BookReader()` - 41 edges
+2. `App()` - 17 edges
+3. `compilerOptions` - 17 edges
 4. `compilerOptions` - 16 edges
 5. `csSet()` - 14 edges
 6. `VocabItem` - 13 edges
 7. `csGet()` - 11 edges
-8. `mergeMp3Files()` - 8 edges
-9. `ProgressDashboard()` - 8 edges
-10. `SpaceGame()` - 8 edges
+8. `SpaceGame()` - 9 edges
+9. `mergeMp3Files()` - 8 edges
+10. `ProgressDashboard()` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `App()` --calls--> `currentLesson()`  [EXTRACTED]
@@ -56,31 +55,31 @@
   src/App.tsx → src/lib/chapterStorage.ts
 - `App()` --calls--> `csDel()`  [EXTRACTED]
   src/App.tsx → src/lib/cloudStorage.ts
+- `App()` --calls--> `csGetAppState()`  [EXTRACTED]
+  src/App.tsx → src/lib/cloudStorage.ts
 - `App()` --calls--> `csSet()`  [EXTRACTED]
   src/App.tsx → src/lib/cloudStorage.ts
-- `BookReader()` --calls--> `kstToday()`  [EXTRACTED]
-  src/components/BookReader.tsx → src/data/syllabus.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (24 total, 5 thin omitted)
+## Communities (23 total, 5 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.08
-Nodes (39): GameType, Props, TABS, isKorean(), Props, SentenceScramble(), shuffle(), VocabPuzzle (+31 more)
+Cohesion: 0.07
+Nodes (48): App(), BookReader, GamesPanel, ImageUploadInput, MainTab, ProgressDashboard, V1Tab, VocabularyPanel (+40 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.08
-Nodes (39): App(), BookReader, GamesPanel, ImageUploadInput, MainTab, ProgressDashboard, V1Tab, VocabularyPanel (+31 more)
+Cohesion: 0.07
+Nodes (44): GameType, Props, TABS, isKorean(), Props, SentenceScramble(), shuffle(), VocabPuzzle (+36 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.10
 Nodes (40): BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms(), cleanChapterText(), cleanPageText() (+32 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.11
-Nodes (36): migrateFromLocalStorage(), CardState, DefEntry, isKorean(), sessionCache, VocabularyPanel(), audioPath(), clearBook() (+28 more)
+Cohesion: 0.13
+Nodes (31): migrateFromLocalStorage(), audioPath(), clearBook(), deleteChapterAudio(), deleteChapterTimings(), getChaptersWithAudio(), getTranslatedChapters(), hasBook() (+23 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.07
@@ -123,14 +122,10 @@ Cohesion: 0.31
 Nodes (7): COUNT, fixOpeningLine(), fixText(), headers, PROPER, sentenceCaseToken(), upserts
 
 ### Community 14 - "Community 14"
-Cohesion: 0.36
-Nodes (7): BaseProps, compressImage(), ImageEntry, ImageUploadInput(), Props, TextProps, VocabProps
-
-### Community 15 - "Community 15"
 Cohesion: 0.52
 Nodes (6): alignKoreanToEnglish(), main(), sbGet(), sbUpsert(), splitToSentences(), translateBatch()
 
-### Community 17 - "Community 17"
+### Community 16 - "Community 16"
 Cohesion: 0.40
 Nodes (3): COUNT, cutDur, headers
 
@@ -142,17 +137,17 @@ Nodes (3): COUNT, cutDur, headers
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `VocabItem` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 14`?**
+- **Why does `VocabItem` connect `Community 1` to `Community 0`, `Community 2`?**
   _High betweenness centrality (0.033) - this node is a cross-community bridge._
-- **Why does `BookReader()` connect `Community 2` to `Community 9`, `Community 10`, `Community 3`, `Community 1`?**
+- **Why does `App()` connect `Community 0` to `Community 1`, `Community 3`, `Community 9`?**
   _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Why does `devDependencies` connect `Community 4` to `Community 6`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
+  _High betweenness centrality (0.012) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `version` to the rest of the system?**
   _157 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.07678075855689177 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06516290726817042 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.08019323671497584 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07111756168359942 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.0975609756097561 - nodes in this community are weakly interconnected._
