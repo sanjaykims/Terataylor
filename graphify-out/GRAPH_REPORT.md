@@ -1,15 +1,15 @@
-# Graph Report - Terataylor  (2026-08-30)
+# Graph Report - Terataylor  (2026-08-29)
 
 ## Corpus Check
 - cluster-only mode — file stats not available
 
 ## Summary
-- 420 nodes · 753 edges · 23 communities (17 shown, 6 thin omitted)
+- 421 nodes · 754 edges · 23 communities (17 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a33612f2`
+- Built from commit: `e7909e2c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -67,14 +67,14 @@
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
-Nodes (88): migrateFromLocalStorage(), BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms(), cleanChapterText() (+80 more)
+Nodes (88): BookReader, migrateFromLocalStorage(), BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms() (+80 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.07
-Nodes (46): App(), BookReader, ImageUploadInput, MainTab, ProgressDashboard, V1Tab, Icon(), IconName (+38 more)
+Nodes (49): App(), ImageUploadInput, MainTab, ProgressDashboard, V1Tab, Icon(), IconName, PATHS (+41 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.06
+Cohesion: 0.07
 Nodes (46): GamesPanel, VocabularyPanel, GameType, Props, TABS, isKorean(), Props, SentenceScramble() (+38 more)
 
 ### Community 3 - "Community 3"
@@ -82,12 +82,12 @@ Cohesion: 0.07
 Nodes (29): eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, devDependencies, eslint, @eslint/js (+21 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.14
-Nodes (23): ListeningPanelProps, BookScheduleSection(), daysDiff(), fmtDate(), LessonCard(), LessonScheduleWidget(), utcDays(), activeBookIds() (+15 more)
-
-### Community 5 - "Community 5"
 Cohesion: 0.09
 Nodes (22): DOM, src, vite/client, compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, jsx, lib (+14 more)
+
+### Community 5 - "Community 5"
+Cohesion: 0.14
+Nodes (20): ListeningPanelProps, BookScheduleSection(), daysDiff(), fmtDate(), LessonCard(), utcDays(), BookId, BookInfo (+12 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.10
@@ -102,7 +102,7 @@ Cohesion: 0.11
 Nodes (13): boundaries, buf, candidates, cuts, ends, kv, ONES, sbHeaders (+5 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.27
+Cohesion: 0.24
 Nodes (12): alignByNW(), alignChapterAudio(), alignFromWordTimestamps(), AlignPhase, AlignProgress, buildAudioWordList(), Chunk, decodeTo16kMono() (+4 more)
 
 ### Community 10 - "Community 10"
@@ -135,8 +135,8 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `VocabItem` connect `Community 2` to `Community 0`, `Community 1`?**
   _High betweenness centrality (0.027) - this node is a cross-community bridge._
-- **Why does `BookReader()` connect `Community 0` to `Community 9`, `Community 4`, `Community 1`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
+- **Why does `BookReader()` connect `Community 0` to `Community 9`, `Community 5`, `Community 1`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Why does `devDependencies` connect `Community 3` to `Community 6`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **What connects `InitState`, `MobileRowProps`, `RowProps` to the rest of the system?**
@@ -144,6 +144,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.05493221131369799 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.06753246753246753 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06654567453115548 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.0649895178197065 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
