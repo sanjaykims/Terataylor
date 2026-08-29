@@ -144,6 +144,75 @@ export async function deleteChapterTimings(bookId: BookId, chapter: number): Pro
   await csDel(`chapter_${bookId}_${chapter}_times`).catch(() => {});
 }
 
+// ── Listening passage (Bridge curriculum only) ───────────────────────────
+// Bridge lessons have a separate Listening passage/audio alongside the
+// Reading passage above — old novel-kind books never use these. Same key
+// shapes/semantics as the Reading equivalents, with a `_listening_` infix.
+export async function saveListeningEn(bookId: BookId, lesson: number, text: string): Promise<void> {
+  const key = `chapter_${bookId}_${lesson}_listening_en`;
+  if (!text.trim()) { await csDel(key); return; }
+  await csSet(key, text);
+}
+
+export async function saveListeningKo(bookId: BookId, lesson: number, text: string): Promise<void> {
+  const key = `chapter_${bookId}_${lesson}_listening_ko`;
+  if (!text.trim()) { await csDel(key); return; }
+  await csSet(key, text);
+}
+
+export async function loadListeningEn(bookId: BookId, lesson: number): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('taylor_app_data')
+    .select('value')
+    .eq('key', `chapter_${bookId}_${lesson}_listening_en`)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as { value: string } | null)?.value ?? null;
+}
+
+export async function loadListeningKo(bookId: BookId, lesson: number): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('taylor_app_data')
+    .select('value')
+    .eq('key', `chapter_${bookId}_${lesson}_listening_ko`)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as { value: string } | null)?.value ?? null;
+}
+
+const listeningAudioPath = (bookId: BookId, chapter: number) => `v1/${bookId}/ch${chapter}_listening.mp3`;
+
+export async function saveListeningAudio(bookId: BookId, chapter: number, file: File): Promise<string> {
+  const path = listeningAudioPath(bookId, chapter);
+  const { error } = await supabase.storage
+    .from(AUDIO_BUCKET)
+    .upload(path, file, { upsert: true, contentType: file.type || 'audio/mpeg' });
+  if (error) throw error;
+  const { data } = supabase.storage.from(AUDIO_BUCKET).getPublicUrl(path);
+  await csSet(`chapter_${bookId}_${chapter}_listening_audio`, data.publicUrl);
+  return data.publicUrl;
+}
+
+export async function loadListeningAudio(bookId: BookId, chapter: number): Promise<string | null> {
+  const url = await csGet(`chapter_${bookId}_${chapter}_listening_audio`);
+  return url ? `${url}?t=${Date.now()}` : null; // cache-bust so re-uploads show
+}
+
+export async function deleteListeningAudio(bookId: BookId, chapter: number): Promise<void> {
+  await supabase.storage.from(AUDIO_BUCKET).remove([listeningAudioPath(bookId, chapter)]).catch(() => {});
+  await csDel(`chapter_${bookId}_${chapter}_listening_audio`).catch(() => {});
+}
+
+export async function saveListeningTimings(bookId: BookId, chapter: number, times: number[]): Promise<void> {
+  await csSet(`chapter_${bookId}_${chapter}_listening_times`, JSON.stringify(times));
+}
+
+export async function loadListeningTimings(bookId: BookId, chapter: number): Promise<number[] | null> {
+  const raw = await csGet(`chapter_${bookId}_${chapter}_listening_times`);
+  if (!raw) return null;
+  try { const a = JSON.parse(raw); return Array.isArray(a) ? a as number[] : null; } catch { return null; }
+}
+
 // Per-lesson curated vocabulary (set by teacher / pre-loaded per chapter).
 export async function saveChapterVocab(bookId: BookId, chapter: number, vocab: unknown[]): Promise<void> {
   await csSet(`chapter_${bookId}_${chapter}_vocab`, JSON.stringify(vocab));
@@ -158,6 +227,9 @@ export async function loadChapterVocab(bookId: BookId, chapter: number): Promise
 
 export async function migrateChaptersFromLocalStorage(): Promise<void> {
   const entries: { key: string; value: string }[] = [];
+  // Intentionally frozen to the two books that existed pre-migration — this
+  // describes historical localStorage data, not the live book set, so it
+  // does NOT need to grow as new books (e.g. bridge_c1/c2) are added.
   const bookIds = ['edward', 'coraline'] as const;
   for (const bookId of bookIds) {
     for (let i = 1; i <= 12; i++) {

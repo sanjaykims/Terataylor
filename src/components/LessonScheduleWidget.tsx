@@ -38,7 +38,7 @@ export default function LessonScheduleWidget() {
           V1 Tera 수업 일정
           <span className="eyebrow" style={{ fontSize: '0.6rem' }}>여름학기 2026</span>
         </div>
-        <span className="text-xs text-muted">총 12회 수업</span>
+        <span className="text-xs text-muted">총 {SCHEDULE.length}회 수업</span>
       </div>
 
       {termEnded ? (
@@ -61,7 +61,7 @@ export default function LessonScheduleWidget() {
               </div>
               <div className="font-bold text-sm text-gray-900">Lesson {String(current.lesson).padStart(2,'0')}</div>
               <div className="text-xs text-gray-600 mt-0.5">{BOOKS[current.book].shortTitle}</div>
-              <div className="text-xs font-semibold text-gray-900 mt-1">{current.pages}</div>
+              <div className="text-xs font-semibold text-gray-900 mt-1">{current.topic ?? current.pages}</div>
               <div className="text-xs text-muted mt-0.5">{fmtDate(current.date)}</div>
             </div>
           )}
@@ -81,7 +81,7 @@ export default function LessonScheduleWidget() {
               </div>
               <div className="font-bold text-sm text-gray-900">Lesson {String(next.lesson).padStart(2,'0')}</div>
               <div className="text-xs text-gray-600 mt-0.5">{BOOKS[next.book].shortTitle}</div>
-              <div className="text-xs font-semibold text-gray-900 mt-1">{next.pages}</div>
+              <div className="text-xs font-semibold text-gray-900 mt-1">{next.topic ?? next.pages}</div>
               <div className="text-xs text-muted mt-0.5">{fmtDate(next.date)}</div>
             </div>
           )}
@@ -121,12 +121,13 @@ export default function LessonScheduleWidget() {
           {SCHEDULE.map(l => {
             const past = l.date <= today;
             const isCur = current?.lesson === l.lesson;
+            const bookInfo = BOOKS[l.book];
             return (
-              <div key={l.lesson} title={`Lesson ${l.lesson} (${l.book === 'edward' ? 'ET' : 'CL'})`}
+              <div key={l.lesson} title={`Lesson ${l.lesson} (${bookInfo?.badgeAbbr ?? l.book.slice(0, 2).toUpperCase()})`}
                 className="flex-1 h-1.5 rounded-full transition-colors"
                 style={{
                   background: isCur ? 'var(--accent)'
-                    : past ? (l.book === 'edward' ? 'var(--info)' : 'var(--accent-strong)')
+                    : past ? (bookInfo?.scheduleColor ?? 'var(--accent-strong)')
                     : 'var(--paper-3)',
                 }} />
             );

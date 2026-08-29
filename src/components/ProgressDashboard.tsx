@@ -4,6 +4,7 @@ import {
 } from '../lib/tracker';
 import type { VocabProgress, GameScore, StudySession } from '../lib/tracker';
 import Icon, { type IconName } from './Icon';
+import { BOOKS } from '../data/syllabus';
 
 // Labels are plain text; icons live in a separate map so the two are styled
 // independently (no emoji baked into a string, then split back off with
@@ -17,7 +18,11 @@ const FEATURE_ICONS: Record<string, IconName> = {
   reading: 'book', shadowing: 'headphones', vocabulary: 'book',
   opinion: 'document', story: 'document', games: 'target',
 };
-const BOOK_LABELS: Record<string, string> = { edward: 'Edward', coraline: 'Coraline' };
+// Derived from BOOKS so archived/new books resolve automatically — no
+// separate list to keep in sync.
+const BOOK_LABELS: Record<string, string> = Object.fromEntries(
+  Object.entries(BOOKS).map(([id, b]) => [id, b.shortTitle]),
+);
 
 // Sessions store detail inside the feature column: "reading:coraline:ch3".
 // Legacy rows are just "reading" — both shapes parse here.

@@ -18,9 +18,9 @@ const TabSpinner = () => (
 
 import { sessionFlush, sessionSwitch, sessionSetDetail, sessionPause, sessionResume } from './lib/tracker';
 import { csGet, csSet, csDel, csGetAppState, csSetBatch } from './lib/cloudStorage';
-import { migrateChaptersFromLocalStorage, loadChapterVocab } from './lib/chapterStorage';
+import { migrateChaptersFromLocalStorage, loadChapterVocab, loadChapterCount } from './lib/chapterStorage';
 import type { VocabItem } from './lib/types';
-import { BOOKS, currentLesson, type BookId } from './data/syllabus';
+import { BOOKS, activeBookIds, defaultBookId, type BookId } from './data/syllabus';
 
 type MainTab = 'v1' | 'progress';
 type V1Tab   = 'reading' | 'vocabulary' | 'games';
@@ -47,6 +47,9 @@ async function migrateFromLocalStorage(): Promise<void> {
   }
 
   // Essays
+  // Intentionally frozen to the two books that existed pre-migration — this
+  // describes historical localStorage data, not the live book set, so it
+  // does NOT need to grow as new books (e.g. bridge_c1/c2) are added.
   const bookIds = ['edward', 'coraline'] as const;
   const promptIds = ['dynamic-character', 'symbolism', 'love-loss', 'response-journal', 'mood-tone', 'compare-contrast', 'true-bravery'];
   for (const bid of bookIds) {
@@ -68,16 +71,26 @@ export default function App() {
 
   // ── Content state ────────────────────────────────────────────────────────
   // The book follows the academy schedule: opening the app lands on the book
-  // of this week's class. Manual switching still works within a session.
-  const [v1Book, setV1BookState] = useState<BookId>(currentLesson().book);
-  const [v1Vocab1, setV1Vocab1] = useState<VocabItem[] | null>(null);
-  const [v1Vocab2, setV1Vocab2] = useState<VocabItem[] | null>(null);
-  const [v1Vocab3, setV1Vocab3] = useState<VocabItem[] | null>(null);
-  const [v1Vocab4, setV1Vocab4] = useState<VocabItem[] | null>(null);
-  const [v1Vocab5, setV1Vocab5] = useState<VocabItem[] | null>(null);
-  const [v1Vocab6, setV1Vocab6] = useState<VocabItem[] | null>(null);
-  const [v1VocabCh, setV1VocabCh] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
+  // of this week's class (or the first active book, if that one's archived).
+  // Manual switching still works within a session.
+  const [v1Book, setV1BookState] = useState<BookId>(defaultBookId());
+  const [v1Vocab, setV1Vocab] = useState<Record<number, VocabItem[] | null>>({});
+  const [v1VocabCh, setV1VocabCh] = useState<number>(1);
+  // Novel books discover their chapter count from uploaded content; topical
+  // (Bridge) books know it upfront from the syllabus. See BookInfo.lessonCount.
+  const [v1ChapterCount, setV1ChapterCount] = useState<number>(6);
   const [v1StudiedWords, setV1StudiedWords] = useState<string[]>([]);
+
+  const resolveChapterCount = async (b: BookId): Promise<number> => {
+    return BOOKS[b]?.lessonCount ?? loadChapterCount(b);
+  };
+  const loadAllVocab = async (b: BookId, count: number): Promise<Record<number, VocabItem[] | null>> => {
+    const chapters = Array.from({ length: count }, (_, i) => i + 1);
+    const results = await Promise.all(chapters.map(ch => loadChapterVocab(b, ch).catch(() => null)));
+    const out: Record<number, VocabItem[] | null> = {};
+    chapters.forEach((ch, i) => { if (results[i]) out[ch] = results[i] as VocabItem[]; });
+    return out;
+  };
 
   // ── Load everything from Supabase on mount ──────────────────────────────
   useEffect(() => {
@@ -85,21 +98,10 @@ export default function App() {
       .catch(() => {})
       .finally(async () => {
         try {
-          const book = currentLesson().book;
-          const [vc1, vc2, vc3, vc4, vc5, vc6] = await Promise.all([
-            loadChapterVocab(book, 1).catch(() => null),
-            loadChapterVocab(book, 2).catch(() => null),
-            loadChapterVocab(book, 3).catch(() => null),
-            loadChapterVocab(book, 4).catch(() => null),
-            loadChapterVocab(book, 5).catch(() => null),
-            loadChapterVocab(book, 6).catch(() => null),
-          ]);
-          if (vc1) setV1Vocab1(vc1 as VocabItem[]);
-          if (vc2) setV1Vocab2(vc2 as VocabItem[]);
-          if (vc3) setV1Vocab3(vc3 as VocabItem[]);
-          if (vc4) setV1Vocab4(vc4 as VocabItem[]);
-          if (vc5) setV1Vocab5(vc5 as VocabItem[]);
-          if (vc6) setV1Vocab6(vc6 as VocabItem[]);
+          const book = v1Book;
+          const count = await resolveChapterCount(book);
+          setV1ChapterCount(count);
+          setV1Vocab(await loadAllVocab(book, count));
         } catch { /* ignore */ } finally {
           // csGetAppState primes the cloud-storage cache used across the app.
           try { await csGetAppState(); } catch { /* ignore */ }
@@ -113,25 +115,19 @@ export default function App() {
     setV1BookState(b);
     setV1VocabCh(1);
     setV1StudiedWords([]);
-    setV1Vocab1(null); setV1Vocab2(null); setV1Vocab3(null);
-    setV1Vocab4(null); setV1Vocab5(null); setV1Vocab6(null);
+    setV1Vocab({});
     csSet('v1_book', b).catch(() => {});
     const seq = ++v1BookSeqRef;
-    Promise.all([
-      loadChapterVocab(b, 1).catch(() => null), loadChapterVocab(b, 2).catch(() => null),
-      loadChapterVocab(b, 3).catch(() => null), loadChapterVocab(b, 4).catch(() => null),
-      loadChapterVocab(b, 5).catch(() => null), loadChapterVocab(b, 6).catch(() => null),
-    ]).then(([vc1, vc2, vc3, vc4, vc5, vc6]) => {
+    resolveChapterCount(b).then(async count => {
       if (seq !== v1BookSeqRef) return;
-      if (vc1) setV1Vocab1(vc1 as VocabItem[]); if (vc2) setV1Vocab2(vc2 as VocabItem[]);
-      if (vc3) setV1Vocab3(vc3 as VocabItem[]); if (vc4) setV1Vocab4(vc4 as VocabItem[]);
-      if (vc5) setV1Vocab5(vc5 as VocabItem[]); if (vc6) setV1Vocab6(vc6 as VocabItem[]);
+      setV1ChapterCount(count);
+      const vocab = await loadAllVocab(b, count);
+      if (seq !== v1BookSeqRef) return;
+      setV1Vocab(vocab);
     });
   };
-  const setV1ChVocab = (ch: 1 | 2 | 3 | 4 | 5 | 6, v: VocabItem[] | null) => {
-    if (ch === 1) setV1Vocab1(v); else if (ch === 2) setV1Vocab2(v);
-    else if (ch === 3) setV1Vocab3(v); else if (ch === 4) setV1Vocab4(v);
-    else if (ch === 5) setV1Vocab5(v); else setV1Vocab6(v);
+  const setV1ChVocab = (ch: number, v: VocabItem[] | null) => {
+    setV1Vocab(prev => ({ ...prev, [ch]: v }));
     const key = `chapter_${v1Book}_${ch}_vocab`;
     if (v) csSet(key, JSON.stringify(v)).catch(() => {});
     else csDel(key).catch(() => {});
@@ -144,9 +140,7 @@ export default function App() {
   }, [v1Book]);
   const handleV1VocabLoad = (vocab: VocabItem[], chapter: number, forBook: BookId) => {
     if (forBook !== v1BookRef.current) return;
-    if (chapter === 1) setV1Vocab1(vocab); else if (chapter === 2) setV1Vocab2(vocab);
-    else if (chapter === 3) setV1Vocab3(vocab); else if (chapter === 4) setV1Vocab4(vocab);
-    else if (chapter === 5) setV1Vocab5(vocab); else if (chapter === 6) setV1Vocab6(vocab);
+    setV1Vocab(prev => ({ ...prev, [chapter]: vocab }));
   };
 
   // ── Session tracking (engine lives in lib/tracker) ───────────────────────
@@ -180,14 +174,17 @@ export default function App() {
     );
   }
 
+  // Tab label reflects whichever book is currently active — "V1 소설" only
+  // makes sense while a novel-kind book is what's actually being studied.
+  const mainTabLabel = BOOKS[v1Book]?.lessonKind === 'topical' ? '이번 주 학습' : 'V1 소설';
   const MAIN_TABS: { id: MainTab; icon: IconName; label: string; preload: () => void }[] = [
-    { id: 'v1', icon: 'book', label: 'V1 소설', preload: () => {
+    { id: 'v1', icon: 'book', label: mainTabLabel, preload: () => {
         import('./components/VocabularyPanel'); import('./components/GamesPanel'); import('./components/ImageUploadInput');
       } },
     { id: 'progress', icon: 'chart', label: '성장 기록', preload: () => { import('./components/ProgressDashboard'); } },
   ];
 
-  const chLabel = (ch: number) => `Ch.0${ch} 단어장`;
+  const chLabel = (ch: number) => `Ch.${String(ch).padStart(2, '0')} 단어장`;
 
   return (
     <div className="min-h-screen">
@@ -230,7 +227,7 @@ export default function App() {
 
             {/* Book selector */}
             <div className="grid grid-cols-2 gap-3">
-              {(['edward', 'coraline'] as BookId[]).map(bid => {
+              {activeBookIds().map(bid => {
                 const b = BOOKS[bid];
                 const active = v1Book === bid;
                 return (
@@ -251,7 +248,7 @@ export default function App() {
             {/* V1 sub-tabs */}
             <div className="seg">
               {([
-                { id: 'reading',    label: '원서 읽기' },
+                { id: 'reading',    label: BOOKS[v1Book]?.hasListening ? '읽기·듣기' : '원서 읽기' },
                 { id: 'vocabulary', label: '단어장' },
                 { id: 'games',      label: '게임' },
               ] as { id: V1Tab; label: string }[]).map(t => (
@@ -263,15 +260,14 @@ export default function App() {
             {v1Tab === 'reading' && <Suspense fallback={<TabSpinner />}><BookReader key={v1Book} bookId={v1Book} onLessonVocabLoad={handleV1VocabLoad} /></Suspense>}
 
             {v1Tab === 'vocabulary' && (() => {
-              const vocabByChapter: Record<number, VocabItem[] | null> = { 1: v1Vocab1, 2: v1Vocab2, 3: v1Vocab3, 4: v1Vocab4, 5: v1Vocab5, 6: v1Vocab6 };
-              const activeVocab = vocabByChapter[v1VocabCh];
+              const activeVocab = v1Vocab[v1VocabCh] ?? null;
               const activeSummary = activeVocab?.length ? `저장됨 (${activeVocab.length}개)` : undefined;
               return (
                 <>
-                  {/* Chapter selector — real 3-col grid so 6 chapters wrap to two rows on phones */}
+                  {/* Chapter selector — 3-col grid so any lesson count wraps cleanly on phones */}
                   <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl"
                        style={{ background: 'var(--paper-3)', border: '1px solid var(--rule)' }}>
-                    {([1, 2, 3, 4, 5, 6] as const).map(ch => (
+                    {Array.from({ length: v1ChapterCount }, (_, i) => i + 1).map(ch => (
                       <button key={ch} onClick={() => { setV1VocabCh(ch); setV1StudiedWords([]); }}
                         className={`seg-btn text-center justify-center ${v1VocabCh === ch ? 'seg-btn-active' : ''}`}>
                         {chLabel(ch)}
@@ -306,10 +302,7 @@ export default function App() {
               <Suspense fallback={<TabSpinner />}>
                 <GamesPanel
                   text=""
-                  vocab={
-                    v1VocabCh === 1 ? v1Vocab1 : v1VocabCh === 2 ? v1Vocab2 : v1VocabCh === 3 ? v1Vocab3 :
-                    v1VocabCh === 4 ? v1Vocab4 : v1VocabCh === 5 ? v1Vocab5 : v1Vocab6
-                  }
+                  vocab={v1Vocab[v1VocabCh] ?? null}
                   selectedWords={v1StudiedWords}
                 />
               </Suspense>

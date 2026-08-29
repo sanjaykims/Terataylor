@@ -1,4 +1,4 @@
-export type BookId = 'edward' | 'coraline';
+export type BookId = string;
 
 export interface BookInfo {
   id: BookId;
@@ -12,6 +12,23 @@ export interface BookInfo {
   badge: string;
   korSummary: string;
   themes: string[];
+  /** Hides this book from the selector and default lists. Data is untouched — flip back anytime. */
+  archived?: boolean;
+  /** 'novel' (default when absent) = old serialized-chapter model. 'topical' = independent-topic weekly lessons (Bridge curriculum). */
+  lessonKind?: 'novel' | 'topical';
+  /** True when each lesson has a separate Reading passage AND a separate Listening passage/audio. */
+  hasListening?: boolean;
+  /** Short 2-letter badge shown in the lesson schedule widget. */
+  badgeAbbr?: string;
+  /** CSS var name used for the lesson schedule widget's accent color. */
+  scheduleColor?: string;
+  /**
+   * Known lesson count for topical books (the syllabus fixes this upfront,
+   * unlike novels where it's discovered from uploaded/split content via
+   * loadChapterCount). Lets the vocab-chapter grid show all lessons from
+   * day one, before any content has been uploaded for them.
+   */
+  lessonCount?: number;
 }
 
 export const BOOKS: Record<BookId, BookInfo> = {
@@ -27,6 +44,9 @@ export const BOOKS: Record<BookId, BookInfo> = {
     badge: 'bg-blue-600',
     korSummary: '오만한 도자기 토끼 에드워드가 여정을 통해 사랑의 진정한 의미를 깨닫는 이야기',
     themes: ['Dynamic Character', 'Symbolism', 'Love & Loss', 'Redemption'],
+    archived: true,
+    badgeAbbr: 'ET',
+    scheduleColor: 'var(--info)',
   },
   coraline: {
     id: 'coraline',
@@ -40,6 +60,45 @@ export const BOOKS: Record<BookId, BookInfo> = {
     badge: 'bg-purple-600',
     korSummary: '호기심 많은 소녀 코라인이 또 다른 세계에서 진정한 용기를 발휘하는 다크 판타지',
     themes: ['True Bravery', 'Mood & Tone', 'Comparison & Contrast', 'Identity'],
+    archived: true,
+    badgeAbbr: 'CL',
+    scheduleColor: 'var(--accent-strong)',
+  },
+  bridge_c1: {
+    id: 'bridge_c1',
+    title: 'Bridge C1',
+    shortTitle: 'Bridge C1',
+    author: 'Chungdahm Bridge Curriculum',
+    emoji: '🌉',
+    color: 'text-pink-700',
+    bg: 'bg-pink-50',
+    border: 'border-pink-300',
+    badge: 'bg-pink-600',
+    korSummary: '논리적 사고력 계발 및 토픽 지식 습득 — 매주 새로운 주제의 읽기·듣기·말하기·쓰기 통합 학습',
+    themes: ['Critical Thinking', 'Reading & Listening Integration', 'Logical Speaking & Writing'],
+    lessonKind: 'topical',
+    hasListening: true,
+    badgeAbbr: 'C1',
+    scheduleColor: 'var(--danger, #db2777)',
+    lessonCount: 13, // 13-week Bridge C1 syllabus (see BRIDGE_C1_TOPICS below)
+  },
+  bridge_c2: {
+    id: 'bridge_c2',
+    title: 'Bridge C2',
+    shortTitle: 'Bridge C2',
+    author: 'Chungdahm Bridge Curriculum',
+    emoji: '🧭',
+    color: 'text-sky-700',
+    bg: 'bg-sky-50',
+    border: 'border-sky-300',
+    badge: 'bg-sky-600',
+    korSummary: '종합적/대안적 사고력 계발 — 관점 통합과 사고의 틀(Frame) 전환, 그룹 프로젝트를 통한 문제 해결',
+    themes: ['Multiple Perspectives', 'Group Projects', 'Alternative Thinking'],
+    lessonKind: 'topical',
+    hasListening: true,
+    badgeAbbr: 'C2',
+    scheduleColor: 'var(--info, #0284c7)',
+    lessonCount: 13, // 13-week Bridge C2 syllabus (topics span multiple weeks — see BRIDGE_C2_TOPICS below)
   },
 };
 
@@ -50,7 +109,24 @@ export interface LessonEntry {
   pages: string;
   homework: string;
   pdfPages?: [number, number];  // [firstPage, lastPage] in the uploaded PDF (1-indexed)
+  /** Weekly topic title, used instead of "Ch. N~M" styling for topical (non-novel) books. */
+  topic?: string;
 }
+
+// Bridge C1/C2 syllabus topics, captured from the textbook cover photos.
+// Real class dates aren't confirmed yet, so these aren't wired into SCHEDULE
+// below — once dates are known, turn each entry into a SCHEDULE row with
+// book: 'bridge_c1' | 'bridge_c2', topic: <title>, pages: <title> (fallback
+// display text), homework: '' or a real assignment.
+export const BRIDGE_C1_TOPICS: string[] = [
+  'The Existence of Dragons', 'A Lifetime of Socialization', 'The Effects of the Great Fire of London',
+  'The World of Tolkien', 'Fast Food Concerns', 'The Rewards of Reality Shows', 'Borrowing versus Plagiarizing',
+  'Different Kinds of Biorobots', 'Coming-of-age Rites of Passage', 'Differing Views on Art Forgery',
+  'The History of Money', 'Types of Allergies', 'The Amazing Tongue',
+];
+export const BRIDGE_C2_TOPICS: string[] = [
+  'Escape from Reality', 'Digital Content', 'Super Athletes', 'Brain Boosters', 'Sin Cities', 'Surveillance Society',
+];
 
 export const SCHEDULE: LessonEntry[] = [
   { lesson:  1, date: '2026-06-03', book: 'edward',   pages: 'Ch. 1~3',   homework: 'Read Ch. 4~8',           pdfPages: [10, 19]  },
@@ -87,6 +163,23 @@ export function kstToday(today: Date = new Date()): string {
 export function currentLesson(today: Date = new Date()): LessonEntry {
   const t = kstToday(today);
   return SCHEDULE.find(l => l.date >= t) ?? SCHEDULE[SCHEDULE.length - 1];
+}
+
+/** All non-archived book ids, in BOOKS declaration order. */
+export function activeBookIds(): BookId[] {
+  return Object.values(BOOKS).filter(b => !b.archived).map(b => b.id);
+}
+
+/**
+ * The book the app should default to: today's scheduled lesson if that
+ * book is still active, otherwise the first active book. This keeps the
+ * app from ever landing on an archived book (e.g. once SCHEDULE's dates
+ * run out and currentLesson() falls back to its last, now-archived, entry).
+ */
+export function defaultBookId(today: Date = new Date()): BookId {
+  const scheduled = currentLesson(today).book;
+  if (!BOOKS[scheduled]?.archived) return scheduled;
+  return activeBookIds()[0] ?? scheduled;
 }
 
 // ── Writing Prompts ───────────────────────────────────────────────────────────
