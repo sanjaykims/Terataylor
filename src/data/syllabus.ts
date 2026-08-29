@@ -29,6 +29,8 @@ export interface BookInfo {
    * day one, before any content has been uploaded for them.
    */
   lessonCount?: number;
+  /** Hides the Korean-translation UI (button, KO column, KO mobile view) for the Reading passage — this book is meant to be read in English only. */
+  hideTranslation?: boolean;
 }
 
 export const BOOKS: Record<BookId, BookInfo> = {
@@ -81,6 +83,7 @@ export const BOOKS: Record<BookId, BookInfo> = {
     badgeAbbr: 'C1',
     scheduleColor: 'var(--danger, #db2777)',
     lessonCount: 13, // 13-week Bridge C1 syllabus (see BRIDGE_C1_TOPICS below)
+    hideTranslation: true, // C1 trains analytical reading in English — no Korean crutch
   },
   bridge_c2: {
     id: 'bridge_c2',

@@ -683,6 +683,7 @@ function renderWords(text: string, upToWord: number) {
 interface SentenceRowsProps {
   enRows: string[]; koRows: string[]; maxRows: number;
   activeIdx: number; activeWordIdx: number; hasKo: boolean; hasAudio: boolean;
+  showKo: boolean;
   mobileView: 'en' | 'ko';
   onSeek: (i: number) => void;
   setRowRef: (i: number, el: HTMLDivElement | null) => void;
@@ -693,27 +694,29 @@ interface SentenceRowsProps {
 // chapter (the previous full-grid re-render was ~466ms of INP on big chapters).
 type RowProps = {
   i: number; en: string; ko: string; active: boolean; wordIdx: number;
-  hasKo: boolean; hasAudio: boolean; onSeek: (i: number) => void;
+  hasKo: boolean; hasAudio: boolean; showKo: boolean; onSeek: (i: number) => void;
   setRowRef: (i: number, el: HTMLDivElement | null) => void;
 };
-const Row = memo(function Row({ i, en, ko, active, wordIdx, hasKo, hasAudio, onSeek, setRowRef }: RowProps) {
+const Row = memo(function Row({ i, en, ko, active, wordIdx, hasKo, hasAudio, showKo, onSeek, setRowRef }: RowProps) {
   return (
     <div ref={el => setRowRef(i, el)} onClick={() => hasAudio && onSeek(i)}
-      className={`grid grid-cols-2 items-start border-b border-violet-50 last:border-0 transition-colors ${
+      className={`grid ${showKo ? 'grid-cols-2' : 'grid-cols-1'} items-start border-b border-violet-50 last:border-0 transition-colors ${
         active ? 'bg-amber-50/80' : 'hover:bg-violet-50/40'
       } ${hasAudio ? 'cursor-pointer' : ''}`}>
-      <div className="px-4 py-3 border-r border-violet-100/70">
+      <div className={`px-4 py-3 ${showKo ? 'border-r border-violet-100/70' : ''}`}>
         <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-800'}`}>
           {active ? renderWords(en, wordIdx) : en}
         </p>
       </div>
-      <div className="px-4 py-3">
-        {ko ? (
-          <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-700'}`}>{ko}</p>
-        ) : (i === 0 && !hasKo ? (
-          <p className="text-xs text-muted">번역 버튼을 눌러주세요</p>
-        ) : null)}
-      </div>
+      {showKo && (
+        <div className="px-4 py-3">
+          {ko ? (
+            <p className={`text-sm leading-relaxed ${active ? 'text-gray-900 font-semibold bg-amber-200/60 rounded px-1' : 'text-gray-700'}`}>{ko}</p>
+          ) : (i === 0 && !hasKo ? (
+            <p className="text-xs text-muted">번역 버튼을 눌러주세요</p>
+          ) : null)}
+        </div>
+      )}
     </div>
   );
 });
@@ -737,25 +740,27 @@ const MobileRow = memo(function MobileRow({ i, text, active, wordIdx, variant, h
 });
 
 const SentenceRows = memo(function SentenceRows(
-  { enRows, koRows, maxRows, activeIdx, activeWordIdx, hasKo, hasAudio, mobileView, onSeek, setRowRef, setMobileRowRef }: SentenceRowsProps,
+  { enRows, koRows, maxRows, activeIdx, activeWordIdx, hasKo, hasAudio, showKo, mobileView, onSeek, setRowRef, setMobileRowRef }: SentenceRowsProps,
 ) {
   return (
     <>
-      {/* Desktop: paired grid */}
+      {/* Desktop: paired grid, or English-only single column when showKo is false */}
       <div className="hidden sm:block surface overflow-hidden">
-        <div className="grid grid-cols-2 border-b border-violet-100/70">
-          <div className="px-4 py-2.5 border-r border-violet-100/70">
+        <div className={`grid ${showKo ? 'grid-cols-2' : 'grid-cols-1'} border-b border-violet-100/70`}>
+          <div className={`px-4 py-2.5 ${showKo ? 'border-r border-violet-100/70' : ''}`}>
             <span className="eyebrow text-violet-500/80 inline-flex items-center gap-1"><span className="lang-tag">EN</span> English</span>
           </div>
-          <div className="px-4 py-2.5">
-            <span className="eyebrow text-violet-500/80 inline-flex items-center gap-1"><span className="lang-tag">KO</span> 한국어</span>
-          </div>
+          {showKo && (
+            <div className="px-4 py-2.5">
+              <span className="eyebrow text-violet-500/80 inline-flex items-center gap-1"><span className="lang-tag">KO</span> 한국어</span>
+            </div>
+          )}
         </div>
         {Array.from({ length: maxRows }).map((_, i) => {
           const active = i === activeIdx;
           return (
             <Row key={i} i={i} en={enRows[i] ?? ''} ko={koRows[i] ?? ''} active={active}
-              wordIdx={active ? activeWordIdx : -1} hasKo={hasKo} hasAudio={hasAudio}
+              wordIdx={active ? activeWordIdx : -1} hasKo={hasKo} hasAudio={hasAudio} showKo={showKo}
               onSeek={onSeek} setRowRef={setRowRef} />
           );
         })}
@@ -763,7 +768,7 @@ const SentenceRows = memo(function SentenceRows(
 
       {/* Mobile: single column */}
       <div className="sm:hidden surface p-4 space-y-3">
-        {mobileView === 'en'
+        {mobileView === 'en' || !showKo
           ? enRows.map((p, i) => (
               <MobileRow key={i} i={i} text={p} active={i === activeIdx}
                 wordIdx={i === activeIdx ? activeWordIdx : -1} variant="en"
@@ -875,27 +880,60 @@ function ListeningPanel({
 
 // ── Knowledge Map view (Bridge curriculum) ──────────────────────────────────
 // The retell/organize-what-you-read exercise: a topic branching into a few
-// argument threads, each with its own supporting points. Read-only for now —
-// no ingestion UI yet, see KnowledgeMap in chapterStorage.ts.
+// argument threads, each with its own supporting points. Rendered as an
+// actual org-chart tree (boxes + connecting lines), matching the worksheet's
+// own layout, not a generic card list. Read-only for now — no ingestion UI
+// yet, see KnowledgeMap in chapterStorage.ts.
+const MAP_LINE = 'var(--rule-2, #d8d0f5)';
+
+function MapBox({ children, variant }: { children: React.ReactNode; variant: 'topic' | 'branch' | 'point' }) {
+  const styles = {
+    topic:  'px-5 py-2.5 rounded-xl border-2 border-violet-400 bg-violet-50 font-bold text-sm text-violet-900',
+    branch: 'px-4 py-2 rounded-lg border-2 border-violet-300 bg-white font-bold text-xs text-violet-800 text-center',
+    point:  'px-3 py-1.5 rounded-lg border border-violet-200 bg-violet-50/60 text-xs text-gray-800',
+  }[variant];
+  return <div className={`${styles} whitespace-nowrap`}>{children}</div>;
+}
+
 function KnowledgeMapView({ map }: { map: KnowledgeMap }) {
+  const multi = map.branches.length > 1;
   return (
-    <div className="surface p-4 space-y-3">
+    <div className="surface p-4 space-y-3 overflow-x-auto">
       <div className="text-sm font-semibold text-gray-700 flex items-center gap-2">
         <Icon name="target" className="h-4 w-4 text-violet-500" /> Knowledge Map
       </div>
-      <div className="flex flex-col items-center gap-3">
-        <div className="px-4 py-2 rounded-xl border-2 border-violet-300 bg-violet-50 font-bold text-sm text-violet-900">
-          {map.topic}
-        </div>
-        <div className={`grid gap-3 w-full ${map.branches.length > 1 ? 'sm:grid-cols-2' : ''}`}>
+      <div className="flex flex-col items-center min-w-max px-2 pb-2">
+        {/* Topic (root) */}
+        <MapBox variant="topic">{map.topic}</MapBox>
+        {/* Trunk down to the branch bar */}
+        <div style={{ width: 2, height: 18, background: MAP_LINE }} />
+
+        {/* Branch row, each with its own horizontal tick connecting up to a
+            shared bar (only drawn when there's more than one branch). */}
+        <div className="flex items-start">
           {map.branches.map((branch, i) => (
-            <div key={i} className="surface-soft p-3 space-y-2">
-              <div className="text-xs font-bold text-violet-700">{branch.label}</div>
-              <ul className="space-y-1.5">
+            <div key={i} className="flex flex-col items-center px-6">
+              {multi && (
+                <div className="relative w-full" style={{ height: 18 }}>
+                  <div style={{
+                    position: 'absolute', top: 0, height: 2, background: MAP_LINE,
+                    left: i === 0 ? '50%' : 0,
+                    right: i === map.branches.length - 1 ? '50%' : 0,
+                  }} />
+                  <div style={{ position: 'absolute', top: 0, left: '50%', width: 2, height: 18, background: MAP_LINE }} />
+                </div>
+              )}
+              <MapBox variant="branch">{branch.label}</MapBox>
+
+              {/* Points hanging under this branch as a simple spine + ticks */}
+              <div className="flex flex-col items-stretch mt-3" style={{ borderLeft: `2px solid ${MAP_LINE}`, paddingLeft: 16 }}>
                 {branch.points.map((p, j) => (
-                  <li key={j} className="text-xs text-gray-700 pl-3 border-l-2 border-violet-200">{p}</li>
+                  <div key={j} className="flex items-center" style={{ marginLeft: -16, marginBottom: j < branch.points.length - 1 ? 10 : 0 }}>
+                    <div style={{ width: 16, height: 2, background: MAP_LINE, flexShrink: 0 }} />
+                    <MapBox variant="point">{p}</MapBox>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           ))}
         </div>
@@ -1839,55 +1877,61 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         )}
       </div>
 
-      {/* Mobile view toggle */}
-      <div className="sm:hidden seg">
-        {(['en', 'ko'] as const).map(v => (
-          <button key={v} onClick={() => setMobileView(v)}
-            className={`seg-btn inline-flex items-center justify-center gap-1.5 ${mobileView === v ? 'seg-btn-active' : ''}`}>
-            <span className="lang-tag">{v === 'en' ? 'EN' : 'KO'}</span>{v === 'en' ? '영어' : '한국어'}
-          </button>
-        ))}
-      </div>
+      {/* Mobile view toggle — omitted entirely for English-only books (hideTranslation) */}
+      {!bk.hideTranslation && (
+        <div className="sm:hidden seg">
+          {(['en', 'ko'] as const).map(v => (
+            <button key={v} onClick={() => setMobileView(v)}
+              className={`seg-btn inline-flex items-center justify-center gap-1.5 ${mobileView === v ? 'seg-btn-active' : ''}`}>
+              <span className="lang-tag">{v === 'en' ? 'EN' : 'KO'}</span>{v === 'en' ? '영어' : '한국어'}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {/* Translation controls */}
-      {!chapterLoading && enText && !koText && !translating && (
-        <button onClick={handleTranslate}
-          className="btn-primary w-full text-sm inline-flex items-center justify-center gap-2">
-          <Icon name="globe" className="h-4 w-4" /> 이 챕터 한국어로 번역하기
-        </button>
-      )}
-      {translating && (
-        <div className="surface-soft px-4 py-3 space-y-2">
-          <div className="text-xs text-gray-600 font-semibold text-center">번역 중...</div>
-          <div className="w-full bg-violet-100/70 rounded-full h-2 overflow-hidden">
-            <div className="progress-fill h-full transition-[width] duration-300"
-              style={{ width: txProgress.total ? `${(txProgress.done / txProgress.total) * 100}%` : '15%' }} />
-          </div>
-          {txProgress.total > 0 && (
-            <div className="text-xs text-muted text-center">{txProgress.done} / {txProgress.total} 구간</div>
+      {/* Translation controls — this book is meant to be read in English only */}
+      {!bk.hideTranslation && (
+        <>
+          {!chapterLoading && enText && !koText && !translating && (
+            <button onClick={handleTranslate}
+              className="btn-primary w-full text-sm inline-flex items-center justify-center gap-2">
+              <Icon name="globe" className="h-4 w-4" /> 이 챕터 한국어로 번역하기
+            </button>
           )}
-        </div>
-      )}
-      {txError && <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{txError}</p>}
-      {koText && !translating && misaligned && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
-          <span className="text-xs text-amber-700 font-semibold">
-            ⚠️ 영어와 한국어 문장 수가 맞지 않아요. 정렬하려면 다시 번역하세요.
-          </span>
-          <button onClick={handleTranslate}
-            className="shrink-0 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5">
-            <Icon name="refresh" className="h-3.5 w-3.5" /> 다시 번역
-          </button>
-        </div>
-      )}
-      {koText && !translating && !misaligned && (
-        <div className="px-1 flex items-center justify-between">
-          <span className="text-xs text-emerald-600 font-semibold">✓ 번역 저장됨</span>
-          <button onClick={handleTranslate}
-            className="text-xs text-muted hover:text-violet-600 transition-colors font-semibold inline-flex items-center gap-1.5">
-            <Icon name="refresh" className="h-3.5 w-3.5" /> 다시 번역 (문장 정렬)
-          </button>
-        </div>
+          {translating && (
+            <div className="surface-soft px-4 py-3 space-y-2">
+              <div className="text-xs text-gray-600 font-semibold text-center">번역 중...</div>
+              <div className="w-full bg-violet-100/70 rounded-full h-2 overflow-hidden">
+                <div className="progress-fill h-full transition-[width] duration-300"
+                  style={{ width: txProgress.total ? `${(txProgress.done / txProgress.total) * 100}%` : '15%' }} />
+              </div>
+              {txProgress.total > 0 && (
+                <div className="text-xs text-muted text-center">{txProgress.done} / {txProgress.total} 구간</div>
+              )}
+            </div>
+          )}
+          {txError && <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{txError}</p>}
+          {koText && !translating && misaligned && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+              <span className="text-xs text-amber-700 font-semibold">
+                ⚠️ 영어와 한국어 문장 수가 맞지 않아요. 정렬하려면 다시 번역하세요.
+              </span>
+              <button onClick={handleTranslate}
+                className="shrink-0 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5">
+                <Icon name="refresh" className="h-3.5 w-3.5" /> 다시 번역
+              </button>
+            </div>
+          )}
+          {koText && !translating && !misaligned && (
+            <div className="px-1 flex items-center justify-between">
+              <span className="text-xs text-emerald-600 font-semibold">✓ 번역 저장됨</span>
+              <button onClick={handleTranslate}
+                className="text-xs text-muted hover:text-violet-600 transition-colors font-semibold inline-flex items-center gap-1.5">
+                <Icon name="refresh" className="h-3.5 w-3.5" /> 다시 번역 (문장 정렬)
+              </button>
+            </div>
+          )}
+        </>
       )}
       {/* Chapter audio — shadowing with real-time sentence highlight */}
       {!chapterLoading && enText && (
@@ -2005,9 +2049,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         </div>
       ) : enText ? (
         <SentenceRows
-          enRows={enRows} koRows={koRows} maxRows={maxRows}
+          enRows={enRows} koRows={bk.hideTranslation ? [] : koRows} maxRows={bk.hideTranslation ? enRows.length : maxRows}
           activeIdx={activeIdx} activeWordIdx={activeWordIdx}
-          hasKo={!!koText} hasAudio={!!audioUrl} mobileView={mobileView}
+          hasKo={!bk.hideTranslation && !!koText} hasAudio={!!audioUrl} showKo={!bk.hideTranslation} mobileView={mobileView}
           onSeek={seekToSentence} setRowRef={setRowRef} setMobileRowRef={setMobileRowRef}
         />
       ) : bk.lessonKind === 'topical' ? (
