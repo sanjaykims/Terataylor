@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useMemo, useCallback, memo } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { BOOKS, SCHEDULE, type BookId } from '../data/syllabus';
@@ -881,57 +881,115 @@ function ListeningPanel({
 // ── Knowledge Map view (Bridge curriculum) ──────────────────────────────────
 // The retell/organize-what-you-read exercise: a topic branching into a few
 // argument threads, each with its own supporting points. Rendered as an
-// actual org-chart tree (boxes + connecting lines), matching the worksheet's
-// own layout, not a generic card list. Read-only for now — no ingestion UI
-// yet, see KnowledgeMap in chapterStorage.ts.
-const MAP_LINE = 'var(--rule-2, #d8d0f5)';
+// actual org-chart tree, matching the worksheet's own layout. Boxes lay out
+// via normal flow (so variable text length just works); connector lines are
+// drawn afterward by measuring each box's real position and overlaying an
+// SVG — CSS border tricks don't align cleanly once box sizes vary.
+const MAP_LINE = 'var(--rule-2, #c9bff0)';
 
-function MapBox({ children, variant }: { children: React.ReactNode; variant: 'topic' | 'branch' | 'point' }) {
+function MapBox({
+  boxRef, children, variant,
+}: {
+  boxRef?: (el: HTMLDivElement | null) => void;
+  children: React.ReactNode;
+  variant: 'topic' | 'branch' | 'point';
+}) {
   const styles = {
     topic:  'px-5 py-2.5 rounded-xl border-2 border-violet-400 bg-violet-50 font-bold text-sm text-violet-900',
     branch: 'px-4 py-2 rounded-lg border-2 border-violet-300 bg-white font-bold text-xs text-violet-800 text-center',
     point:  'px-3 py-1.5 rounded-lg border border-violet-200 bg-violet-50/60 text-xs text-gray-800',
   }[variant];
-  return <div className={`${styles} whitespace-nowrap`}>{children}</div>;
+  return <div ref={boxRef} className={`relative z-10 ${styles} whitespace-nowrap`}>{children}</div>;
 }
 
 function KnowledgeMapView({ map }: { map: KnowledgeMap }) {
-  const multi = map.branches.length > 1;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const topicRef = useRef<HTMLDivElement | null>(null);
+  const branchRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const pointRefs = useRef<(HTMLDivElement | null)[][]>([]);
+  const [paths, setPaths] = useState<string[]>([]);
+  const [svgSize, setSvgSize] = useState({ w: 0, h: 0 });
+
+  const recompute = useCallback(() => {
+    const container = containerRef.current;
+    const topicEl = topicRef.current;
+    if (!container || !topicEl) return;
+    const cRect = container.getBoundingClientRect();
+    const rel = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      return {
+        top: r.top - cRect.top, bottom: r.bottom - cRect.top,
+        left: r.left - cRect.left, cx: r.left + r.width / 2 - cRect.left, cy: r.top + r.height / 2 - cRect.top,
+      };
+    };
+    const t = rel(topicEl);
+    const next: string[] = [];
+
+    map.branches.forEach((branch, i) => {
+      const bEl = branchRefs.current[i];
+      if (!bEl) return;
+      const b = rel(bEl);
+      // Topic -> branch: straight down if directly under the topic, otherwise
+      // an elbow (down, across, down) so branches spread out cleanly.
+      next.push(Math.abs(b.cx - t.cx) < 1
+        ? `M ${t.cx} ${t.bottom} L ${b.cx} ${b.top}`
+        : `M ${t.cx} ${t.bottom} V ${t.bottom + (b.top - t.bottom) / 2} H ${b.cx} V ${b.top}`);
+
+      // Branch -> each point: drop from the branch's center into a spine
+      // aligned with the branch's LEFT edge (which sits in the empty gutter
+      // to the left of the indented point boxes below), then tick right
+      // into each point's left edge. Keeping the spine out of the boxes'
+      // own footprint is what makes this read as a clean tree, not a line
+      // cutting through text.
+      const spineX = b.left;
+      const dropY = b.bottom + 8;
+      branch.points.forEach((_, j) => {
+        const pEl = pointRefs.current[i]?.[j];
+        if (!pEl) return;
+        const p = rel(pEl);
+        next.push(`M ${b.cx} ${b.bottom} V ${dropY} H ${spineX} V ${p.cy} H ${p.left}`);
+      });
+    });
+
+    setPaths(next);
+    setSvgSize({ w: container.scrollWidth, h: container.scrollHeight });
+  }, [map]);
+
+  useLayoutEffect(() => {
+    recompute();
+    const ro = new ResizeObserver(() => recompute());
+    if (containerRef.current) ro.observe(containerRef.current);
+    window.addEventListener('resize', recompute);
+    return () => { ro.disconnect(); window.removeEventListener('resize', recompute); };
+  }, [recompute]);
+
   return (
     <div className="surface p-4 space-y-3 overflow-x-auto">
       <div className="text-sm font-semibold text-gray-700 flex items-center gap-2">
         <Icon name="target" className="h-4 w-4 text-violet-500" /> Knowledge Map
       </div>
-      <div className="flex flex-col items-center min-w-max px-2 pb-2">
-        {/* Topic (root) */}
-        <MapBox variant="topic">{map.topic}</MapBox>
-        {/* Trunk down to the branch bar */}
-        <div style={{ width: 2, height: 18, background: MAP_LINE }} />
+      <div ref={containerRef} className="relative flex flex-col items-center min-w-max px-2 pb-2">
+        <svg className="absolute inset-0 pointer-events-none" width={svgSize.w} height={svgSize.h}>
+          {paths.map((d, i) => (
+            <path key={i} d={d} fill="none" stroke={MAP_LINE} strokeWidth={2}
+              strokeLinecap="round" strokeLinejoin="round" />
+          ))}
+        </svg>
 
-        {/* Branch row, each with its own horizontal tick connecting up to a
-            shared bar (only drawn when there's more than one branch). */}
-        <div className="flex items-start">
+        <MapBox boxRef={el => { topicRef.current = el; }} variant="topic">{map.topic}</MapBox>
+
+        <div className="flex items-start gap-8 mt-9">
           {map.branches.map((branch, i) => (
-            <div key={i} className="flex flex-col items-center px-6">
-              {multi && (
-                <div className="relative w-full" style={{ height: 18 }}>
-                  <div style={{
-                    position: 'absolute', top: 0, height: 2, background: MAP_LINE,
-                    left: i === 0 ? '50%' : 0,
-                    right: i === map.branches.length - 1 ? '50%' : 0,
-                  }} />
-                  <div style={{ position: 'absolute', top: 0, left: '50%', width: 2, height: 18, background: MAP_LINE }} />
-                </div>
-              )}
-              <MapBox variant="branch">{branch.label}</MapBox>
-
-              {/* Points hanging under this branch as a simple spine + ticks */}
-              <div className="flex flex-col items-stretch mt-3" style={{ borderLeft: `2px solid ${MAP_LINE}`, paddingLeft: 16 }}>
+            <div key={i} className="flex flex-col items-stretch gap-3">
+              <MapBox boxRef={el => { branchRefs.current[i] = el; }} variant="branch">{branch.label}</MapBox>
+              {/* items-start + left padding: natural-width boxes, indented so
+                  the spine has a clear gutter to run in instead of crossing
+                  through box content. */}
+              <div className="flex flex-col items-start gap-2.5 mt-1 pl-6">
                 {branch.points.map((p, j) => (
-                  <div key={j} className="flex items-center" style={{ marginLeft: -16, marginBottom: j < branch.points.length - 1 ? 10 : 0 }}>
-                    <div style={{ width: 16, height: 2, background: MAP_LINE, flexShrink: 0 }} />
-                    <MapBox variant="point">{p}</MapBox>
-                  </div>
+                  <MapBox key={j}
+                    boxRef={el => { (pointRefs.current[i] ??= [])[j] = el; }}
+                    variant="point">{p}</MapBox>
                 ))}
               </div>
             </div>
