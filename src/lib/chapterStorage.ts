@@ -213,6 +213,10 @@ export async function loadListeningTimings(bookId: BookId, chapter: number): Pro
   try { const a = JSON.parse(raw); return Array.isArray(a) ? a as number[] : null; } catch { return null; }
 }
 
+export async function deleteListeningTimings(bookId: BookId, chapter: number): Promise<void> {
+  await csDel(`chapter_${bookId}_${chapter}_listening_times`).catch(() => {});
+}
+
 // Per-lesson curated vocabulary (set by teacher / pre-loaded per chapter).
 export async function saveChapterVocab(bookId: BookId, chapter: number, vocab: unknown[]): Promise<void> {
   await csSet(`chapter_${bookId}_${chapter}_vocab`, JSON.stringify(vocab));

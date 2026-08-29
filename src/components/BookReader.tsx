@@ -10,6 +10,8 @@ import {
   saveChapterAudio, loadChapterAudio, deleteChapterAudio,
   saveChapterTimings, loadChapterTimings, deleteChapterTimings,
   loadChapterVocab,
+  loadListeningEn, loadListeningKo, saveListeningEn, saveListeningKo,
+  loadListeningAudio, saveListeningAudio, deleteListeningAudio,
 } from '../lib/chapterStorage';
 import { sessionSetDetail } from '../lib/tracker';
 import type { VocabItem } from '../lib/types';
@@ -777,6 +779,99 @@ const SentenceRows = memo(function SentenceRows(
   );
 });
 
+// ── Listening panel (Bridge curriculum only) ────────────────────────────────
+// Deliberately simple: a plain audio player (no sentence-level sync/seek —
+// that machinery is Reading-only, built for novel narration) plus EN/KO text
+// underneath. Each lesson's listening script/audio is one standalone upload.
+interface ListeningPanelProps {
+  bookId: BookId;
+  selectedChapter: number;
+  bk: { shortTitle: string; color: string; bg: string; border: string };
+  loading: boolean;
+  enText: string | null;
+  koText: string | null;
+  audioUrl: string | null;
+  audioUploading: boolean;
+  translating: boolean;
+  txError: string;
+  fileRef: React.RefObject<HTMLInputElement | null>;
+  onExtracted: (text: string) => void;
+  onTranslate: () => void;
+  onAudioFile: (file: File) => void;
+  onDeleteAudio: () => void;
+}
+function ListeningPanel({
+  selectedChapter, bk, loading, enText, koText, audioUrl, audioUploading,
+  translating, txError, fileRef, onExtracted, onTranslate, onAudioFile, onDeleteAudio,
+}: ListeningPanelProps) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-xs text-muted animate-pulse">듣기 자료 불러오는 중...</div>
+      </div>
+    );
+  }
+  if (!enText) {
+    return (
+      <div className="surface p-4">
+        <ImageUploadInput
+          key={`listening-upload-${bk.shortTitle}-ch${selectedChapter}`}
+          mode="text"
+          label={`Chapter ${selectedChapter} 듣기 스크립트 사진`}
+          hint="이번 주 듣기 스크립트 사진을 올리면 자동으로 텍스트가 추출돼요"
+          onExtracted={onExtracted}
+        />
+      </div>
+    );
+  }
+  const enRows = splitToSentences(enText);
+  const koRows = koText ? splitKoRows(koText) : [];
+  return (
+    <div className="space-y-3">
+      <div className="surface p-4 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <Icon name="headphones" className="h-4 w-4 text-violet-500" /> 듣기 오디오
+          </span>
+          <div className="flex items-center gap-2">
+            {audioUrl && (
+              <button onClick={onDeleteAudio}
+                className="text-xs text-muted hover:text-red-500 transition-colors inline-flex items-center gap-1"><Icon name="trash" className="h-3.5 w-3.5" /> 삭제</button>
+            )}
+            <button onClick={() => fileRef.current?.click()} disabled={audioUploading}
+              className="text-xs text-violet-600 hover:text-violet-700 font-semibold disabled:opacity-50">
+              {audioUploading ? '업로드 중...' : audioUrl ? '📁 다시 업로드' : '+ mp3 업로드'}
+            </button>
+            <input ref={fileRef} type="file" accept="audio/*" className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) onAudioFile(f); }} />
+          </div>
+        </div>
+        {audioUrl && <audio src={audioUrl} controls className="w-full" />}
+      </div>
+
+      {!koText && !translating && (
+        <button onClick={onTranslate}
+          className="btn-primary w-full text-sm inline-flex items-center justify-center gap-2">
+          <Icon name="globe" className="h-4 w-4" /> 이 스크립트 한국어로 번역하기
+        </button>
+      )}
+      {translating && (
+        <div className="surface-soft px-4 py-3 text-xs text-gray-600 font-semibold text-center">번역 중...</div>
+      )}
+      {txError && <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{txError}</p>}
+
+      <div className="surface p-4 space-y-3">
+        {enRows.map((en, i) => (
+          <div key={i} className="pb-2 border-b border-violet-50 last:border-0 last:pb-0">
+            <p className="text-sm text-gray-900">{en}</p>
+            {koRows[i] && <p className="text-sm text-muted mt-1">{koRows[i]}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 type InitState = 'loading' | 'no-book' | 'has-book';
 
@@ -820,6 +915,21 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const [confirmClear, setConfirmClear] = useState(false);
   const [mobileView,   setMobileView]   = useState<'en' | 'ko'>('en');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // ── Listening passage (Bridge curriculum only, BookInfo.hasListening) ─────
+  // Deliberately simpler than the Reading passage above: no PDF extraction,
+  // no novel-audiobook splitting/merging, no per-sentence audio alignment —
+  // each lesson's listening script/audio is one standalone upload. Read with
+  // a plain audio player, not the sentence-synced one Reading uses.
+  const [passageView, setPassageView] = useState<'reading' | 'listening'>('reading');
+  const [listenEnText,   setListenEnText]   = useState<string | null>(null);
+  const [listenKoText,   setListenKoText]   = useState<string | null>(null);
+  const [listenAudioUrl, setListenAudioUrl] = useState<string | null>(null);
+  const [listenLoading,  setListenLoading]  = useState(false);
+  const [listenTranslating, setListenTranslating] = useState(false);
+  const [listenTxError,     setListenTxError]     = useState('');
+  const [listenAudioUploading, setListenAudioUploading] = useState(false);
+  const listenFileRef = useRef<HTMLInputElement>(null);
 
   // ── Chapter audio + real-time sentence highlight ──────────────────────────
   const [audioUrl,      setAudioUrl]      = useState<string | null>(null);
@@ -927,6 +1037,24 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setTimings(times);
     if (vocab?.length && onLessonVocabLoad) onLessonVocabLoad(vocab as VocabItem[], chapter, bid);
     setChapterLoading(false);
+
+    if (BOOKS[bid]?.hasListening) {
+      setListenLoading(true);
+      setListenEnText(null);
+      setListenKoText(null);
+      setListenAudioUrl(null);
+      setListenTxError('');
+      const [lEn, lKo, lAudio] = await Promise.all([
+        loadListeningEn(bid, chapter).catch(() => null),
+        loadListeningKo(bid, chapter).catch(() => null),
+        loadListeningAudio(bid, chapter).catch(() => null),
+      ]);
+      if (loadSeqRef.current !== seq) return; // a newer load superseded this one
+      setListenEnText(lEn);
+      setListenKoText(lKo);
+      setListenAudioUrl(lAudio);
+      setListenLoading(false);
+    }
   };
 
   // Attribute study time to the exact book+chapter on screen. Chapter/book
@@ -971,6 +1099,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setSelectedChapter(chapter);
     setTxError('');
     setMobileView('en');
+    setPassageView('reading');
     await loadChapter(bookId, chapter);
   };
 
@@ -1075,6 +1204,42 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     } finally {
       if (loadSeqRef.current === seq) setTranslating(false);
     }
+  };
+
+  // ── Listening passage: translation + simple (unmerged) audio upload ───────
+  const handleListenTranslate = async () => {
+    if (!listenEnText) return;
+    const forChapter = selectedChapter;
+    const seq = loadSeqRef.current;
+    setListenTranslating(true);
+    setListenTxError('');
+    try {
+      const ko = await translateSentences(listenEnText, () => {});
+      await saveListeningKo(bookId, forChapter, ko);
+      if (loadSeqRef.current === seq) setListenKoText(ko);
+    } catch (e) {
+      if (loadSeqRef.current === seq) setListenTxError(e instanceof Error ? e.message : '번역 실패');
+    } finally {
+      if (loadSeqRef.current === seq) setListenTranslating(false);
+    }
+  };
+
+  const handleListenAudioFile = async (file: File) => {
+    setListenAudioUploading(true);
+    try {
+      const url = await saveListeningAudio(bookId, selectedChapter, file);
+      setListenAudioUrl(`${url}?t=${Date.now()}`);
+    } catch (e) {
+      setListenTxError(e instanceof Error ? e.message : '오디오 업로드 실패');
+    } finally {
+      setListenAudioUploading(false);
+      if (listenFileRef.current) listenFileRef.current.value = '';
+    }
+  };
+
+  const handleDeleteListenAudio = async () => {
+    await deleteListeningAudio(bookId, selectedChapter).catch(() => {});
+    setListenAudioUrl(null);
   };
 
   const handleClearBook = async () => {
@@ -1603,6 +1768,22 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         );
       })()}
 
+      {/* Reading / Listening toggle — Bridge lessons only; each has its own
+          separate passage, unlike the old novels' single narrated text. */}
+      {bk.hasListening && (
+        <div className="seg">
+          {([
+            { id: 'reading' as const,   label: '읽기' },
+            { id: 'listening' as const, label: '듣기' },
+          ]).map(t => (
+            <button key={t.id} onClick={() => setPassageView(t.id)}
+              className={`seg-btn ${passageView === t.id ? 'seg-btn-active' : ''}`}>{t.label}</button>
+          ))}
+        </div>
+      )}
+
+      {passageView === 'reading' ? (<>
+
       {/* Current chapter info bar */}
       <div className="surface-soft px-3 py-2 flex items-center justify-between">
         <span className={`text-xs font-bold ${bk.color}`}>
@@ -1806,8 +1987,25 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         </div>
       )}
 
-      {/* ── STICKY AUDIO PLAYER BAR ── */}
-      {audioUrl && (() => {
+      </>) : (
+        <ListeningPanel
+          bookId={bookId} selectedChapter={selectedChapter} bk={bk}
+          loading={listenLoading} enText={listenEnText} koText={listenKoText}
+          audioUrl={listenAudioUrl} audioUploading={listenAudioUploading}
+          translating={listenTranslating} txError={listenTxError}
+          fileRef={listenFileRef}
+          onExtracted={async text => {
+            await saveListeningEn(bookId, selectedChapter, text);
+            await loadChapter(bookId, selectedChapter);
+          }}
+          onTranslate={handleListenTranslate}
+          onAudioFile={handleListenAudioFile}
+          onDeleteAudio={handleDeleteListenAudio}
+        />
+      )}
+
+      {/* ── STICKY AUDIO PLAYER BAR (Reading passage only) ── */}
+      {passageView === 'reading' && audioUrl && (() => {
         const fmt = (s: number) => {
           const m = Math.floor(s / 60);
           const sec = Math.floor(s % 60);

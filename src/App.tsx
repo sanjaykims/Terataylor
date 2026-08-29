@@ -93,21 +93,24 @@ export default function App() {
   };
 
   // ── Load everything from Supabase on mount ──────────────────────────────
+  // Mount-only by design: v1Book's initial value (set above via defaultBookId)
+  // is what should load here; a later book switch is handled by setV1Book, not
+  // by re-running this effect.
   useEffect(() => {
     migrateFromLocalStorage()
       .catch(() => {})
       .finally(async () => {
         try {
-          const book = v1Book;
-          const count = await resolveChapterCount(book);
+          const count = await resolveChapterCount(v1Book);
           setV1ChapterCount(count);
-          setV1Vocab(await loadAllVocab(book, count));
+          setV1Vocab(await loadAllVocab(v1Book, count));
         } catch { /* ignore */ } finally {
           // csGetAppState primes the cloud-storage cache used across the app.
           try { await csGetAppState(); } catch { /* ignore */ }
           setAppReady(true);
         }
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Persisting setters (fire-and-forget to Supabase) ────────────────────
