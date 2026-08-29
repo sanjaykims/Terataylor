@@ -223,6 +223,23 @@ export function defaultBookId(today: Date = new Date()): BookId {
   return activeBookIds()[0] ?? scheduled;
 }
 
+/**
+ * The lesson NUMBER WITHIN this book (1-based position among its own
+ * SCHEDULE rows — matching what the schedule widget displays as "Lesson N")
+ * that's current-or-next as of `today`. Mirrors LessonScheduleWidget's own
+ * current/next logic, so a book's reader opens on the same lesson the
+ * schedule card is telling the student to prep for. Returns null when the
+ * book has no SCHEDULE rows yet (e.g. dates haven't been confirmed).
+ */
+export function currentLessonNumberFor(bookId: BookId, today: Date = new Date()): number | null {
+  const t = kstToday(today);
+  const lessons = SCHEDULE.filter(l => l.book === bookId);
+  if (lessons.length === 0) return null;
+  const past = lessons.filter(l => l.date <= t);
+  const current = past.at(-1) ?? lessons.find(l => l.date > t) ?? null;
+  return current ? lessons.indexOf(current) + 1 : null;
+}
+
 // ── Writing Prompts ───────────────────────────────────────────────────────────
 export interface EssaySection {
   title: string;

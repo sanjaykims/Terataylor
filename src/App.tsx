@@ -187,7 +187,9 @@ export default function App() {
     { id: 'progress', icon: 'chart', label: '성장 기록', preload: () => { import('./components/ProgressDashboard'); } },
   ];
 
-  const chLabel = (ch: number) => `Ch.${String(ch).padStart(2, '0')} 단어장`;
+  const chLabel = (ch: number) => BOOKS[v1Book]?.lessonKind === 'topical'
+    ? `L${ch} 단어장`
+    : `Ch.${String(ch).padStart(2, '0')} 단어장`;
 
   return (
     <div className="min-h-screen">

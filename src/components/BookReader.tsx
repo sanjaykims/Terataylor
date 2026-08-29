@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useLayoutEffect, useMemo, useCallback, memo } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { BOOKS, SCHEDULE, type BookId } from '../data/syllabus';
+import { BOOKS, SCHEDULE, currentLessonNumberFor, type BookId } from '../data/syllabus';
 import { supabase } from '../lib/supabase';
 import {
   hasBook, clearBook, loadChapterEn, loadChapterKo, saveChapterEn,
@@ -823,7 +823,7 @@ function ListeningPanel({
         <ImageUploadInput
           key={`listening-upload-${bk.shortTitle}-ch${selectedChapter}`}
           mode="text"
-          label={`Chapter ${selectedChapter} 듣기 스크립트 사진`}
+          label={`L${selectedChapter} 듣기 스크립트 사진`}
           hint="이번 주 듣기 스크립트 사진을 올리면 자동으로 텍스트가 추출돼요"
           onExtracted={onExtracted}
         />
@@ -1006,13 +1006,18 @@ type InitState = 'loading' | 'no-book' | 'has-book';
 export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: BookId; onLessonVocabLoad?: (vocab: VocabItem[], chapter: number, forBook: BookId) => void }) {
   const bk = BOOKS[bookId];
 
-  // Chapter the reader opens on a fresh connect. Product decision: always land
-  // on Chapter 4 (rather than the date-derived current lesson). Clamp to the
-  // number of chapters the book actually has so shorter books still land on a
-  // real chapter. Computed BEFORE useState so it seeds the initial value;
-  // bookId changes cause remount via key={v1Book}.
+  // Chapter the reader opens on a fresh connect. Computed BEFORE useState so
+  // it seeds the initial value; bookId changes cause remount via key={v1Book}.
   const DEFAULT_CHAPTER = 4;
   const initialLessonChapter = (() => {
+    // Topical (Bridge) books: land on whichever lesson the real class
+    // schedule says is current/next — matching what the schedule widget
+    // already tells the student to prep for, not an arbitrary fixed chapter.
+    if (bk?.lessonKind === 'topical') {
+      return currentLessonNumberFor(bookId) ?? 1;
+    }
+    // Novel-kind books: always land on Chapter 4 (product decision, not
+    // date-derived). Clamp to the number of chapters the book actually has.
     const bookLessons = SCHEDULE.filter(l => l.book === bookId && (l.pdfPages || CH_RANGE.test(l.pages)));
     if (bookLessons.length === 0) return DEFAULT_CHAPTER;
     return Math.min(DEFAULT_CHAPTER, bookLessons.length);
@@ -1884,9 +1889,11 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         )}
       </div>
 
-      {/* Chapter selector — show all chapters in the book (Ch.01 … Ch.N) */}
+      {/* Chapter/lesson selector — "L1..LN" for topical (Bridge) books, since
+          those are independent weekly lessons, not chapters of one book. */}
       {(() => {
         const visibleChapters = Array.from({ length: totalChapters }, (_, i) => i + 1);
+        const isTopical = bk.lessonKind === 'topical';
         return (
           <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
             {visibleChapters.map(ch => (
@@ -1896,7 +1903,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
                     ? 'fill-accent border-transparent shadow-sm shadow-violet-500/30'
                     : 'bg-white border-violet-100 text-gray-600 hover:border-violet-300 hover:text-violet-700'
                 }`}>
-                Ch.{String(ch).padStart(2, '0')}
+                {isTopical ? `L${ch}` : `Ch.${String(ch).padStart(2, '0')}`}
                 {translatedChaps.has(ch) && (
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border border-white" />
                 )}
@@ -1922,10 +1929,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
 
       {passageView === 'reading' ? (<>
 
-      {/* Current chapter info bar */}
+      {/* Current chapter/lesson info bar */}
       <div className="surface-soft px-3 py-2 flex items-center justify-between">
         <span className={`text-xs font-bold ${bk.color}`}>
-          Chapter {selectedChapter}
+          {bk.lessonKind === 'topical' ? `L${selectedChapter}` : `Chapter ${selectedChapter}`}
           {selectedChapterRange
             ? ` (책 챕터: Ch. ${selectedChapterRange[0]}${selectedChapterRange[1] !== selectedChapterRange[0] ? `~${selectedChapterRange[1]}` : ''})`
             : ` / ${totalChapters}`}
@@ -2117,7 +2124,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           <ImageUploadInput
             key={`reading-upload-${bookId}-ch${selectedChapter}`}
             mode="text"
-            label={`Chapter ${selectedChapter} 리딩 지문 사진`}
+            label={`L${selectedChapter} 리딩 지문 사진`}
             hint="이번 주 리딩 지문 사진을 올리면 자동으로 텍스트가 추출돼요"
             onExtracted={async text => {
               await saveChapterEn(bookId, selectedChapter, text);
