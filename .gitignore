@@ -25,3 +25,4 @@ graphify-out/manifest.json
 *.njsproj
 *.sln
 *.sw?
+.graphify-venv/

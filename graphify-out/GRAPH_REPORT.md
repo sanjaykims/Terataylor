@@ -1,15 +1,15 @@
-# Graph Report - .  (2026-07-31)
+# Graph Report - Terataylor  (2026-08-29)
 
 ## Corpus Check
 - cluster-only mode — file stats not available
 
 ## Summary
-- 392 nodes · 670 edges · 23 communities (18 shown, 5 thin omitted)
+- 395 nodes · 674 edges · 24 communities (18 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2a4b9eb3`
+- Built from commit: `15963b44`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -35,6 +35,7 @@
 - Community 18
 - Community 19
 - Community 20
+- Community 21
 
 ## God Nodes (most connected - your core abstractions)
 1. `BookReader()` - 41 edges
@@ -45,41 +46,41 @@
 6. `VocabItem` - 13 edges
 7. `csGet()` - 11 edges
 8. `SpaceGame()` - 9 edges
-9. `mergeMp3Files()` - 8 edges
-10. `ProgressDashboard()` - 8 edges
+9. `ProgressDashboard()` - 8 edges
+10. `mergeMp3Files()` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `App()` --calls--> `currentLesson()`  [EXTRACTED]
-  src/App.tsx → src/data/syllabus.ts
-- `App()` --calls--> `loadChapterVocab()`  [EXTRACTED]
-  src/App.tsx → src/lib/chapterStorage.ts
+- `VocabProps` --references--> `VocabItem`  [EXTRACTED]
+  src/components/ImageUploadInput.tsx → src/lib/types.ts
+- `Props` --references--> `VocabItem`  [EXTRACTED]
+  src/components/GamesPanel.tsx → src/lib/types.ts
+- `Props` --references--> `VocabItem`  [EXTRACTED]
+  src/components/SentenceScramble.tsx → src/lib/types.ts
+- `Props` --references--> `VocabItem`  [EXTRACTED]
+  src/components/VocabularyPanel.tsx → src/lib/types.ts
 - `App()` --calls--> `csDel()`  [EXTRACTED]
-  src/App.tsx → src/lib/cloudStorage.ts
-- `App()` --calls--> `csGetAppState()`  [EXTRACTED]
-  src/App.tsx → src/lib/cloudStorage.ts
-- `App()` --calls--> `csSet()`  [EXTRACTED]
   src/App.tsx → src/lib/cloudStorage.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (23 total, 5 thin omitted)
+## Communities (24 total, 6 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
-Nodes (48): App(), BookReader, GamesPanel, ImageUploadInput, MainTab, ProgressDashboard, V1Tab, VocabularyPanel (+40 more)
+Nodes (48): App(), ImageUploadInput, MainTab, ProgressDashboard, V1Tab, Icon(), IconName, PATHS (+40 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.07
-Nodes (44): GameType, Props, TABS, isKorean(), Props, SentenceScramble(), shuffle(), VocabPuzzle (+36 more)
+Nodes (46): GamesPanel, VocabularyPanel, GameType, Props, TABS, isKorean(), Props, SentenceScramble() (+38 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.10
-Nodes (40): BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms(), cleanChapterText(), cleanPageText() (+32 more)
+Cohesion: 0.09
+Nodes (42): BookReader, BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms(), cleanChapterText() (+34 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.13
-Nodes (31): migrateFromLocalStorage(), audioPath(), clearBook(), deleteChapterAudio(), deleteChapterTimings(), getChaptersWithAudio(), getTranslatedChapters(), hasBook() (+23 more)
+Cohesion: 0.14
+Nodes (29): migrateFromLocalStorage(), audioPath(), clearBook(), deleteChapterAudio(), deleteChapterTimings(), getChaptersWithAudio(), getTranslatedChapters(), hasBook() (+21 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.07
@@ -103,10 +104,10 @@ Nodes (13): boundaries, buf, candidates, cuts, ends, kv, ONES, sbHeaders (+5 mor
 
 ### Community 9 - "Community 9"
 Cohesion: 0.19
-Nodes (15): daysDiff(), fmtDate(), LessonScheduleWidget(), utcDays(), BookId, BookInfo, BOOKS, currentLesson() (+7 more)
+Nodes (14): daysDiff(), fmtDate(), LessonScheduleWidget(), utcDays(), BookId, BookInfo, BOOKS, EssaySection (+6 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.27
+Cohesion: 0.24
 Nodes (12): alignByNW(), alignChapterAudio(), alignFromWordTimestamps(), AlignPhase, AlignProgress, buildAudioWordList(), Chunk, decodeTo16kMono() (+4 more)
 
 ### Community 11 - "Community 11"
@@ -118,7 +119,7 @@ Cohesion: 0.20
 Nodes (7): cut, findAnnouncement(), inBuf, lesson, numberForms(), sbHeaders, targetCh
 
 ### Community 13 - "Community 13"
-Cohesion: 0.31
+Cohesion: 0.28
 Nodes (7): COUNT, fixOpeningLine(), fixText(), headers, PROPER, sentenceCaseToken(), upserts
 
 ### Community 14 - "Community 14"
@@ -130,24 +131,24 @@ Cohesion: 0.40
 Nodes (3): COUNT, cutDur, headers
 
 ## Knowledge Gaps
-- **157 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+152 more)
+- **155 isolated node(s):** `MainTab`, `V1Tab`, `ImageEntry`, `Props`, `GameType` (+150 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `VocabItem` connect `Community 1` to `Community 0`, `Community 2`?**
-  _High betweenness centrality (0.033) - this node is a cross-community bridge._
-- **Why does `App()` connect `Community 0` to `Community 1`, `Community 3`, `Community 9`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+  _High betweenness centrality (0.028) - this node is a cross-community bridge._
 - **Why does `devDependencies` connect `Community 4` to `Community 6`?**
   _High betweenness centrality (0.012) - this node is a cross-community bridge._
-- **What connects `name`, `private`, `version` to the rest of the system?**
-  _157 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `BookReader()` connect `Community 2` to `Community 0`, `Community 10`, `Community 3`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **What connects `MainTab`, `V1Tab`, `ImageEntry` to the rest of the system?**
+  _155 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.06516290726817042 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06704260651629072 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.07111756168359942 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.0975609756097561 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09302325581395349 - nodes in this community are weakly interconnected._

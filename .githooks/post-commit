@@ -1,0 +1,43 @@
+#!/bin/sh
+# Post-commit: refresh the local Graphify knowledge graph after code changes.
+#
+# Mirrors .github/workflows/graphify.yml so the graph in graphify-out/ stays
+# current locally too, not just after a push completes CI.
+#
+# Enable once per clone:   git config core.hooksPath .githooks
+# Skip once:                GRAPHIFY_SKIP=1 git commit ...
+
+if [ -n "$GRAPHIFY_SKIP" ]; then
+  exit 0
+fi
+
+# Avoid recursive/self-triggering runs on our own snapshot commits.
+if git log -1 --pretty=%s | grep -q "^Update Graphify snapshot"; then
+  exit 0
+fi
+
+# Only refresh when the last commit touched paths that affect the graph.
+CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD)
+if ! echo "$CHANGED" | grep -qE '^(AGENTS\.md|CLAUDE\.md|\.agents/|\.graphifyignore|src/|scripts/|supabase/functions/|public/|package\.json|package-lock\.json|tsconfig.*\.json|vite\.config\.ts|eslint\.config\.js|index\.html)'; then
+  exit 0
+fi
+
+GRAPHIFY_BIN="$(git rev-parse --show-toplevel)/.graphify-venv/bin/graphify"
+if [ ! -x "$GRAPHIFY_BIN" ]; then
+  echo "⚠ post-commit: graphify not found at .graphify-venv/bin/graphify — skipping local refresh."
+  exit 0
+fi
+
+echo "▶ post-commit: refreshing Graphify snapshot…"
+"$GRAPHIFY_BIN" extract . --code-only --out . >/dev/null 2>&1
+"$GRAPHIFY_BIN" cluster-only . --graph graphify-out/graph.json --no-label >/dev/null 2>&1
+"$GRAPHIFY_BIN" tree --graph graphify-out/graph.json --output graphify-out/GRAPH_TREE.html --root . --label Terataylor >/dev/null 2>&1
+
+if git diff --quiet -- graphify-out; then
+  echo "✓ post-commit: Graphify snapshot already current."
+  exit 0
+fi
+
+git add graphify-out
+GRAPHIFY_SKIP=1 git commit -m "Update Graphify snapshot" --no-verify >/dev/null
+echo "✓ post-commit: Graphify snapshot updated and committed."

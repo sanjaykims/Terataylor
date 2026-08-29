@@ -3,14 +3,11 @@
     "0": [
       "src_app",
       "src_app_app",
-      "src_app_bookreader",
-      "src_app_gamespanel",
       "src_app_imageuploadinput",
       "src_app_maintab",
       "src_app_progressdashboard",
       "src_app_tabspinner",
       "src_app_v1tab",
-      "src_app_vocabularypanel",
       "src_components_icon",
       "src_components_icon_icon",
       "src_components_icon_iconname",
@@ -38,6 +35,9 @@
       "src_components_progressdashboard_minibar",
       "src_components_progressdashboard_parsefeature",
       "src_components_progressdashboard_progressdashboard",
+      "src_data_syllabus_currentlesson",
+      "src_lib_chapterstorage_loadchaptervocab",
+      "src_lib_cloudstorage_csgetappstate",
       "src_lib_supabase",
       "src_lib_supabase_supabase",
       "src_lib_supabase_supabase_key",
@@ -60,6 +60,8 @@
       "src_main"
     ],
     "1": [
+      "src_app_gamespanel",
+      "src_app_vocabularypanel",
       "src_components_gamespanel",
       "src_components_gamespanel_gamespanel",
       "src_components_gamespanel_gametype",
@@ -115,6 +117,7 @@
       "src_utils_textutils_vocabword"
     ],
     "2": [
+      "src_app_bookreader",
       "src_components_bookreader",
       "src_components_bookreader_bookreader",
       "src_components_bookreader_buildbookchaptertolessonmap",
@@ -171,7 +174,6 @@
       "src_lib_chapterstorage_loadchapteraudio",
       "src_lib_chapterstorage_loadchaptercount",
       "src_lib_chapterstorage_loadchaptertimings",
-      "src_lib_chapterstorage_loadchaptervocab",
       "src_lib_chapterstorage_migratechaptersfromlocalstorage",
       "src_lib_chapterstorage_savebookchapters",
       "src_lib_chapterstorage_savechapteraudio",
@@ -184,7 +186,6 @@
       "src_lib_cloudstorage_csdel",
       "src_lib_cloudstorage_csdelpattern",
       "src_lib_cloudstorage_csget",
-      "src_lib_cloudstorage_csgetappstate",
       "src_lib_cloudstorage_csgetjson",
       "src_lib_cloudstorage_csgetkeysbypattern",
       "src_lib_cloudstorage_cskeyexists",
@@ -326,7 +327,6 @@
       "src_data_syllabus_bookid",
       "src_data_syllabus_bookinfo",
       "src_data_syllabus_books",
-      "src_data_syllabus_currentlesson",
       "src_data_syllabus_essaysection",
       "src_data_syllabus_holiday",
       "src_data_syllabus_ksttoday",
@@ -348,7 +348,8 @@
       "src_lib_audioalign_enforcemonotone",
       "src_lib_audioalign_gettranscriber",
       "src_lib_audioalign_normword",
-      "src_lib_audioalign_wordtimestamp"
+      "src_lib_audioalign_wordtimestamp",
+      "transformers"
     ],
     "11": [
       "scripts_split_book_chapters",
@@ -429,31 +430,35 @@
       "tsconfig_references"
     ],
     "20": [
+      "githooks_post_commit",
+      "githooks_post_commit__entry"
+    ],
+    "21": [
       "githooks_pre_push",
       "githooks_pre_push__entry"
     ],
-    "21": [
+    "22": [
       "eslint_config"
     ],
-    "22": [
+    "23": [
       "vite_config"
     ]
   },
   "cohesion": {
-    "0": 0.06516290726817042,
-    "1": 0.07111756168359942,
-    "2": 0.0975609756097561,
-    "3": 0.12878787878787878,
+    "0": 0.06704260651629072,
+    "1": 0.06666666666666667,
+    "2": 0.09302325581395349,
+    "3": 0.13978494623655913,
     "4": 0.06896551724137931,
     "5": 0.08695652173913043,
     "6": 0.09523809523809523,
     "7": 0.09523809523809523,
     "8": 0.10526315789473684,
-    "9": 0.19117647058823528,
-    "10": 0.2692307692307692,
+    "9": 0.19166666666666668,
+    "10": 0.24175824175824176,
     "11": 0.16666666666666666,
     "12": 0.2,
-    "13": 0.3055555555555556,
+    "13": 0.2777777777777778,
     "14": 0.5238095238095238,
     "15": 0.3333333333333333,
     "16": 0.4,
@@ -462,7 +467,8 @@
     "19": 0.6666666666666666,
     "20": 1.0,
     "21": 1.0,
-    "22": 1.0
+    "22": 1.0,
+    "23": 1.0
   },
   "gods": [
     {
@@ -506,64 +512,64 @@
       "degree": 9
     },
     {
-      "id": "src_components_bookreader_mergemp3files",
-      "label": "mergeMp3Files()",
+      "id": "src_components_progressdashboard_progressdashboard",
+      "label": "ProgressDashboard()",
       "degree": 8
     },
     {
-      "id": "src_components_progressdashboard_progressdashboard",
-      "label": "ProgressDashboard()",
+      "id": "src_components_bookreader_mergemp3files",
+      "label": "mergeMp3Files()",
       "degree": 8
     }
   ],
   "surprises": [
     {
-      "source": "App()",
-      "target": "currentLesson()",
+      "source": "VocabProps",
+      "target": "VocabItem",
       "source_files": [
-        "src/App.tsx",
-        "src/data/syllabus.ts"
+        "src/components/ImageUploadInput.tsx",
+        "src/lib/types.ts"
       ],
       "confidence": "EXTRACTED",
-      "relation": "calls",
+      "relation": "references",
       "why": "bridges separate communities"
     },
     {
-      "source": "App()",
-      "target": "loadChapterVocab()",
+      "source": "Props",
+      "target": "VocabItem",
       "source_files": [
-        "src/App.tsx",
-        "src/lib/chapterStorage.ts"
+        "src/components/GamesPanel.tsx",
+        "src/lib/types.ts"
       ],
       "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "bridges separate communities"
+      "relation": "references",
+      "why": "peripheral node `Props` unexpectedly reaches hub `VocabItem`"
+    },
+    {
+      "source": "Props",
+      "target": "VocabItem",
+      "source_files": [
+        "src/components/SentenceScramble.tsx",
+        "src/lib/types.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "peripheral node `Props` unexpectedly reaches hub `VocabItem`"
+    },
+    {
+      "source": "Props",
+      "target": "VocabItem",
+      "source_files": [
+        "src/components/VocabularyPanel.tsx",
+        "src/lib/types.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "peripheral node `Props` unexpectedly reaches hub `VocabItem`"
     },
     {
       "source": "App()",
       "target": "csDel()",
-      "source_files": [
-        "src/App.tsx",
-        "src/lib/cloudStorage.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "bridges separate communities"
-    },
-    {
-      "source": "App()",
-      "target": "csGetAppState()",
-      "source_files": [
-        "src/App.tsx",
-        "src/lib/cloudStorage.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "bridges separate communities"
-    },
-    {
-      "source": "App()",
-      "target": "csSet()",
       "source_files": [
         "src/App.tsx",
         "src/lib/cloudStorage.ts"
@@ -577,12 +583,7 @@
     {
       "type": "bridge_node",
       "question": "Why does `VocabItem` connect `Community 1` to `Community 0`, `Community 2`?",
-      "why": "High betweenness centrality (0.033) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `App()` connect `Community 0` to `Community 1`, `Community 3`, `Community 9`?",
-      "why": "High betweenness centrality (0.014) - this node is a cross-community bridge."
+      "why": "High betweenness centrality (0.028) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
@@ -590,24 +591,29 @@
       "why": "High betweenness centrality (0.012) - this node is a cross-community bridge."
     },
     {
+      "type": "bridge_node",
+      "question": "Why does `BookReader()` connect `Community 2` to `Community 0`, `Community 10`, `Community 3`?",
+      "why": "High betweenness centrality (0.011) - this node is a cross-community bridge."
+    },
+    {
       "type": "isolated_nodes",
-      "question": "What connects `name`, `private`, `version` to the rest of the system?",
-      "why": "157 weakly-connected nodes found - possible documentation gaps or missing edges."
+      "question": "What connects `MainTab`, `V1Tab`, `ImageEntry` to the rest of the system?",
+      "why": "155 weakly-connected nodes found - possible documentation gaps or missing edges."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.06516290726817042 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.06704260651629072 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 1` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.07111756168359942 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 2` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.0975609756097561 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.09302325581395349 - nodes in this community are weakly interconnected."
     }
   ]
 }
