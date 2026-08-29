@@ -2722,17 +2722,6 @@
       "source_location": "L19"
     },
     {
-      "id": "transformers",
-      "label": "@huggingface/transformers",
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "Community 10",
-      "confidence": "EXTRACTED",
-      "file_type": "code",
-      "norm_label": "@huggingface/transformers",
-      "source_file": "@huggingface/transformers"
-    },
-    {
       "id": "src_lib_audioalign",
       "label": "audioAlign.ts",
       "_origin": "ast",
@@ -12337,17 +12326,8 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/App.tsx"
-    },
-    {
-      "source": "src_lib_audioalign",
-      "target": "transformers",
-      "relation": "dynamic_import",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/lib/audioAlign.ts"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "15963b441094ab53aed0bff5c9aae43c33298485"
+  "built_at_commit": "2fe13e5ef868173d7a1d1fa75b18f252916d8bd3"
 }

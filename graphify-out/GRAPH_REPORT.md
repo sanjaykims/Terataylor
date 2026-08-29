@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 395 nodes · 674 edges · 24 communities (18 shown, 6 thin omitted)
+- 394 nodes · 673 edges · 24 communities (18 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `15963b44`
+- Built from commit: `2fe13e5e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -107,7 +107,7 @@ Cohesion: 0.19
 Nodes (14): daysDiff(), fmtDate(), LessonScheduleWidget(), utcDays(), BookId, BookInfo, BOOKS, EssaySection (+6 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.24
+Cohesion: 0.27
 Nodes (12): alignByNW(), alignChapterAudio(), alignFromWordTimestamps(), AlignPhase, AlignProgress, buildAudioWordList(), Chunk, decodeTo16kMono() (+4 more)
 
 ### Community 11 - "Community 11"
