@@ -1,4 +1,4 @@
-# Graph Report - Terataylor  (2026-08-30)
+# Graph Report - Terataylor  (2026-08-29)
 
 ## Corpus Check
 - cluster-only mode — file stats not available
@@ -35,6 +35,7 @@
 - Community 18
 - Community 19
 - Community 20
+- Community 21
 
 ## God Nodes (most connected - your core abstractions)
 1. `BookReader()` - 51 edges
@@ -59,15 +60,17 @@
   src/components/ImageUploadInput.tsx → src/lib/types.ts
 - `ListeningPanelProps` --references--> `BookId`  [EXTRACTED]
   src/components/BookReader.tsx → src/data/syllabus.ts
+- `BookReader()` --calls--> `alignFromWordTimestamps()`  [EXTRACTED]
+  src/components/BookReader.tsx → src/lib/audioAlign.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (23 total, 6 thin omitted)
+## Communities (24 total, 6 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.06
-Nodes (87): BookReader, migrateFromLocalStorage(), BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms() (+79 more)
+Cohesion: 0.05
+Nodes (88): migrateFromLocalStorage(), BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms(), cleanChapterText() (+80 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.06
@@ -93,40 +96,40 @@ Nodes (21): ListeningPanelProps, BookScheduleSection(), daysDiff(), fmtDate(), L
 Cohesion: 0.10
 Nodes (20): @huggingface/transformers, dependencies, @huggingface/transformers, pdfjs-dist, react, react-dom, @supabase/supabase-js, name (+12 more)
 
-### Community 7 - "Community 7"
+### Community 8 - "Community 8"
 Cohesion: 0.10
 Nodes (20): node, vite.config.ts, compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib, module, moduleDetection (+12 more)
 
-### Community 8 - "Community 8"
+### Community 9 - "Community 9"
 Cohesion: 0.11
 Nodes (13): boundaries, buf, candidates, cuts, ends, kv, ONES, sbHeaders (+5 more)
 
-### Community 9 - "Community 9"
-Cohesion: 0.27
+### Community 10 - "Community 10"
+Cohesion: 0.24
 Nodes (12): alignByNW(), alignChapterAudio(), alignFromWordTimestamps(), AlignPhase, AlignProgress, buildAudioWordList(), Chunk, decodeTo16kMono() (+4 more)
 
-### Community 10 - "Community 10"
+### Community 11 - "Community 11"
 Cohesion: 0.17
 Nodes (10): chapters, headers, HEADING, headingIdx, lessons, lines, NUM_WORDS, RANGES (+2 more)
 
-### Community 11 - "Community 11"
+### Community 12 - "Community 12"
 Cohesion: 0.20
 Nodes (7): cut, findAnnouncement(), inBuf, lesson, numberForms(), sbHeaders, targetCh
 
-### Community 12 - "Community 12"
+### Community 13 - "Community 13"
 Cohesion: 0.28
 Nodes (7): COUNT, fixOpeningLine(), fixText(), headers, PROPER, sentenceCaseToken(), upserts
 
-### Community 13 - "Community 13"
+### Community 14 - "Community 14"
 Cohesion: 0.52
 Nodes (6): alignKoreanToEnglish(), main(), sbGet(), sbUpsert(), splitToSentences(), translateBatch()
 
-### Community 15 - "Community 15"
+### Community 16 - "Community 16"
 Cohesion: 0.40
 Nodes (3): COUNT, cutDur, headers
 
 ## Knowledge Gaps
-- **157 isolated node(s):** `KnowledgeMapBranch`, `Row`, `InitState`, `MobileRowProps`, `RowProps` (+152 more)
+- **157 isolated node(s):** `InitState`, `MobileRowProps`, `RowProps`, `SentenceRowsProps`, `KnowledgeMapBranch` (+152 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -139,10 +142,10 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **Why does `devDependencies` connect `Community 3` to `Community 6`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **What connects `KnowledgeMapBranch`, `Row`, `InitState` to the rest of the system?**
+- **What connects `InitState`, `MobileRowProps`, `RowProps` to the rest of the system?**
   _157 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.05518394648829431 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05493221131369799 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.06078316773816481 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**

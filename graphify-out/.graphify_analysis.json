@@ -1,7 +1,6 @@
 {
   "communities": {
     "0": [
-      "src_app_bookreader",
       "src_app_migratefromlocalstorage",
       "src_components_bookreader",
       "src_components_bookreader_bookreader",
@@ -64,6 +63,7 @@
       "src_lib_chapterstorage_loadchapteren",
       "src_lib_chapterstorage_loadchapterko",
       "src_lib_chapterstorage_loadchaptertimings",
+      "src_lib_chapterstorage_loadchaptervocab",
       "src_lib_chapterstorage_loadknowledgemap",
       "src_lib_chapterstorage_loadlisteningaudio",
       "src_lib_chapterstorage_loadlisteningen",
@@ -86,6 +86,7 @@
       "src_lib_cloudstorage_csdel",
       "src_lib_cloudstorage_csdelpattern",
       "src_lib_cloudstorage_csget",
+      "src_lib_cloudstorage_csgetappstate",
       "src_lib_cloudstorage_csgetjson",
       "src_lib_cloudstorage_csgetkeysbypattern",
       "src_lib_cloudstorage_cskeyexists",
@@ -95,16 +96,53 @@
       "src_lib_cloudstorage_row"
     ],
     "1": [
+      "src_app",
+      "src_app_app",
+      "src_app_bookreader",
       "src_app_gamespanel",
+      "src_app_imageuploadinput",
+      "src_app_maintab",
+      "src_app_tabspinner",
+      "src_app_v1tab",
       "src_app_vocabularypanel",
       "src_components_gamespanel",
       "src_components_gamespanel_gamespanel",
       "src_components_gamespanel_gametype",
       "src_components_gamespanel_props",
       "src_components_gamespanel_tabs",
+      "src_components_icon",
+      "src_components_icon_icon",
+      "src_components_icon_iconname",
+      "src_components_icon_paths",
+      "src_components_icon_solid",
+      "src_components_icon_stroke",
+      "src_components_imageuploadinput",
+      "src_components_imageuploadinput_baseprops",
+      "src_components_imageuploadinput_compressimage",
+      "src_components_imageuploadinput_imageentry",
+      "src_components_imageuploadinput_imageuploadinput",
+      "src_components_imageuploadinput_props",
+      "src_components_imageuploadinput_textprops",
+      "src_components_imageuploadinput_vocabprops",
+      "src_components_sentencescramble_props",
+      "src_components_vocabularypanel",
+      "src_components_vocabularypanel_cardstate",
+      "src_components_vocabularypanel_defentry",
+      "src_components_vocabularypanel_iskorean",
+      "src_components_vocabularypanel_props",
+      "src_components_vocabularypanel_sessioncache",
+      "src_components_vocabularypanel_vocabularypanel",
+      "src_lib_tracker_sessionflush",
+      "src_lib_tracker_sessionpause",
+      "src_lib_tracker_sessionsetdetail",
+      "src_lib_tracker_sessionswitch",
+      "src_lib_types",
+      "src_lib_types_vocabitem",
+      "src_main"
+    ],
+    "2": [
       "src_components_sentencescramble",
       "src_components_sentencescramble_iskorean",
-      "src_components_sentencescramble_props",
       "src_components_sentencescramble_sentencescramble",
       "src_components_sentencescramble_shuffle",
       "src_components_sentencescramble_vocabpuzzle",
@@ -147,8 +185,6 @@
       "src_lib_supabase_supabase_url",
       "src_lib_tracker_trackgamescore",
       "src_lib_tracker_trackvocabresult",
-      "src_lib_types",
-      "src_lib_types_vocabitem",
       "src_utils_textutils",
       "src_utils_textutils_extractvocabulary",
       "src_utils_textutils_parsesentences",
@@ -315,7 +351,7 @@
       "react_dom",
       "supabase_supabase_js"
     ],
-    "7": [
+    "8": [
       "ref_node",
       "ref_vite_config_ts",
       "tsconfig_node",
@@ -338,7 +374,7 @@
       "tsconfig_node_include",
       "tsconfig_node_json_ref_es2023"
     ],
-    "8": [
+    "9": [
       "scripts_split_audiobook",
       "scripts_split_audiobook_boundaries",
       "scripts_split_audiobook_buf",
@@ -359,7 +395,7 @@
       "scripts_split_audiobook_total",
       "scripts_split_audiobook_word2num"
     ],
-    "9": [
+    "10": [
       "src_lib_audioalign",
       "src_lib_audioalign_alignbynw",
       "src_lib_audioalign_alignchapteraudio",
@@ -372,9 +408,10 @@
       "src_lib_audioalign_enforcemonotone",
       "src_lib_audioalign_gettranscriber",
       "src_lib_audioalign_normword",
-      "src_lib_audioalign_wordtimestamp"
+      "src_lib_audioalign_wordtimestamp",
+      "transformers"
     ],
-    "10": [
+    "11": [
       "scripts_split_book_chapters",
       "scripts_split_book_chapters_chapters",
       "scripts_split_book_chapters_fail",
@@ -388,7 +425,7 @@
       "scripts_split_book_chapters_roman",
       "scripts_split_book_chapters_upserts"
     ],
-    "11": [
+    "12": [
       "scripts_trim_audio_head",
       "scripts_trim_audio_head_cut",
       "scripts_trim_audio_head_dur",
@@ -401,7 +438,7 @@
       "scripts_trim_audio_head_sbheaders",
       "scripts_trim_audio_head_targetch"
     ],
-    "12": [
+    "13": [
       "scripts_fix_dropcaps",
       "scripts_fix_dropcaps_count",
       "scripts_fix_dropcaps_fail",
@@ -412,7 +449,7 @@
       "scripts_fix_dropcaps_sentencecasetoken",
       "scripts_fix_dropcaps_upserts"
     ],
-    "13": [
+    "14": [
       "scripts_realign_ch03_ko",
       "scripts_realign_ch03_ko_alignkoreantoenglish",
       "scripts_realign_ch03_ko_main",
@@ -421,7 +458,7 @@
       "scripts_realign_ch03_ko_splittosentences",
       "scripts_realign_ch03_ko_translatebatch"
     ],
-    "14": [
+    "15": [
       "supabase_functions_merge_audio_index",
       "supabase_functions_merge_audio_index_bytespersec",
       "supabase_functions_merge_audio_index_cors",
@@ -429,41 +466,41 @@
       "supabase_functions_merge_audio_index_skipid3v2",
       "supabase_functions_merge_audio_index_trimid3v1"
     ],
-    "15": [
+    "16": [
       "scripts_inspect_audio",
       "scripts_inspect_audio_count",
       "scripts_inspect_audio_cutdur",
       "scripts_inspect_audio_headers",
       "scripts_inspect_audio_mmss"
     ],
-    "16": [
+    "17": [
       "supabase_functions_deepgram_listen_index",
       "supabase_functions_deepgram_listen_index_corsheaders",
       "supabase_functions_deepgram_listen_index_deepgramword",
       "supabase_functions_deepgram_listen_index_json"
     ],
-    "17": [
+    "18": [
       "supabase_functions_ocr_extract_index",
       "supabase_functions_ocr_extract_index_cors",
       "supabase_functions_ocr_extract_index_lookslikemetareply"
     ],
-    "18": [
+    "19": [
       "tsconfig",
       "tsconfig_files",
       "tsconfig_references"
     ],
-    "19": [
+    "20": [
       "githooks_post_commit",
       "githooks_post_commit__entry"
     ],
-    "20": [
+    "21": [
       "githooks_pre_push",
       "githooks_pre_push__entry"
     ],
-    "21": [
+    "22": [
       "eslint_config"
     ],
-    "22": [
+    "23": [
       "vite_config"
     ]
   },
@@ -476,21 +513,22 @@
     "5": 0.1383399209486166,
     "6": 0.09523809523809523,
     "7": 0.09523809523809523,
-    "8": 0.10526315789473684,
-    "9": 0.2692307692307692,
-    "10": 0.16666666666666666,
-    "11": 0.2,
-    "12": 0.2777777777777778,
-    "13": 0.5238095238095238,
-    "14": 0.3333333333333333,
-    "15": 0.4,
-    "16": 0.5,
-    "17": 0.6666666666666666,
+    "8": 0.09523809523809523,
+    "9": 0.10526315789473684,
+    "10": 0.24175824175824176,
+    "11": 0.16666666666666666,
+    "12": 0.2,
+    "13": 0.2777777777777778,
+    "14": 0.5238095238095238,
+    "15": 0.3333333333333333,
+    "16": 0.4,
+    "17": 0.5,
     "18": 0.6666666666666666,
-    "19": 1.0,
+    "19": 0.6666666666666666,
     "20": 1.0,
     "21": 1.0,
-    "22": 1.0
+    "22": 1.0,
+    "23": 1.0
   },
   "gods": [
     {
@@ -599,6 +637,17 @@
       "confidence": "EXTRACTED",
       "relation": "references",
       "why": "peripheral node `ListeningPanelProps` unexpectedly reaches hub `BookId`"
+    },
+    {
+      "source": "BookReader()",
+      "target": "alignFromWordTimestamps()",
+      "source_files": [
+        "src/components/BookReader.tsx",
+        "src/lib/audioAlign.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
     }
   ],
   "questions": [
@@ -619,13 +668,13 @@
     },
     {
       "type": "isolated_nodes",
-      "question": "What connects `KnowledgeMapBranch`, `Row`, `InitState` to the rest of the system?",
+      "question": "What connects `InitState`, `MobileRowProps`, `RowProps` to the rest of the system?",
       "why": "157 weakly-connected nodes found - possible documentation gaps or missing edges."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.05518394648829431 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.05493221131369799 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
