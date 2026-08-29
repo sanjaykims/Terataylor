@@ -12,6 +12,35 @@ Project-specific knowledge for helping Taylor (4th grader, Chungdahm/April acade
 prepare for his weekly Bridge English class. Prefer this over a generic
 language-learning skill — it encodes the actual curriculum, not general advice.
 
+## The academy's overall structure (CREVERSE roadmap)
+
+**Important**: "Tera" and "Bridge" are **tier/level names**, not subject
+names — the full progression is Mega/Giga/Tera → **Bridge**/Par/Birdie →
+Eagle/Albatross/Albatross+ → Masters. **C1, C2, A2, V1 are subject
+tracks that repeat at every tier** (each is a separate weekly class in a
+different skill area: C1 = analytical reading/listening + opinion
+speaking/writing, C2 = discussion/perspective-taking, A2 = TOEFL Jr.
+strategy, V1 = novel reading + structured story writing). A student
+usually takes a *subset* of tracks per tier, not all four.
+
+Taylor took **V1 + A2** in the Tera tier; he's now taking **C1 + C2** in
+the Bridge tier — same two track "slots" as before, but a *different
+pair* of tracks this time, at the next tier up (harder content: Tera's
+C1 is "읽기/듣기 실력 다지기" foundational skill-building; Bridge's C1 is
+"분석적 읽기/듣기" analytical reading/listening — a real step up).
+
+**The official CREVERSE ecosystem already covers grading/attendance/
+homework tracking**: c-Learning (in-class) → i-Learning (self-study
+platform + the "CHUNGDAHM BUFF" app) → Allim (parent app, real-time
+progress). The family already has Allim/i-Learning access. **Terataylor
+should not try to duplicate that** — its actual value is what those
+don't provide: Korean/English bilingual translation and reading
+practice, casual vocab-practice games, and (uniquely) keeping V1/A2's
+content permanently accessible even after the curriculum moved on,
+which Allim likely can't do once a level ends. Progress tracking inside
+Terataylor is about Taylor's own home study habit (time spent, vocab
+studied), not a substitute for the school's official record.
+
 ## Curriculum shape (from the textbook's own "How to Use This Book" guide)
 
 Both C1 and C2 are **13 independent weekly topics** (not one continuous
