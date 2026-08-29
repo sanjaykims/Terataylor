@@ -1,13 +1,21 @@
 name: Verify Production Deploy
 
-# Confirms the live site (terataylor.vercel.app) actually updated to this
-# push, instead of trusting that it did. This exists because Vercel's
+# Confirms the live site (terataylor.vercel.app) actually updated to include
+# this push, instead of trusting that it did. This exists because Vercel's
 # Production Branch setting can silently point at the wrong branch (it did,
-# for a long stretch) — when that happens, every push to main still builds
+# for a long stretch) - when that happens, every push to main still builds
 # fine and "succeeds," but the live site never changes. This job makes that
 # failure loud instead of silent: it reads the commit SHA embedded in the
 # live page (see index.html's commit-sha meta tag + package.json's build
-# script) and fails the check if it doesn't match what was just pushed.
+# script) and fails the check if that commit doesn't actually include the
+# one just pushed, instead of the mismatch going unnoticed like it did
+# before.
+#
+# The check is "live commit is a descendant of (or equal to) the pushed
+# commit," not an exact match - other automation (e.g. the Graphify
+# snapshot bot) can land newer commits on the deploy branch between this
+# push and when the 90s wait finishes, which is expected and fine as long
+# as this push's content actually made it to production.
 #
 # If this fails: check Vercel dashboard -> terataylor project -> Settings ->
 # Git -> Production Branch. It must be "main".
@@ -24,23 +32,37 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Wait for Vercel to build and deploy
         run: sleep 90
 
-      - name: Check the live site matches this commit
+      - name: Check the live site includes this commit
         run: |
           LIVE_SHA=$(curl -fsSL https://terataylor.vercel.app | grep -oP 'name="commit-sha" content="\K[^"]*' || true)
           echo "Live site commit: ${LIVE_SHA:-<empty>}"
           echo "Pushed commit:    $GITHUB_SHA"
 
           if [ -z "$LIVE_SHA" ]; then
-            echo "::error::Could not read the commit-sha meta tag from https://terataylor.vercel.app. Either the site is down, or the tag itself got removed/broken — check index.html and package.json's build script."
+            echo "::error::Could not read the commit-sha meta tag from https://terataylor.vercel.app. Either the site is down, or the tag itself got removed/broken - check index.html and package.json's build script."
             exit 1
           fi
 
-          if [ "$LIVE_SHA" != "$GITHUB_SHA" ]; then
-            echo "::error::Live site is NOT running this commit (live=$LIVE_SHA, expected=$GITHUB_SHA). This is almost always Vercel's Production Branch pointing at the wrong branch — check Vercel dashboard > terataylor project > Settings > Git > Production Branch (must be 'main')."
+          # The live commit may live on a branch this checkout doesn't know
+          # about yet (e.g. a separate deploy branch) - fetch everything so
+          # the ancestry check below can actually find it.
+          git fetch origin --prune --quiet '+refs/heads/*:refs/remotes/origin/*' || true
+
+          if ! git cat-file -e "$LIVE_SHA" 2>/dev/null; then
+            echo "::error::Live site reports commit $LIVE_SHA, but that commit isn't reachable from any branch in this repo. The meta tag may be misconfigured, or the site is serving something unexpected."
             exit 1
           fi
 
-          echo "Live site matches this commit."
+          if git merge-base --is-ancestor "$GITHUB_SHA" "$LIVE_SHA"; then
+            echo "Live site includes this commit (live=$LIVE_SHA)."
+          else
+            echo "::error::Live site does NOT include this commit (live=$LIVE_SHA, pushed=$GITHUB_SHA, and pushed is not an ancestor of live). This is almost always Vercel's Production Branch pointing at the wrong branch - check Vercel dashboard > terataylor project > Settings > Git > Production Branch (must be 'main')."
+            exit 1
+          fi
