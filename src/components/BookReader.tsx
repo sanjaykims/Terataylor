@@ -721,6 +721,35 @@ const Row = memo(function Row({ i, en, ko, active, wordIdx, hasKo, hasAudio, sho
   );
 });
 
+// English-only reading view (no KO column): sentences flow together as one
+// continuous, wrapping passage — like a normal page of text — instead of
+// each sentence sitting alone in its own full-width row. Each sentence is
+// still its own clickable/highlightable span, so click-to-seek and the
+// active-sentence word highlight during audio playback both keep working;
+// only the layout changes; short sentences no longer leave a wall of dead
+// space where a translation used to sit.
+function FlowingText({
+  rows, activeIdx, activeWordIdx, hasAudio, onSeek,
+}: {
+  rows: string[]; activeIdx: number; activeWordIdx: number; hasAudio: boolean; onSeek: (i: number) => void;
+}) {
+  return (
+    <p className="text-sm leading-loose text-gray-800">
+      {rows.map((text, i) => {
+        const active = i === activeIdx;
+        return (
+          <span key={i} onClick={() => hasAudio && onSeek(i)}
+            className={`rounded px-0.5 transition-colors ${hasAudio ? 'cursor-pointer hover:bg-violet-50' : ''} ${
+              active ? 'text-gray-900 font-semibold bg-amber-200/60' : ''
+            }`}>
+            {active ? renderWords(text, activeWordIdx) : text}{' '}
+          </span>
+        );
+      })}
+    </p>
+  );
+}
+
 // One mobile row, memoized (same rationale).
 type MobileRowProps = {
   i: number; text: string; active: boolean; wordIdx: number; variant: 'en' | 'ko';
@@ -744,31 +773,40 @@ const SentenceRows = memo(function SentenceRows(
 ) {
   return (
     <>
-      {/* Desktop: paired grid, or English-only single column when showKo is false */}
+      {/* Desktop: paired grid when translation is shown; a single flowing
+          passage (not one sentence per row) when it isn't. */}
       <div className="hidden sm:block surface overflow-hidden">
-        <div className={`grid ${showKo ? 'grid-cols-2' : 'grid-cols-1'} border-b border-violet-100/70`}>
-          <div className={`px-4 py-2.5 ${showKo ? 'border-r border-violet-100/70' : ''}`}>
-            <span className="eyebrow text-violet-500/80 inline-flex items-center gap-1"><span className="lang-tag">EN</span> English</span>
-          </div>
-          {showKo && (
-            <div className="px-4 py-2.5">
-              <span className="eyebrow text-violet-500/80 inline-flex items-center gap-1"><span className="lang-tag">KO</span> 한국어</span>
+        {showKo ? (
+          <>
+            <div className="grid grid-cols-2 border-b border-violet-100/70">
+              <div className="px-4 py-2.5 border-r border-violet-100/70">
+                <span className="eyebrow text-violet-500/80 inline-flex items-center gap-1"><span className="lang-tag">EN</span> English</span>
+              </div>
+              <div className="px-4 py-2.5">
+                <span className="eyebrow text-violet-500/80 inline-flex items-center gap-1"><span className="lang-tag">KO</span> 한국어</span>
+              </div>
             </div>
-          )}
-        </div>
-        {Array.from({ length: maxRows }).map((_, i) => {
-          const active = i === activeIdx;
-          return (
-            <Row key={i} i={i} en={enRows[i] ?? ''} ko={koRows[i] ?? ''} active={active}
-              wordIdx={active ? activeWordIdx : -1} hasKo={hasKo} hasAudio={hasAudio} showKo={showKo}
-              onSeek={onSeek} setRowRef={setRowRef} />
-          );
-        })}
+            {Array.from({ length: maxRows }).map((_, i) => {
+              const active = i === activeIdx;
+              return (
+                <Row key={i} i={i} en={enRows[i] ?? ''} ko={koRows[i] ?? ''} active={active}
+                  wordIdx={active ? activeWordIdx : -1} hasKo={hasKo} hasAudio={hasAudio} showKo={showKo}
+                  onSeek={onSeek} setRowRef={setRowRef} />
+              );
+            })}
+          </>
+        ) : (
+          <div className="p-4">
+            <FlowingText rows={enRows} activeIdx={activeIdx} activeWordIdx={activeWordIdx} hasAudio={hasAudio} onSeek={onSeek} />
+          </div>
+        )}
       </div>
 
-      {/* Mobile: single column */}
+      {/* Mobile: single column, same flowing treatment when showKo is false */}
       <div className="sm:hidden surface p-4 space-y-3">
-        {mobileView === 'en' || !showKo
+        {!showKo
+          ? <FlowingText rows={enRows} activeIdx={activeIdx} activeWordIdx={activeWordIdx} hasAudio={hasAudio} onSeek={onSeek} />
+          : mobileView === 'en'
           ? enRows.map((p, i) => (
               <MobileRow key={i} i={i} text={p} active={i === activeIdx}
                 wordIdx={i === activeIdx ? activeWordIdx : -1} variant="en"
