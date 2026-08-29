@@ -2,7 +2,6 @@
   "communities": {
     "0": [
       "src_app_bookreader",
-      "src_app_migratefromlocalstorage",
       "src_components_bookreader",
       "src_components_bookreader_bookreader",
       "src_components_bookreader_buildbookchaptertolessonmap",
@@ -63,8 +62,6 @@
       "src_lib_chapterstorage_loadlisteningen",
       "src_lib_chapterstorage_loadlisteningko",
       "src_lib_chapterstorage_loadlisteningtimings",
-      "src_lib_chapterstorage_migratechaptersfromlocalstorage",
-      "src_lib_chapterstorage_savebookchapters",
       "src_lib_chapterstorage_savechapteraudio",
       "src_lib_chapterstorage_savechaptercount",
       "src_lib_chapterstorage_savechapteren",
@@ -83,73 +80,11 @@
       "src_lib_cloudstorage_csgetkeysbypattern",
       "src_lib_cloudstorage_cskeyexists",
       "src_lib_cloudstorage_csset",
-      "src_lib_cloudstorage_cssetbatch",
       "src_lib_cloudstorage_cssetjson",
-      "src_lib_cloudstorage_row"
+      "src_lib_cloudstorage_row",
+      "src_lib_supabase_supabase"
     ],
     "1": [
-      "src_app",
-      "src_app_app",
-      "src_app_imageuploadinput",
-      "src_app_maintab",
-      "src_app_progressdashboard",
-      "src_app_tabspinner",
-      "src_app_v1tab",
-      "src_components_icon",
-      "src_components_icon_icon",
-      "src_components_icon_iconname",
-      "src_components_icon_paths",
-      "src_components_icon_solid",
-      "src_components_icon_stroke",
-      "src_components_imageuploadinput",
-      "src_components_imageuploadinput_baseprops",
-      "src_components_imageuploadinput_compressimage",
-      "src_components_imageuploadinput_imageentry",
-      "src_components_imageuploadinput_imageuploadinput",
-      "src_components_imageuploadinput_props",
-      "src_components_imageuploadinput_textprops",
-      "src_components_imageuploadinput_vocabprops",
-      "src_components_lessonschedulewidget_lessonschedulewidget",
-      "src_components_progressdashboard",
-      "src_components_progressdashboard_book_labels",
-      "src_components_progressdashboard_feature_icons",
-      "src_components_progressdashboard_feature_labels",
-      "src_components_progressdashboard_formatdate",
-      "src_components_progressdashboard_formatduration",
-      "src_components_progressdashboard_formatsessionwhen",
-      "src_components_progressdashboard_game_labels",
-      "src_components_progressdashboard_kst_date",
-      "src_components_progressdashboard_kst_time",
-      "src_components_progressdashboard_minibar",
-      "src_components_progressdashboard_parsefeature",
-      "src_components_progressdashboard_progressdashboard",
-      "src_data_syllabus_activebookids",
-      "src_data_syllabus_defaultbookid",
-      "src_lib_chapterstorage_loadchaptercount",
-      "src_lib_chapterstorage_loadchaptervocab",
-      "src_lib_cloudstorage_csgetappstate",
-      "src_lib_supabase",
-      "src_lib_supabase_supabase",
-      "src_lib_supabase_supabase_key",
-      "src_lib_supabase_supabase_url",
-      "src_lib_tracker",
-      "src_lib_tracker_fetchgamescores",
-      "src_lib_tracker_fetchstudysessions",
-      "src_lib_tracker_fetchvocabprogress",
-      "src_lib_tracker_gamescore",
-      "src_lib_tracker_segstart",
-      "src_lib_tracker_sessionflush",
-      "src_lib_tracker_sessionpause",
-      "src_lib_tracker_sessionresume",
-      "src_lib_tracker_sessionsetdetail",
-      "src_lib_tracker_sessionswitch",
-      "src_lib_tracker_studysession",
-      "src_lib_tracker_tracksession",
-      "src_lib_tracker_vocablocks",
-      "src_lib_tracker_vocabprogress",
-      "src_main"
-    ],
-    "2": [
       "src_app_gamespanel",
       "src_app_vocabularypanel",
       "src_components_gamespanel",
@@ -205,6 +140,62 @@
       "src_utils_textutils_parsesentences",
       "src_utils_textutils_stopwords",
       "src_utils_textutils_vocabword"
+    ],
+    "2": [
+      "src_app",
+      "src_app_app",
+      "src_app_maintab",
+      "src_app_migratefromlocalstorage",
+      "src_app_progressdashboard",
+      "src_app_tabspinner",
+      "src_app_v1tab",
+      "src_components_icon",
+      "src_components_icon_icon",
+      "src_components_icon_iconname",
+      "src_components_icon_paths",
+      "src_components_icon_solid",
+      "src_components_icon_stroke",
+      "src_components_lessonschedulewidget_lessonschedulewidget",
+      "src_components_progressdashboard",
+      "src_components_progressdashboard_book_labels",
+      "src_components_progressdashboard_feature_icons",
+      "src_components_progressdashboard_feature_labels",
+      "src_components_progressdashboard_formatdate",
+      "src_components_progressdashboard_formatduration",
+      "src_components_progressdashboard_formatsessionwhen",
+      "src_components_progressdashboard_game_labels",
+      "src_components_progressdashboard_kst_date",
+      "src_components_progressdashboard_kst_time",
+      "src_components_progressdashboard_minibar",
+      "src_components_progressdashboard_parsefeature",
+      "src_components_progressdashboard_progressdashboard",
+      "src_data_syllabus_activebookids",
+      "src_data_syllabus_defaultbookid",
+      "src_lib_chapterstorage_loadchaptercount",
+      "src_lib_chapterstorage_loadchaptervocab",
+      "src_lib_chapterstorage_migratechaptersfromlocalstorage",
+      "src_lib_chapterstorage_savebookchapters",
+      "src_lib_cloudstorage_csgetappstate",
+      "src_lib_cloudstorage_cssetbatch",
+      "src_lib_supabase",
+      "src_lib_supabase_supabase_key",
+      "src_lib_supabase_supabase_url",
+      "src_lib_tracker",
+      "src_lib_tracker_fetchgamescores",
+      "src_lib_tracker_fetchstudysessions",
+      "src_lib_tracker_fetchvocabprogress",
+      "src_lib_tracker_gamescore",
+      "src_lib_tracker_segstart",
+      "src_lib_tracker_sessionflush",
+      "src_lib_tracker_sessionpause",
+      "src_lib_tracker_sessionresume",
+      "src_lib_tracker_sessionsetdetail",
+      "src_lib_tracker_sessionswitch",
+      "src_lib_tracker_studysession",
+      "src_lib_tracker_tracksession",
+      "src_lib_tracker_vocablocks",
+      "src_lib_tracker_vocabprogress",
+      "src_main"
     ],
     "3": [
       "eslint",
@@ -365,7 +356,8 @@
       "src_lib_audioalign_enforcemonotone",
       "src_lib_audioalign_gettranscriber",
       "src_lib_audioalign_normword",
-      "src_lib_audioalign_wordtimestamp"
+      "src_lib_audioalign_wordtimestamp",
+      "transformers"
     ],
     "10": [
       "scripts_split_book_chapters",
@@ -406,6 +398,17 @@
       "scripts_fix_dropcaps_upserts"
     ],
     "13": [
+      "src_app_imageuploadinput",
+      "src_components_imageuploadinput",
+      "src_components_imageuploadinput_baseprops",
+      "src_components_imageuploadinput_compressimage",
+      "src_components_imageuploadinput_imageentry",
+      "src_components_imageuploadinput_imageuploadinput",
+      "src_components_imageuploadinput_props",
+      "src_components_imageuploadinput_textprops",
+      "src_components_imageuploadinput_vocabprops"
+    ],
+    "14": [
       "scripts_realign_ch03_ko",
       "scripts_realign_ch03_ko_alignkoreantoenglish",
       "scripts_realign_ch03_ko_main",
@@ -414,7 +417,7 @@
       "scripts_realign_ch03_ko_splittosentences",
       "scripts_realign_ch03_ko_translatebatch"
     ],
-    "14": [
+    "15": [
       "supabase_functions_merge_audio_index",
       "supabase_functions_merge_audio_index_bytespersec",
       "supabase_functions_merge_audio_index_cors",
@@ -422,68 +425,69 @@
       "supabase_functions_merge_audio_index_skipid3v2",
       "supabase_functions_merge_audio_index_trimid3v1"
     ],
-    "15": [
+    "16": [
       "scripts_inspect_audio",
       "scripts_inspect_audio_count",
       "scripts_inspect_audio_cutdur",
       "scripts_inspect_audio_headers",
       "scripts_inspect_audio_mmss"
     ],
-    "16": [
+    "17": [
       "supabase_functions_deepgram_listen_index",
       "supabase_functions_deepgram_listen_index_corsheaders",
       "supabase_functions_deepgram_listen_index_deepgramword",
       "supabase_functions_deepgram_listen_index_json"
     ],
-    "17": [
+    "18": [
       "supabase_functions_ocr_extract_index",
       "supabase_functions_ocr_extract_index_cors",
       "supabase_functions_ocr_extract_index_lookslikemetareply"
     ],
-    "18": [
+    "19": [
       "tsconfig",
       "tsconfig_files",
       "tsconfig_references"
     ],
-    "19": [
+    "20": [
       "githooks_post_commit",
       "githooks_post_commit__entry"
     ],
-    "20": [
+    "21": [
       "githooks_pre_push",
       "githooks_pre_push__entry"
     ],
-    "21": [
+    "22": [
       "eslint_config"
     ],
-    "22": [
+    "23": [
       "vite_config"
     ]
   },
   "cohesion": {
-    "0": 0.06022408963585434,
-    "1": 0.06440677966101695,
-    "2": 0.06666666666666667,
+    "0": 0.06202950918398073,
+    "1": 0.06666666666666667,
+    "2": 0.07127882599580712,
     "3": 0.06896551724137931,
     "4": 0.08695652173913043,
     "5": 0.09523809523809523,
     "6": 0.09523809523809523,
     "7": 0.14761904761904762,
     "8": 0.10526315789473684,
-    "9": 0.2692307692307692,
+    "9": 0.24175824175824176,
     "10": 0.16666666666666666,
     "11": 0.2,
     "12": 0.2777777777777778,
-    "13": 0.5238095238095238,
-    "14": 0.3333333333333333,
-    "15": 0.4,
-    "16": 0.5,
-    "17": 0.6666666666666666,
+    "13": 0.3055555555555556,
+    "14": 0.5238095238095238,
+    "15": 0.3333333333333333,
+    "16": 0.4,
+    "17": 0.5,
     "18": 0.6666666666666666,
-    "19": 1.0,
+    "19": 0.6666666666666666,
     "20": 1.0,
     "21": 1.0,
-    "22": 1.0
+    "22": 1.0,
+    "23": 1.0
   },
   "gods": [
     {
@@ -539,17 +543,6 @@
   ],
   "surprises": [
     {
-      "source": "VocabProps",
-      "target": "VocabItem",
-      "source_files": [
-        "src/components/ImageUploadInput.tsx",
-        "src/lib/types.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "bridges separate communities"
-    },
-    {
       "source": "Props",
       "target": "VocabItem",
       "source_files": [
@@ -583,6 +576,17 @@
       "why": "peripheral node `Props` unexpectedly reaches hub `VocabItem`"
     },
     {
+      "source": "VocabProps",
+      "target": "VocabItem",
+      "source_files": [
+        "src/components/ImageUploadInput.tsx",
+        "src/lib/types.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    },
+    {
       "source": "ListeningPanelProps",
       "target": "BookId",
       "source_files": [
@@ -597,12 +601,12 @@
   "questions": [
     {
       "type": "bridge_node",
-      "question": "Why does `VocabItem` connect `Community 2` to `Community 0`, `Community 1`?",
+      "question": "Why does `VocabItem` connect `Community 1` to `Community 0`, `Community 2`, `Community 13`?",
       "why": "High betweenness centrality (0.026) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
-      "question": "Why does `BookReader()` connect `Community 0` to `Community 9`, `Community 1`?",
+      "question": "Why does `BookReader()` connect `Community 0` to `Community 9`, `Community 2`?",
       "why": "High betweenness centrality (0.013) - this node is a cross-community bridge."
     },
     {
@@ -618,17 +622,17 @@
     {
       "type": "low_cohesion",
       "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.06022408963585434 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.06202950918398073 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 1` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.06440677966101695 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 2` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.07127882599580712 - nodes in this community are weakly interconnected."
     }
   ]
 }
