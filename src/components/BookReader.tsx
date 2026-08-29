@@ -4,7 +4,7 @@ import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { BOOKS, SCHEDULE, type BookId } from '../data/syllabus';
 import { supabase } from '../lib/supabase';
 import {
-  hasBook, clearBook, loadChapterEn, loadChapterKo,
+  hasBook, clearBook, loadChapterEn, loadChapterKo, saveChapterEn,
   saveChapterKo, saveBookChapters, getTranslatedChapters,
   saveChapterCount, loadChapterCount,
   saveChapterAudio, loadChapterAudio, deleteChapterAudio,
@@ -15,6 +15,7 @@ import { sessionSetDetail } from '../lib/tracker';
 import type { VocabItem } from '../lib/types';
 import type { WordTimestamp } from '../lib/audioAlign';
 import Icon from './Icon';
+import ImageUploadInput from './ImageUploadInput';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -938,6 +939,20 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   // ── On mount ─────────────────────────────────────────────────────────────
   useEffect(() => {
     setInitState('loading');
+    // Topical (Bridge) books have a fixed, syllabus-known lesson count and no
+    // single "book" to upload — skip the whole-book PDF gate entirely and
+    // always show the reader view. Individual empty lessons get their own
+    // per-lesson upload prompt inline (see the Reader section below).
+    if (bk?.lessonKind === 'topical') {
+      (async () => {
+        setTotalChapters(bk.lessonCount ?? 0);
+        setInitState('has-book');
+        const translated = await getTranslatedChapters(bookId).catch(() => [] as number[]);
+        setTranslatedChaps(new Set(translated));
+        await loadChapter(bookId, initialLessonChapter);
+      })();
+      return;
+    }
     hasBook(bookId)
       .then(async has => {
         if (!has) { setInitState('no-book'); return; }
@@ -1772,6 +1787,19 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           hasKo={!!koText} hasAudio={!!audioUrl} mobileView={mobileView}
           onSeek={seekToSentence} setRowRef={setRowRef} setMobileRowRef={setMobileRowRef}
         />
+      ) : bk.lessonKind === 'topical' ? (
+        <div className="surface p-4">
+          <ImageUploadInput
+            key={`reading-upload-${bookId}-ch${selectedChapter}`}
+            mode="text"
+            label={`Chapter ${selectedChapter} 리딩 지문 사진`}
+            hint="이번 주 리딩 지문 사진을 올리면 자동으로 텍스트가 추출돼요"
+            onExtracted={async text => {
+              await saveChapterEn(bookId, selectedChapter, text);
+              await loadChapter(bookId, selectedChapter);
+            }}
+          />
+        </div>
       ) : (
         <div className="surface-soft p-8 text-center text-sm text-gray-500">
           이 챕터의 텍스트를 불러올 수 없어요.
