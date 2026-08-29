@@ -2,7 +2,6 @@
   "communities": {
     "0": [
       "src_app_bookreader",
-      "src_app_migratefromlocalstorage",
       "src_components_bookreader",
       "src_components_bookreader_bookreader",
       "src_components_bookreader_buildbookchaptertolessonmap",
@@ -22,6 +21,7 @@
       "src_components_bookreader_knowledgemapview",
       "src_components_bookreader_lessonchapterrangesfor",
       "src_components_bookreader_listeningpanel",
+      "src_components_bookreader_listeningpanelprops",
       "src_components_bookreader_lookslikemetareply",
       "src_components_bookreader_mapbox",
       "src_components_bookreader_mergemp3files",
@@ -64,13 +64,12 @@
       "src_lib_chapterstorage_loadchapteren",
       "src_lib_chapterstorage_loadchapterko",
       "src_lib_chapterstorage_loadchaptertimings",
+      "src_lib_chapterstorage_loadchaptervocab",
       "src_lib_chapterstorage_loadknowledgemap",
       "src_lib_chapterstorage_loadlisteningaudio",
       "src_lib_chapterstorage_loadlisteningen",
       "src_lib_chapterstorage_loadlisteningko",
       "src_lib_chapterstorage_loadlisteningtimings",
-      "src_lib_chapterstorage_migratechaptersfromlocalstorage",
-      "src_lib_chapterstorage_savebookchapters",
       "src_lib_chapterstorage_savechapteraudio",
       "src_lib_chapterstorage_savechaptercount",
       "src_lib_chapterstorage_savechapteren",
@@ -86,11 +85,11 @@
       "src_lib_cloudstorage_csdel",
       "src_lib_cloudstorage_csdelpattern",
       "src_lib_cloudstorage_csget",
+      "src_lib_cloudstorage_csgetappstate",
       "src_lib_cloudstorage_csgetjson",
       "src_lib_cloudstorage_csgetkeysbypattern",
       "src_lib_cloudstorage_cskeyexists",
       "src_lib_cloudstorage_csset",
-      "src_lib_cloudstorage_cssetbatch",
       "src_lib_cloudstorage_cssetjson",
       "src_lib_cloudstorage_row"
     ],
@@ -191,6 +190,7 @@
       "src_lib_tracker_fetchvocabprogress",
       "src_lib_tracker_gamescore",
       "src_lib_tracker_segstart",
+      "src_lib_tracker_sessionresume",
       "src_lib_tracker_studysession",
       "src_lib_tracker_tracksession",
       "src_lib_tracker_vocablocks",
@@ -200,9 +200,9 @@
       "src_app",
       "src_app_app",
       "src_app_maintab",
+      "src_app_migratefromlocalstorage",
       "src_app_tabspinner",
       "src_app_v1tab",
-      "src_components_bookreader_listeningpanelprops",
       "src_components_lessonschedulewidget",
       "src_components_lessonschedulewidget_bookschedulesection",
       "src_components_lessonschedulewidget_daysdiff",
@@ -226,11 +226,11 @@
       "src_data_syllabus_schedule",
       "src_data_syllabus_writing_prompts",
       "src_data_syllabus_writingprompt",
-      "src_lib_chapterstorage_loadchaptervocab",
-      "src_lib_cloudstorage_csgetappstate",
+      "src_lib_chapterstorage_migratechaptersfromlocalstorage",
+      "src_lib_chapterstorage_savebookchapters",
+      "src_lib_cloudstorage_cssetbatch",
       "src_lib_tracker_sessionflush",
       "src_lib_tracker_sessionpause",
-      "src_lib_tracker_sessionresume",
       "src_lib_tracker_sessionsetdetail",
       "src_lib_tracker_sessionswitch",
       "src_main"
@@ -467,10 +467,10 @@
     ]
   },
   "cohesion": {
-    "0": 0.05518394648829431,
+    "0": 0.054945054945054944,
     "1": 0.06666666666666667,
-    "2": 0.07308970099667775,
-    "3": 0.1066066066066066,
+    "2": 0.0708245243128964,
+    "3": 0.10810810810810811,
     "4": 0.06896551724137931,
     "5": 0.08695652173913043,
     "6": 0.09523809523809523,
@@ -567,17 +567,6 @@
       "why": "peripheral node `Props` unexpectedly reaches hub `VocabItem`"
     },
     {
-      "source": "VocabProps",
-      "target": "VocabItem",
-      "source_files": [
-        "src/components/ImageUploadInput.tsx",
-        "src/lib/types.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "bridges separate communities"
-    },
-    {
       "source": "Props",
       "target": "VocabItem",
       "source_files": [
@@ -589,15 +578,26 @@
       "why": "peripheral node `Props` unexpectedly reaches hub `VocabItem`"
     },
     {
-      "source": "ListeningPanelProps",
-      "target": "BookId",
+      "source": "VocabProps",
+      "target": "VocabItem",
       "source_files": [
-        "src/components/BookReader.tsx",
-        "src/data/syllabus.ts"
+        "src/components/ImageUploadInput.tsx",
+        "src/lib/types.ts"
       ],
       "confidence": "EXTRACTED",
       "relation": "references",
-      "why": "peripheral node `ListeningPanelProps` unexpectedly reaches hub `BookId`"
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "deleteListeningTimings()",
+      "target": "csDel()",
+      "source_files": [
+        "src/lib/chapterStorage.ts",
+        "src/lib/cloudStorage.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `deleteListeningTimings()` unexpectedly reaches hub `csDel()`"
     }
   ],
   "questions": [
@@ -619,12 +619,12 @@
     {
       "type": "isolated_nodes",
       "question": "What connects `KnowledgeMapBranch`, `Row`, `InitState` to the rest of the system?",
-      "why": "157 weakly-connected nodes found - possible documentation gaps or missing edges."
+      "why": "158 weakly-connected nodes found - possible documentation gaps or missing edges."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.05518394648829431 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.054945054945054944 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
@@ -634,7 +634,7 @@
     {
       "type": "low_cohesion",
       "question": "Should `Community 2` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.07308970099667775 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.0708245243128964 - nodes in this community are weakly interconnected."
     }
   ]
 }

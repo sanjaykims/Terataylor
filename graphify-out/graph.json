@@ -14,7 +14,20 @@
       "file_type": "code",
       "norm_label": "initstate",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L946"
+      "source_location": "L1004"
+    },
+    {
+      "id": "src_components_bookreader_listeningpanelprops",
+      "label": "ListeningPanelProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "listeningpanelprops",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L792"
     },
     {
       "id": "src_components_bookreader_mobilerowprops",
@@ -485,19 +498,6 @@
       "source_location": "L26"
     },
     {
-      "id": "src_components_bookreader_listeningpanelprops",
-      "label": "ListeningPanelProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "Community 3",
-      "file_type": "code",
-      "norm_label": "listeningpanelprops",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L792"
-    },
-    {
       "id": "src_data_syllabus_bookid",
       "label": "BookId",
       "_callable": true,
@@ -615,18 +615,6 @@
       "source_location": "L247"
     },
     {
-      "id": "src_app_migratefromlocalstorage",
-      "label": "migrateFromLocalStorage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "Community 0",
-      "file_type": "code",
-      "norm_label": "migratefromlocalstorage()",
-      "source_file": "src/App.tsx",
-      "source_location": "L32"
-    },
-    {
       "id": "src_components_bookreader_bookreader",
       "label": "BookReader()",
       "_callable": true,
@@ -636,7 +624,7 @@
       "file_type": "code",
       "norm_label": "bookreader()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L948"
+      "source_location": "L1006"
     },
     {
       "id": "src_components_bookreader_buildbookchaptertolessonmap",
@@ -780,7 +768,7 @@
       "file_type": "code",
       "norm_label": "knowledgemapview()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L898"
+      "source_location": "L905"
     },
     {
       "id": "src_components_bookreader_lessonchapterrangesfor",
@@ -828,7 +816,7 @@
       "file_type": "code",
       "norm_label": "mapbox()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L889"
+      "source_location": "L890"
     },
     {
       "id": "src_components_bookreader_mergemp3files",
@@ -1179,6 +1167,18 @@
       "source_location": "L137"
     },
     {
+      "id": "src_lib_chapterstorage_loadchaptervocab",
+      "label": "loadChapterVocab()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "loadchaptervocab()",
+      "source_file": "src/lib/chapterStorage.ts",
+      "source_location": "L253"
+    },
+    {
       "id": "src_lib_chapterstorage_loadknowledgemap",
       "label": "loadKnowledgeMap()",
       "_callable": true,
@@ -1237,30 +1237,6 @@
       "norm_label": "loadlisteningtimings()",
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L210"
-    },
-    {
-      "id": "src_lib_chapterstorage_migratechaptersfromlocalstorage",
-      "label": "migrateChaptersFromLocalStorage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "Community 0",
-      "file_type": "code",
-      "norm_label": "migratechaptersfromlocalstorage()",
-      "source_file": "src/lib/chapterStorage.ts",
-      "source_location": "L260"
-    },
-    {
-      "id": "src_lib_chapterstorage_savebookchapters",
-      "label": "saveBookChapters()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "Community 0",
-      "file_type": "code",
-      "norm_label": "savebookchapters()",
-      "source_file": "src/lib/chapterStorage.ts",
-      "source_location": "L86"
     },
     {
       "id": "src_lib_chapterstorage_savechapteraudio",
@@ -1431,6 +1407,18 @@
       "source_location": "L5"
     },
     {
+      "id": "src_lib_cloudstorage_csgetappstate",
+      "label": "csGetAppState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "csgetappstate()",
+      "source_file": "src/lib/cloudStorage.ts",
+      "source_location": "L76"
+    },
+    {
       "id": "src_lib_cloudstorage_csgetjson",
       "label": "csGetJSON()",
       "_callable": true,
@@ -1477,18 +1465,6 @@
       "norm_label": "csset()",
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L21"
-    },
-    {
-      "id": "src_lib_cloudstorage_cssetbatch",
-      "label": "csSetBatch()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "Community 0",
-      "file_type": "code",
-      "norm_label": "cssetbatch()",
-      "source_file": "src/lib/cloudStorage.ts",
-      "source_location": "L46"
     },
     {
       "id": "src_lib_cloudstorage_cssetjson",
@@ -2187,6 +2163,18 @@
       "source_location": "L167"
     },
     {
+      "id": "src_lib_tracker_sessionresume",
+      "label": "sessionResume()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "sessionresume()",
+      "source_file": "src/lib/tracker.ts",
+      "source_location": "L148"
+    },
+    {
       "id": "src_lib_tracker_tracksession",
       "label": "trackSession()",
       "_callable": true,
@@ -2209,6 +2197,18 @@
       "norm_label": "app()",
       "source_file": "src/App.tsx",
       "source_location": "L67"
+    },
+    {
+      "id": "src_app_migratefromlocalstorage",
+      "label": "migrateFromLocalStorage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Community 3",
+      "file_type": "code",
+      "norm_label": "migratefromlocalstorage()",
+      "source_file": "src/App.tsx",
+      "source_location": "L32"
     },
     {
       "id": "src_app_tabspinner",
@@ -2343,28 +2343,40 @@
       "source_location": "L198"
     },
     {
-      "id": "src_lib_chapterstorage_loadchaptervocab",
-      "label": "loadChapterVocab()",
+      "id": "src_lib_chapterstorage_migratechaptersfromlocalstorage",
+      "label": "migrateChaptersFromLocalStorage()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "Community 3",
       "file_type": "code",
-      "norm_label": "loadchaptervocab()",
+      "norm_label": "migratechaptersfromlocalstorage()",
       "source_file": "src/lib/chapterStorage.ts",
-      "source_location": "L253"
+      "source_location": "L260"
     },
     {
-      "id": "src_lib_cloudstorage_csgetappstate",
-      "label": "csGetAppState()",
+      "id": "src_lib_chapterstorage_savebookchapters",
+      "label": "saveBookChapters()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "Community 3",
       "file_type": "code",
-      "norm_label": "csgetappstate()",
+      "norm_label": "savebookchapters()",
+      "source_file": "src/lib/chapterStorage.ts",
+      "source_location": "L86"
+    },
+    {
+      "id": "src_lib_cloudstorage_cssetbatch",
+      "label": "csSetBatch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Community 3",
+      "file_type": "code",
+      "norm_label": "cssetbatch()",
       "source_file": "src/lib/cloudStorage.ts",
-      "source_location": "L76"
+      "source_location": "L46"
     },
     {
       "id": "src_lib_tracker_sessionflush",
@@ -2389,18 +2401,6 @@
       "norm_label": "sessionpause()",
       "source_file": "src/lib/tracker.ts",
       "source_location": "L142"
-    },
-    {
-      "id": "src_lib_tracker_sessionresume",
-      "label": "sessionResume()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "Community 3",
-      "file_type": "code",
-      "norm_label": "sessionresume()",
-      "source_file": "src/lib/tracker.ts",
-      "source_location": "L148"
     },
     {
       "id": "src_lib_tracker_sessionsetdetail",
@@ -5197,7 +5197,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1048",
+      "source_location": "L1106",
       "weight": 1.0
     },
     {
@@ -5209,7 +5209,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1053",
+      "source_location": "L1111",
       "weight": 1.0
     },
     {
@@ -5221,7 +5221,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1082",
+      "source_location": "L1140",
       "weight": 1.0
     },
     {
@@ -5233,7 +5233,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1083",
+      "source_location": "L1141",
       "weight": 1.0
     },
     {
@@ -5245,7 +5245,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1084",
+      "source_location": "L1142",
       "weight": 1.0
     },
     {
@@ -5257,7 +5257,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1085",
+      "source_location": "L1143",
       "weight": 1.0
     },
     {
@@ -5269,7 +5269,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1086",
+      "source_location": "L1144",
       "weight": 1.0
     },
     {
@@ -5281,7 +5281,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1098",
+      "source_location": "L1156",
       "weight": 1.0
     },
     {
@@ -5293,7 +5293,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1099",
+      "source_location": "L1157",
       "weight": 1.0
     },
     {
@@ -5305,7 +5305,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1116",
+      "source_location": "L1174",
       "weight": 1.0
     },
     {
@@ -5317,7 +5317,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1128",
+      "source_location": "L1186",
       "weight": 1.0
     },
     {
@@ -5329,7 +5329,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1129",
+      "source_location": "L1187",
       "weight": 1.0
     },
     {
@@ -5341,7 +5341,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1130",
+      "source_location": "L1188",
       "weight": 1.0
     },
     {
@@ -5353,7 +5353,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1143",
+      "source_location": "L1201",
       "weight": 1.0
     },
     {
@@ -5365,7 +5365,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1158",
+      "source_location": "L1216",
       "weight": 1.0
     },
     {
@@ -5377,7 +5377,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1164",
+      "source_location": "L1222",
       "weight": 1.0
     },
     {
@@ -5389,7 +5389,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1167",
+      "source_location": "L1225",
       "weight": 1.0
     },
     {
@@ -5401,7 +5401,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1198",
+      "source_location": "L1256",
       "weight": 1.0
     },
     {
@@ -5413,7 +5413,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1201",
+      "source_location": "L1259",
       "weight": 1.0
     },
     {
@@ -5425,7 +5425,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1202",
+      "source_location": "L1260",
       "weight": 1.0
     },
     {
@@ -5437,7 +5437,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1211",
+      "source_location": "L1269",
       "weight": 1.0
     },
     {
@@ -5449,7 +5449,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1218",
+      "source_location": "L1276",
       "weight": 1.0
     },
     {
@@ -5461,7 +5461,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1231",
+      "source_location": "L1289",
       "weight": 1.0
     },
     {
@@ -5473,7 +5473,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1246",
+      "source_location": "L1304",
       "weight": 1.0
     },
     {
@@ -5485,7 +5485,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1247",
+      "source_location": "L1305",
       "weight": 1.0
     },
     {
@@ -5497,7 +5497,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1275",
+      "source_location": "L1333",
       "weight": 1.0
     },
     {
@@ -5509,7 +5509,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1276",
+      "source_location": "L1334",
       "weight": 1.0
     },
     {
@@ -5521,7 +5521,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1298",
+      "source_location": "L1356",
       "weight": 1.0
     },
     {
@@ -5533,7 +5533,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1310",
+      "source_location": "L1368",
       "weight": 1.0
     },
     {
@@ -5545,7 +5545,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1321",
+      "source_location": "L1379",
       "weight": 1.0
     },
     {
@@ -5557,7 +5557,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1328",
+      "source_location": "L1386",
       "weight": 1.0
     },
     {
@@ -5569,7 +5569,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1363",
+      "source_location": "L1421",
       "weight": 1.0
     },
     {
@@ -5581,7 +5581,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1410",
+      "source_location": "L1468",
       "weight": 1.0
     },
     {
@@ -5593,7 +5593,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1419",
+      "source_location": "L1477",
       "weight": 1.0
     },
     {
@@ -5605,7 +5605,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1419",
+      "source_location": "L1477",
       "weight": 1.0
     },
     {
@@ -5617,7 +5617,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1420",
+      "source_location": "L1478",
       "weight": 1.0
     },
     {
@@ -5629,7 +5629,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1421",
+      "source_location": "L1479",
       "weight": 1.0
     },
     {
@@ -5641,7 +5641,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1427",
+      "source_location": "L1485",
       "weight": 1.0
     },
     {
@@ -5653,7 +5653,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1433",
+      "source_location": "L1491",
       "weight": 1.0
     },
     {
@@ -5665,7 +5665,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1461",
+      "source_location": "L1519",
       "weight": 1.0
     },
     {
@@ -5677,7 +5677,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1472",
+      "source_location": "L1530",
       "weight": 1.0
     },
     {
@@ -5689,7 +5689,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1473",
+      "source_location": "L1531",
       "weight": 1.0
     },
     {
@@ -5701,7 +5701,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1499",
+      "source_location": "L1557",
       "weight": 1.0
     },
     {
@@ -5713,7 +5713,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1527",
+      "source_location": "L1585",
       "weight": 1.0
     },
     {
@@ -5725,7 +5725,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1572",
+      "source_location": "L1630",
       "weight": 1.0
     },
     {
@@ -5737,7 +5737,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1573",
+      "source_location": "L1631",
       "weight": 1.0
     },
     {
@@ -5749,7 +5749,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L2065",
+      "source_location": "L2123",
       "weight": 1.0
     },
     {
@@ -5761,7 +5761,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L2086",
+      "source_location": "L2144",
       "weight": 1.0
     },
     {
@@ -7157,18 +7157,6 @@
       "weight": 1.0
     },
     {
-      "source": "src_components_bookreader_listeningpanelprops",
-      "target": "src_data_syllabus_bookid",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "field",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L793",
-      "weight": 1.0
-    },
-    {
       "source": "src_components_gamespanel_props",
       "target": "src_lib_types_vocabitem",
       "relation": "references",
@@ -7343,7 +7331,7 @@
       "context": "import",
       "deferred": true,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1571",
+      "source_location": "L1629",
       "weight": 1.0
     },
     {
@@ -10597,6 +10585,28 @@
     },
     {
       "source": "src_components_bookreader",
+      "target": "src_components_bookreader_initstate",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1004",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader",
+      "target": "src_components_bookreader_bookreader",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1006",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader",
       "target": "src_components_bookreader_detectrunningheaders",
       "relation": "contains",
       "_origin": "ast",
@@ -11032,7 +11042,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L889",
+      "source_location": "L890",
       "weight": 1.0
     },
     {
@@ -11043,29 +11053,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L898",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader",
-      "target": "src_components_bookreader_initstate",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L946",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader",
-      "target": "src_components_bookreader_bookreader",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L948",
+      "source_location": "L905",
       "weight": 1.0
     },
     {
@@ -13469,5 +13457,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "60f503c1f5ea3eb00790a05a02947c66f92e15ff"
+  "built_at_commit": "9f576044b955c07710f2abac3e4aa80d45de530d"
 }

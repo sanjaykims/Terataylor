@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 419 nodes · 745 edges · 23 communities (17 shown, 6 thin omitted)
+- 419 nodes · 744 edges · 23 communities (17 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `60f503c1`
+- Built from commit: `9f576044`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -53,12 +53,12 @@
   src/components/GamesPanel.tsx → src/lib/types.ts
 - `Props` --references--> `VocabItem`  [EXTRACTED]
   src/components/SentenceScramble.tsx → src/lib/types.ts
-- `VocabProps` --references--> `VocabItem`  [EXTRACTED]
-  src/components/ImageUploadInput.tsx → src/lib/types.ts
 - `Props` --references--> `VocabItem`  [EXTRACTED]
   src/components/VocabularyPanel.tsx → src/lib/types.ts
-- `ListeningPanelProps` --references--> `BookId`  [EXTRACTED]
-  src/components/BookReader.tsx → src/data/syllabus.ts
+- `VocabProps` --references--> `VocabItem`  [EXTRACTED]
+  src/components/ImageUploadInput.tsx → src/lib/types.ts
+- `deleteListeningTimings()` --calls--> `csDel()`  [EXTRACTED]
+  src/lib/chapterStorage.ts → src/lib/cloudStorage.ts
 
 ## Import Cycles
 - None detected.
@@ -66,8 +66,8 @@
 ## Communities (23 total, 6 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.06
-Nodes (87): BookReader, migrateFromLocalStorage(), BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms() (+79 more)
+Cohesion: 0.05
+Nodes (86): BookReader, BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms(), cleanChapterText() (+78 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.07
@@ -75,11 +75,11 @@ Nodes (46): GamesPanel, VocabularyPanel, GameType, Props, TABS, isKorean(), Prop
 
 ### Community 2 - "Community 2"
 Cohesion: 0.07
-Nodes (37): ImageUploadInput, ProgressDashboard, Icon(), IconName, PATHS, SOLID, STROKE, BaseProps (+29 more)
+Nodes (38): ImageUploadInput, ProgressDashboard, Icon(), IconName, PATHS, SOLID, STROKE, BaseProps (+30 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.11
-Nodes (32): App(), MainTab, V1Tab, ListeningPanelProps, BookScheduleSection(), daysDiff(), fmtDate(), LessonCard() (+24 more)
+Nodes (32): App(), MainTab, migrateFromLocalStorage(), V1Tab, BookScheduleSection(), daysDiff(), fmtDate(), LessonCard() (+24 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.07
@@ -126,7 +126,7 @@ Cohesion: 0.40
 Nodes (3): COUNT, cutDur, headers
 
 ## Knowledge Gaps
-- **157 isolated node(s):** `KnowledgeMapBranch`, `Row`, `InitState`, `MobileRowProps`, `RowProps` (+152 more)
+- **158 isolated node(s):** `KnowledgeMapBranch`, `Row`, `InitState`, `ListeningPanelProps`, `MobileRowProps` (+153 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -140,10 +140,10 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `devDependencies` connect `Community 4` to `Community 6`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **What connects `KnowledgeMapBranch`, `Row`, `InitState` to the rest of the system?**
-  _157 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _158 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.05518394648829431 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.054945054945054944 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.07308970099667775 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0708245243128964 - nodes in this community are weakly interconnected._
