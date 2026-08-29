@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 408 nodes · 705 edges · 25 communities (19 shown, 6 thin omitted)
+- 409 nodes · 711 edges · 25 communities (19 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f7cbb183`
+- Built from commit: `5d0a22e7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -48,7 +48,7 @@
 7. `csGet()` - 13 edges
 8. `csDel()` - 11 edges
 9. `SpaceGame()` - 9 edges
-10. `mergeMp3Files()` - 8 edges
+10. `ProgressDashboard()` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Props` --references--> `VocabItem`  [EXTRACTED]
@@ -59,8 +59,8 @@
   src/components/VocabularyPanel.tsx → src/lib/types.ts
 - `VocabProps` --references--> `VocabItem`  [EXTRACTED]
   src/components/ImageUploadInput.tsx → src/lib/types.ts
-- `SpaceGame()` --calls--> `extractVocabulary()`  [EXTRACTED]
-  src/components/SpaceGame.tsx → src/utils/textUtils.ts
+- `VocabularyPanel()` --calls--> `csGet()`  [EXTRACTED]
+  src/components/VocabularyPanel.tsx → src/lib/cloudStorage.ts
 
 ## Import Cycles
 - None detected.
@@ -69,15 +69,15 @@
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
-Nodes (39): GamesPanel, GameType, Props, TABS, isKorean(), Props, SentenceScramble(), shuffle() (+31 more)
+Nodes (46): GamesPanel, VocabularyPanel, GameType, Props, TABS, isKorean(), Props, SentenceScramble() (+38 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.09
-Nodes (42): BookReader, BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms(), cleanChapterText() (+34 more)
+Cohesion: 0.08
+Nodes (39): App(), MainTab, ProgressDashboard, V1Tab, Icon(), IconName, PATHS, SOLID (+31 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.10
-Nodes (34): App(), MainTab, ProgressDashboard, V1Tab, BOOK_LABELS, FEATURE_ICONS, FEATURE_LABELS, formatDate() (+26 more)
+Cohesion: 0.09
+Nodes (42): BookReader, BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms(), cleanChapterText() (+34 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.11
@@ -88,32 +88,32 @@ Cohesion: 0.07
 Nodes (29): eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, devDependencies, eslint, @eslint/js (+21 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.10
-Nodes (23): ImageUploadInput, VocabularyPanel, Icon(), IconName, PATHS, SOLID, STROKE, BaseProps (+15 more)
-
-### Community 6 - "Community 6"
 Cohesion: 0.09
 Nodes (22): DOM, src, vite/client, compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, jsx, lib (+14 more)
 
-### Community 7 - "Community 7"
+### Community 6 - "Community 6"
 Cohesion: 0.10
 Nodes (20): @huggingface/transformers, dependencies, @huggingface/transformers, pdfjs-dist, react, react-dom, @supabase/supabase-js, name (+12 more)
 
-### Community 8 - "Community 8"
+### Community 7 - "Community 7"
 Cohesion: 0.10
 Nodes (20): node, vite.config.ts, compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib, module, moduleDetection (+12 more)
 
-### Community 9 - "Community 9"
+### Community 8 - "Community 8"
 Cohesion: 0.11
 Nodes (13): boundaries, buf, candidates, cuts, ends, kv, ONES, sbHeaders (+5 more)
 
-### Community 10 - "Community 10"
+### Community 9 - "Community 9"
 Cohesion: 0.16
 Nodes (17): daysDiff(), fmtDate(), LessonScheduleWidget(), utcDays(), BookId, BookInfo, BOOKS, BRIDGE_C1_TOPICS (+9 more)
 
-### Community 11 - "Community 11"
-Cohesion: 0.27
+### Community 10 - "Community 10"
+Cohesion: 0.24
 Nodes (12): alignByNW(), alignChapterAudio(), alignFromWordTimestamps(), AlignPhase, AlignProgress, buildAudioWordList(), Chunk, decodeTo16kMono() (+4 more)
+
+### Community 11 - "Community 11"
+Cohesion: 0.21
+Nodes (11): ImageUploadInput, BaseProps, compressImage(), ImageEntry, ImageUploadInput(), Props, TextProps, VocabProps (+3 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.17
@@ -143,17 +143,17 @@ Nodes (3): COUNT, cutDur, headers
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `VocabItem` connect `Community 0` to `Community 1`, `Community 2`, `Community 5`?**
+- **Why does `VocabItem` connect `Community 0` to `Community 1`, `Community 2`, `Community 11`?**
   _High betweenness centrality (0.026) - this node is a cross-community bridge._
-- **Why does `devDependencies` connect `Community 4` to `Community 7`?**
-  _High betweenness centrality (0.012) - this node is a cross-community bridge._
-- **Why does `BookReader()` connect `Community 1` to `Community 3`, `Community 2`, `Community 11`?**
+- **Why does `devDependencies` connect `Community 4` to `Community 6`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `BookReader()` connect `Community 2` to `Community 1`, `Community 10`, `Community 3`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **What connects `GameType`, `VocabPuzzle`, `WordToken` to the rest of the system?**
   _157 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.07493061979648474 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.09302325581395349 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08405797101449275 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.09743589743589744 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09302325581395349 - nodes in this community are weakly interconnected._
