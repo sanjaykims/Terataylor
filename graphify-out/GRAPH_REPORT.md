@@ -1,15 +1,15 @@
-# Graph Report - Terataylor  (2026-08-30)
+# Graph Report - Terataylor  (2026-08-29)
 
 ## Corpus Check
 - cluster-only mode — file stats not available
 
 ## Summary
-- 421 nodes · 752 edges · 24 communities (18 shown, 6 thin omitted)
+- 422 nodes · 756 edges · 24 communities (18 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4cdbad75`
+- Built from commit: `d8bc0534`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -58,8 +58,8 @@
   src/components/VocabularyPanel.tsx → src/lib/types.ts
 - `VocabProps` --references--> `VocabItem`  [EXTRACTED]
   src/components/ImageUploadInput.tsx → src/lib/types.ts
-- `deleteListeningTimings()` --calls--> `csDel()`  [EXTRACTED]
-  src/lib/chapterStorage.ts → src/lib/cloudStorage.ts
+- `ListeningPanelProps` --references--> `BookId`  [EXTRACTED]
+  src/components/BookReader.tsx → src/data/syllabus.ts
 
 ## Import Cycles
 - None detected.
@@ -76,7 +76,7 @@ Nodes (46): GamesPanel, VocabularyPanel, GameType, Props, TABS, isKorean(), Prop
 
 ### Community 2 - "Community 2"
 Cohesion: 0.09
-Nodes (38): App(), MainTab, V1Tab, Icon(), IconName, PATHS, SOLID, STROKE (+30 more)
+Nodes (38): App(), MainTab, V1Tab, ListeningPanelProps, Icon(), IconName, PATHS, SOLID (+30 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.07
@@ -103,7 +103,7 @@ Cohesion: 0.11
 Nodes (13): boundaries, buf, candidates, cuts, ends, kv, ONES, sbHeaders (+5 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.27
+Cohesion: 0.24
 Nodes (12): alignByNW(), alignChapterAudio(), alignFromWordTimestamps(), AlignPhase, AlignProgress, buildAudioWordList(), Chunk, decodeTo16kMono() (+4 more)
 
 ### Community 10 - "Community 10"
@@ -131,7 +131,7 @@ Cohesion: 0.40
 Nodes (3): COUNT, cutDur, headers
 
 ## Knowledge Gaps
-- **158 isolated node(s):** `KnowledgeMapBranch`, `Row`, `InitState`, `ListeningPanelProps`, `MobileRowProps` (+153 more)
+- **157 isolated node(s):** `InitState`, `MobileRowProps`, `RowProps`, `SentenceRowsProps`, `KnowledgeMapBranch` (+152 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -144,11 +144,11 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **Why does `devDependencies` connect `Community 3` to `Community 6`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **What connects `KnowledgeMapBranch`, `Row`, `InitState` to the rest of the system?**
-  _158 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `InitState`, `MobileRowProps`, `RowProps` to the rest of the system?**
+  _157 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.05352968676951847 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.054464703132304816 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.08879492600422834 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08773784355179703 - nodes in this community are weakly interconnected._
