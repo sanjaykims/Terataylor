@@ -38,3 +38,4 @@ graphify tree --graph graphify-out/graph.json --output graphify-out/GRAPH_TREE.h
 
 Dirty `graphify-out/` files are expected after code changes; keep them in the
 same commit when the graph changed.
+
