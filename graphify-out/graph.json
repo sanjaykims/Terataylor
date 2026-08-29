@@ -17,19 +17,6 @@
       "source_location": "L876"
     },
     {
-      "id": "src_components_bookreader_listeningpanelprops",
-      "label": "ListeningPanelProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "Community 0",
-      "file_type": "code",
-      "norm_label": "listeningpanelprops",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L786"
-    },
-    {
       "id": "src_components_bookreader_mobilerowprops",
       "label": "MobileRowProps",
       "_callable": true,
@@ -69,17 +56,17 @@
       "source_location": "L682"
     },
     {
-      "id": "src_data_syllabus_bookid",
-      "label": "BookId",
+      "id": "src_lib_cloudstorage_row",
+      "label": "Row",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "Community 0",
       "file_type": "code",
-      "norm_label": "bookid",
-      "source_file": "src/data/syllabus.ts",
-      "source_location": "L1"
+      "norm_label": "row",
+      "source_file": "src/lib/cloudStorage.ts",
+      "source_location": "L3"
     },
     {
       "id": "src_app_maintab",
@@ -184,45 +171,6 @@
       "norm_label": "vocabprops",
       "source_file": "src/components/ImageUploadInput.tsx",
       "source_location": "L13"
-    },
-    {
-      "id": "src_components_vocabularypanel_cardstate",
-      "label": "CardState",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "cardstate",
-      "source_file": "src/components/VocabularyPanel.tsx",
-      "source_location": "L17"
-    },
-    {
-      "id": "src_components_vocabularypanel_defentry",
-      "label": "DefEntry",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "defentry",
-      "source_file": "src/components/VocabularyPanel.tsx",
-      "source_location": "L19"
-    },
-    {
-      "id": "src_lib_cloudstorage_row",
-      "label": "Row",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "row",
-      "source_file": "src/lib/cloudStorage.ts",
-      "source_location": "L3"
     },
     {
       "id": "src_lib_tracker_gamescore",
@@ -446,6 +394,32 @@
       "source_location": "L6"
     },
     {
+      "id": "src_components_vocabularypanel_cardstate",
+      "label": "CardState",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "cardstate",
+      "source_file": "src/components/VocabularyPanel.tsx",
+      "source_location": "L17"
+    },
+    {
+      "id": "src_components_vocabularypanel_defentry",
+      "label": "DefEntry",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "defentry",
+      "source_file": "src/components/VocabularyPanel.tsx",
+      "source_location": "L19"
+    },
+    {
       "id": "src_components_vocabularypanel_props",
       "label": "Props",
       "_callable": true,
@@ -485,6 +459,32 @@
       "source_location": "L40"
     },
     {
+      "id": "src_components_bookreader_listeningpanelprops",
+      "label": "ListeningPanelProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "Community 7",
+      "file_type": "code",
+      "norm_label": "listeningpanelprops",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L786"
+    },
+    {
+      "id": "src_data_syllabus_bookid",
+      "label": "BookId",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "Community 7",
+      "file_type": "code",
+      "norm_label": "bookid",
+      "source_file": "src/data/syllabus.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_data_syllabus_bookinfo",
       "label": "BookInfo",
       "_callable": true,
@@ -508,7 +508,7 @@
       "file_type": "code",
       "norm_label": "essaysection",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L186"
+      "source_location": "L224"
     },
     {
       "id": "src_data_syllabus_lessonentry",
@@ -534,7 +534,7 @@
       "file_type": "code",
       "norm_label": "writingprompt",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L192"
+      "source_location": "L230"
     },
     {
       "id": "src_lib_audioalign_alignphase",
@@ -587,6 +587,18 @@
       "norm_label": "wordtimestamp",
       "source_file": "src/lib/audioAlign.ts",
       "source_location": "L247"
+    },
+    {
+      "id": "src_app_migratefromlocalstorage",
+      "label": "migrateFromLocalStorage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "migratefromlocalstorage()",
+      "source_file": "src/App.tsx",
+      "source_location": "L32"
     },
     {
       "id": "src_components_bookreader_bookreader",
@@ -1153,6 +1165,30 @@
       "source_location": "L210"
     },
     {
+      "id": "src_lib_chapterstorage_migratechaptersfromlocalstorage",
+      "label": "migrateChaptersFromLocalStorage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "migratechaptersfromlocalstorage()",
+      "source_file": "src/lib/chapterStorage.ts",
+      "source_location": "L232"
+    },
+    {
+      "id": "src_lib_chapterstorage_savebookchapters",
+      "label": "saveBookChapters()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "savebookchapters()",
+      "source_file": "src/lib/chapterStorage.ts",
+      "source_location": "L86"
+    },
+    {
       "id": "src_lib_chapterstorage_savechapteraudio",
       "label": "saveChapterAudio()",
       "_callable": true,
@@ -1309,6 +1345,18 @@
       "source_location": "L5"
     },
     {
+      "id": "src_lib_cloudstorage_csgetjson",
+      "label": "csGetJSON()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "csgetjson()",
+      "source_file": "src/lib/cloudStorage.ts",
+      "source_location": "L15"
+    },
+    {
       "id": "src_lib_cloudstorage_csgetkeysbypattern",
       "label": "csGetKeysByPattern()",
       "_callable": true,
@@ -1345,6 +1393,30 @@
       "source_location": "L21"
     },
     {
+      "id": "src_lib_cloudstorage_cssetbatch",
+      "label": "csSetBatch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "cssetbatch()",
+      "source_file": "src/lib/cloudStorage.ts",
+      "source_location": "L46"
+    },
+    {
+      "id": "src_lib_cloudstorage_cssetjson",
+      "label": "csSetJSON()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "cssetjson()",
+      "source_file": "src/lib/cloudStorage.ts",
+      "source_location": "L32"
+    },
+    {
       "id": "src_app_app",
       "label": "App()",
       "_callable": true,
@@ -1355,18 +1427,6 @@
       "norm_label": "app()",
       "source_file": "src/App.tsx",
       "source_location": "L67"
-    },
-    {
-      "id": "src_app_migratefromlocalstorage",
-      "label": "migrateFromLocalStorage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "migratefromlocalstorage()",
-      "source_file": "src/App.tsx",
-      "source_location": "L32"
     },
     {
       "id": "src_app_tabspinner",
@@ -1415,6 +1475,18 @@
       "norm_label": "imageuploadinput()",
       "source_file": "src/components/ImageUploadInput.tsx",
       "source_location": "L39"
+    },
+    {
+      "id": "src_components_lessonschedulewidget_lessonschedulewidget",
+      "label": "LessonScheduleWidget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "lessonschedulewidget()",
+      "source_file": "src/components/LessonScheduleWidget.tsx",
+      "source_location": "L134"
     },
     {
       "id": "src_components_progressdashboard_formatdate",
@@ -1489,6 +1561,30 @@
       "source_location": "L74"
     },
     {
+      "id": "src_data_syllabus_activebookids",
+      "label": "activeBookIds()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "activebookids()",
+      "source_file": "src/data/syllabus.ts",
+      "source_location": "L207"
+    },
+    {
+      "id": "src_data_syllabus_defaultbookid",
+      "label": "defaultBookId()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Community 1",
+      "file_type": "code",
+      "norm_label": "defaultbookid()",
+      "source_file": "src/data/syllabus.ts",
+      "source_location": "L217"
+    },
+    {
       "id": "src_lib_chapterstorage_loadchaptercount",
       "label": "loadChapterCount()",
       "_callable": true,
@@ -1513,30 +1609,6 @@
       "source_location": "L225"
     },
     {
-      "id": "src_lib_chapterstorage_migratechaptersfromlocalstorage",
-      "label": "migrateChaptersFromLocalStorage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "migratechaptersfromlocalstorage()",
-      "source_file": "src/lib/chapterStorage.ts",
-      "source_location": "L232"
-    },
-    {
-      "id": "src_lib_chapterstorage_savebookchapters",
-      "label": "saveBookChapters()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "savebookchapters()",
-      "source_file": "src/lib/chapterStorage.ts",
-      "source_location": "L86"
-    },
-    {
       "id": "src_lib_cloudstorage_csgetappstate",
       "label": "csGetAppState()",
       "_callable": true,
@@ -1547,42 +1619,6 @@
       "norm_label": "csgetappstate()",
       "source_file": "src/lib/cloudStorage.ts",
       "source_location": "L76"
-    },
-    {
-      "id": "src_lib_cloudstorage_csgetjson",
-      "label": "csGetJSON()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "csgetjson()",
-      "source_file": "src/lib/cloudStorage.ts",
-      "source_location": "L15"
-    },
-    {
-      "id": "src_lib_cloudstorage_cssetbatch",
-      "label": "csSetBatch()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "cssetbatch()",
-      "source_file": "src/lib/cloudStorage.ts",
-      "source_location": "L46"
-    },
-    {
-      "id": "src_lib_cloudstorage_cssetjson",
-      "label": "csSetJSON()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "cssetjson()",
-      "source_file": "src/lib/cloudStorage.ts",
-      "source_location": "L32"
     },
     {
       "id": "src_lib_tracker_fetchgamescores",
@@ -2233,6 +2269,18 @@
       "source_location": "L1"
     },
     {
+      "id": "src_components_lessonschedulewidget_bookschedulesection",
+      "label": "BookScheduleSection()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "Community 7",
+      "file_type": "code",
+      "norm_label": "bookschedulesection()",
+      "source_file": "src/components/LessonScheduleWidget.tsx",
+      "source_location": "L57"
+    },
+    {
       "id": "src_components_lessonschedulewidget_daysdiff",
       "label": "daysDiff()",
       "_callable": true,
@@ -2257,16 +2305,16 @@
       "source_location": "L9"
     },
     {
-      "id": "src_components_lessonschedulewidget_lessonschedulewidget",
-      "label": "LessonScheduleWidget()",
+      "id": "src_components_lessonschedulewidget_lessoncard",
+      "label": "LessonCard()",
       "_callable": true,
       "_origin": "ast",
       "community": 7,
       "community_name": "Community 7",
       "file_type": "code",
-      "norm_label": "lessonschedulewidget()",
+      "norm_label": "lessoncard()",
       "source_file": "src/components/LessonScheduleWidget.tsx",
-      "source_location": "L14"
+      "source_location": "L17"
     },
     {
       "id": "src_components_lessonschedulewidget_utcdays",
@@ -2281,18 +2329,6 @@
       "source_location": "L7"
     },
     {
-      "id": "src_data_syllabus_activebookids",
-      "label": "activeBookIds()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 7,
-      "community_name": "Community 7",
-      "file_type": "code",
-      "norm_label": "activebookids()",
-      "source_file": "src/data/syllabus.ts",
-      "source_location": "L169"
-    },
-    {
       "id": "src_data_syllabus_currentlesson",
       "label": "currentLesson()",
       "_callable": true,
@@ -2302,19 +2338,7 @@
       "file_type": "code",
       "norm_label": "currentlesson()",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L163"
-    },
-    {
-      "id": "src_data_syllabus_defaultbookid",
-      "label": "defaultBookId()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 7,
-      "community_name": "Community 7",
-      "file_type": "code",
-      "norm_label": "defaultbookid()",
-      "source_file": "src/data/syllabus.ts",
-      "source_location": "L179"
+      "source_location": "L201"
     },
     {
       "id": "src_data_syllabus_ksttoday",
@@ -2326,7 +2350,7 @@
       "file_type": "code",
       "norm_label": "ksttoday()",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L157"
+      "source_location": "L195"
     },
     {
       "id": "scripts_split_audiobook_directdownloadurl",
@@ -2595,6 +2619,17 @@
       "source_location": "L1"
     },
     {
+      "id": "src_lib_cloudstorage",
+      "label": "cloudStorage.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "cloudstorage.ts",
+      "source_file": "src/lib/cloudStorage.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_app",
       "label": "App.tsx",
       "_origin": "ast",
@@ -2626,17 +2661,6 @@
       "norm_label": "progressdashboard",
       "source_file": "src/App.tsx",
       "source_location": "L9"
-    },
-    {
-      "id": "src_app_vocabularypanel",
-      "label": "VocabularyPanel",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "vocabularypanel",
-      "source_file": "src/App.tsx",
-      "source_location": "L7"
     },
     {
       "id": "src_components_icon",
@@ -2769,39 +2793,6 @@
       "norm_label": "kst_time",
       "source_file": "src/components/ProgressDashboard.tsx",
       "source_location": "L49"
-    },
-    {
-      "id": "src_components_vocabularypanel",
-      "label": "VocabularyPanel.tsx",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "vocabularypanel.tsx",
-      "source_file": "src/components/VocabularyPanel.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_vocabularypanel_sessioncache",
-      "label": "sessionCache",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "sessioncache",
-      "source_file": "src/components/VocabularyPanel.tsx",
-      "source_location": "L24"
-    },
-    {
-      "id": "src_lib_cloudstorage",
-      "label": "cloudStorage.ts",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Community 1",
-      "file_type": "code",
-      "norm_label": "cloudstorage.ts",
-      "source_file": "src/lib/cloudStorage.ts",
-      "source_location": "L1"
     },
     {
       "id": "src_lib_supabase",
@@ -3329,6 +3320,17 @@
       "source_location": "L8"
     },
     {
+      "id": "src_app_vocabularypanel",
+      "label": "VocabularyPanel",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "vocabularypanel",
+      "source_file": "src/App.tsx",
+      "source_location": "L7"
+    },
+    {
       "id": "src_components_gamespanel",
       "label": "GamesPanel.tsx",
       "_origin": "ast",
@@ -3415,6 +3417,28 @@
       "norm_label": "vocabquizgame.tsx",
       "source_file": "src/components/VocabQuizGame.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "src_components_vocabularypanel",
+      "label": "VocabularyPanel.tsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "vocabularypanel.tsx",
+      "source_file": "src/components/VocabularyPanel.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_vocabularypanel_sessioncache",
+      "label": "sessionCache",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "sessioncache",
+      "source_file": "src/components/VocabularyPanel.tsx",
+      "source_location": "L24"
     },
     {
       "id": "src_lib_types",
@@ -4599,7 +4623,7 @@
       "file_type": "code",
       "norm_label": "holiday",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L146"
+      "source_location": "L184"
     },
     {
       "id": "src_data_syllabus_schedule",
@@ -4621,7 +4645,7 @@
       "file_type": "code",
       "norm_label": "writing_prompts",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L202"
+      "source_location": "L240"
     },
     {
       "id": "scripts_split_audiobook",
@@ -4776,17 +4800,6 @@
       "norm_label": "word2num",
       "source_file": "scripts/split-audiobook.mjs",
       "source_location": "L51"
-    },
-    {
-      "id": "transformers",
-      "label": "@huggingface/transformers",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "Community 9",
-      "confidence": "EXTRACTED",
-      "file_type": "code",
-      "norm_label": "@huggingface/transformers",
-      "source_file": "@huggingface/transformers"
     },
     {
       "id": "src_lib_audioalign",
@@ -5930,6 +5943,30 @@
       "weight": 1.0
     },
     {
+      "source": "src_components_lessonschedulewidget_bookschedulesection",
+      "target": "src_components_lessonschedulewidget_daysdiff",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/LessonScheduleWidget.tsx",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_lessonschedulewidget_bookschedulesection",
+      "target": "src_components_lessonschedulewidget_fmtdate",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/LessonScheduleWidget.tsx",
+      "source_location": "L96",
+      "weight": 1.0
+    },
+    {
       "source": "src_components_lessonschedulewidget_daysdiff",
       "target": "src_components_lessonschedulewidget_utcdays",
       "relation": "calls",
@@ -5942,6 +5979,18 @@
       "weight": 1.0
     },
     {
+      "source": "src_components_lessonschedulewidget_lessoncard",
+      "target": "src_components_lessonschedulewidget_fmtdate",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/LessonScheduleWidget.tsx",
+      "source_location": "L48",
+      "weight": 1.0
+    },
+    {
       "source": "src_components_lessonschedulewidget_lessonschedulewidget",
       "target": "src_data_syllabus_ksttoday",
       "relation": "calls",
@@ -5950,31 +5999,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/LessonScheduleWidget.tsx",
-      "source_location": "L15",
+      "source_location": "L135",
       "weight": 1.0
     },
     {
       "source": "src_components_lessonschedulewidget_lessonschedulewidget",
-      "target": "src_components_lessonschedulewidget_daysdiff",
+      "target": "src_data_syllabus_activebookids",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/LessonScheduleWidget.tsx",
-      "source_location": "L25",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_lessonschedulewidget_lessonschedulewidget",
-      "target": "src_components_lessonschedulewidget_fmtdate",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/LessonScheduleWidget.tsx",
-      "source_location": "L65",
+      "source_location": "L137",
       "weight": 1.0
     },
     {
@@ -6358,7 +6395,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L164",
+      "source_location": "L202",
       "weight": 1.0
     },
     {
@@ -6370,7 +6407,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L180",
+      "source_location": "L218",
       "weight": 1.0
     },
     {
@@ -6382,7 +6419,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L182",
+      "source_location": "L220",
       "weight": 1.0
     },
     {
@@ -8245,6 +8282,30 @@
     },
     {
       "source": "src_components_lessonschedulewidget",
+      "target": "src_data_syllabus_activebookids",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/LessonScheduleWidget.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_lessonschedulewidget",
+      "target": "src_data_syllabus_bookid",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/LessonScheduleWidget.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_lessonschedulewidget",
       "target": "src_data_syllabus_books",
       "relation": "imports",
       "_origin": "ast",
@@ -8281,7 +8342,7 @@
     },
     {
       "source": "src_components_lessonschedulewidget",
-      "target": "src_data_syllabus_schedule",
+      "target": "src_data_syllabus_lessonentry",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -8293,14 +8354,14 @@
     },
     {
       "source": "src_components_lessonschedulewidget",
-      "target": "src_components_icon_icon",
+      "target": "src_data_syllabus_schedule",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/LessonScheduleWidget.tsx",
-      "source_location": "L2",
+      "source_location": "L1",
       "weight": 1.0
     },
     {
@@ -11071,7 +11132,29 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/LessonScheduleWidget.tsx",
-      "source_location": "L14",
+      "source_location": "L134",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_lessonschedulewidget",
+      "target": "src_components_lessonschedulewidget_lessoncard",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/LessonScheduleWidget.tsx",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_lessonschedulewidget",
+      "target": "src_components_lessonschedulewidget_bookschedulesection",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/LessonScheduleWidget.tsx",
+      "source_location": "L57",
       "weight": 1.0
     },
     {
@@ -11687,7 +11770,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L146",
+      "source_location": "L184",
       "weight": 1.0
     },
     {
@@ -11698,7 +11781,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L157",
+      "source_location": "L195",
       "weight": 1.0
     },
     {
@@ -11709,7 +11792,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L163",
+      "source_location": "L201",
       "weight": 1.0
     },
     {
@@ -11720,7 +11803,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L169",
+      "source_location": "L207",
       "weight": 1.0
     },
     {
@@ -11731,7 +11814,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L179",
+      "source_location": "L217",
       "weight": 1.0
     },
     {
@@ -11742,7 +11825,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L186",
+      "source_location": "L224",
       "weight": 1.0
     },
     {
@@ -11753,7 +11836,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L192",
+      "source_location": "L230",
       "weight": 1.0
     },
     {
@@ -11764,7 +11847,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L202",
+      "source_location": "L240",
       "weight": 1.0
     },
     {
@@ -13219,17 +13302,8 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/App.tsx"
-    },
-    {
-      "source": "src_lib_audioalign",
-      "target": "transformers",
-      "relation": "dynamic_import",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/lib/audioAlign.ts"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "aa7fd5176a3f176aca50d94e4395e89253498c4b"
+  "built_at_commit": "8c571525f314e0c8c7d9a4ff67c9477841737fb0"
 }

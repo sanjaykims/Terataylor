@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 412 nodes · 732 edges · 23 communities (17 shown, 6 thin omitted)
+- 413 nodes · 737 edges · 23 communities (17 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `aa7fd517`
+- Built from commit: `8c571525`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -49,8 +49,6 @@
 10. `mergeMp3Files()` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `ListeningPanelProps` --references--> `BookId`  [EXTRACTED]
-  src/components/BookReader.tsx → src/data/syllabus.ts
 - `VocabProps` --references--> `VocabItem`  [EXTRACTED]
   src/components/ImageUploadInput.tsx → src/lib/types.ts
 - `Props` --references--> `VocabItem`  [EXTRACTED]
@@ -59,6 +57,8 @@
   src/components/SentenceScramble.tsx → src/lib/types.ts
 - `Props` --references--> `VocabItem`  [EXTRACTED]
   src/components/VocabularyPanel.tsx → src/lib/types.ts
+- `ListeningPanelProps` --references--> `BookId`  [EXTRACTED]
+  src/components/BookReader.tsx → src/data/syllabus.ts
 
 ## Import Cycles
 - None detected.
@@ -67,15 +67,15 @@
 
 ### Community 0 - "Community 0"
 Cohesion: 0.06
-Nodes (77): BookReader, BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms(), cleanChapterText() (+69 more)
+Nodes (82): BookReader, migrateFromLocalStorage(), BookReader(), buildBookChapterToLessonMap(), buildXingFrame(), CHAPTER_HEADING, CHAPTER_NUMBER_WORDS, chapterNumberForms() (+74 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.06
-Nodes (59): App(), ImageUploadInput, MainTab, migrateFromLocalStorage(), ProgressDashboard, V1Tab, VocabularyPanel, Icon() (+51 more)
+Nodes (51): App(), ImageUploadInput, MainTab, ProgressDashboard, V1Tab, Icon(), IconName, PATHS (+43 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.07
-Nodes (42): GamesPanel, GameType, Props, TABS, isKorean(), Props, SentenceScramble(), shuffle() (+34 more)
+Nodes (46): GamesPanel, VocabularyPanel, GameType, Props, TABS, isKorean(), Props, SentenceScramble() (+38 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.07
@@ -94,15 +94,15 @@ Cohesion: 0.10
 Nodes (20): node, vite.config.ts, compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib, module, moduleDetection (+12 more)
 
 ### Community 7 - "Community 7"
-Cohesion: 0.16
-Nodes (18): daysDiff(), fmtDate(), LessonScheduleWidget(), utcDays(), activeBookIds(), BookInfo, BOOKS, BRIDGE_C1_TOPICS (+10 more)
+Cohesion: 0.15
+Nodes (19): ListeningPanelProps, BookScheduleSection(), daysDiff(), fmtDate(), LessonCard(), utcDays(), BookId, BookInfo (+11 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.11
 Nodes (13): boundaries, buf, candidates, cuts, ends, kv, ONES, sbHeaders (+5 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.24
+Cohesion: 0.27
 Nodes (12): alignByNW(), alignChapterAudio(), alignFromWordTimestamps(), AlignPhase, AlignProgress, buildAudioWordList(), Chunk, decodeTo16kMono() (+4 more)
 
 ### Community 10 - "Community 10"
@@ -126,7 +126,7 @@ Cohesion: 0.40
 Nodes (3): COUNT, cutDur, headers
 
 ## Knowledge Gaps
-- **157 isolated node(s):** `InitState`, `MobileRowProps`, `RowProps`, `SentenceRowsProps`, `MainTab` (+152 more)
+- **156 isolated node(s):** `InitState`, `MobileRowProps`, `RowProps`, `SentenceRowsProps`, `Row` (+151 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -140,10 +140,10 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `devDependencies` connect `Community 3` to `Community 5`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **What connects `InitState`, `MobileRowProps`, `RowProps` to the rest of the system?**
-  _157 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _156 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.06329113924050633 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06022408963585434 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.055900621118012424 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06440677966101695 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.07183673469387755 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
