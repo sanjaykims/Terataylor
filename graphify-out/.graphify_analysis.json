@@ -1,7 +1,6 @@
 {
   "communities": {
     "0": [
-      "src_app_bookreader",
       "src_app_migratefromlocalstorage",
       "src_components_bookreader",
       "src_components_bookreader_bookreader",
@@ -87,6 +86,7 @@
       "src_lib_cloudstorage_csdel",
       "src_lib_cloudstorage_csdelpattern",
       "src_lib_cloudstorage_csget",
+      "src_lib_cloudstorage_csgetappstate",
       "src_lib_cloudstorage_csgetjson",
       "src_lib_cloudstorage_csgetkeysbypattern",
       "src_lib_cloudstorage_cskeyexists",
@@ -98,6 +98,7 @@
     "1": [
       "src_app",
       "src_app_app",
+      "src_app_bookreader",
       "src_app_imageuploadinput",
       "src_app_maintab",
       "src_app_progressdashboard",
@@ -117,7 +118,6 @@
       "src_components_imageuploadinput_props",
       "src_components_imageuploadinput_textprops",
       "src_components_imageuploadinput_vocabprops",
-      "src_components_lessonschedulewidget_lessonschedulewidget",
       "src_components_progressdashboard",
       "src_components_progressdashboard_book_labels",
       "src_components_progressdashboard_feature_icons",
@@ -131,9 +131,6 @@
       "src_components_progressdashboard_minibar",
       "src_components_progressdashboard_parsefeature",
       "src_components_progressdashboard_progressdashboard",
-      "src_data_syllabus_activebookids",
-      "src_data_syllabus_defaultbookid",
-      "src_lib_cloudstorage_csgetappstate",
       "src_lib_supabase",
       "src_lib_supabase_supabase",
       "src_lib_supabase_supabase_key",
@@ -153,6 +150,7 @@
       "src_lib_tracker_tracksession",
       "src_lib_tracker_vocablocks",
       "src_lib_tracker_vocabprogress",
+      "src_lib_types",
       "src_main"
     ],
     "2": [
@@ -204,7 +202,6 @@
       "src_components_vocabularypanel_vocabularypanel",
       "src_lib_tracker_trackgamescore",
       "src_lib_tracker_trackvocabresult",
-      "src_lib_types",
       "src_lib_types_vocabitem",
       "src_utils_textutils",
       "src_utils_textutils_extractvocabulary",
@@ -244,6 +241,33 @@
       "vitejs_plugin_react"
     ],
     "4": [
+      "src_components_bookreader_listeningpanelprops",
+      "src_components_lessonschedulewidget",
+      "src_components_lessonschedulewidget_bookschedulesection",
+      "src_components_lessonschedulewidget_daysdiff",
+      "src_components_lessonschedulewidget_fmtdate",
+      "src_components_lessonschedulewidget_lessoncard",
+      "src_components_lessonschedulewidget_lessonschedulewidget",
+      "src_components_lessonschedulewidget_utcdays",
+      "src_data_syllabus",
+      "src_data_syllabus_activebookids",
+      "src_data_syllabus_bookid",
+      "src_data_syllabus_bookinfo",
+      "src_data_syllabus_books",
+      "src_data_syllabus_bridge_c1_topics",
+      "src_data_syllabus_bridge_c2_topics",
+      "src_data_syllabus_currentlesson",
+      "src_data_syllabus_currentlessonnumberfor",
+      "src_data_syllabus_defaultbookid",
+      "src_data_syllabus_essaysection",
+      "src_data_syllabus_holiday",
+      "src_data_syllabus_ksttoday",
+      "src_data_syllabus_lessonentry",
+      "src_data_syllabus_schedule",
+      "src_data_syllabus_writing_prompts",
+      "src_data_syllabus_writingprompt"
+    ],
+    "5": [
       "ref_dom",
       "ref_src",
       "ref_vite_client",
@@ -267,30 +291,6 @@
       "tsconfig_app_compileroptions_verbatimmodulesyntax",
       "tsconfig_app_include",
       "tsconfig_app_json_ref_es2023"
-    ],
-    "5": [
-      "src_components_bookreader_listeningpanelprops",
-      "src_components_lessonschedulewidget",
-      "src_components_lessonschedulewidget_bookschedulesection",
-      "src_components_lessonschedulewidget_daysdiff",
-      "src_components_lessonschedulewidget_fmtdate",
-      "src_components_lessonschedulewidget_lessoncard",
-      "src_components_lessonschedulewidget_utcdays",
-      "src_data_syllabus",
-      "src_data_syllabus_bookid",
-      "src_data_syllabus_bookinfo",
-      "src_data_syllabus_books",
-      "src_data_syllabus_bridge_c1_topics",
-      "src_data_syllabus_bridge_c2_topics",
-      "src_data_syllabus_currentlesson",
-      "src_data_syllabus_currentlessonnumberfor",
-      "src_data_syllabus_essaysection",
-      "src_data_syllabus_holiday",
-      "src_data_syllabus_ksttoday",
-      "src_data_syllabus_lessonentry",
-      "src_data_syllabus_schedule",
-      "src_data_syllabus_writing_prompts",
-      "src_data_syllabus_writingprompt"
     ],
     "6": [
       "huggingface_transformers",
@@ -372,8 +372,7 @@
       "src_lib_audioalign_enforcemonotone",
       "src_lib_audioalign_gettranscriber",
       "src_lib_audioalign_normword",
-      "src_lib_audioalign_wordtimestamp",
-      "transformers"
+      "src_lib_audioalign_wordtimestamp"
     ],
     "10": [
       "scripts_split_book_chapters",
@@ -470,15 +469,15 @@
   },
   "cohesion": {
     "0": 0.05493221131369799,
-    "1": 0.06654567453115548,
-    "2": 0.06666666666666667,
+    "1": 0.06753246753246753,
+    "2": 0.0649895178197065,
     "3": 0.06896551724137931,
-    "4": 0.08695652173913043,
-    "5": 0.14285714285714285,
+    "4": 0.13666666666666666,
+    "5": 0.08695652173913043,
     "6": 0.09523809523809523,
     "7": 0.09523809523809523,
     "8": 0.10526315789473684,
-    "9": 0.24175824175824176,
+    "9": 0.2692307692307692,
     "10": 0.16666666666666666,
     "11": 0.2,
     "12": 0.2777777777777778,
@@ -610,8 +609,8 @@
     },
     {
       "type": "bridge_node",
-      "question": "Why does `BookReader()` connect `Community 0` to `Community 9`, `Community 5`, `Community 1`?",
-      "why": "High betweenness centrality (0.014) - this node is a cross-community bridge."
+      "question": "Why does `BookReader()` connect `Community 0` to `Community 9`, `Community 4`, `Community 1`?",
+      "why": "High betweenness centrality (0.013) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
@@ -631,12 +630,12 @@
     {
       "type": "low_cohesion",
       "question": "Should `Community 1` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.06654567453115548 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.06753246753246753 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 2` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.0649895178197065 - nodes in this community are weakly interconnected."
     }
   ]
 }
