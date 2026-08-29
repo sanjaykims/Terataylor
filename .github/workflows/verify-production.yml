@@ -1,0 +1,46 @@
+name: Verify Production Deploy
+
+# Confirms the live site (terataylor.vercel.app) actually updated to this
+# push, instead of trusting that it did. This exists because Vercel's
+# Production Branch setting can silently point at the wrong branch (it did,
+# for a long stretch) — when that happens, every push to main still builds
+# fine and "succeeds," but the live site never changes. This job makes that
+# failure loud instead of silent: it reads the commit SHA embedded in the
+# live page (see index.html's commit-sha meta tag + package.json's build
+# script) and fails the check if it doesn't match what was just pushed.
+#
+# If this fails: check Vercel dashboard -> terataylor project -> Settings ->
+# Git -> Production Branch. It must be "main".
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: verify-production-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Vercel to build and deploy
+        run: sleep 90
+
+      - name: Check the live site matches this commit
+        run: |
+          LIVE_SHA=$(curl -fsSL https://terataylor.vercel.app | grep -oP 'name="commit-sha" content="\K[^"]*' || true)
+          echo "Live site commit: ${LIVE_SHA:-<empty>}"
+          echo "Pushed commit:    $GITHUB_SHA"
+
+          if [ -z "$LIVE_SHA" ]; then
+            echo "::error::Could not read the commit-sha meta tag from https://terataylor.vercel.app. Either the site is down, or the tag itself got removed/broken — check index.html and package.json's build script."
+            exit 1
+          fi
+
+          if [ "$LIVE_SHA" != "$GITHUB_SHA" ]; then
+            echo "::error::Live site is NOT running this commit (live=$LIVE_SHA, expected=$GITHUB_SHA). This is almost always Vercel's Production Branch pointing at the wrong branch — check Vercel dashboard > terataylor project > Settings > Git > Production Branch (must be 'main')."
+            exit 1
+          fi
+
+          echo "Live site matches this commit."
