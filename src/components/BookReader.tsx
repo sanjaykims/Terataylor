@@ -12,6 +12,7 @@ import {
   loadChapterVocab,
   loadListeningEn, loadListeningKo, saveListeningEn, saveListeningKo,
   loadListeningAudio, saveListeningAudio, deleteListeningAudio,
+  loadKnowledgeMap, type KnowledgeMap,
 } from '../lib/chapterStorage';
 import { sessionSetDetail } from '../lib/tracker';
 import type { VocabItem } from '../lib/types';
@@ -872,6 +873,37 @@ function ListeningPanel({
   );
 }
 
+// ── Knowledge Map view (Bridge curriculum) ──────────────────────────────────
+// The retell/organize-what-you-read exercise: a topic branching into a few
+// argument threads, each with its own supporting points. Read-only for now —
+// no ingestion UI yet, see KnowledgeMap in chapterStorage.ts.
+function KnowledgeMapView({ map }: { map: KnowledgeMap }) {
+  return (
+    <div className="surface p-4 space-y-3">
+      <div className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <Icon name="target" className="h-4 w-4 text-violet-500" /> Knowledge Map
+      </div>
+      <div className="flex flex-col items-center gap-3">
+        <div className="px-4 py-2 rounded-xl border-2 border-violet-300 bg-violet-50 font-bold text-sm text-violet-900">
+          {map.topic}
+        </div>
+        <div className={`grid gap-3 w-full ${map.branches.length > 1 ? 'sm:grid-cols-2' : ''}`}>
+          {map.branches.map((branch, i) => (
+            <div key={i} className="surface-soft p-3 space-y-2">
+              <div className="text-xs font-bold text-violet-700">{branch.label}</div>
+              <ul className="space-y-1.5">
+                {branch.points.map((p, j) => (
+                  <li key={j} className="text-xs text-gray-700 pl-3 border-l-2 border-violet-200">{p}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 type InitState = 'loading' | 'no-book' | 'has-book';
 
@@ -930,6 +962,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const [listenTxError,     setListenTxError]     = useState('');
   const [listenAudioUploading, setListenAudioUploading] = useState(false);
   const listenFileRef = useRef<HTMLInputElement>(null);
+
+  // ── Knowledge Map (topical books only) ─────────────────────────────────
+  const [knowledgeMap, setKnowledgeMap] = useState<KnowledgeMap | null>(null);
 
   // ── Chapter audio + real-time sentence highlight ──────────────────────────
   const [audioUrl,      setAudioUrl]      = useState<string | null>(null);
@@ -1037,6 +1072,13 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setTimings(times);
     if (vocab?.length && onLessonVocabLoad) onLessonVocabLoad(vocab as VocabItem[], chapter, bid);
     setChapterLoading(false);
+
+    if (BOOKS[bid]?.lessonKind === 'topical') {
+      setKnowledgeMap(null);
+      loadKnowledgeMap(bid, chapter).then(map => {
+        if (loadSeqRef.current === seq) setKnowledgeMap(map);
+      }).catch(() => {});
+    }
 
     if (BOOKS[bid]?.hasListening) {
       setListenLoading(true);
@@ -1986,6 +2028,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           이 챕터의 텍스트를 불러올 수 없어요.
         </div>
       )}
+
+      {knowledgeMap && <KnowledgeMapView map={knowledgeMap} />}
 
       </>) : (
         <ListeningPanel

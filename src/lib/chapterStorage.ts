@@ -217,6 +217,34 @@ export async function deleteListeningTimings(bookId: BookId, chapter: number): P
   await csDel(`chapter_${bookId}_${chapter}_listening_times`).catch(() => {});
 }
 
+// ── Knowledge Map (Bridge curriculum) ────────────────────────────────────
+// The retell/organize-what-you-read exercise: a topic with branching
+// argument points, e.g. Dragons -> [Existence possible, No proof of
+// existence] -> sub-points under each. No OCR ingestion path yet (the
+// diagram doesn't fit plain-text/vocab extraction) - populated manually
+// for now.
+export interface KnowledgeMapBranch {
+  label: string;
+  points: string[];
+}
+export interface KnowledgeMap {
+  topic: string;
+  branches: KnowledgeMapBranch[];
+}
+
+export async function saveKnowledgeMap(bookId: BookId, chapter: number, map: KnowledgeMap): Promise<void> {
+  await csSet(`chapter_${bookId}_${chapter}_knowledge_map`, JSON.stringify(map));
+}
+
+export async function loadKnowledgeMap(bookId: BookId, chapter: number): Promise<KnowledgeMap | null> {
+  const raw = await csGet(`chapter_${bookId}_${chapter}_knowledge_map`);
+  if (!raw) return null;
+  try {
+    const m = JSON.parse(raw);
+    return m && typeof m.topic === 'string' && Array.isArray(m.branches) ? m as KnowledgeMap : null;
+  } catch { return null; }
+}
+
 // Per-lesson curated vocabulary (set by teacher / pre-loaded per chapter).
 export async function saveChapterVocab(bookId: BookId, chapter: number, vocab: unknown[]): Promise<void> {
   await csSet(`chapter_${bookId}_${chapter}_vocab`, JSON.stringify(vocab));

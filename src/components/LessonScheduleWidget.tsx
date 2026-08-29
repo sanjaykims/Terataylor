@@ -15,9 +15,10 @@ function fmtDate(s: string) {
 // BookScheduleSection) — a component created during render loses its state
 // every re-render.
 function LessonCard({
-  entry, kind, today, dTag, daysUntil,
+  entry, displayNumber, kind, today, dTag, daysUntil,
 }: {
   entry: LessonEntry;
+  displayNumber: number;
   kind: 'current' | 'next';
   today: string;
   dTag: string | null;
@@ -43,7 +44,7 @@ function LessonCard({
           }`}>{dTag}</span>
         )}
       </div>
-      <div className="font-bold text-sm text-gray-900">Lesson {String(entry.lesson).padStart(2, '0')}</div>
+      <div className="font-bold text-sm text-gray-900">Lesson {String(displayNumber).padStart(2, '0')}</div>
       <div className="text-xs font-semibold text-gray-900 mt-1">{entry.topic ?? entry.pages}</div>
       <div className="text-xs text-muted mt-0.5">{fmtDate(entry.date)}</div>
     </div>
@@ -86,8 +87,8 @@ function BookScheduleSection({ bookId, today }: { bookId: BookId; today: string 
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
-          {current && <LessonCard entry={current} kind="current" today={today} dTag={null} daysUntil={null} />}
-          {next && <LessonCard entry={next} kind="next" today={today} dTag={dTag} daysUntil={daysUntil} />}
+          {current && <LessonCard entry={current} displayNumber={lessons.indexOf(current) + 1} kind="current" today={today} dTag={null} daysUntil={null} />}
+          {next && <LessonCard entry={next} displayNumber={lessons.indexOf(next) + 1} kind="next" today={today} dTag={dTag} daysUntil={daysUntil} />}
           {!current && next && (
             <div className="surface-soft p-3">
               <div className="text-xs text-muted font-semibold mb-1 flex items-center gap-1.5">
@@ -113,11 +114,11 @@ function BookScheduleSection({ bookId, today }: { bookId: BookId; today: string 
         <div className="progress-fill h-full transition-[width] duration-700" style={{ width: `${pct}%` }} />
       </div>
       <div className="flex gap-0.5">
-        {lessons.map(l => {
+        {lessons.map((l, i) => {
           const past = l.date <= today;
           const isCur = current?.lesson === l.lesson;
           return (
-            <div key={l.lesson} title={`Lesson ${l.lesson}`}
+            <div key={l.lesson} title={`Lesson ${i + 1}`}
               className="flex-1 h-1.5 rounded-full transition-colors"
               style={{
                 background: isCur ? 'var(--accent)'

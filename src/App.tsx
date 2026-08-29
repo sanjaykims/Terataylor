@@ -196,7 +196,7 @@ export default function App() {
         <div className={`${containerW} mx-auto px-6`} style={{ display: 'flex', alignItems: 'center', gap: 16, minHeight: 68 }}>
           <span style={{ width: 15, height: 15, background: 'var(--accent)', borderRadius: 3, transform: 'rotate(45deg)', flex: '0 0 auto' }} />
           <div className="min-w-0" style={{ flex: 1 }}>
-            <div className="eyebrow" style={{ fontSize: '0.6rem' }}>청담어학원 Tera</div>
+            <div className="eyebrow" style={{ fontSize: '0.6rem' }}>청담어학원 Bridge</div>
             <h1 className="font-display" style={{ fontSize: 'var(--text-md)', fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.1 }}>Taylor's English</h1>
           </div>
           <span className="text-muted hidden md:inline" style={{ fontSize: '0.85rem' }}>안녕, 태윤아</span>
