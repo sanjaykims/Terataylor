@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 408 nodes · 703 edges · 25 communities (19 shown, 6 thin omitted)
+- 408 nodes · 705 edges · 25 communities (19 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a35ce6d5`
+- Built from commit: `f7cbb183`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -39,7 +39,7 @@
 - Community 22
 
 ## God Nodes (most connected - your core abstractions)
-1. `BookReader()` - 41 edges
+1. `BookReader()` - 42 edges
 2. `App()` - 19 edges
 3. `csSet()` - 18 edges
 4. `compilerOptions` - 17 edges
@@ -144,11 +144,11 @@ Nodes (3): COUNT, cutDur, headers
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `VocabItem` connect `Community 0` to `Community 1`, `Community 2`, `Community 5`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
 - **Why does `devDependencies` connect `Community 4` to `Community 7`?**
   _High betweenness centrality (0.012) - this node is a cross-community bridge._
 - **Why does `BookReader()` connect `Community 1` to `Community 3`, `Community 2`, `Community 11`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **What connects `GameType`, `VocabPuzzle`, `WordToken` to the rest of the system?**
   _157 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**

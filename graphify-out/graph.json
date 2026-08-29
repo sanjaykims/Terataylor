@@ -222,7 +222,7 @@
       "file_type": "code",
       "norm_label": "initstate",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L780"
+      "source_location": "L781"
     },
     {
       "id": "src_components_bookreader_mobilerowprops",
@@ -235,7 +235,7 @@
       "file_type": "code",
       "norm_label": "mobilerowprops",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L718"
+      "source_location": "L719"
     },
     {
       "id": "src_components_bookreader_rowprops",
@@ -248,7 +248,7 @@
       "file_type": "code",
       "norm_label": "rowprops",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L690"
+      "source_location": "L691"
     },
     {
       "id": "src_components_bookreader_sentencerowsprops",
@@ -261,7 +261,7 @@
       "file_type": "code",
       "norm_label": "sentencerowsprops",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L679"
+      "source_location": "L680"
     },
     {
       "id": "src_data_syllabus_bookid",
@@ -813,7 +813,7 @@
       "file_type": "code",
       "norm_label": "bookreader()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L782"
+      "source_location": "L783"
     },
     {
       "id": "src_components_bookreader_buildbookchaptertolessonmap",
@@ -825,7 +825,7 @@
       "file_type": "code",
       "norm_label": "buildbookchaptertolessonmap()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L359"
+      "source_location": "L360"
     },
     {
       "id": "src_components_bookreader_buildxingframe",
@@ -837,7 +837,7 @@
       "file_type": "code",
       "norm_label": "buildxingframe()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L455"
+      "source_location": "L456"
     },
     {
       "id": "src_components_bookreader_chapternumberforms",
@@ -849,7 +849,7 @@
       "file_type": "code",
       "norm_label": "chapternumberforms()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L575"
+      "source_location": "L576"
     },
     {
       "id": "src_components_bookreader_cleanchaptertext",
@@ -861,7 +861,7 @@
       "file_type": "code",
       "norm_label": "cleanchaptertext()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L141"
+      "source_location": "L142"
     },
     {
       "id": "src_components_bookreader_cleanpagetext",
@@ -873,7 +873,7 @@
       "file_type": "code",
       "norm_label": "cleanpagetext()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L125"
+      "source_location": "L126"
     },
     {
       "id": "src_components_bookreader_detectrunningheaders",
@@ -885,7 +885,7 @@
       "file_type": "code",
       "norm_label": "detectrunningheaders()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L101"
+      "source_location": "L102"
     },
     {
       "id": "src_components_bookreader_extractallpages",
@@ -897,7 +897,7 @@
       "file_type": "code",
       "norm_label": "extractallpages()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L198"
+      "source_location": "L199"
     },
     {
       "id": "src_components_bookreader_extractfnerror",
@@ -909,7 +909,7 @@
       "file_type": "code",
       "norm_label": "extractfnerror()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L263"
+      "source_location": "L264"
     },
     {
       "id": "src_components_bookreader_findchapterannouncement",
@@ -921,7 +921,7 @@
       "file_type": "code",
       "norm_label": "findchapterannouncement()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L586"
+      "source_location": "L587"
     },
     {
       "id": "src_components_bookreader_findmp3sync",
@@ -933,7 +933,7 @@
       "file_type": "code",
       "norm_label": "findmp3sync()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L400"
+      "source_location": "L401"
     },
     {
       "id": "src_components_bookreader_isxingframe",
@@ -945,7 +945,7 @@
       "file_type": "code",
       "norm_label": "isxingframe()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L444"
+      "source_location": "L445"
     },
     {
       "id": "src_components_bookreader_lessonchapterrangesfor",
@@ -957,7 +957,7 @@
       "file_type": "code",
       "norm_label": "lessonchapterrangesfor()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L351"
+      "source_location": "L352"
     },
     {
       "id": "src_components_bookreader_lookslikemetareply",
@@ -969,7 +969,7 @@
       "file_type": "code",
       "norm_label": "lookslikemetareply()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L253"
+      "source_location": "L254"
     },
     {
       "id": "src_components_bookreader_mergemp3files",
@@ -981,7 +981,7 @@
       "file_type": "code",
       "norm_label": "mergemp3files()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L493"
+      "source_location": "L494"
     },
     {
       "id": "src_components_bookreader_parsefilenamechapters",
@@ -993,7 +993,7 @@
       "file_type": "code",
       "norm_label": "parsefilenamechapters()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L549"
+      "source_location": "L550"
     },
     {
       "id": "src_components_bookreader_parsemp3frame",
@@ -1005,7 +1005,7 @@
       "file_type": "code",
       "norm_label": "parsemp3frame()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L416"
+      "source_location": "L417"
     },
     {
       "id": "src_components_bookreader_renderwords",
@@ -1017,7 +1017,7 @@
       "file_type": "code",
       "norm_label": "renderwords()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L664"
+      "source_location": "L665"
     },
     {
       "id": "src_components_bookreader_skipid3v2",
@@ -1029,7 +1029,7 @@
       "file_type": "code",
       "norm_label": "skipid3v2()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L377"
+      "source_location": "L378"
     },
     {
       "id": "src_components_bookreader_slicemp3bodyfromtime",
@@ -1041,7 +1041,7 @@
       "file_type": "code",
       "norm_label": "slicemp3bodyfromtime()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L650"
+      "source_location": "L651"
     },
     {
       "id": "src_components_bookreader_splitintochapters",
@@ -1053,7 +1053,7 @@
       "file_type": "code",
       "norm_label": "splitintochapters()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L42"
+      "source_location": "L43"
     },
     {
       "id": "src_components_bookreader_splitkorows",
@@ -1065,7 +1065,7 @@
       "file_type": "code",
       "norm_label": "splitkorows()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L240"
+      "source_location": "L241"
     },
     {
       "id": "src_components_bookreader_splittosentences",
@@ -1077,7 +1077,7 @@
       "file_type": "code",
       "norm_label": "splittosentences()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L222"
+      "source_location": "L223"
     },
     {
       "id": "src_components_bookreader_striptofirstchapterheading",
@@ -1089,7 +1089,7 @@
       "file_type": "code",
       "norm_label": "striptofirstchapterheading()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L186"
+      "source_location": "L187"
     },
     {
       "id": "src_components_bookreader_stripurls",
@@ -1101,7 +1101,7 @@
       "file_type": "code",
       "norm_label": "stripurls()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L121"
+      "source_location": "L122"
     },
     {
       "id": "src_components_bookreader_translatesentences",
@@ -1113,7 +1113,7 @@
       "file_type": "code",
       "norm_label": "translatesentences()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L277"
+      "source_location": "L278"
     },
     {
       "id": "src_components_bookreader_trimid3v1",
@@ -1125,7 +1125,7 @@
       "file_type": "code",
       "norm_label": "trimid3v1()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L388"
+      "source_location": "L389"
     },
     {
       "id": "src_components_bookreader_trimmp3bodyattime",
@@ -1137,7 +1137,7 @@
       "file_type": "code",
       "norm_label": "trimmp3bodyattime()",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L620"
+      "source_location": "L621"
     },
     {
       "id": "src_lib_chapterstorage_loadchapteren",
@@ -2610,7 +2610,7 @@
       "file_type": "code",
       "norm_label": "chapter_heading",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L37"
+      "source_location": "L38"
     },
     {
       "id": "src_components_bookreader_chapter_number_words",
@@ -2621,7 +2621,7 @@
       "file_type": "code",
       "norm_label": "chapter_number_words",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L539"
+      "source_location": "L540"
     },
     {
       "id": "src_components_bookreader_mobilerow",
@@ -2632,7 +2632,7 @@
       "file_type": "code",
       "norm_label": "mobilerow",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L723"
+      "source_location": "L724"
     },
     {
       "id": "src_components_bookreader_number_words",
@@ -2643,7 +2643,7 @@
       "file_type": "code",
       "norm_label": "number_words",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L25"
+      "source_location": "L26"
     },
     {
       "id": "src_components_bookreader_roman_numerals",
@@ -2654,7 +2654,7 @@
       "file_type": "code",
       "norm_label": "roman_numerals",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L34"
+      "source_location": "L35"
     },
     {
       "id": "src_components_bookreader_row",
@@ -2665,7 +2665,7 @@
       "file_type": "code",
       "norm_label": "row",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L695"
+      "source_location": "L696"
     },
     {
       "id": "src_components_bookreader_sentencerows",
@@ -2676,7 +2676,7 @@
       "file_type": "code",
       "norm_label": "sentencerows",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L735"
+      "source_location": "L736"
     },
     {
       "id": "src_components_lessonschedulewidget",
@@ -5055,450 +5055,6 @@
     },
     {
       "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_striptofirstchapterheading",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1007",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_savebookchapters",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1022",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_savechaptercount",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1023",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_translatesentences",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1051",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_savechapterko",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1052",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_clearbook",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1068",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_parsefilenamechapters",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1103",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_findchapterannouncement",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1150",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_findmp3sync",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1159",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_skipid3v2",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1159",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_parsemp3frame",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1160",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_isxingframe",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1161",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_trimmp3bodyattime",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1167",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_slicemp3bodyfromtime",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1173",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_mergemp3files",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1201",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_savechapteraudio",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1212",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_deletechaptertimings",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1213",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_deletechapteraudio",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1239",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_extractfnerror",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1267",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_audioalign_alignfromwordtimestamps",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1312",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_savechaptertimings",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1313",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_buildbookchaptertolessonmap",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L864",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_lessonchapterrangesfor",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L869",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_loadchapteren",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L898",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_loadchapterko",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L899",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_loadchapteraudio",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L900",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_loadchaptertimings",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L901",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_loadchaptervocab",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L902",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_splittosentences",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L914",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_splitkorows",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L915",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_tracker_sessionsetdetail",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L934",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_hasbook",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L941",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_loadchaptercount",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L944",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_lib_chapterstorage_gettranslatedchapters",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L947",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_extractallpages",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L974",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_detectrunningheaders",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L977",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
-      "target": "src_components_bookreader_cleanpagetext",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L978",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_bookreader",
       "target": "src_components_bookreader_splitintochapters",
       "relation": "calls",
       "_origin": "ast",
@@ -5506,7 +5062,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L987",
+      "source_location": "L1002",
       "weight": 1.0
     },
     {
@@ -5518,7 +5074,463 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L994",
+      "source_location": "L1009",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_striptofirstchapterheading",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1022",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_savebookchapters",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1037",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_savechaptercount",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1038",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_translatesentences",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1066",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_savechapterko",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1067",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_clearbook",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1083",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_parsefilenamechapters",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1118",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_findchapterannouncement",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1165",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_findmp3sync",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1174",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_skipid3v2",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1174",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_parsemp3frame",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1175",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_isxingframe",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1176",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_trimmp3bodyattime",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1182",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_slicemp3bodyfromtime",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1188",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_mergemp3files",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1216",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_savechapteraudio",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1227",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_deletechaptertimings",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1228",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_deletechapteraudio",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1254",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_extractfnerror",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1282",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_audioalign_alignfromwordtimestamps",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1327",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_savechaptertimings",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1328",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_savechapteren",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L1798",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_buildbookchaptertolessonmap",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L865",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_lessonchapterrangesfor",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L870",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_loadchapteren",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L899",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_loadchapterko",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L900",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_loadchapteraudio",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L901",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_loadchaptertimings",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L902",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_loadchaptervocab",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L903",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_splittosentences",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L915",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_splitkorows",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L916",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_tracker_sessionsetdetail",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L935",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_gettranslatedchapters",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L950",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_hasbook",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L956",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_lib_chapterstorage_loadchaptercount",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L959",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_extractallpages",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L989",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_detectrunningheaders",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L992",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_bookreader",
+      "target": "src_components_bookreader_cleanpagetext",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L993",
       "weight": 1.0
     },
     {
@@ -5530,7 +5542,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L361",
+      "source_location": "L362",
       "weight": 1.0
     },
     {
@@ -5542,7 +5554,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L144",
+      "source_location": "L145",
       "weight": 1.0
     },
     {
@@ -5554,7 +5566,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L128",
+      "source_location": "L129",
       "weight": 1.0
     },
     {
@@ -5566,7 +5578,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L590",
+      "source_location": "L591",
       "weight": 1.0
     },
     {
@@ -5578,7 +5590,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L497",
+      "source_location": "L498",
       "weight": 1.0
     },
     {
@@ -5590,24 +5602,12 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L498",
+      "source_location": "L499",
       "weight": 1.0
     },
     {
       "source": "src_components_bookreader_mergemp3files",
       "target": "src_components_bookreader_parsemp3frame",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L501",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader_mergemp3files",
-      "target": "src_components_bookreader_isxingframe",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -5619,6 +5619,18 @@
     },
     {
       "source": "src_components_bookreader_mergemp3files",
+      "target": "src_components_bookreader_isxingframe",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L503",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader_mergemp3files",
       "target": "src_components_bookreader_trimid3v1",
       "relation": "calls",
       "_origin": "ast",
@@ -5626,7 +5638,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L505",
+      "source_location": "L506",
       "weight": 1.0
     },
     {
@@ -5638,7 +5650,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L533",
+      "source_location": "L534",
       "weight": 1.0
     },
     {
@@ -5650,7 +5662,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L730",
+      "source_location": "L731",
       "weight": 1.0
     },
     {
@@ -5662,7 +5674,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L703",
+      "source_location": "L704",
       "weight": 1.0
     },
     {
@@ -5674,7 +5686,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L653",
+      "source_location": "L654",
       "weight": 1.0
     },
     {
@@ -5686,7 +5698,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L246",
+      "source_location": "L247",
       "weight": 1.0
     },
     {
@@ -5698,7 +5710,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L281",
+      "source_location": "L282",
       "weight": 1.0
     },
     {
@@ -5710,7 +5722,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L305",
+      "source_location": "L306",
       "weight": 1.0
     },
     {
@@ -5722,7 +5734,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L311",
+      "source_location": "L312",
       "weight": 1.0
     },
     {
@@ -5734,7 +5746,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L628",
+      "source_location": "L629",
       "weight": 1.0
     },
     {
@@ -5746,7 +5758,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L640",
+      "source_location": "L641",
       "weight": 1.0
     },
     {
@@ -7004,7 +7016,7 @@
       "context": "import",
       "deferred": true,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L1311",
+      "source_location": "L1326",
       "weight": 1.0
     },
     {
@@ -7597,18 +7609,6 @@
     },
     {
       "source": "src_components_bookreader",
-      "target": "src_components_icon_icon",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader",
       "target": "src_data_syllabus_bookid",
       "relation": "imports",
       "_origin": "ast",
@@ -7814,6 +7814,18 @@
     {
       "source": "src_components_bookreader",
       "target": "src_lib_chapterstorage_savechaptercount",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader",
+      "target": "src_lib_chapterstorage_savechapteren",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -8565,6 +8577,18 @@
       "context": "import",
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader",
+      "target": "src_components_imageuploadinput",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -10096,7 +10120,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L101",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -10107,7 +10131,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L121",
+      "source_location": "L122",
       "weight": 1.0
     },
     {
@@ -10118,7 +10142,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L125",
+      "source_location": "L126",
       "weight": 1.0
     },
     {
@@ -10129,7 +10153,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L141",
+      "source_location": "L142",
       "weight": 1.0
     },
     {
@@ -10140,7 +10164,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L186",
+      "source_location": "L187",
       "weight": 1.0
     },
     {
@@ -10151,7 +10175,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L198",
+      "source_location": "L199",
       "weight": 1.0
     },
     {
@@ -10162,7 +10186,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L222",
+      "source_location": "L223",
       "weight": 1.0
     },
     {
@@ -10173,18 +10197,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L240",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader",
-      "target": "src_components_bookreader_number_words",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L25",
+      "source_location": "L241",
       "weight": 1.0
     },
     {
@@ -10195,7 +10208,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L253",
+      "source_location": "L254",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader",
+      "target": "src_components_bookreader_number_words",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -10206,7 +10230,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L263",
+      "source_location": "L264",
       "weight": 1.0
     },
     {
@@ -10217,7 +10241,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L277",
+      "source_location": "L278",
       "weight": 1.0
     },
     {
@@ -10228,7 +10252,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L34",
+      "source_location": "L35",
       "weight": 1.0
     },
     {
@@ -10239,7 +10263,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L351",
+      "source_location": "L352",
       "weight": 1.0
     },
     {
@@ -10250,18 +10274,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L359",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_bookreader",
-      "target": "src_components_bookreader_chapter_heading",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L37",
+      "source_location": "L360",
       "weight": 1.0
     },
     {
@@ -10272,7 +10285,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L377",
+      "source_location": "L378",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader",
+      "target": "src_components_bookreader_chapter_heading",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -10283,7 +10307,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L388",
+      "source_location": "L389",
       "weight": 1.0
     },
     {
@@ -10294,7 +10318,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L400",
+      "source_location": "L401",
       "weight": 1.0
     },
     {
@@ -10305,7 +10329,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L416",
+      "source_location": "L417",
       "weight": 1.0
     },
     {
@@ -10316,7 +10340,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L42",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -10327,7 +10351,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L444",
+      "source_location": "L445",
       "weight": 1.0
     },
     {
@@ -10338,7 +10362,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L455",
+      "source_location": "L456",
       "weight": 1.0
     },
     {
@@ -10349,7 +10373,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L493",
+      "source_location": "L494",
       "weight": 1.0
     },
     {
@@ -10360,7 +10384,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L539",
+      "source_location": "L540",
       "weight": 1.0
     },
     {
@@ -10371,7 +10395,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L549",
+      "source_location": "L550",
       "weight": 1.0
     },
     {
@@ -10382,7 +10406,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L575",
+      "source_location": "L576",
       "weight": 1.0
     },
     {
@@ -10393,7 +10417,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L586",
+      "source_location": "L587",
       "weight": 1.0
     },
     {
@@ -10404,7 +10428,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L620",
+      "source_location": "L621",
       "weight": 1.0
     },
     {
@@ -10415,7 +10439,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L650",
+      "source_location": "L651",
       "weight": 1.0
     },
     {
@@ -10426,7 +10450,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L664",
+      "source_location": "L665",
       "weight": 1.0
     },
     {
@@ -10437,7 +10461,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L679",
+      "source_location": "L680",
       "weight": 1.0
     },
     {
@@ -10448,7 +10472,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L690",
+      "source_location": "L691",
       "weight": 1.0
     },
     {
@@ -10459,7 +10483,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L695",
+      "source_location": "L696",
       "weight": 1.0
     },
     {
@@ -10470,7 +10494,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L718",
+      "source_location": "L719",
       "weight": 1.0
     },
     {
@@ -10481,7 +10505,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L723",
+      "source_location": "L724",
       "weight": 1.0
     },
     {
@@ -10492,7 +10516,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L735",
+      "source_location": "L736",
       "weight": 1.0
     },
     {
@@ -10503,7 +10527,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L780",
+      "source_location": "L781",
       "weight": 1.0
     },
     {
@@ -10514,7 +10538,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/BookReader.tsx",
-      "source_location": "L782",
+      "source_location": "L783",
       "weight": 1.0
     },
     {
@@ -12841,5 +12865,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a35ce6d5cd6270d59e39a021098a5b5e2c88fbc4"
+  "built_at_commit": "f7cbb18397c523f9ff2f22724a571e85e41e7247"
 }

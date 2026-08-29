@@ -490,7 +490,7 @@
     {
       "id": "src_components_bookreader_bookreader",
       "label": "BookReader()",
-      "degree": 41
+      "degree": 42
     },
     {
       "id": "src_app_app",
@@ -599,7 +599,7 @@
     {
       "type": "bridge_node",
       "question": "Why does `VocabItem` connect `Community 0` to `Community 1`, `Community 2`, `Community 5`?",
-      "why": "High betweenness centrality (0.027) - this node is a cross-community bridge."
+      "why": "High betweenness centrality (0.026) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
@@ -609,7 +609,7 @@
     {
       "type": "bridge_node",
       "question": "Why does `BookReader()` connect `Community 1` to `Community 3`, `Community 2`, `Community 11`?",
-      "why": "High betweenness centrality (0.010) - this node is a cross-community bridge."
+      "why": "High betweenness centrality (0.011) - this node is a cross-community bridge."
     },
     {
       "type": "isolated_nodes",
