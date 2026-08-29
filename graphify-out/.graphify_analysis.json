@@ -23,7 +23,6 @@
       "src_components_bookreader_knowledgemapview",
       "src_components_bookreader_lessonchapterrangesfor",
       "src_components_bookreader_listeningpanel",
-      "src_components_bookreader_listeningpanelprops",
       "src_components_bookreader_lookslikemetareply",
       "src_components_bookreader_mapbox",
       "src_components_bookreader_mergemp3files",
@@ -62,6 +61,7 @@
       "src_lib_chapterstorage_knowledgemapbranch",
       "src_lib_chapterstorage_listeningaudiopath",
       "src_lib_chapterstorage_loadchapteraudio",
+      "src_lib_chapterstorage_loadchaptercount",
       "src_lib_chapterstorage_loadchapteren",
       "src_lib_chapterstorage_loadchapterko",
       "src_lib_chapterstorage_loadchaptertimings",
@@ -158,6 +158,7 @@
       "src_app_maintab",
       "src_app_tabspinner",
       "src_app_v1tab",
+      "src_components_bookreader_listeningpanelprops",
       "src_components_icon",
       "src_components_icon_icon",
       "src_components_icon_iconname",
@@ -188,7 +189,6 @@
       "src_data_syllabus_schedule",
       "src_data_syllabus_writing_prompts",
       "src_data_syllabus_writingprompt",
-      "src_lib_chapterstorage_loadchaptercount",
       "src_lib_chapterstorage_loadchaptervocab",
       "src_lib_cloudstorage_csgetappstate",
       "src_lib_tracker_sessionflush",
@@ -364,7 +364,8 @@
       "src_lib_audioalign_enforcemonotone",
       "src_lib_audioalign_gettranscriber",
       "src_lib_audioalign_normword",
-      "src_lib_audioalign_wordtimestamp"
+      "src_lib_audioalign_wordtimestamp",
+      "transformers"
     ],
     "10": [
       "scripts_split_book_chapters",
@@ -471,16 +472,16 @@
     ]
   },
   "cohesion": {
-    "0": 0.05352968676951847,
+    "0": 0.054464703132304816,
     "1": 0.06666666666666667,
-    "2": 0.08879492600422834,
+    "2": 0.08773784355179703,
     "3": 0.06896551724137931,
     "4": 0.11375661375661375,
     "5": 0.08695652173913043,
     "6": 0.09523809523809523,
     "7": 0.09523809523809523,
     "8": 0.10526315789473684,
-    "9": 0.2692307692307692,
+    "9": 0.24175824175824176,
     "10": 0.16666666666666666,
     "11": 0.2,
     "12": 0.2777777777777778,
@@ -594,15 +595,15 @@
       "why": "bridges separate communities"
     },
     {
-      "source": "deleteListeningTimings()",
-      "target": "csDel()",
+      "source": "ListeningPanelProps",
+      "target": "BookId",
       "source_files": [
-        "src/lib/chapterStorage.ts",
-        "src/lib/cloudStorage.ts"
+        "src/components/BookReader.tsx",
+        "src/data/syllabus.ts"
       ],
       "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "peripheral node `deleteListeningTimings()` unexpectedly reaches hub `csDel()`"
+      "relation": "references",
+      "why": "peripheral node `ListeningPanelProps` unexpectedly reaches hub `BookId`"
     }
   ],
   "questions": [
@@ -623,13 +624,13 @@
     },
     {
       "type": "isolated_nodes",
-      "question": "What connects `KnowledgeMapBranch`, `Row`, `InitState` to the rest of the system?",
-      "why": "158 weakly-connected nodes found - possible documentation gaps or missing edges."
+      "question": "What connects `InitState`, `MobileRowProps`, `RowProps` to the rest of the system?",
+      "why": "157 weakly-connected nodes found - possible documentation gaps or missing edges."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.05352968676951847 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.054464703132304816 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
@@ -639,7 +640,7 @@
     {
       "type": "low_cohesion",
       "question": "Should `Community 2` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.08879492600422834 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.08773784355179703 - nodes in this community are weakly interconnected."
     }
   ]
 }

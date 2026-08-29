@@ -17,19 +17,6 @@
       "source_location": "L1042"
     },
     {
-      "id": "src_components_bookreader_listeningpanelprops",
-      "label": "ListeningPanelProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "Community 0",
-      "file_type": "code",
-      "norm_label": "listeningpanelprops",
-      "source_file": "src/components/BookReader.tsx",
-      "source_location": "L830"
-    },
-    {
       "id": "src_components_bookreader_mobilerowprops",
       "label": "MobileRowProps",
       "_callable": true,
@@ -444,6 +431,19 @@
       "norm_label": "v1tab",
       "source_file": "src/App.tsx",
       "source_location": "L26"
+    },
+    {
+      "id": "src_components_bookreader_listeningpanelprops",
+      "label": "ListeningPanelProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "Community 2",
+      "file_type": "code",
+      "norm_label": "listeningpanelprops",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L830"
     },
     {
       "id": "src_components_icon_iconname",
@@ -1141,6 +1141,18 @@
       "norm_label": "loadchapteraudio()",
       "source_file": "src/lib/chapterStorage.ts",
       "source_location": "L115"
+    },
+    {
+      "id": "src_lib_chapterstorage_loadchaptercount",
+      "label": "loadChapterCount()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Community 0",
+      "file_type": "code",
+      "norm_label": "loadchaptercount()",
+      "source_file": "src/lib/chapterStorage.ts",
+      "source_location": "L70"
     },
     {
       "id": "src_lib_chapterstorage_loadchapteren",
@@ -2233,18 +2245,6 @@
       "norm_label": "ksttoday()",
       "source_file": "src/data/syllabus.ts",
       "source_location": "L198"
-    },
-    {
-      "id": "src_lib_chapterstorage_loadchaptercount",
-      "label": "loadChapterCount()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "Community 2",
-      "file_type": "code",
-      "norm_label": "loadchaptercount()",
-      "source_file": "src/lib/chapterStorage.ts",
-      "source_location": "L70"
     },
     {
       "id": "src_lib_chapterstorage_loadchaptervocab",
@@ -4900,6 +4900,17 @@
       "source_location": "L51"
     },
     {
+      "id": "transformers",
+      "label": "@huggingface/transformers",
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "Community 9",
+      "confidence": "EXTRACTED",
+      "file_type": "code",
+      "norm_label": "@huggingface/transformers",
+      "source_file": "@huggingface/transformers"
+    },
+    {
       "id": "src_lib_audioalign",
       "label": "audioAlign.ts",
       "_origin": "ast",
@@ -7217,6 +7228,18 @@
       "weight": 1.0
     },
     {
+      "source": "src_components_bookreader_listeningpanelprops",
+      "target": "src_data_syllabus_bookid",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L831",
+      "weight": 1.0
+    },
+    {
       "source": "src_components_gamespanel_props",
       "target": "src_lib_types_vocabitem",
       "relation": "references",
@@ -7992,6 +8015,30 @@
       "context": "import",
       "source_file": "src/components/BookReader.tsx",
       "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader",
+      "target": "src_components_icon_icon",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_bookreader",
+      "target": "src_components_imageuploadinput_imageuploadinput",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/BookReader.tsx",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -13572,8 +13619,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/App.tsx"
+    },
+    {
+      "source": "src_lib_audioalign",
+      "target": "transformers",
+      "relation": "dynamic_import",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/audioAlign.ts"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4cdbad75f19b89aadef61e90a4917d5b2ed6598f"
+  "built_at_commit": "d8bc0534ac3ff1be933f3c2006fd6c38e7ab42bd"
 }
