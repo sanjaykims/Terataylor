@@ -141,6 +141,44 @@ export const SCHEDULE: LessonEntry[] = [
   { lesson: 10, date: '2026-08-12', book: 'coraline', pages: 'Ch. 7~9',   homework: 'Read Ch. 10~11' },
   { lesson: 11, date: '2026-08-19', book: 'coraline', pages: 'Ch. 10~11', homework: 'Read Ch. 12~13' },
   { lesson: 12, date: '2026-08-26', book: 'coraline', pages: 'Ch. 12~13', homework: 'Term End' },
+
+  // Bridge semester, starting 2026-08-31 (청담어학원 다음학기 개강 notice).
+  // Bridge C1: Wed 18:00-20:55. Bridge C2: Fri 18:00-20:55. Both run in
+  // parallel every week (unlike V1/A2, which were one class at a time) —
+  // dates are a plain weekly cadence with no known holiday breaks yet for
+  // this term; adjust here once the academy publishes any.
+  { lesson: 13, date: '2026-09-02', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[0],  topic: BRIDGE_C1_TOPICS[0],  homework: '' },
+  { lesson: 14, date: '2026-09-09', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[1],  topic: BRIDGE_C1_TOPICS[1],  homework: '' },
+  { lesson: 15, date: '2026-09-16', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[2],  topic: BRIDGE_C1_TOPICS[2],  homework: '' },
+  { lesson: 16, date: '2026-09-23', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[3],  topic: BRIDGE_C1_TOPICS[3],  homework: '' },
+  { lesson: 17, date: '2026-09-30', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[4],  topic: BRIDGE_C1_TOPICS[4],  homework: '' },
+  { lesson: 18, date: '2026-10-07', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[5],  topic: BRIDGE_C1_TOPICS[5],  homework: '' },
+  { lesson: 19, date: '2026-10-14', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[6],  topic: BRIDGE_C1_TOPICS[6],  homework: '' },
+  { lesson: 20, date: '2026-10-21', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[7],  topic: BRIDGE_C1_TOPICS[7],  homework: '' },
+  { lesson: 21, date: '2026-10-28', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[8],  topic: BRIDGE_C1_TOPICS[8],  homework: '' },
+  { lesson: 22, date: '2026-11-04', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[9],  topic: BRIDGE_C1_TOPICS[9],  homework: '' },
+  { lesson: 23, date: '2026-11-11', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[10], topic: BRIDGE_C1_TOPICS[10], homework: '' },
+  { lesson: 24, date: '2026-11-18', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[11], topic: BRIDGE_C1_TOPICS[11], homework: '' },
+  { lesson: 25, date: '2026-11-25', book: 'bridge_c1', pages: BRIDGE_C1_TOPICS[12], topic: BRIDGE_C1_TOPICS[12], homework: '' },
+
+  // Bridge C2 week-type per the "Tera & Bridge" C-Learning table: Input days
+  // introduce new Reading/Listening content; Output days are group project
+  // (Writing/Presentation) work with no new passage to prep. Exact topic
+  // titles per week (BRIDGE_C2_TOPICS) aren't confirmed against real class
+  // dates yet, so `topic` names the day type instead of guessing a mapping.
+  { lesson: 26, date: '2026-09-04', book: 'bridge_c2', pages: 'Input Day',              topic: 'Input Day (Reading & Listening)',  homework: '' },
+  { lesson: 27, date: '2026-09-11', book: 'bridge_c2', pages: 'Output Day (Writing)',   topic: 'Output Day (Writing)',              homework: '' },
+  { lesson: 28, date: '2026-09-18', book: 'bridge_c2', pages: 'Input Day',              topic: 'Input Day (Reading & Listening)',  homework: '' },
+  { lesson: 29, date: '2026-09-25', book: 'bridge_c2', pages: 'Output Day (Presentation)', topic: 'Output Day (Presentation)',      homework: '' },
+  { lesson: 30, date: '2026-10-02', book: 'bridge_c2', pages: 'Input Day',              topic: 'Input Day (Reading & Listening)',  homework: '' },
+  { lesson: 31, date: '2026-10-09', book: 'bridge_c2', pages: 'Output Day (Writing)',   topic: 'Output Day (Writing)',              homework: '' },
+  { lesson: 32, date: '2026-10-16', book: 'bridge_c2', pages: 'Input Day',              topic: 'Input Day (Reading & Listening)',  homework: '' },
+  { lesson: 33, date: '2026-10-23', book: 'bridge_c2', pages: 'Output Day (Presentation)', topic: 'Output Day (Presentation)',      homework: '' },
+  { lesson: 34, date: '2026-10-30', book: 'bridge_c2', pages: 'Input Day',              topic: 'Input Day (Reading & Listening)',  homework: '' },
+  { lesson: 35, date: '2026-11-06', book: 'bridge_c2', pages: 'Output Day (Writing)',   topic: 'Output Day (Writing)',              homework: '' },
+  { lesson: 36, date: '2026-11-13', book: 'bridge_c2', pages: 'Input Day',              topic: 'Input Day (Reading & Listening)',  homework: '' },
+  { lesson: 37, date: '2026-11-20', book: 'bridge_c2', pages: 'Output Day (Presentation)', topic: 'Output Day (Presentation)',      homework: '' },
+  { lesson: 38, date: '2026-11-27', book: 'bridge_c2', pages: 'Output Day (Presentation)', topic: 'Output Day (Presentation)',      homework: '' },
 ];
 
 export const HOLIDAY = { date: '2026-07-29', note: 'NO CLASS (7/28 ~ 7/31 여름방학 휴원)' };
