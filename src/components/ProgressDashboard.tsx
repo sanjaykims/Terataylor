@@ -63,6 +63,25 @@ function formatSessionWhen(startedIso: string, durationSeconds: number) {
   return `${KST_DATE.format(start)} ${KST_TIME.format(start)}${range}`;
 }
 
+// ── Per-day usage helpers ─────────────────────────────────────────────────────
+// Days are bucketed by the KST calendar date the segment STARTED on, so a
+// late-night session lands on the day it felt like, and the buckets match the
+// academy's timezone no matter where the page is opened from. 'en-CA' is used
+// purely because it formats as "YYYY-MM-DD", which sorts lexicographically.
+const KST_DAY_KEY = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+const KST_WEEKDAY = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', weekday: 'short' });
+const KST_MONTH_DAY = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric' });
+
+const kstDayKey = (iso: string) => KST_DAY_KEY.format(new Date(iso));
+// Midday UTC is 21:00 KST the same date, so formatting a bare day key back to a
+// label can never slip across a date boundary.
+const dayKeyToDate = (key: string) => new Date(`${key}T12:00:00Z`);
+// Both sides parse as explicit UTC midnight, so differences are exact whole days.
+const dayNum = (key: string) => Math.round(Date.parse(`${key}T00:00:00Z`) / 86_400_000);
+const dayNumToKey = (n: number) => new Date(n * 86_400_000).toISOString().slice(0, 10);
+
 function MiniBar({ value, max, color }: { value: number; max: number; color: string }) {
   return (
     <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
@@ -77,7 +96,7 @@ export default function ProgressDashboard() {
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeSection, setActiveSection] = useState<'overview' | 'vocab' | 'games' | 'sessions'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'daily' | 'vocab' | 'games' | 'sessions'>('overview');
 
   const load = async () => {
     setLoading(true);
@@ -128,8 +147,60 @@ export default function ProgressDashboard() {
     return acc;
   }, {});
 
+  // ── Per-day usage ───────────────────────────────────────────────────────────
+  // One bucket per KST calendar day: how long was studied, across how many
+  // segments, which features, and how many games were played that day.
+  const dailyMap = new Map<string, { secs: number; segments: number; features: Record<string, number> }>();
+  for (const s of sessions) {
+    const key = kstDayKey(s.started_at);
+    const day = dailyMap.get(key) ?? { secs: 0, segments: 0, features: {} };
+    day.secs += s.duration_seconds;
+    day.segments += 1;
+    const base = parseFeature(s.feature).base;
+    day.features[base] = (day.features[base] ?? 0) + s.duration_seconds;
+    dailyMap.set(key, day);
+  }
+
+  const gamesPerDay = new Map<string, number>();
+  for (const g of scores) {
+    const key = kstDayKey(g.played_at);
+    gamesPerDay.set(key, (gamesPerDay.get(key) ?? 0) + 1);
+  }
+
+  // Newest first, matching every other list in this dashboard.
+  const dailyRows = [...dailyMap.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([key, day]) => ({ key, ...day, games: gamesPerDay.get(key) ?? 0 }));
+
+  const activeDays = dailyRows.length;
+  const avgPerActiveDay = activeDays ? Math.round(totalStudySecs / activeDays) : 0;
+  const busiestDay = dailyRows.reduce<typeof dailyRows[number] | null>(
+    (best, d) => (best === null || d.secs > best.secs ? d : best), null);
+
+  // Consecutive studied days counting back from today. Yesterday is allowed as
+  // the anchor so the streak doesn't read as broken before today's first session.
+  const todayKey = KST_DAY_KEY.format(new Date());
+  const streakDays = (() => {
+    let cursor = dayNum(todayKey);
+    if (!dailyMap.has(dayNumToKey(cursor))) cursor -= 1; // today not studied yet
+    let n = 0;
+    while (dailyMap.has(dayNumToKey(cursor))) { n += 1; cursor -= 1; }
+    return n;
+  })();
+
+  // A fixed 14-day window INCLUDING days with no usage — the gaps are the
+  // point of a usage monitor, so zero days must be visible, not omitted.
+  const CHART_DAYS = 14;
+  const todayNum = dayNum(todayKey);
+  const chartDays = Array.from({ length: CHART_DAYS }, (_, i) => {
+    const key = dayNumToKey(todayNum - (CHART_DAYS - 1 - i));
+    return { key, secs: dailyMap.get(key)?.secs ?? 0, isToday: key === todayKey };
+  });
+  const chartMax = Math.max(...chartDays.map(d => d.secs), 1);
+
   const SECTIONS = [
     { id: 'overview', label: '요약' },
+    { id: 'daily',    label: '일별 사용' },
     { id: 'vocab',    label: '단어 마스터리' },
     { id: 'games',    label: '게임 기록' },
     { id: 'sessions', label: '학습 기록' },
@@ -209,6 +280,108 @@ export default function ProgressDashboard() {
                 ))}
               </div>
             </div>
+          )}
+        </div>
+      )}
+
+      {/* ── DAILY USAGE ──────────────────────────────────────────────────────── */}
+      {activeSection === 'daily' && (
+        <div className="space-y-4">
+          {dailyRows.length === 0 ? (
+            <div className="text-center py-12 text-muted">
+              아직 사용 기록이 없어요. 앱을 사용하면 날짜별로 자동 기록됩니다!
+            </div>
+          ) : (
+            <>
+              {/* Day-level summary */}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[
+                  { label: '학습한 날', value: `${activeDays}일`, sub: '기록이 있는 날', color: 'text-violet-600' },
+                  { label: '하루 평균', value: formatDuration(avgPerActiveDay), sub: '학습한 날 기준', color: 'text-emerald-600' },
+                  { label: '연속 학습', value: `${streakDays}일`, sub: streakDays > 0 ? '계속 이어가요' : '오늘 시작해요', color: 'text-amber-500' },
+                  {
+                    label: '가장 오래',
+                    value: busiestDay ? formatDuration(busiestDay.secs) : '-',
+                    sub: busiestDay ? KST_MONTH_DAY.format(dayKeyToDate(busiestDay.key)) : '기록 없음',
+                    color: 'text-violet-600',
+                  },
+                ].map(stat => (
+                  <div key={stat.label} className="surface p-4">
+                    <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
+                    <div className="text-xs font-semibold text-gray-700 mt-1">{stat.label}</div>
+                    <div className="text-xs text-muted mt-0.5">{stat.sub}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Last 14 days — zero days are drawn too, so gaps stay visible */}
+              <div className="surface p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="font-bold text-gray-700 text-sm">최근 14일 사용량</div>
+                  <div className="text-xs text-muted">최대 {formatDuration(chartMax)}</div>
+                </div>
+                <div className="flex items-end gap-1 h-28">
+                  {chartDays.map(d => (
+                    <div key={d.key} className="flex-1 flex flex-col items-center gap-1 min-w-0"
+                      title={`${KST_MONTH_DAY.format(dayKeyToDate(d.key))} · ${d.secs ? formatDuration(d.secs) : '기록 없음'}`}>
+                      <div className="w-full rounded-t-md transition-[height] duration-500"
+                        style={{
+                          height: `${d.secs ? Math.max(6, (d.secs / chartMax) * 76) : 3}px`,
+                          background: d.secs
+                            ? (d.isToday ? 'var(--accent)' : 'var(--accent-strong)')
+                            : 'var(--rule-2)',
+                          opacity: d.secs ? (d.isToday ? 1 : 0.75) : 1,
+                        }} />
+                      <div className={`text-[10px] leading-none truncate max-w-full ${
+                        d.isToday ? 'font-bold text-violet-600' : 'text-muted'}`}>
+                        {dayKeyToDate(d.key).getUTCDate()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Per-day detail */}
+              <div className="space-y-2">
+                {dailyRows.map(d => {
+                  const date = dayKeyToDate(d.key);
+                  return (
+                    <div key={d.key} className="surface p-4 space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-bold text-gray-800 text-sm">
+                            {KST_MONTH_DAY.format(date)} ({KST_WEEKDAY.format(date)})
+                            {d.key === todayKey && (
+                              <span className="ml-2 text-xs font-semibold px-1.5 py-0.5 rounded-full"
+                                style={{ color: 'var(--accent-ink)', background: 'var(--accent-wash)' }}>오늘</span>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted mt-0.5">
+                            {d.segments}세션{d.games > 0 ? ` · 게임 ${d.games}회` : ''}
+                          </div>
+                        </div>
+                        <div className="font-bold text-emerald-600 text-base shrink-0">
+                          {formatDuration(d.secs)}
+                        </div>
+                      </div>
+
+                      <MiniBar value={d.secs} max={busiestDay?.secs ?? d.secs} color="bg-violet-500" />
+
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        {Object.entries(d.features).sort((a, b) => b[1] - a[1]).map(([feat, secs]) => (
+                          <span key={feat}
+                            className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full surface-soft text-gray-700">
+                            <Icon name={FEATURE_ICONS[feat] ?? 'book'} className="h-3 w-3 text-violet-500" />
+                            {FEATURE_LABELS[feat] ?? feat}
+                            <span className="text-muted">{formatDuration(secs)}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       )}
