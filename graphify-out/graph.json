@@ -495,7 +495,7 @@
       "file_type": "code",
       "norm_label": "essaysection",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L244"
+      "source_location": "L261"
     },
     {
       "id": "src_data_syllabus_lessonentry",
@@ -521,7 +521,7 @@
       "file_type": "code",
       "norm_label": "writingprompt",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L250"
+      "source_location": "L267"
     },
     {
       "id": "supabase_functions_deepgram_listen_index_deepgramword",
@@ -2281,7 +2281,7 @@
       "file_type": "code",
       "norm_label": "activebookids()",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L210"
+      "source_location": "L223"
     },
     {
       "id": "src_data_syllabus_currentlesson",
@@ -2293,7 +2293,7 @@
       "file_type": "code",
       "norm_label": "currentlesson()",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L204"
+      "source_location": "L214"
     },
     {
       "id": "src_data_syllabus_currentlessonnumberfor",
@@ -2305,7 +2305,7 @@
       "file_type": "code",
       "norm_label": "currentlessonnumberfor()",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L234"
+      "source_location": "L247"
     },
     {
       "id": "src_data_syllabus_defaultbookid",
@@ -2317,7 +2317,7 @@
       "file_type": "code",
       "norm_label": "defaultbookid()",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L220"
+      "source_location": "L233"
     },
     {
       "id": "src_data_syllabus_ksttoday",
@@ -3917,7 +3917,7 @@
       "file_type": "code",
       "norm_label": "writing_prompts",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L260"
+      "source_location": "L277"
     },
     {
       "id": "src_main",
@@ -6969,7 +6969,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L205",
+      "source_location": "L215",
       "weight": 1.0
     },
     {
@@ -6981,7 +6981,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L235",
+      "source_location": "L248",
       "weight": 1.0
     },
     {
@@ -6993,7 +6993,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L221",
+      "source_location": "L234",
       "weight": 1.0
     },
     {
@@ -7005,7 +7005,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L223",
+      "source_location": "L236",
       "weight": 1.0
     },
     {
@@ -13114,7 +13114,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L204",
+      "source_location": "L214",
       "weight": 1.0
     },
     {
@@ -13125,7 +13125,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L210",
+      "source_location": "L223",
       "weight": 1.0
     },
     {
@@ -13136,7 +13136,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L220",
+      "source_location": "L233",
       "weight": 1.0
     },
     {
@@ -13147,7 +13147,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L234",
+      "source_location": "L247",
       "weight": 1.0
     },
     {
@@ -13158,7 +13158,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L244",
+      "source_location": "L261",
       "weight": 1.0
     },
     {
@@ -13169,7 +13169,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L250",
+      "source_location": "L267",
       "weight": 1.0
     },
     {
@@ -13180,7 +13180,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/syllabus.ts",
-      "source_location": "L260",
+      "source_location": "L277",
       "weight": 1.0
     },
     {
@@ -14735,5 +14735,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "43ed8f1870744fabc982199668194ea4aa4fdc89"
+  "built_at_commit": "fda1172caf10d0581a2cea9e7af264b48ef256ce"
 }
