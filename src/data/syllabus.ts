@@ -201,9 +201,22 @@ export function kstToday(today: Date = new Date()): string {
   }).format(today); // en-CA → 'YYYY-MM-DD'
 }
 
+/**
+ * The next class across all books — today's if a class is on today, else the
+ * soonest upcoming one. Falls back to the final row once the term is over.
+ *
+ * SCHEDULE is grouped by book, not sorted by date, so this has to pick the
+ * EARLIEST upcoming row rather than the first one that appears in the array.
+ * Scanning in array order always answered with C1 (its rows come first): on a
+ * Thursday it named C1's class the following Wednesday while C2's was the very
+ * next day.
+ */
 export function currentLesson(today: Date = new Date()): LessonEntry {
   const t = kstToday(today);
-  return SCHEDULE.find(l => l.date >= t) ?? SCHEDULE[SCHEDULE.length - 1];
+  const upcoming = SCHEDULE.filter(l => l.date >= t);
+  if (upcoming.length === 0) return SCHEDULE[SCHEDULE.length - 1];
+  // Earliest date wins; an earlier array position breaks a same-day tie.
+  return upcoming.reduce((soonest, l) => (l.date < soonest.date ? l : soonest));
 }
 
 /** All non-archived book ids, in BOOKS declaration order. */
@@ -235,9 +248,13 @@ export function currentLessonNumberFor(bookId: BookId, today: Date = new Date())
   const t = kstToday(today);
   const lessons = SCHEDULE.filter(l => l.book === bookId);
   if (lessons.length === 0) return null;
-  const past = lessons.filter(l => l.date <= t);
-  const current = past.at(-1) ?? lessons.find(l => l.date > t) ?? null;
-  return current ? lessons.indexOf(current) + 1 : null;
+  // Current-or-next, which is what the student needs open: on a class day it
+  // stays on that day's lesson, and from the day after it moves to the one to
+  // prepare for. This previously returned the last PAST lesson, so the reader
+  // opened the class just finished rather than the 다음 수업 the schedule card
+  // points at — contradicting the contract described above.
+  const target = lessons.find(l => l.date >= t) ?? lessons[lessons.length - 1];
+  return lessons.indexOf(target) + 1;
 }
 
 // ── Writing Prompts ───────────────────────────────────────────────────────────
