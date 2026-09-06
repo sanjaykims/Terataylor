@@ -1114,6 +1114,15 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const [koText,        setKoText]        = useState<string | null>(null);
   const [chapterLoading,setChapterLoading]= useState(false);
 
+  // Hand-editing the passage. The text arrives by OCR from textbook photos, so
+  // it carries the page's own furniture — stray paragraph numbers, a heading
+  // glued onto the first sentence, split words. Re-shooting the photo rarely
+  // fixes those, so the fix has to be editable text.
+  const [editingEn,  setEditingEn]  = useState(false);
+  const [draftEn,    setDraftEn]    = useState('');
+  const [savingEn,   setSavingEn]   = useState(false);
+  const [editEnErr,  setEditEnErr]  = useState('');
+
   const [extracting,   setExtracting]   = useState(false);
   const [progress,     setProgress]     = useState({ done: 0, total: 0 });
   const [uploadError,  setUploadError]  = useState('');
@@ -1210,6 +1219,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     // wrong key).
     const seq = ++loadSeqRef.current;
     setChapterLoading(true);
+    // Leaving edit mode open across a chapter switch would show one lesson's
+    // draft over another lesson's passage, and save it onto the wrong lesson.
+    setEditingEn(false);
+    setEditEnErr('');
     setEnText(null);
     setKoText(null);
     setAudioUrl(null);
@@ -1331,6 +1344,42 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     setMobileView('en');
     setPassageView('reading');
     await loadChapter(bookId, chapter);
+  };
+
+  const startEditEn = () => {
+    setDraftEn(enText ?? '');
+    setEditEnErr('');
+    setEditingEn(true);
+  };
+
+  const saveEditEn = async () => {
+    const text = draftEn.trim();
+    // Saving empty would delete the passage row and drop the lesson back to the
+    // photo-upload screen — almost certainly not what "edit" meant.
+    if (!text) { setEditEnErr('본문이 비어 있어요. 내용을 입력하거나 취소하세요.'); return; }
+    setSavingEn(true);
+    setEditEnErr('');
+    try {
+      // Audio timings are stored as one entry per sentence, positionally. An
+      // edit that changes the sentence count leaves every later entry pointing
+      // at the wrong line, so drop them and let the reader offer 음성 분석 again
+      // rather than silently highlighting the wrong sentence.
+      const sentencesBefore = splitToSentences(enText ?? '').length;
+      const sentencesAfter  = splitToSentences(text).length;
+      await saveChapterEn(bookId, selectedChapter, text);
+      if (sentencesBefore !== sentencesAfter) {
+        await deleteChapterTimings(bookId, selectedChapter).catch(() => {});
+      }
+      setEditingEn(false);
+      // Reload rather than patching state locally: this re-runs the Korean
+      // alignment check, so an edit that desyncs the translation surfaces the
+      // existing "다시 번역" banner instead of quietly mismatching columns.
+      await loadChapter(bookId, selectedChapter);
+    } catch (e) {
+      setEditEnErr(e instanceof Error ? e.message : '저장하지 못했어요.');
+    } finally {
+      setSavingEn(false);
+    }
   };
 
   // ── PDF upload & chapter splitting ────────────────────────────────────────
@@ -2025,7 +2074,15 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
             : ` / ${totalChapters}`}
         </span>
         {enText && (
-          <span className="text-xs text-muted">{enText.trim().split(/\s+/).length}단어</span>
+          <span className="inline-flex items-center gap-3">
+            <span className="text-xs text-muted">{enText.trim().split(/\s+/).length}단어</span>
+            {!editingEn && (
+              <button onClick={startEditEn}
+                className="text-xs text-violet-600 hover:text-violet-700 font-semibold inline-flex items-center gap-1">
+                <Icon name="document" className="h-3.5 w-3.5" /> 본문 수정
+              </button>
+            )}
+          </span>
         )}
       </div>
 
@@ -2215,6 +2272,45 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       {chapterLoading ? (
         <div className="flex items-center justify-center py-12">
           <div className="text-xs text-muted animate-pulse">챕터 불러오는 중...</div>
+        </div>
+      ) : editingEn ? (
+        <div className="surface p-4 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-semibold text-gray-700 inline-flex items-center gap-2">
+              <Icon name="document" className="h-4 w-4 text-violet-500" /> 본문 수정
+            </span>
+            <span className="text-xs text-muted">
+              {draftEn.trim() ? `${draftEn.trim().split(/\s+/).length}단어` : '비어 있음'}
+            </span>
+          </div>
+          <p className="text-xs text-muted">
+            사진에서 읽어온 글자를 직접 고칠 수 있어요. 교재 쪽번호나 붙어버린 제목처럼 본문이 아닌 부분을 지우면 문장이 더 정확하게 나뉘어요.
+          </p>
+          <textarea
+            value={draftEn}
+            onChange={e => setDraftEn(e.target.value)}
+            spellCheck={false}
+            className="w-full rounded-xl p-3 text-sm leading-relaxed font-mono"
+            style={{
+              minHeight: '16rem',
+              background: 'var(--paper)',
+              border: '1px solid var(--rule-2)',
+              color: 'var(--ink)',
+            }}
+          />
+          {editEnErr && (
+            <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{editEnErr}</p>
+          )}
+          <div className="flex items-center gap-2">
+            <button onClick={saveEditEn} disabled={savingEn}
+              className="btn-primary flex-1 text-sm inline-flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+              <Icon name="check" className="h-4 w-4" /> {savingEn ? '저장 중...' : '저장'}
+            </button>
+            <button onClick={() => { setEditingEn(false); setEditEnErr(''); }} disabled={savingEn}
+              className="btn-soft px-4 text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+              취소
+            </button>
+          </div>
         </div>
       ) : enText ? (
         <SentenceRows
