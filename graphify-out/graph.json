@@ -1920,7 +1920,7 @@
       "file_type": "code",
       "norm_label": "getrows()",
       "source_file": "scripts/generate-listening-scripts.mjs",
-      "source_location": "L41"
+      "source_location": "L44"
     },
     {
       "id": "scripts_trim_audio_head_dur",
@@ -3364,7 +3364,7 @@
       "file_type": "code",
       "norm_label": "done",
       "source_file": "scripts/generate-listening-scripts.mjs",
-      "source_location": "L82"
+      "source_location": "L88"
     },
     {
       "id": "scripts_generate_listening_scripts_failed",
@@ -3375,7 +3375,7 @@
       "file_type": "code",
       "norm_label": "failed",
       "source_file": "scripts/generate-listening-scripts.mjs",
-      "source_location": "L83"
+      "source_location": "L89"
     },
     {
       "id": "scripts_generate_listening_scripts_havescript",
@@ -3386,7 +3386,7 @@
       "file_type": "code",
       "norm_label": "havescript",
       "source_file": "scripts/generate-listening-scripts.mjs",
-      "source_location": "L50"
+      "source_location": "L56"
     },
     {
       "id": "scripts_generate_listening_scripts_only_book",
@@ -3430,7 +3430,7 @@
       "file_type": "code",
       "norm_label": "targets",
       "source_file": "scripts/generate-listening-scripts.mjs",
-      "source_location": "L52"
+      "source_location": "L58"
     },
     {
       "id": "scripts_generate_listening_scripts_rationale_5",
@@ -5265,7 +5265,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/generate-listening-scripts.mjs",
-      "source_location": "L43",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -10763,7 +10763,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/generate-listening-scripts.mjs",
-      "source_location": "L41",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -10774,7 +10774,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/generate-listening-scripts.mjs",
-      "source_location": "L50",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -10785,7 +10785,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/generate-listening-scripts.mjs",
-      "source_location": "L52",
+      "source_location": "L58",
       "weight": 1.0
     },
     {
@@ -10796,7 +10796,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/generate-listening-scripts.mjs",
-      "source_location": "L82",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -10807,7 +10807,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/generate-listening-scripts.mjs",
-      "source_location": "L83",
+      "source_location": "L89",
       "weight": 1.0
     },
     {
@@ -14617,5 +14617,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4986b9e66d3c455a3be465ddcc4388eecd4db91e"
+  "built_at_commit": "c418f86ddcb180ff54b483472362d48dbc0a90bd"
 }
