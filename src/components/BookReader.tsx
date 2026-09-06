@@ -18,6 +18,7 @@ import { sessionSetDetail } from '../lib/tracker';
 import type { VocabItem } from '../lib/types';
 import type { WordTimestamp } from '../lib/audioAlign';
 import Icon from './Icon';
+import PassageEditor from './PassageEditor';
 import ImageUploadInput from './ImageUploadInput';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
@@ -840,17 +841,20 @@ interface ListeningPanelProps {
   translating: boolean;
   txError: string;
   fileRef: React.RefObject<HTMLInputElement | null>;
-  onExtracted: (text: string) => void;
+  onExtracted: (text: string) => Promise<void>;
+  onSaveKo: (text: string) => Promise<void>;
   onTranslate: () => void;
   onAudioFile: (file: File) => void;
   onDeleteAudio: () => void;
 }
 function ListeningPanel({
   selectedChapter, bk, loading, enText, enSrc, koText, audioUrl, audioUploading,
-  translating, txError, fileRef, onExtracted, onTranslate, onAudioFile, onDeleteAudio,
+  translating, txError, fileRef, onExtracted, onSaveKo, onTranslate, onAudioFile, onDeleteAudio,
 }: ListeningPanelProps) {
   // Declared before the early returns below — hooks can't sit behind a branch.
   const [showReplace, setShowReplace] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editingKo, setEditingKo] = useState(false);
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -889,15 +893,32 @@ function ListeningPanel({
     return (
       <div className="space-y-3">
         {audioBlock}
-        <div className="surface p-4">
-          <ImageUploadInput
-            key={`listening-upload-${bk.shortTitle}-ch${selectedChapter}`}
-            mode="text"
-            label={`L${selectedChapter} 듣기 스크립트 사진`}
-            hint="이번 주 듣기 스크립트 사진을 올리면 자동으로 텍스트가 추출돼요"
-            onExtracted={onExtracted}
+        {editing ? (
+          <PassageEditor
+            title="듣기 스크립트 직접 입력"
+            hint="스크립트를 직접 입력하거나 붙여넣을 수 있어요. 사진이 없어도 바로 읽고 번역할 수 있어요."
+            initialText=""
+            saveLabel="추가"
+            onSave={async text => { await onExtracted(text); setEditing(false); }}
+            onCancel={() => setEditing(false)}
           />
-        </div>
+        ) : (
+          <div className="surface p-4 space-y-3">
+            <ImageUploadInput
+              key={`listening-upload-${bk.shortTitle}-ch${selectedChapter}`}
+              mode="text"
+              label={`L${selectedChapter} 듣기 스크립트 사진`}
+              hint="이번 주 듣기 스크립트 사진을 올리면 자동으로 텍스트가 추출돼요"
+              onExtracted={onExtracted}
+            />
+            <div className="text-center">
+              <button onClick={() => setEditing(true)}
+                className="text-xs text-violet-600 hover:text-violet-700 font-semibold">
+                또는 직접 입력하기
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -920,11 +941,29 @@ function ListeningPanel({
             <><Icon name="document" className="h-3.5 w-3.5" /> 교재 사진에서 추출한 스크립트</>
           )}
         </span>
-        <button onClick={() => setShowReplace(v => !v)}
-          className="text-xs text-violet-600 hover:text-violet-700 font-semibold shrink-0">
-          {showReplace ? '닫기' : '교재 사진으로 교체'}
-        </button>
+        <span className="inline-flex items-center gap-3 shrink-0">
+          {/* Fixing a few mis-heard words shouldn't require re-shooting the
+              page — especially for a transcript, where the errors are usually
+              a word or two rather than the whole script. */}
+          <button onClick={() => { setShowReplace(false); setEditing(true); }}
+            className="text-xs text-violet-600 hover:text-violet-700 font-semibold inline-flex items-center gap-1">
+            <Icon name="document" className="h-3.5 w-3.5" /> 수정
+          </button>
+          <button onClick={() => setShowReplace(v => !v)}
+            className="text-xs text-muted hover:text-violet-600 transition-colors font-semibold">
+            {showReplace ? '닫기' : '교재 사진으로 교체'}
+          </button>
+        </span>
       </div>
+      {editing && (
+        <PassageEditor
+          title="듣기 스크립트 수정"
+          hint="잘못 들린 단어나 문장을 직접 고칠 수 있어요. 저장하면 자동 생성 표시가 사라져요."
+          initialText={enText}
+          onSave={async text => { await onExtracted(text); setEditing(false); }}
+          onCancel={() => setEditing(false)}
+        />
+      )}
       {showReplace && (
         <div className="surface p-4">
           <ImageUploadInput
@@ -947,6 +986,25 @@ function ListeningPanel({
         <div className="surface-soft px-4 py-3 text-xs text-gray-600 font-semibold text-center">번역 중...</div>
       )}
       {txError && <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{txError}</p>}
+
+      {koText && !translating && (
+        <div className="px-1 flex items-center justify-between gap-2 flex-wrap">
+          <span className="text-xs text-emerald-600 font-semibold">✓ 번역 저장됨</span>
+          <button onClick={() => setEditingKo(true)}
+            className="text-xs text-violet-600 hover:text-violet-700 font-semibold inline-flex items-center gap-1">
+            <Icon name="document" className="h-3.5 w-3.5" /> 번역 수정
+          </button>
+        </div>
+      )}
+      {editingKo && (
+        <PassageEditor
+          title="듣기 번역 수정"
+          hint="한 줄이 영어 한 문장에 대응해요. 줄 수를 그대로 두면 문장이 나란히 유지돼요."
+          initialText={koText ?? ''}
+          onSave={async text => { await onSaveKo(text); setEditingKo(false); }}
+          onCancel={() => setEditingKo(false)}
+        />
+      )}
 
       <div className="surface p-4 space-y-3">
         {enRows.map((en, i) => (
@@ -1114,14 +1172,13 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   const [koText,        setKoText]        = useState<string | null>(null);
   const [chapterLoading,setChapterLoading]= useState(false);
 
-  // Hand-editing the passage. The text arrives by OCR from textbook photos, so
-  // it carries the page's own furniture — stray paragraph numbers, a heading
-  // glued onto the first sentence, split words. Re-shooting the photo rarely
-  // fixes those, so the fix has to be editable text.
-  const [editingEn,  setEditingEn]  = useState(false);
-  const [draftEn,    setDraftEn]    = useState('');
-  const [savingEn,   setSavingEn]   = useState(false);
-  const [editEnErr,  setEditEnErr]  = useState('');
+  // Typing/editing a section's text by hand. The text arrives by OCR from
+  // textbook photos, so it carries the page's own furniture — stray paragraph
+  // numbers, a heading glued onto the first sentence, split words — and some
+  // lessons have no photo at all. One flag per section; the editor itself owns
+  // the draft, so adding a section costs one flag, not four useStates.
+  const [editingEn, setEditingEn] = useState(false); // reading passage
+  const [editingKo, setEditingKo] = useState(false); // reading translation
 
   const [extracting,   setExtracting]   = useState(false);
   const [progress,     setProgress]     = useState({ done: 0, total: 0 });
@@ -1222,7 +1279,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     // Leaving edit mode open across a chapter switch would show one lesson's
     // draft over another lesson's passage, and save it onto the wrong lesson.
     setEditingEn(false);
-    setEditEnErr('');
+    setEditingKo(false);
     setEnText(null);
     setKoText(null);
     setAudioUrl(null);
@@ -1346,40 +1403,28 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     await loadChapter(bookId, chapter);
   };
 
-  const startEditEn = () => {
-    setDraftEn(enText ?? '');
-    setEditEnErr('');
-    setEditingEn(true);
+  const saveEditEn = async (text: string) => {
+    // Audio timings are stored as one entry per sentence, positionally. An edit
+    // that changes the sentence count leaves every later entry pointing at the
+    // wrong line, so drop them and let the reader offer 음성 분석 again rather
+    // than silently highlighting the wrong sentence.
+    const sentencesBefore = splitToSentences(enText ?? '').length;
+    const sentencesAfter  = splitToSentences(text).length;
+    await saveChapterEn(bookId, selectedChapter, text);
+    if (sentencesBefore !== sentencesAfter) {
+      await deleteChapterTimings(bookId, selectedChapter).catch(() => {});
+    }
+    setEditingEn(false);
+    // Reload rather than patching state locally: this re-runs the Korean
+    // alignment check, so an edit that desyncs the translation surfaces the
+    // existing "다시 번역" banner instead of quietly mismatching columns.
+    await loadChapter(bookId, selectedChapter);
   };
 
-  const saveEditEn = async () => {
-    const text = draftEn.trim();
-    // Saving empty would delete the passage row and drop the lesson back to the
-    // photo-upload screen — almost certainly not what "edit" meant.
-    if (!text) { setEditEnErr('본문이 비어 있어요. 내용을 입력하거나 취소하세요.'); return; }
-    setSavingEn(true);
-    setEditEnErr('');
-    try {
-      // Audio timings are stored as one entry per sentence, positionally. An
-      // edit that changes the sentence count leaves every later entry pointing
-      // at the wrong line, so drop them and let the reader offer 음성 분석 again
-      // rather than silently highlighting the wrong sentence.
-      const sentencesBefore = splitToSentences(enText ?? '').length;
-      const sentencesAfter  = splitToSentences(text).length;
-      await saveChapterEn(bookId, selectedChapter, text);
-      if (sentencesBefore !== sentencesAfter) {
-        await deleteChapterTimings(bookId, selectedChapter).catch(() => {});
-      }
-      setEditingEn(false);
-      // Reload rather than patching state locally: this re-runs the Korean
-      // alignment check, so an edit that desyncs the translation surfaces the
-      // existing "다시 번역" banner instead of quietly mismatching columns.
-      await loadChapter(bookId, selectedChapter);
-    } catch (e) {
-      setEditEnErr(e instanceof Error ? e.message : '저장하지 못했어요.');
-    } finally {
-      setSavingEn(false);
-    }
+  const saveEditKo = async (text: string) => {
+    await saveChapterKo(bookId, selectedChapter, text);
+    setEditingKo(false);
+    await loadChapter(bookId, selectedChapter);
   };
 
   // ── PDF upload & chapter splitting ────────────────────────────────────────
@@ -2077,7 +2122,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           <span className="inline-flex items-center gap-3">
             <span className="text-xs text-muted">{enText.trim().split(/\s+/).length}단어</span>
             {!editingEn && (
-              <button onClick={startEditEn}
+              <button onClick={() => setEditingEn(true)}
                 className="text-xs text-violet-600 hover:text-violet-700 font-semibold inline-flex items-center gap-1">
                 <Icon name="document" className="h-3.5 w-3.5" /> 본문 수정
               </button>
@@ -2132,12 +2177,20 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
             </div>
           )}
           {koText && !translating && !misaligned && (
-            <div className="px-1 flex items-center justify-between">
+            <div className="px-1 flex items-center justify-between gap-2 flex-wrap">
               <span className="text-xs text-emerald-600 font-semibold">✓ 번역 저장됨</span>
-              <button onClick={handleTranslate}
-                className="text-xs text-muted hover:text-violet-600 transition-colors font-semibold inline-flex items-center gap-1.5">
-                <Icon name="refresh" className="h-3.5 w-3.5" /> 다시 번역 (문장 정렬)
-              </button>
+              <span className="inline-flex items-center gap-3">
+                {/* The translation is machine-made, so a wrong word should be
+                    fixable directly instead of only by re-translating the lot. */}
+                <button onClick={() => setEditingKo(true)}
+                  className="text-xs text-violet-600 hover:text-violet-700 font-semibold inline-flex items-center gap-1">
+                  <Icon name="document" className="h-3.5 w-3.5" /> 번역 수정
+                </button>
+                <button onClick={handleTranslate}
+                  className="text-xs text-muted hover:text-violet-600 transition-colors font-semibold inline-flex items-center gap-1.5">
+                  <Icon name="refresh" className="h-3.5 w-3.5" /> 다시 번역 (문장 정렬)
+                </button>
+              </span>
             </div>
           )}
         </>
@@ -2274,44 +2327,24 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           <div className="text-xs text-muted animate-pulse">챕터 불러오는 중...</div>
         </div>
       ) : editingEn ? (
-        <div className="surface p-4 space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-semibold text-gray-700 inline-flex items-center gap-2">
-              <Icon name="document" className="h-4 w-4 text-violet-500" /> 본문 수정
-            </span>
-            <span className="text-xs text-muted">
-              {draftEn.trim() ? `${draftEn.trim().split(/\s+/).length}단어` : '비어 있음'}
-            </span>
-          </div>
-          <p className="text-xs text-muted">
-            사진에서 읽어온 글자를 직접 고칠 수 있어요. 교재 쪽번호나 붙어버린 제목처럼 본문이 아닌 부분을 지우면 문장이 더 정확하게 나뉘어요.
-          </p>
-          <textarea
-            value={draftEn}
-            onChange={e => setDraftEn(e.target.value)}
-            spellCheck={false}
-            className="w-full rounded-xl p-3 text-sm leading-relaxed font-mono"
-            style={{
-              minHeight: '16rem',
-              background: 'var(--paper)',
-              border: '1px solid var(--rule-2)',
-              color: 'var(--ink)',
-            }}
-          />
-          {editEnErr && (
-            <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{editEnErr}</p>
-          )}
-          <div className="flex items-center gap-2">
-            <button onClick={saveEditEn} disabled={savingEn}
-              className="btn-primary flex-1 text-sm inline-flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
-              <Icon name="check" className="h-4 w-4" /> {savingEn ? '저장 중...' : '저장'}
-            </button>
-            <button onClick={() => { setEditingEn(false); setEditEnErr(''); }} disabled={savingEn}
-              className="btn-soft px-4 text-sm disabled:opacity-60 disabled:cursor-not-allowed">
-              취소
-            </button>
-          </div>
-        </div>
+        <PassageEditor
+          title={enText ? '본문 수정' : '본문 직접 입력'}
+          hint={enText
+            ? '사진에서 읽어온 글자를 직접 고칠 수 있어요. 교재 쪽번호나 붙어버린 제목처럼 본문이 아닌 부분을 지우면 문장이 더 정확하게 나뉘어요.'
+            : '지문을 직접 입력하거나 붙여넣을 수 있어요. 사진이 없어도 이 수업을 바로 시작할 수 있어요.'}
+          initialText={enText ?? ''}
+          saveLabel={enText ? '저장' : '추가'}
+          onSave={saveEditEn}
+          onCancel={() => setEditingEn(false)}
+        />
+      ) : editingKo ? (
+        <PassageEditor
+          title="번역 수정"
+          hint="한 줄이 영어 한 문장에 대응해요. 줄 수를 그대로 두면 두 칸이 나란히 유지되고, 줄을 더하거나 지우면 정렬이 어긋나 '다시 번역'이 필요할 수 있어요."
+          initialText={koText ?? ''}
+          onSave={saveEditKo}
+          onCancel={() => setEditingKo(false)}
+        />
       ) : enText ? (
         <SentenceRows
           enRows={enRows} koRows={bk.hideTranslation ? [] : koRows} maxRows={bk.hideTranslation ? enRows.length : maxRows}
@@ -2320,7 +2353,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           onSeek={seekToSentence} setRowRef={setRowRef} setMobileRowRef={setMobileRowRef}
         />
       ) : bk.lessonKind === 'topical' ? (
-        <div className="surface p-4">
+        <div className="surface p-4 space-y-3">
           <ImageUploadInput
             key={`reading-upload-${bookId}-ch${selectedChapter}`}
             mode="text"
@@ -2331,10 +2364,21 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
               await loadChapter(bookId, selectedChapter);
             }}
           />
+          {/* A photo isn't always the fastest way in — the passage may already
+              exist as text to paste, or the book may not be to hand. */}
+          <div className="text-center">
+            <button onClick={() => setEditingEn(true)}
+              className="text-xs text-violet-600 hover:text-violet-700 font-semibold">
+              또는 직접 입력하기
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="surface-soft p-8 text-center text-sm text-gray-500">
-          이 챕터의 텍스트를 불러올 수 없어요.
+        <div className="surface-soft p-6 text-center space-y-3">
+          <div className="text-sm text-gray-500">이 챕터의 텍스트가 아직 없어요.</div>
+          <button onClick={() => setEditingEn(true)} className="btn-soft px-4 text-sm">
+            본문 직접 입력
+          </button>
         </div>
       )}
 
@@ -2349,6 +2393,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           fileRef={listenFileRef}
           onExtracted={async text => {
             await saveListeningEn(bookId, selectedChapter, text);
+            await loadChapter(bookId, selectedChapter);
+          }}
+          onSaveKo={async text => {
+            await saveListeningKo(bookId, selectedChapter, text);
             await loadChapter(bookId, selectedChapter);
           }}
           onTranslate={handleListenTranslate}
