@@ -20,7 +20,7 @@ import { sessionFlush, sessionSwitch, sessionSetDetail, sessionPause, sessionRes
 import { csGet, csSet, csDel, csGetAppState, csSetBatch } from './lib/cloudStorage';
 import { migrateChaptersFromLocalStorage, loadChapterVocab, loadChapterCount } from './lib/chapterStorage';
 import type { VocabItem } from './lib/types';
-import { BOOKS, activeBookIds, defaultBookId, type BookId } from './data/syllabus';
+import { BOOKS, activeBookIds, defaultBookId, currentLessonNumberFor, type BookId } from './data/syllabus';
 
 type MainTab = 'v1' | 'progress';
 type V1Tab   = 'reading' | 'vocabulary' | 'games';
@@ -75,7 +75,10 @@ export default function App() {
   // Manual switching still works within a session.
   const [v1Book, setV1BookState] = useState<BookId>(defaultBookId());
   const [v1Vocab, setV1Vocab] = useState<Record<number, VocabItem[] | null>>({});
-  const [v1VocabCh, setV1VocabCh] = useState<number>(1);
+  // 단어장 opens on the same lesson the reader does — the one the next class
+  // covers — instead of always starting at L1. Studying last week's words while
+  // the reader shows next week's passage was the mismatch this fixes.
+  const [v1VocabCh, setV1VocabCh] = useState<number>(() => currentLessonNumberFor(v1Book) ?? 1);
   // Novel books discover their chapter count from uploaded content; topical
   // (Bridge) books know it upfront from the syllabus. See BookInfo.lessonCount.
   const [v1ChapterCount, setV1ChapterCount] = useState<number>(6);
@@ -103,6 +106,10 @@ export default function App() {
         try {
           const count = await resolveChapterCount(v1Book);
           setV1ChapterCount(count);
+          // The schedule can name a lesson the book has no slot for yet (a
+          // 13-week syllabus whose content stops at L4). Clamp so the selector
+          // always has the chosen lesson to highlight.
+          setV1VocabCh(ch => Math.min(ch, Math.max(count, 1)));
           setV1Vocab(await loadAllVocab(v1Book, count));
         } catch { /* ignore */ } finally {
           // csGetAppState primes the cloud-storage cache used across the app.
@@ -116,7 +123,7 @@ export default function App() {
   // ── Persisting setters (fire-and-forget to Supabase) ────────────────────
   const setV1Book = (b: BookId) => {
     setV1BookState(b);
-    setV1VocabCh(1);
+    setV1VocabCh(currentLessonNumberFor(b) ?? 1);
     setV1StudiedWords([]);
     setV1Vocab({});
     csSet('v1_book', b).catch(() => {});
@@ -124,6 +131,7 @@ export default function App() {
     resolveChapterCount(b).then(async count => {
       if (seq !== v1BookSeqRef) return;
       setV1ChapterCount(count);
+      setV1VocabCh(ch => Math.min(ch, Math.max(count, 1)));
       const vocab = await loadAllVocab(b, count);
       if (seq !== v1BookSeqRef) return;
       setV1Vocab(vocab);
