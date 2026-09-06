@@ -855,16 +855,46 @@ function ListeningPanel({
       </div>
     );
   }
+  // The audio player is independent of the script: a term's audio is uploaded in
+  // one batch, while each week's script arrives later with its textbook photos.
+  // Rendering this in both branches means audio is listenable as soon as it
+  // exists, instead of being hidden behind a script that isn't in yet.
+  const audioBlock = (
+    <div className="surface p-4 space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <Icon name="headphones" className="h-4 w-4 text-violet-500" /> 듣기 오디오
+        </span>
+        <div className="flex items-center gap-2">
+          {audioUrl && (
+            <button onClick={onDeleteAudio}
+              className="text-xs text-muted hover:text-red-500 transition-colors inline-flex items-center gap-1"><Icon name="trash" className="h-3.5 w-3.5" /> 삭제</button>
+          )}
+          <button onClick={() => fileRef.current?.click()} disabled={audioUploading}
+            className="text-xs text-violet-600 hover:text-violet-700 font-semibold disabled:opacity-50">
+            {audioUploading ? '업로드 중...' : audioUrl ? 'mp3 다시 업로드' : '+ mp3 업로드'}
+          </button>
+          <input ref={fileRef} type="file" accept="audio/*" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) onAudioFile(f); }} />
+        </div>
+      </div>
+      {audioUrl && <audio src={audioUrl} controls className="w-full" />}
+    </div>
+  );
+
   if (!enText) {
     return (
-      <div className="surface p-4">
-        <ImageUploadInput
-          key={`listening-upload-${bk.shortTitle}-ch${selectedChapter}`}
-          mode="text"
-          label={`L${selectedChapter} 듣기 스크립트 사진`}
-          hint="이번 주 듣기 스크립트 사진을 올리면 자동으로 텍스트가 추출돼요"
-          onExtracted={onExtracted}
-        />
+      <div className="space-y-3">
+        {audioBlock}
+        <div className="surface p-4">
+          <ImageUploadInput
+            key={`listening-upload-${bk.shortTitle}-ch${selectedChapter}`}
+            mode="text"
+            label={`L${selectedChapter} 듣기 스크립트 사진`}
+            hint="이번 주 듣기 스크립트 사진을 올리면 자동으로 텍스트가 추출돼요"
+            onExtracted={onExtracted}
+          />
+        </div>
       </div>
     );
   }
@@ -872,26 +902,7 @@ function ListeningPanel({
   const koRows = koText ? splitKoRows(koText) : [];
   return (
     <div className="space-y-3">
-      <div className="surface p-4 space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <Icon name="headphones" className="h-4 w-4 text-violet-500" /> 듣기 오디오
-          </span>
-          <div className="flex items-center gap-2">
-            {audioUrl && (
-              <button onClick={onDeleteAudio}
-                className="text-xs text-muted hover:text-red-500 transition-colors inline-flex items-center gap-1"><Icon name="trash" className="h-3.5 w-3.5" /> 삭제</button>
-            )}
-            <button onClick={() => fileRef.current?.click()} disabled={audioUploading}
-              className="text-xs text-violet-600 hover:text-violet-700 font-semibold disabled:opacity-50">
-              {audioUploading ? '업로드 중...' : audioUrl ? '📁 다시 업로드' : '+ mp3 업로드'}
-            </button>
-            <input ref={fileRef} type="file" accept="audio/*" className="hidden"
-              onChange={e => { const f = e.target.files?.[0]; if (f) onAudioFile(f); }} />
-          </div>
-        </div>
-        {audioUrl && <audio src={audioUrl} controls className="w-full" />}
-      </div>
+      {audioBlock}
 
       {!koText && !translating && (
         <button onClick={onTranslate}
@@ -2036,6 +2047,23 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           )}
         </>
       )}
+      {/* Audio arrived before the passage text. The shadowing player below is
+          driven by clicking sentences (its <audio> is deliberately hidden), so
+          with no text it would render as an unplayable shell. Give the file
+          plain controls instead — it's listenable now, and this block gives way
+          to the full shadowing UI as soon as the passage photos are uploaded. */}
+      {!chapterLoading && !enText && audioUrl && (
+        <div className="surface p-4 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <Icon name="headphones" className="h-4 w-4 text-violet-500" /> 본문 오디오
+            </span>
+            <span className="text-xs text-muted">지문 사진을 올리면 문장별 섀도잉이 켜져요</span>
+          </div>
+          <audio src={audioUrl} controls className="w-full" />
+        </div>
+      )}
+
       {/* Chapter audio — shadowing with real-time sentence highlight */}
       {!chapterLoading && enText && (
         <div className="surface p-4 space-y-3">

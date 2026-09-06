@@ -34,8 +34,17 @@ export async function loadChapterKo(bookId: BookId, lesson: number): Promise<str
   return (data as { value: string } | null)?.value ?? null;
 }
 
+// A book counts as "started" once it has EITHER passage text or audio. Audio can
+// legitimately land first: a whole term's class audio is uploaded in one go,
+// while each lesson's text only arrives when its textbook photos do. Keying this
+// on text alone sent a book with audio-but-no-text to the empty upload screen,
+// leaving already-uploaded audio unreachable.
 export async function hasBook(bookId: BookId): Promise<boolean> {
-  return csKeyExists(`chapter_${bookId}_%_en`);
+  const [hasText, hasAudio] = await Promise.all([
+    csKeyExists(`chapter_${bookId}_%_en`),
+    csKeyExists(`chapter_${bookId}_%_audio`),
+  ]);
+  return hasText || hasAudio;
 }
 
 export async function clearBook(bookId: BookId): Promise<void> {
