@@ -157,8 +157,22 @@ export async function deleteChapterTimings(bookId: BookId, chapter: number): Pro
 // Bridge lessons have a separate Listening passage/audio alongside the
 // Reading passage above — old novel-kind books never use these. Same key
 // shapes/semantics as the Reading equivalents, with a `_listening_` infix.
+// A script generated from the audio by speech-to-text is tagged with this
+// marker so the reader can label it and keep offering the textbook-photo path.
+// Text OCR'd from the textbook carries no marker — it IS the accurate source.
+const listeningEnSrcKey = (bookId: BookId, lesson: number) =>
+  `chapter_${bookId}_${lesson}_listening_en_src`;
+
+export async function loadListeningEnSrc(bookId: BookId, lesson: number): Promise<string | null> {
+  return csGet(listeningEnSrcKey(bookId, lesson));
+}
+
 export async function saveListeningEn(bookId: BookId, lesson: number, text: string): Promise<void> {
   const key = `chapter_${bookId}_${lesson}_listening_en`;
+  // This path is only reached from the textbook-photo OCR flow, so whatever
+  // lands here supersedes any generated transcript — drop the marker with it,
+  // or the accurate script would keep being labelled auto-generated.
+  await csDel(listeningEnSrcKey(bookId, lesson)).catch(() => {});
   if (!text.trim()) { await csDel(key); return; }
   await csSet(key, text);
 }

@@ -9,6 +9,33 @@ interface DeepgramWord {
   end: number;
 }
 
+// Deepgram's own query string, in one place so both request paths stay in sync.
+// paragraphs=true adds a paragraph-broken rendering of the transcript on top of
+// smart_format's punctuation/capitalisation — needed because a listening script
+// is read as prose, not as a flat run of words.
+const DG_URL = 'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&paragraphs=true';
+
+// Callers that only ever wanted timings keep reading `words`; `transcript` is
+// additive, for callers that want the script text itself.
+function extract(dgData: unknown) {
+  const alt = (dgData as {
+    results?: {
+      channels?: {
+        alternatives?: {
+          words?: DeepgramWord[];
+          transcript?: string;
+          paragraphs?: { transcript?: string };
+        }[];
+      }[];
+    };
+  })?.results?.channels?.[0]?.alternatives?.[0];
+  return {
+    words: alt?.words ?? [],
+    // Prefer the paragraph-broken text; fall back to the flat punctuated one.
+    transcript: (alt?.paragraphs?.transcript ?? alt?.transcript ?? '').trim(),
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -79,7 +106,7 @@ Deno.serve(async (req) => {
         return json({ message: 'audioUrl must be a taylor-audio Storage URL' }, 400);
       }
       const dgRes = await fetch(
-        'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
+        DG_URL,
         {
           method: 'POST',
           headers: {
@@ -94,10 +121,7 @@ Deno.serve(async (req) => {
         return json({ message: `Deepgram failed (${dgRes.status}): ${detail}` }, dgRes.status);
       }
       const dgData = await dgRes.json();
-      const words = (
-        dgData?.results?.channels?.[0]?.alternatives?.[0]?.words ?? []
-      ) as DeepgramWord[];
-      return json({ words });
+      return json(extract(dgData));
     }
 
     // Raw binary path: client sent MP3 bytes directly (used for boundary detection
@@ -109,7 +133,7 @@ Deno.serve(async (req) => {
       return json({ message: 'audio too large (max 80 MB)' }, 413);
     }
     const dgRes = await fetch(
-      'https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true',
+      DG_URL,
       {
         method: 'POST',
         headers: {
@@ -124,10 +148,7 @@ Deno.serve(async (req) => {
       return json({ message: `Deepgram failed (${dgRes.status}): ${detail}` }, dgRes.status);
     }
     const dgData = await dgRes.json();
-    const words = (
-      dgData?.results?.channels?.[0]?.alternatives?.[0]?.words ?? []
-    ) as DeepgramWord[];
-    return json({ words });
+    return json(extract(dgData));
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return json({ message }, 500);

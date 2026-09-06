@@ -10,7 +10,7 @@ import {
   saveChapterAudio, loadChapterAudio, deleteChapterAudio,
   saveChapterTimings, loadChapterTimings, deleteChapterTimings,
   loadChapterVocab,
-  loadListeningEn, loadListeningKo, saveListeningEn, saveListeningKo,
+  loadListeningEn, loadListeningKo, saveListeningEn, saveListeningKo, loadListeningEnSrc,
   loadListeningAudio, saveListeningAudio, deleteListeningAudio,
   loadKnowledgeMap, type KnowledgeMap,
 } from '../lib/chapterStorage';
@@ -833,6 +833,7 @@ interface ListeningPanelProps {
   bk: { shortTitle: string; color: string; bg: string; border: string };
   loading: boolean;
   enText: string | null;
+  enSrc: string | null;
   koText: string | null;
   audioUrl: string | null;
   audioUploading: boolean;
@@ -845,9 +846,11 @@ interface ListeningPanelProps {
   onDeleteAudio: () => void;
 }
 function ListeningPanel({
-  selectedChapter, bk, loading, enText, koText, audioUrl, audioUploading,
+  selectedChapter, bk, loading, enText, enSrc, koText, audioUrl, audioUploading,
   translating, txError, fileRef, onExtracted, onTranslate, onAudioFile, onDeleteAudio,
 }: ListeningPanelProps) {
+  // Declared before the early returns below — hooks can't sit behind a branch.
+  const [showReplace, setShowReplace] = useState(false);
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -903,6 +906,36 @@ function ListeningPanel({
   return (
     <div className="space-y-3">
       {audioBlock}
+
+      {/* Where this script came from, and the way back to the accurate one.
+          A transcript generated from the audio is a stand-in until the textbook
+          photos exist, so it says so plainly rather than passing itself off as
+          the real script. The replace path stays available either way — without
+          it, filling this slot would permanently hide the upload prompt. */}
+      <div className="surface-soft px-3 py-2 flex items-center justify-between gap-2 flex-wrap">
+        <span className="text-xs text-muted inline-flex items-center gap-1.5">
+          {enSrc === 'asr' ? (
+            <><Icon name="mic" className="h-3.5 w-3.5" /> 음성에서 자동 생성된 스크립트 · 오류가 있을 수 있어요</>
+          ) : (
+            <><Icon name="document" className="h-3.5 w-3.5" /> 교재 사진에서 추출한 스크립트</>
+          )}
+        </span>
+        <button onClick={() => setShowReplace(v => !v)}
+          className="text-xs text-violet-600 hover:text-violet-700 font-semibold shrink-0">
+          {showReplace ? '닫기' : '교재 사진으로 교체'}
+        </button>
+      </div>
+      {showReplace && (
+        <div className="surface p-4">
+          <ImageUploadInput
+            key={`listening-replace-${bk.shortTitle}-ch${selectedChapter}`}
+            mode="text"
+            label={`L${selectedChapter} 듣기 스크립트 사진`}
+            hint="교재 사진을 올리면 자동 생성된 스크립트를 대체해요"
+            onExtracted={text => { setShowReplace(false); onExtracted(text); }}
+          />
+        </div>
+      )}
 
       {!koText && !translating && (
         <button onClick={onTranslate}
@@ -1105,6 +1138,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
   // a plain audio player, not the sentence-synced one Reading uses.
   const [passageView, setPassageView] = useState<'reading' | 'listening'>('reading');
   const [listenEnText,   setListenEnText]   = useState<string | null>(null);
+  // 'asr' when the script was transcribed from the audio rather than the textbook.
+  const [listenEnSrc,    setListenEnSrc]    = useState<string | null>(null);
   const [listenKoText,   setListenKoText]   = useState<string | null>(null);
   const [listenAudioUrl, setListenAudioUrl] = useState<string | null>(null);
   const [listenLoading,  setListenLoading]  = useState(false);
@@ -1233,16 +1268,19 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
     if (BOOKS[bid]?.hasListening) {
       setListenLoading(true);
       setListenEnText(null);
+      setListenEnSrc(null);
       setListenKoText(null);
       setListenAudioUrl(null);
       setListenTxError('');
-      const [lEn, lKo, lAudio] = await Promise.all([
+      const [lEn, lEnSrc, lKo, lAudio] = await Promise.all([
         loadListeningEn(bid, chapter).catch(() => null),
+        loadListeningEnSrc(bid, chapter).catch(() => null),
         loadListeningKo(bid, chapter).catch(() => null),
         loadListeningAudio(bid, chapter).catch(() => null),
       ]);
       if (loadSeqRef.current !== seq) return; // a newer load superseded this one
       setListenEnText(lEn);
+      setListenEnSrc(lEnSrc);
       setListenKoText(lKo);
       setListenAudioUrl(lAudio);
       setListenLoading(false);
@@ -2209,7 +2247,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       </>) : (
         <ListeningPanel
           bookId={bookId} selectedChapter={selectedChapter} bk={bk}
-          loading={listenLoading} enText={listenEnText} koText={listenKoText}
+          loading={listenLoading} enText={listenEnText} enSrc={listenEnSrc} koText={listenKoText}
           audioUrl={listenAudioUrl} audioUploading={listenAudioUploading}
           translating={listenTranslating} txError={listenTxError}
           fileRef={listenFileRef}

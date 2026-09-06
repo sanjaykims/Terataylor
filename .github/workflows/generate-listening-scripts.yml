@@ -1,0 +1,59 @@
+name: Generate Listening Scripts
+
+# Transcribes each Bridge lesson's 듣기 audio (via the deepgram-listen edge
+# function) and stores the text as that lesson's listening script.
+#
+# Only fills lessons that have listening audio but NO script yet — a script
+# OCR'd from the textbook is the accurate source and is never overwritten, so
+# this is safe to re-run whenever new audio lands.
+#
+# Trigger it by pushing a branch named gen-scripts/** (dispatching needs a
+# token with actions:write that this automation doesn't have). Run it with
+# dry_run first to see which lessons it would fill.
+#
+# ORDERING: this depends on deepgram-listen returning a `transcript` field.
+# If that function was just changed, let Deploy Edge Functions finish first —
+# otherwise every lesson fails with "empty transcript returned" (which is the
+# intended failure: it refuses to write a blank script).
+
+on:
+  push:
+    branches: ['gen-scripts/**']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'List the lessons that would be filled, without writing'
+        type: boolean
+        default: false
+      only_book:
+        description: 'Limit to one book (bridge_c1 | bridge_c2). Empty = both.'
+        default: ''
+      only_lesson:
+        description: 'Limit to one lesson number. Empty = all.'
+        default: ''
+      force:
+        description: 'Re-transcribe even if a script already exists (use with only_lesson)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: generate-listening-scripts
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Generate listening scripts
+        env:
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+          ONLY_BOOK: ${{ inputs.only_book }}
+          ONLY_LESSON: ${{ inputs.only_lesson }}
+          FORCE: ${{ inputs.force && '1' || '0' }}
+        run: node scripts/generate-listening-scripts.mjs
