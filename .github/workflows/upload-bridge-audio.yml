@@ -13,6 +13,12 @@ name: Upload Bridge Audio
 # Run once with dry_run to check the file -> lesson mapping before writing.
 
 on:
+  # Pushing a batch to an audio-drop/** branch IS the request to upload it —
+  # that branch pattern exists for nothing else, so there is no separate button
+  # to remember. main is not a trigger: it never carries the mp3s.
+  push:
+    branches: ['audio-drop/**']
+    paths: ['assets/bridge-audio/**']
   workflow_dispatch:
     inputs:
       dry_run:
