@@ -94,21 +94,24 @@
       "src_lib_cloudstorage_csset",
       "src_lib_cloudstorage_cssetbatch",
       "src_lib_cloudstorage_cssetjson",
-      "src_lib_cloudstorage_row",
-      "src_lib_supabase",
-      "src_lib_supabase_supabase",
-      "src_lib_supabase_supabase_key",
-      "src_lib_supabase_supabase_url"
+      "src_lib_cloudstorage_row"
     ],
     "1": [
-      "src_app_gamespanel",
+      "ref_react",
+      "ref_supabase_supabase_js",
+      "src_app",
+      "src_app_app",
       "src_app_imageuploadinput",
-      "src_app_vocabularypanel",
-      "src_components_gamespanel",
-      "src_components_gamespanel_gamespanel",
-      "src_components_gamespanel_gametype",
-      "src_components_gamespanel_props",
-      "src_components_gamespanel_tabs",
+      "src_app_maintab",
+      "src_app_progressdashboard",
+      "src_app_tabspinner",
+      "src_app_v1tab",
+      "src_components_icon",
+      "src_components_icon_icon",
+      "src_components_icon_iconname",
+      "src_components_icon_paths",
+      "src_components_icon_solid",
+      "src_components_icon_stroke",
       "src_components_imageuploadinput",
       "src_components_imageuploadinput_baseprops",
       "src_components_imageuploadinput_compressimage",
@@ -117,6 +120,56 @@
       "src_components_imageuploadinput_props",
       "src_components_imageuploadinput_textprops",
       "src_components_imageuploadinput_vocabprops",
+      "src_components_progressdashboard",
+      "src_components_progressdashboard_book_labels",
+      "src_components_progressdashboard_daykeytodate",
+      "src_components_progressdashboard_daynum",
+      "src_components_progressdashboard_daynumtokey",
+      "src_components_progressdashboard_feature_icons",
+      "src_components_progressdashboard_feature_labels",
+      "src_components_progressdashboard_formatdate",
+      "src_components_progressdashboard_formatduration",
+      "src_components_progressdashboard_formatsessionwhen",
+      "src_components_progressdashboard_game_labels",
+      "src_components_progressdashboard_kst_date",
+      "src_components_progressdashboard_kst_day_key",
+      "src_components_progressdashboard_kst_month_day",
+      "src_components_progressdashboard_kst_time",
+      "src_components_progressdashboard_kst_weekday",
+      "src_components_progressdashboard_kstdaykey",
+      "src_components_progressdashboard_minibar",
+      "src_components_progressdashboard_parsefeature",
+      "src_components_progressdashboard_progressdashboard",
+      "src_lib_cloudstorage_csgetappstate",
+      "src_lib_supabase",
+      "src_lib_supabase_supabase",
+      "src_lib_supabase_supabase_key",
+      "src_lib_supabase_supabase_url",
+      "src_lib_tracker",
+      "src_lib_tracker_fetchgamescores",
+      "src_lib_tracker_fetchstudysessions",
+      "src_lib_tracker_fetchvocabprogress",
+      "src_lib_tracker_gamescore",
+      "src_lib_tracker_segstart",
+      "src_lib_tracker_sessionflush",
+      "src_lib_tracker_sessionpause",
+      "src_lib_tracker_sessionresume",
+      "src_lib_tracker_sessionsetdetail",
+      "src_lib_tracker_sessionswitch",
+      "src_lib_tracker_studysession",
+      "src_lib_tracker_tracksession",
+      "src_lib_tracker_vocablocks",
+      "src_lib_tracker_vocabprogress",
+      "src_main"
+    ],
+    "2": [
+      "src_app_gamespanel",
+      "src_app_vocabularypanel",
+      "src_components_gamespanel",
+      "src_components_gamespanel_gamespanel",
+      "src_components_gamespanel_gametype",
+      "src_components_gamespanel_props",
+      "src_components_gamespanel_tabs",
       "src_components_sentencescramble",
       "src_components_sentencescramble_iskorean",
       "src_components_sentencescramble_props",
@@ -166,142 +219,8 @@
       "src_utils_textutils_stopwords",
       "src_utils_textutils_vocabword"
     ],
-    "2": [
-      "src_app",
-      "src_app_app",
-      "src_app_maintab",
-      "src_app_progressdashboard",
-      "src_app_tabspinner",
-      "src_app_v1tab",
-      "src_components_icon",
-      "src_components_icon_icon",
-      "src_components_icon_iconname",
-      "src_components_icon_paths",
-      "src_components_icon_solid",
-      "src_components_icon_stroke",
-      "src_components_lessonschedulewidget_lessonschedulewidget",
-      "src_components_progressdashboard",
-      "src_components_progressdashboard_book_labels",
-      "src_components_progressdashboard_daykeytodate",
-      "src_components_progressdashboard_daynum",
-      "src_components_progressdashboard_daynumtokey",
-      "src_components_progressdashboard_feature_icons",
-      "src_components_progressdashboard_feature_labels",
-      "src_components_progressdashboard_formatdate",
-      "src_components_progressdashboard_formatduration",
-      "src_components_progressdashboard_formatsessionwhen",
-      "src_components_progressdashboard_game_labels",
-      "src_components_progressdashboard_kst_date",
-      "src_components_progressdashboard_kst_day_key",
-      "src_components_progressdashboard_kst_month_day",
-      "src_components_progressdashboard_kst_time",
-      "src_components_progressdashboard_kst_weekday",
-      "src_components_progressdashboard_kstdaykey",
-      "src_components_progressdashboard_minibar",
-      "src_components_progressdashboard_parsefeature",
-      "src_components_progressdashboard_progressdashboard",
-      "src_data_syllabus_activebookids",
-      "src_data_syllabus_defaultbookid",
-      "src_lib_cloudstorage_csgetappstate",
-      "src_lib_tracker",
-      "src_lib_tracker_fetchgamescores",
-      "src_lib_tracker_fetchstudysessions",
-      "src_lib_tracker_fetchvocabprogress",
-      "src_lib_tracker_gamescore",
-      "src_lib_tracker_segstart",
-      "src_lib_tracker_sessionflush",
-      "src_lib_tracker_sessionpause",
-      "src_lib_tracker_sessionresume",
-      "src_lib_tracker_sessionsetdetail",
-      "src_lib_tracker_sessionswitch",
-      "src_lib_tracker_studysession",
-      "src_lib_tracker_tracksession",
-      "src_lib_tracker_vocablocks",
-      "src_lib_tracker_vocabprogress",
-      "src_main"
-    ],
     "3": [
-      "eslint",
-      "eslint_js",
-      "eslint_plugin_react_hooks",
-      "eslint_plugin_react_refresh",
-      "globals",
-      "package_devdependencies",
-      "package_devdependencies_eslint",
-      "package_devdependencies_eslint_js",
-      "package_devdependencies_eslint_plugin_react_hooks",
-      "package_devdependencies_eslint_plugin_react_refresh",
-      "package_devdependencies_globals",
-      "package_devdependencies_tailwindcss",
-      "package_devdependencies_tailwindcss_vite",
-      "package_devdependencies_types_node",
-      "package_devdependencies_types_react",
-      "package_devdependencies_types_react_dom",
-      "package_devdependencies_typescript",
-      "package_devdependencies_typescript_eslint",
-      "package_devdependencies_vite",
-      "package_devdependencies_vitejs_plugin_react",
-      "tailwindcss",
-      "tailwindcss_vite",
-      "types_node",
-      "types_react",
-      "types_react_dom",
-      "typescript",
-      "typescript_eslint",
-      "vite",
-      "vitejs_plugin_react"
-    ],
-    "4": [
-      "ref_dom",
-      "ref_src",
-      "ref_vite_client",
-      "tsconfig_app",
-      "tsconfig_app_compileroptions",
-      "tsconfig_app_compileroptions_allowimportingtsextensions",
-      "tsconfig_app_compileroptions_erasablesyntaxonly",
-      "tsconfig_app_compileroptions_jsx",
-      "tsconfig_app_compileroptions_lib",
-      "tsconfig_app_compileroptions_module",
-      "tsconfig_app_compileroptions_moduledetection",
-      "tsconfig_app_compileroptions_moduleresolution",
-      "tsconfig_app_compileroptions_noemit",
-      "tsconfig_app_compileroptions_nofallthroughcasesinswitch",
-      "tsconfig_app_compileroptions_nounusedlocals",
-      "tsconfig_app_compileroptions_nounusedparameters",
-      "tsconfig_app_compileroptions_skiplibcheck",
-      "tsconfig_app_compileroptions_target",
-      "tsconfig_app_compileroptions_tsbuildinfofile",
-      "tsconfig_app_compileroptions_types",
-      "tsconfig_app_compileroptions_verbatimmodulesyntax",
-      "tsconfig_app_include",
-      "tsconfig_app_json_ref_es2023"
-    ],
-    "5": [
-      "src_components_bookreader_listeningpanelprops",
-      "src_components_lessonschedulewidget",
-      "src_components_lessonschedulewidget_bookschedulesection",
-      "src_components_lessonschedulewidget_daysdiff",
-      "src_components_lessonschedulewidget_fmtdate",
-      "src_components_lessonschedulewidget_lessoncard",
-      "src_components_lessonschedulewidget_utcdays",
-      "src_data_syllabus",
-      "src_data_syllabus_bookid",
-      "src_data_syllabus_bookinfo",
-      "src_data_syllabus_books",
-      "src_data_syllabus_bridge_c1_topics",
-      "src_data_syllabus_bridge_c2_topics",
-      "src_data_syllabus_currentlesson",
-      "src_data_syllabus_currentlessonnumberfor",
-      "src_data_syllabus_essaysection",
-      "src_data_syllabus_holiday",
-      "src_data_syllabus_ksttoday",
-      "src_data_syllabus_lessonentry",
-      "src_data_syllabus_schedule",
-      "src_data_syllabus_writing_prompts",
-      "src_data_syllabus_writingprompt"
-    ],
-    "6": [
-      "huggingface_transformers",
+      "eslint_config",
       "package",
       "package_dependencies",
       "package_dependencies_huggingface_transformers",
@@ -318,35 +237,52 @@
       "package_scripts_preview",
       "package_type",
       "package_version",
-      "pdfjs_dist",
-      "react",
-      "react_dom",
-      "supabase_supabase_js"
+      "ref_eslint",
+      "ref_eslint_js",
+      "ref_eslint_plugin_react_hooks",
+      "ref_eslint_plugin_react_refresh",
+      "ref_globals",
+      "ref_pdfjs_dist",
+      "ref_react_dom",
+      "ref_tailwindcss",
+      "ref_tailwindcss_vite",
+      "ref_types_node",
+      "ref_types_react",
+      "ref_types_react_dom",
+      "ref_typescript",
+      "ref_typescript_eslint",
+      "ref_vite",
+      "ref_vitejs_plugin_react",
+      "vite_config"
     ],
-    "7": [
-      "ref_node",
-      "ref_vite_config_ts",
-      "tsconfig_node",
-      "tsconfig_node_compileroptions",
-      "tsconfig_node_compileroptions_allowimportingtsextensions",
-      "tsconfig_node_compileroptions_erasablesyntaxonly",
-      "tsconfig_node_compileroptions_lib",
-      "tsconfig_node_compileroptions_module",
-      "tsconfig_node_compileroptions_moduledetection",
-      "tsconfig_node_compileroptions_moduleresolution",
-      "tsconfig_node_compileroptions_noemit",
-      "tsconfig_node_compileroptions_nofallthroughcasesinswitch",
-      "tsconfig_node_compileroptions_nounusedlocals",
-      "tsconfig_node_compileroptions_nounusedparameters",
-      "tsconfig_node_compileroptions_skiplibcheck",
-      "tsconfig_node_compileroptions_target",
-      "tsconfig_node_compileroptions_tsbuildinfofile",
-      "tsconfig_node_compileroptions_types",
-      "tsconfig_node_compileroptions_verbatimmodulesyntax",
-      "tsconfig_node_include",
-      "tsconfig_node_json_ref_es2023"
+    "4": [
+      "src_components_bookreader_listeningpanelprops",
+      "src_components_lessonschedulewidget",
+      "src_components_lessonschedulewidget_bookschedulesection",
+      "src_components_lessonschedulewidget_daysdiff",
+      "src_components_lessonschedulewidget_fmtdate",
+      "src_components_lessonschedulewidget_lessoncard",
+      "src_components_lessonschedulewidget_lessonschedulewidget",
+      "src_components_lessonschedulewidget_utcdays",
+      "src_data_syllabus",
+      "src_data_syllabus_activebookids",
+      "src_data_syllabus_bookid",
+      "src_data_syllabus_bookinfo",
+      "src_data_syllabus_books",
+      "src_data_syllabus_bridge_c1_topics",
+      "src_data_syllabus_bridge_c2_topics",
+      "src_data_syllabus_currentlesson",
+      "src_data_syllabus_currentlessonnumberfor",
+      "src_data_syllabus_defaultbookid",
+      "src_data_syllabus_essaysection",
+      "src_data_syllabus_holiday",
+      "src_data_syllabus_ksttoday",
+      "src_data_syllabus_lessonentry",
+      "src_data_syllabus_schedule",
+      "src_data_syllabus_writing_prompts",
+      "src_data_syllabus_writingprompt"
     ],
-    "8": [
+    "5": [
       "scripts_split_audiobook",
       "scripts_split_audiobook_boundaries",
       "scripts_split_audiobook_buf",
@@ -367,7 +303,66 @@
       "scripts_split_audiobook_total",
       "scripts_split_audiobook_word2num"
     ],
+    "6": [
+      "tsconfig_app",
+      "tsconfig_app_compileroptions",
+      "tsconfig_app_compileroptions_allowimportingtsextensions",
+      "tsconfig_app_compileroptions_erasablesyntaxonly",
+      "tsconfig_app_compileroptions_jsx",
+      "tsconfig_app_compileroptions_lib",
+      "tsconfig_app_compileroptions_module",
+      "tsconfig_app_compileroptions_moduledetection",
+      "tsconfig_app_compileroptions_moduleresolution",
+      "tsconfig_app_compileroptions_noemit",
+      "tsconfig_app_compileroptions_nofallthroughcasesinswitch",
+      "tsconfig_app_compileroptions_nounusedlocals",
+      "tsconfig_app_compileroptions_nounusedparameters",
+      "tsconfig_app_compileroptions_skiplibcheck",
+      "tsconfig_app_compileroptions_target",
+      "tsconfig_app_compileroptions_tsbuildinfofile",
+      "tsconfig_app_compileroptions_types",
+      "tsconfig_app_compileroptions_verbatimmodulesyntax",
+      "tsconfig_app_include"
+    ],
+    "7": [
+      "tsconfig_node",
+      "tsconfig_node_compileroptions",
+      "tsconfig_node_compileroptions_allowimportingtsextensions",
+      "tsconfig_node_compileroptions_erasablesyntaxonly",
+      "tsconfig_node_compileroptions_lib",
+      "tsconfig_node_compileroptions_module",
+      "tsconfig_node_compileroptions_moduledetection",
+      "tsconfig_node_compileroptions_moduleresolution",
+      "tsconfig_node_compileroptions_noemit",
+      "tsconfig_node_compileroptions_nofallthroughcasesinswitch",
+      "tsconfig_node_compileroptions_nounusedlocals",
+      "tsconfig_node_compileroptions_nounusedparameters",
+      "tsconfig_node_compileroptions_skiplibcheck",
+      "tsconfig_node_compileroptions_target",
+      "tsconfig_node_compileroptions_tsbuildinfofile",
+      "tsconfig_node_compileroptions_types",
+      "tsconfig_node_compileroptions_verbatimmodulesyntax",
+      "tsconfig_node_include"
+    ],
+    "8": [
+      "package_devdependencies",
+      "package_devdependencies_eslint",
+      "package_devdependencies_eslint_js",
+      "package_devdependencies_eslint_plugin_react_hooks",
+      "package_devdependencies_eslint_plugin_react_refresh",
+      "package_devdependencies_globals",
+      "package_devdependencies_tailwindcss",
+      "package_devdependencies_tailwindcss_vite",
+      "package_devdependencies_types_node",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_typescript",
+      "package_devdependencies_typescript_eslint",
+      "package_devdependencies_vite",
+      "package_devdependencies_vitejs_plugin_react"
+    ],
     "9": [
+      "ref_huggingface_transformers",
       "src_lib_audioalign",
       "src_lib_audioalign_alignbynw",
       "src_lib_audioalign_alignchapteraudio",
@@ -384,6 +379,21 @@
       "transformers"
     ],
     "10": [
+      "scripts_upload_bridge_audio",
+      "scripts_upload_bridge_audio_books",
+      "scripts_upload_bridge_audio_fail",
+      "scripts_upload_bridge_audio_kv",
+      "scripts_upload_bridge_audio_lessons_per_unit",
+      "scripts_upload_bridge_audio_only_book",
+      "scripts_upload_bridge_audio_plan",
+      "scripts_upload_bridge_audio_publicurlof",
+      "scripts_upload_bridge_audio_readingchapters",
+      "scripts_upload_bridge_audio_resolve",
+      "scripts_upload_bridge_audio_sbheaders",
+      "scripts_upload_bridge_audio_seen",
+      "scripts_upload_bridge_audio_slot"
+    ],
+    "11": [
       "scripts_split_book_chapters",
       "scripts_split_book_chapters_chapters",
       "scripts_split_book_chapters_fail",
@@ -397,7 +407,7 @@
       "scripts_split_book_chapters_roman",
       "scripts_split_book_chapters_upserts"
     ],
-    "11": [
+    "12": [
       "scripts_trim_audio_head",
       "scripts_trim_audio_head_cut",
       "scripts_trim_audio_head_dur",
@@ -410,7 +420,7 @@
       "scripts_trim_audio_head_sbheaders",
       "scripts_trim_audio_head_targetch"
     ],
-    "12": [
+    "13": [
       "scripts_fix_dropcaps",
       "scripts_fix_dropcaps_count",
       "scripts_fix_dropcaps_fail",
@@ -421,7 +431,7 @@
       "scripts_fix_dropcaps_sentencecasetoken",
       "scripts_fix_dropcaps_upserts"
     ],
-    "13": [
+    "14": [
       "scripts_realign_ch03_ko",
       "scripts_realign_ch03_ko_alignkoreantoenglish",
       "scripts_realign_ch03_ko_main",
@@ -430,7 +440,7 @@
       "scripts_realign_ch03_ko_splittosentences",
       "scripts_realign_ch03_ko_translatebatch"
     ],
-    "14": [
+    "15": [
       "supabase_functions_merge_audio_index",
       "supabase_functions_merge_audio_index_bytespersec",
       "supabase_functions_merge_audio_index_cors",
@@ -438,68 +448,61 @@
       "supabase_functions_merge_audio_index_skipid3v2",
       "supabase_functions_merge_audio_index_trimid3v1"
     ],
-    "15": [
+    "16": [
       "scripts_inspect_audio",
       "scripts_inspect_audio_count",
       "scripts_inspect_audio_cutdur",
       "scripts_inspect_audio_headers",
       "scripts_inspect_audio_mmss"
     ],
-    "16": [
+    "17": [
       "supabase_functions_deepgram_listen_index",
       "supabase_functions_deepgram_listen_index_corsheaders",
       "supabase_functions_deepgram_listen_index_deepgramword",
       "supabase_functions_deepgram_listen_index_json"
     ],
-    "17": [
+    "18": [
       "supabase_functions_ocr_extract_index",
       "supabase_functions_ocr_extract_index_cors",
       "supabase_functions_ocr_extract_index_lookslikemetareply"
     ],
-    "18": [
+    "19": [
       "tsconfig",
       "tsconfig_files",
       "tsconfig_references"
     ],
-    "19": [
+    "20": [
       "githooks_post_commit",
       "githooks_post_commit__entry"
     ],
-    "20": [
+    "21": [
       "githooks_pre_push",
       "githooks_pre_push__entry"
-    ],
-    "21": [
-      "eslint_config"
-    ],
-    "22": [
-      "vite_config"
     ]
   },
   "cohesion": {
-    "0": 0.051756785188302123,
-    "1": 0.056051587301587304,
-    "2": 0.07239819004524888,
-    "3": 0.06896551724137931,
-    "4": 0.08695652173913043,
-    "5": 0.14285714285714285,
-    "6": 0.09523809523809523,
-    "7": 0.09523809523809523,
-    "8": 0.10526315789473684,
-    "9": 0.24175824175824176,
+    "0": 0.05422100205902539,
+    "1": 0.05952380952380952,
+    "2": 0.06666666666666667,
+    "3": 0.06951871657754011,
+    "4": 0.13666666666666666,
+    "5": 0.10526315789473684,
+    "6": 0.10526315789473684,
+    "7": 0.1111111111111111,
+    "8": 0.13333333333333333,
+    "9": 0.21904761904761905,
     "10": 0.16666666666666666,
-    "11": 0.2,
-    "12": 0.2777777777777778,
-    "13": 0.5238095238095238,
-    "14": 0.3333333333333333,
-    "15": 0.4,
-    "16": 0.5,
-    "17": 0.6666666666666666,
+    "11": 0.16666666666666666,
+    "12": 0.2,
+    "13": 0.2777777777777778,
+    "14": 0.5238095238095238,
+    "15": 0.3333333333333333,
+    "16": 0.4,
+    "17": 0.5,
     "18": 0.6666666666666666,
-    "19": 1.0,
+    "19": 0.6666666666666666,
     "20": 1.0,
-    "21": 1.0,
-    "22": 1.0
+    "21": 1.0
   },
   "gods": [
     {
@@ -548,12 +551,23 @@
       "degree": 12
     },
     {
-      "id": "src_components_spacegame_spacegame",
-      "label": "SpaceGame()",
-      "degree": 9
+      "id": "ref_react",
+      "label": "react",
+      "degree": 12
     }
   ],
   "surprises": [
+    {
+      "source": "VocabProps",
+      "target": "VocabItem",
+      "source_files": [
+        "src/components/ImageUploadInput.tsx",
+        "src/lib/types.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    },
     {
       "source": "Props",
       "target": "VocabItem",
@@ -597,54 +611,43 @@
       "confidence": "EXTRACTED",
       "relation": "references",
       "why": "peripheral node `ListeningPanelProps` unexpectedly reaches hub `BookId`"
-    },
-    {
-      "source": "BookReader()",
-      "target": "currentLessonNumberFor()",
-      "source_files": [
-        "src/components/BookReader.tsx",
-        "src/data/syllabus.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "bridges separate communities"
     }
   ],
   "questions": [
     {
       "type": "bridge_node",
-      "question": "Why does `VocabItem` connect `Community 1` to `Community 0`, `Community 2`?",
-      "why": "High betweenness centrality (0.026) - this node is a cross-community bridge."
+      "question": "Why does `react` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`?",
+      "why": "High betweenness centrality (0.122) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
-      "question": "Why does `BookReader()` connect `Community 0` to `Community 9`, `Community 2`, `Community 5`?",
-      "why": "High betweenness centrality (0.013) - this node is a cross-community bridge."
+      "question": "Why does `devDependencies` connect `Community 8` to `Community 3`?",
+      "why": "High betweenness centrality (0.044) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
-      "question": "Why does `devDependencies` connect `Community 3` to `Community 6`?",
-      "why": "High betweenness centrality (0.010) - this node is a cross-community bridge."
+      "question": "Why does `pdfjs-dist` connect `Community 3` to `Community 0`?",
+      "why": "High betweenness centrality (0.025) - this node is a cross-community bridge."
     },
     {
       "type": "isolated_nodes",
       "question": "What connects `InitState`, `MobileRowProps`, `RowProps` to the rest of the system?",
-      "why": "160 weakly-connected nodes found - possible documentation gaps or missing edges."
+      "why": "174 weakly-connected nodes found - possible documentation gaps or missing edges."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.051756785188302123 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.05422100205902539 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 1` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.056051587301587304 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.05952380952380952 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 2` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.07239819004524888 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected."
     }
   ]
 }
