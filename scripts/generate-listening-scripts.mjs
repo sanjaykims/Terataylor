@@ -38,6 +38,9 @@ const ONLY_LESSON = (process.env.ONLY_LESSON || '').trim();
 
 const fail = (msg) => { console.error(`✗ ${msg}`); process.exit(1); };
 
+// PostgREST spells the LIKE wildcard `*`, not `%` — passing `%` here silently
+// matches nothing, which would look like "no lessons need scripts" rather than
+// like a broken query.
 async function getRows(pattern) {
   const res = await fetch(`${REST}?key=like.${encodeURIComponent(pattern)}&select=key,value`, { headers: sbHeaders });
   if (!res.ok) fail(`read ${pattern}: ${res.status} ${await res.text()}`);
@@ -45,8 +48,11 @@ async function getRows(pattern) {
 }
 
 // ── Work out which lessons have listening audio but no script yet ─────────────
-const audioRows = await getRows('chapter_%_listening_audio');
-const scriptRows = await getRows('chapter_%_listening_en');
+const audioRows = await getRows('chapter_*_listening_audio');
+const scriptRows = await getRows('chapter_*_listening_en');
+// Guard against exactly the failure above: audio is known to exist, so an empty
+// result means the query shape is wrong, not that there is nothing to do.
+if (audioRows.length === 0) fail('no listening-audio rows matched — check the query wildcard');
 const haveScript = new Set(scriptRows.map(r => r.key));
 
 const targets = [];
