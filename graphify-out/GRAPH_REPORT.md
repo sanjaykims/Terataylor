@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 452 nodes · 821 edges · 27 communities (21 shown, 6 thin omitted)
+- 452 nodes · 823 edges · 27 communities (21 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fda1172c`
+- Built from commit: `0e6796b0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -44,8 +44,8 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `BookReader()` - 52 edges
-2. `csSet()` - 19 edges
-3. `App()` - 19 edges
+2. `App()` - 20 edges
+3. `csSet()` - 19 edges
 4. `compilerOptions` - 17 edges
 5. `compilerOptions` - 16 edges
 6. `csGet()` - 15 edges
@@ -55,16 +55,16 @@
 10. `ProgressDashboard()` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `ListeningPanelProps` --references--> `BookId`  [EXTRACTED]
+  src/components/BookReader.tsx → src/data/syllabus.ts
+- `VocabProps` --references--> `VocabItem`  [EXTRACTED]
+  src/components/ImageUploadInput.tsx → src/lib/types.ts
 - `Props` --references--> `VocabItem`  [EXTRACTED]
   src/components/GamesPanel.tsx → src/lib/types.ts
 - `Props` --references--> `VocabItem`  [EXTRACTED]
   src/components/SentenceScramble.tsx → src/lib/types.ts
 - `Props` --references--> `VocabItem`  [EXTRACTED]
   src/components/VocabularyPanel.tsx → src/lib/types.ts
-- `VocabProps` --references--> `VocabItem`  [EXTRACTED]
-  src/components/ImageUploadInput.tsx → src/lib/types.ts
-- `ListeningPanelProps` --references--> `BookId`  [EXTRACTED]
-  src/components/BookReader.tsx → src/data/syllabus.ts
 
 ## Import Cycles
 - None detected.
@@ -77,15 +77,15 @@ Nodes (91): migrateFromLocalStorage(), BookReader(), buildBookChapterToLessonMap
 
 ### Community 1 - "Community 1"
 Cohesion: 0.07
-Nodes (46): GamesPanel, VocabularyPanel, GameType, Props, TABS, isKorean(), Props, SentenceScramble() (+38 more)
+Nodes (48): react, App(), BookReader, ImageUploadInput, MainTab, ProgressDashboard, V1Tab, ListeningPanelProps (+40 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.07
-Nodes (43): react, BookReader, ImageUploadInput, MainTab, ProgressDashboard, V1Tab, ListeningPanelProps, Icon() (+35 more)
+Nodes (46): GamesPanel, VocabularyPanel, GameType, Props, TABS, isKorean(), Props, SentenceScramble() (+38 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.08
-Nodes (37): @supabase/supabase-js, App(), BOOK_LABELS, dayKeyToDate(), dayNum(), dayNumToKey(), FEATURE_ICONS, FEATURE_LABELS (+29 more)
+Cohesion: 0.09
+Nodes (32): @supabase/supabase-js, BOOK_LABELS, dayKeyToDate(), dayNum(), dayNumToKey(), FEATURE_ICONS, FEATURE_LABELS, formatDate() (+24 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.11
@@ -163,8 +163,8 @@ Nodes (3): @tailwindcss/vite, vite, @vitejs/plugin-react
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `Community 2` to `Community 8`, `Community 0`, `Community 3`, `Community 1`?**
-  _High betweenness centrality (0.116) - this node is a cross-community bridge._
+- **Why does `react` connect `Community 1` to `Community 8`, `Community 0`, `Community 2`, `Community 3`?**
+  _High betweenness centrality (0.117) - this node is a cross-community bridge._
 - **Why does `devDependencies` connect `Community 7` to `Community 8`?**
   _High betweenness centrality (0.041) - this node is a cross-community bridge._
 - **Why does `pdfjs-dist` connect `Community 8` to `Community 0`?**
@@ -174,6 +174,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.05350877192982456 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06883116883116883 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.06901960784313725 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
