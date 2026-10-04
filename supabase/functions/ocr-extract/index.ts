@@ -25,6 +25,61 @@ function looksLikeMetaReply(ko: string, source: string): boolean {
   return false;
 }
 
+// ── Vocabulary-page extraction ───────────────────────────────────────────────
+// A textbook vocabulary page is a table, not a plain word list: row number,
+// a phrase whose KEY word is printed bold, a part of speech, an English
+// definition followed by the Korean meaning in ≪ ≫, and sometimes a synonym.
+// The old prompt said only "word, definition, korean", so the model had to guess
+// which column was which, and one reply covering a whole stack of photos could
+// run into the token ceiling and be cut off mid-array — leaving no closing "]"
+// for the client to find, which surfaced as "단어 목록을 파싱할 수 없어요".
+const VOCAB_PROMPT = `This is a photo of a textbook vocabulary page. Extract EVERY row.
+
+Pages are usually a table with these columns: row number | a phrase in which the KEY word is printed in bold | part of speech | English definition followed by the Korean meaning inside ≪ ≫ | (sometimes) a synonym.
+
+For each row return:
+- no: the row number printed at the left, as a number (null if the page has none)
+- word: the KEY word — the bold part of the phrase — NOT the whole phrase. "disgusting smell" with "disgusting" in bold → "disgusting". Keep a bold multi-word expression whole ("end up", "pros and cons"). If nothing is bold, use the whole phrase.
+- definition: the English definition only, without the ≪ ≫ part and without the part-of-speech letter
+- korean: the Korean meaning from inside ≪ ≫, without the ≪ ≫ marks ("" if there is none)
+
+Ignore the synonym column, page headers ("Vocabulary"), page numbers, fingers, and anything outside the table. Do not skip rows and do not invent rows. If the page uses a different layout (a plain word/meaning list), still return word, a short English definition (write one if the page gives none) and the Korean meaning (translate if absent).
+
+Return ONLY a JSON array, no other text:
+[{"no":1,"word":"habitat","definition":"the natural home of an organism","korean":"서식지"}]`;
+
+interface VocabRow { no: number | null; word: string; definition: string; korean: string }
+
+// Pulls rows out of a model reply. Tries the whole array first; if the reply was
+// cut off (no closing bracket) or has stray text, falls back to recovering each
+// COMPLETE {...} object so rows that were finished are kept instead of lost.
+function parseVocabRows(raw: string): VocabRow[] {
+  let arr: unknown[] = [];
+  const start = raw.indexOf('[');
+  const end = raw.lastIndexOf(']');
+  if (start >= 0 && end > start) {
+    try { const v = JSON.parse(raw.slice(start, end + 1)); if (Array.isArray(v)) arr = v; } catch { /* salvage below */ }
+  }
+  if (arr.length === 0) {
+    for (const m of raw.matchAll(/\{[^{}]*\}/g)) {
+      try { arr.push(JSON.parse(m[0])); } catch { /* skip a mangled object */ }
+    }
+  }
+  const rows: VocabRow[] = [];
+  for (const o of arr) {
+    const r = o as Record<string, unknown>;
+    const word = typeof r?.word === 'string' ? r.word.trim() : '';
+    if (!word) continue;
+    rows.push({
+      no: typeof r.no === 'number' && Number.isFinite(r.no) ? r.no : null,
+      word,
+      definition: typeof r.definition === 'string' ? r.definition.trim() : '',
+      korean: typeof r.korean === 'string' ? r.korean.trim() : '',
+    });
+  }
+  return rows;
+}
+
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 Deno.serve(async (req: Request) => {
@@ -242,13 +297,62 @@ RULES:
       },
     }));
 
-    const prompt = mode === 'vocab'
-      ? `Extract the vocabulary list from these images.\nFor each entry return:\n- word: the English word\n- definition: a brief English definition (one short phrase)\n- korean: the Korean translation/meaning\n\nReturn ONLY a JSON array, no other text:\n[{"word":"habitat","definition":"the natural home of an organism","korean":"서식지"},{"word":"reluctant","definition":"unwilling to do something","korean":"꺼리는, 내키지 않는"}]`
-      : `Extract all English text from these images in reading order.\nIf multiple images, combine in order.\nReturn only the extracted English text with no commentary.`;
+    // ── Vocabulary photos ────────────────────────────────────────────────────
+    // One request PER photo, in parallel: each reply stays small (one page of
+    // rows), one bad photo can't sink the others, and the results are merged.
+    if (mode === 'vocab') {
+      const readOne = async (img: typeof imageContent[number]): Promise<VocabRow[]> => {
+        const resp = await client.messages.create({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 4096,
+          messages: [
+            { role: 'user', content: [img, { type: 'text', text: VOCAB_PROMPT }] },
+            // Prefill: the reply must start as the JSON array, never as prose.
+            { role: 'assistant', content: '[' },
+          ],
+        });
+        const text = resp.content[0].type === 'text' ? resp.content[0].text : '';
+        return parseVocabRows('[' + text);
+      };
+
+      const settled = await Promise.allSettled(imageContent.map(readOne));
+      const pages = settled.flatMap(r => (r.status === 'fulfilled' ? [r.value] : []));
+      const failures = settled.filter(r => r.status === 'rejected').length;
+
+      // Merge in photo order, drop a word that appears twice (the same page
+      // uploaded twice), and if every row carries its printed number put them in
+      // that order — photos are often selected out of order (rows 16-30 first).
+      const seen = new Set<string>();
+      let merged = pages.flat().filter(r => {
+        const k = r.word.toLowerCase();
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+      if (merged.length > 0 && merged.every(r => r.no !== null)) {
+        merged = [...merged].sort((a, b) => (a.no as number) - (b.no as number));
+      }
+
+      if (merged.length === 0) {
+        return new Response(JSON.stringify({
+          error: failures > 0
+            ? '사진을 읽는 중 오류가 났어요. 잠시 후 다시 시도해 주세요.'
+            : '사진에서 단어를 찾지 못했어요. 글자가 또렷하게 나온 사진으로 다시 시도해 주세요.',
+        }), { status: 502, headers: { ...cors, 'Content-Type': 'application/json' } });
+      }
+
+      // Same contract as before — a JSON array in `result` — minus the helper `no`.
+      const items = merged.map(({ word, definition, korean }) => ({ word, definition, korean }));
+      return new Response(JSON.stringify({ result: JSON.stringify(items), skippedPhotos: failures }), {
+        headers: { ...cors, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const prompt = `Extract all English text from these images in reading order.\nIf multiple images, combine in order.\nReturn only the extracted English text with no commentary.`;
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2048,
+      max_tokens: 4096,
       messages: [{ role: 'user', content: [...imageContent, { type: 'text', text: prompt }] }],
     });
 

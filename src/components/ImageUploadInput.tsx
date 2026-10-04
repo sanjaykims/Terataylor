@@ -61,6 +61,8 @@ export default function ImageUploadInput(props: Props) {
   const [rawText, setRawText]   = useState('');
   const [vocabRows, setVocabRows] = useState<VocabItem[]>([]);
   const [error, setError]       = useState('');
+  // Non-fatal note shown with the review, e.g. one photo out of several unreadable.
+  const [notice, setNotice]     = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 
@@ -87,12 +89,25 @@ export default function ImageUploadInput(props: Props) {
     if (!images.length) return;
     setStatus('extracting');
     setError('');
+    setNotice('');
     try {
       const compressed = await Promise.all(images.map(img => compressImage(img.file, img.rot)));
       const { data, error: fnErr } = await supabase.functions.invoke('ocr-extract', {
         body: { images: compressed, mode },
       });
-      if (fnErr) throw new Error(fnErr.message);
+      if (fnErr) {
+        // invoke() reduces every non-2xx reply to a generic "Edge Function
+        // returned a non-2xx status code", hiding the server's own message
+        // (which says WHY: unreadable photo, nothing found, ...). Read it from
+        // the response body when there is one.
+        let detail = '';
+        try {
+          const body = await (fnErr as { context?: Response }).context?.json();
+          if (body && typeof body.error === 'string') detail = body.error;
+        } catch { /* no readable body — fall back to the generic message */ }
+        throw new Error(detail || fnErr.message);
+      }
+      setNotice(data?.skippedPhotos > 0 ? `사진 ${data.skippedPhotos}장은 읽지 못했어요. 나머지 사진의 단어만 가져왔어요.` : '');
       const result: string = data.result ?? '';
 
       if (mode === 'vocab') {
@@ -230,6 +245,7 @@ export default function ImageUploadInput(props: Props) {
       )}
 
       {error && <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+      {notice && <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">{notice}</p>}
 
       {/* Review: text */}
       {status === 'review' && mode === 'text' && (
