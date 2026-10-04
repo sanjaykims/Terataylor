@@ -302,17 +302,21 @@ RULES:
     // rows), one bad photo can't sink the others, and the results are merged.
     if (mode === 'vocab') {
       const readOne = async (img: typeof imageContent[number]): Promise<VocabRow[]> => {
+        // A stronger model than the rest of this function uses: the Korean in
+        // ≪ ≫ is small print, and the cheap model misread uncommon words
+        // (어둑한→어두운, 흩뿌리다→을뿌리다, 거친→거칠은). A wrong meaning gets
+        // memorised, so accuracy matters more than cost here — and this runs a
+        // few times a week, not per sentence. No prefill: the parser below
+        // already copes with stray prose around the array.
         const resp = await client.messages.create({
-          model: 'claude-haiku-4-5-20251001',
+          model: 'claude-sonnet-5-5',
           max_tokens: 4096,
           messages: [
             { role: 'user', content: [img, { type: 'text', text: VOCAB_PROMPT }] },
-            // Prefill: the reply must start as the JSON array, never as prose.
-            { role: 'assistant', content: '[' },
           ],
         });
         const text = resp.content[0].type === 'text' ? resp.content[0].text : '';
-        return parseVocabRows('[' + text);
+        return parseVocabRows(text);
       };
 
       const settled = await Promise.allSettled(imageContent.map(readOne));
