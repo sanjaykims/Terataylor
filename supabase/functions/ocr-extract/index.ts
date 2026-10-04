@@ -290,8 +290,13 @@ RULES:
     // A phone photo of a page often arrives on its side or upside down, and text
     // read sideways is read worse. The client sends ONE small copy of the photo
     // here first and turns the full image by the answer before the real OCR.
-    // Answer = degrees CLOCKWISE the image must be turned for the text to read
-    // upright (0, 90, 180 or 270). Anything unclear answers 0, i.e. "leave it".
+    //
+    // The model is asked WHERE the top of the page is (up / right / down / left),
+    // not "how many degrees clockwise" — asked for the angle it answered 0 for
+    // every photo, however it was turned, because turning a mental image by a
+    // signed angle is the part it gets wrong; naming a side is not. The side is
+    // converted to the clockwise turn here. Anything unclear answers 0 ("leave
+    // it").
     if (mode === 'detect_orientation') {
       const img = (body.images ?? [])[0];
       if (!img) {
@@ -306,13 +311,15 @@ RULES:
           role: 'user',
           content: [
             { type: 'image', source: { type: 'base64', media_type: img.type as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp', data: img.data } },
-            { type: 'text', text: 'Look at the printed text in this photo. By how many degrees CLOCKWISE must the image be rotated so that the text reads upright, left-to-right and top-to-bottom?\n\nIf the text is already upright, answer 0. If the top of the letters points to the right (the image is turned a quarter-turn clockwise), the answer is 270. If the top of the letters points to the left, the answer is 90. If the text is upside down, the answer is 180.\n\nAnswer with exactly one number: 0, 90, 180 or 270. Nothing else.' },
+            { type: 'text', text: 'This is a photo of a printed page. Find the TOP EDGE of the page — the side where a reader holding it the right way up would see the page header and the first line of text.\n\nWhich side of THIS PHOTO is that top edge on?\n- up: the page is already the right way up\n- right: the page is turned so its top edge is on the right side of the photo (text runs vertically, letter tops pointing right)\n- down: the page is upside down\n- left: the page is turned so its top edge is on the left side of the photo (letter tops pointing left)\n\nAnswer with exactly one word: up, right, down or left.' },
           ],
         }],
       });
-      const raw = resp.content[0].type === 'text' ? resp.content[0].text : '';
-      const n = parseInt(raw.match(/\b(0|90|180|270)\b/)?.[1] ?? '0', 10);
-      return new Response(JSON.stringify({ rotation: n }), {
+      const raw = (resp.content[0].type === 'text' ? resp.content[0].text : '').toLowerCase();
+      const side = raw.match(/\b(up|right|down|left)\b/)?.[1] ?? 'up';
+      // Where the top edge sits -> degrees CLOCKWISE to bring it back to the top.
+      const rotation = ({ up: 0, right: 270, down: 180, left: 90 } as const)[side as 'up' | 'right' | 'down' | 'left'];
+      return new Response(JSON.stringify({ rotation, side }), {
         headers: { ...cors, 'Content-Type': 'application/json' },
       });
     }
