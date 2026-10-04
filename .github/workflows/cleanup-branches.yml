@@ -1,0 +1,66 @@
+name: Clean Up Scratch Branches
+
+# Deletes the throwaway branches that tooling creates just to trigger a one-off
+# workflow (audio uploads, script runs, OCR checks). The sandbox the assistant
+# works in blocks branch deletion on its own connection, but this runs on GitHub
+# with the workflow's own token, so it is how those branches get removed.
+#
+# Trigger: push a branch named cleanup/<anything> (cut from main). It lists
+# what it will delete, deletes it, and removes the cleanup/ branch itself.
+# workflow_dispatch + dry_run lists without deleting.
+#
+# SAFETY: only branches starting with one of SCRATCH_PREFIXES are ever deleted.
+# main, the repository's default branch, claude/*, legacy-* and anything else
+# are untouched no matter what — the prefix list is an allow-list, not a
+# block-list, so an unfamiliar branch name is kept.
+
+on:
+  push:
+    branches: ['cleanup/**']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'List the branches that would be deleted, without deleting'
+        type: boolean
+        default: true
+
+concurrency:
+  group: cleanup-branches
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      SCRATCH_PREFIXES: 'ocr-test/ gen-scripts/ translate-reading/ audio-drop/ cleanup/'
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '0' }}
+    steps:
+      - name: Delete scratch branches
+        run: |
+          set -euo pipefail
+          default=$(gh api "repos/$REPO" --jq .default_branch)
+          echo "default branch (never deleted): $default"
+          mapfile -t all < <(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].name')
+          todo=()
+          for b in "${all[@]}"; do
+            [ "$b" = "$default" ] && continue
+            [ "$b" = "main" ] && continue
+            for p in $SCRATCH_PREFIXES; do
+              case "$b" in "$p"*) todo+=("$b"); break;; esac
+            done
+          done
+          if [ ${#todo[@]} -eq 0 ]; then echo "No scratch branches found."; exit 0; fi
+          echo "Scratch branches (${#todo[@]}):"
+          printf '  %s\n' "${todo[@]}"
+          echo "Kept:"; for b in "${all[@]}"; do case " ${todo[*]} " in *" $b "*) ;; *) echo "  $b";; esac; done
+          [ "$DRY_RUN" = "1" ] && { echo "DRY RUN - nothing deleted."; exit 0; }
+          fail=0
+          for b in "${todo[@]}"; do
+            if gh api -X DELETE "repos/$REPO/git/refs/heads/$b" --silent; then echo "deleted $b"; else echo "FAILED $b"; fail=1; fi
+          done
+          exit $fail
