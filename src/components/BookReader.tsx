@@ -824,6 +824,37 @@ const SentenceRows = memo(function SentenceRows(
   );
 });
 
+// ── Korean on/off ────────────────────────────────────────────────────────────
+// One switch for every Korean block (reading column, reading translation
+// controls, listening translation). The choice is remembered per device, because
+// it is a way of studying ("English only today") rather than a property of any
+// lesson. localStorage can be missing or blocked, so every access is guarded and
+// the default is ON.
+const KO_PREF_KEY = 'taylor_show_ko';
+function loadShowKo(): boolean {
+  try { return localStorage.getItem(KO_PREF_KEY) !== '0'; } catch { return true; }
+}
+function saveShowKo(on: boolean) {
+  try { localStorage.setItem(KO_PREF_KEY, on ? '1' : '0'); } catch { /* not persisted */ }
+}
+
+function KoSwitch({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button type="button" role="switch" aria-checked={on} aria-label="한국어 보기"
+      onClick={() => onChange(!on)}
+      className="inline-flex items-center gap-2 text-xs font-semibold min-h-[44px] px-1">
+      <span className="lang-tag">KO</span>
+      <span>한국어</span>
+      <span aria-hidden className="relative inline-block h-5 w-9 rounded-full transition-colors"
+        style={{ background: on ? 'var(--accent)' : 'var(--rule-2)' }}>
+        <span className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full transition-transform"
+          style={{ background: 'var(--paper)', transform: on ? 'translateX(16px)' : 'translateX(0)' }} />
+      </span>
+      <span className="w-6 text-muted">{on ? 'ON' : 'OFF'}</span>
+    </button>
+  );
+}
+
 // ── Listening panel (Bridge curriculum only) ────────────────────────────────
 // Deliberately simple: a plain audio player (no sentence-level sync/seek —
 // that machinery is Reading-only, built for novel narration) plus EN/KO text
@@ -846,10 +877,13 @@ interface ListeningPanelProps {
   onTranslate: () => void;
   onAudioFile: (file: File) => void;
   onDeleteAudio: () => void;
+  showKo: boolean;
+  onToggleKo: (on: boolean) => void;
 }
 function ListeningPanel({
   selectedChapter, bk, loading, enText, enSrc, koText, audioUrl, audioUploading,
   translating, txError, fileRef, onExtracted, onSaveKo, onTranslate, onAudioFile, onDeleteAudio,
+  showKo, onToggleKo,
 }: ListeningPanelProps) {
   // Declared before the early returns below — hooks can't sit behind a branch.
   const [showReplace, setShowReplace] = useState(false);
@@ -976,6 +1010,10 @@ function ListeningPanel({
         </div>
       )}
 
+      <div className="flex justify-end"><KoSwitch on={showKo} onChange={onToggleKo} /></div>
+
+      {showKo && (
+        <>
       {!koText && !translating && (
         <button onClick={onTranslate}
           className="btn-primary w-full text-sm inline-flex items-center justify-center gap-2">
@@ -1005,12 +1043,14 @@ function ListeningPanel({
           onCancel={() => setEditingKo(false)}
         />
       )}
+        </>
+      )}
 
       <div className="surface p-4 space-y-3">
         {enRows.map((en, i) => (
           <div key={i} className="pb-2 border-b border-violet-50 last:border-0 last:pb-0">
             <p className="text-sm text-gray-900">{en}</p>
-            {koRows[i] && <p className="text-sm text-muted mt-1">{koRows[i]}</p>}
+            {showKo && koRows[i] && <p className="text-sm text-muted mt-1">{koRows[i]}</p>}
           </div>
         ))}
       </div>
@@ -1195,6 +1235,10 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
 
   const [confirmClear, setConfirmClear] = useState(false);
   const [mobileView,   setMobileView]   = useState<'en' | 'ko'>('en');
+  const [showKo, setShowKoState] = useState<boolean>(loadShowKo);
+  const setShowKo = (on: boolean) => { setShowKoState(on); saveShowKo(on); };
+  // Korean is shown only when the book has translations AND the switch is on.
+  const koVisible = !bk.hideTranslation && showKo;
   const fileRef = useRef<HTMLInputElement>(null);
 
   // ── Listening passage (Bridge curriculum only, BookInfo.hasListening) ─────
@@ -2111,7 +2155,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
       {passageView === 'reading' ? (<>
 
       {/* Current chapter/lesson info bar */}
-      <div className="surface-soft px-3 py-2 flex items-center justify-between">
+      <div className="surface-soft px-3 py-1 flex items-center justify-between flex-wrap gap-x-3">
         <span className={`text-xs font-bold ${bk.color}`}>
           {bk.lessonKind === 'topical' ? `L${selectedChapter}` : `Chapter ${selectedChapter}`}
           {selectedChapterRange
@@ -2119,7 +2163,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
             : ` / ${totalChapters}`}
         </span>
         {enText && (
-          <span className="inline-flex items-center gap-3">
+          <span className="inline-flex items-center gap-3 flex-wrap">
+            {!bk.hideTranslation && <KoSwitch on={showKo} onChange={setShowKo} />}
             <span className="text-xs text-muted">{enText.trim().split(/\s+/).length}단어</span>
             {!editingEn && (
               <button onClick={() => setEditingEn(true)}
@@ -2131,8 +2176,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         )}
       </div>
 
-      {/* Mobile view toggle — omitted entirely for English-only books (hideTranslation) */}
-      {!bk.hideTranslation && (
+      {/* Mobile view toggle — omitted for English-only books and when Korean is switched off */}
+      {koVisible && (
         <div className="sm:hidden seg">
           {(['en', 'ko'] as const).map(v => (
             <button key={v} onClick={() => setMobileView(v)}
@@ -2143,8 +2188,8 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         </div>
       )}
 
-      {/* Translation controls — this book is meant to be read in English only */}
-      {!bk.hideTranslation && (
+      {/* Translation controls — hidden for English-only books and when Korean is switched off */}
+      {koVisible && (
         <>
           {!chapterLoading && enText && !koText && !translating && (
             <button onClick={handleTranslate}
@@ -2347,9 +2392,9 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
         />
       ) : enText ? (
         <SentenceRows
-          enRows={enRows} koRows={bk.hideTranslation ? [] : koRows} maxRows={bk.hideTranslation ? enRows.length : maxRows}
+          enRows={enRows} koRows={koVisible ? koRows : []} maxRows={koVisible ? maxRows : enRows.length}
           activeIdx={activeIdx} activeWordIdx={activeWordIdx}
-          hasKo={!bk.hideTranslation && !!koText} hasAudio={!!audioUrl} showKo={!bk.hideTranslation} mobileView={mobileView}
+          hasKo={koVisible && !!koText} hasAudio={!!audioUrl} showKo={koVisible} mobileView={mobileView}
           onSeek={seekToSentence} setRowRef={setRowRef} setMobileRowRef={setMobileRowRef}
         />
       ) : bk.lessonKind === 'topical' ? (
@@ -2402,6 +2447,7 @@ export default function BookReader({ bookId, onLessonVocabLoad }: { bookId: Book
           onTranslate={handleListenTranslate}
           onAudioFile={handleListenAudioFile}
           onDeleteAudio={handleDeleteListenAudio}
+          showKo={showKo} onToggleKo={setShowKo}
         />
       )}
 
