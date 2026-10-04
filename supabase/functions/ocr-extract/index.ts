@@ -3,6 +3,11 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import Anthropic from 'npm:@anthropic-ai/sdk';
 
+// One model for everything this function does — reading photos, telling a photo's
+// orientation, translating and defining words — so quality doesn't differ by mode
+// and switching models is a one-line change.
+const MODEL = 'claude-sonnet-5-5';
+
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -129,7 +134,7 @@ Deno.serve(async (req: Request) => {
         });
       }
       const response = await client.messages.create({
-        model: 'claude-haiku-4-5-20251001',
+        model: MODEL,
         max_tokens: 256,
         messages: [{
           role: 'user',
@@ -173,7 +178,7 @@ ABSOLUTE OUTPUT RULES:
 
       const callModel = async (strict: boolean): Promise<string> => {
         const resp = await client.messages.create({
-          model: 'claude-haiku-4-5-20251001',
+          model: MODEL,
           max_tokens: 1024,
           system: strict
             ? baseSystem + `\n\nThe previous attempt did not return a Korean translation. Output Korean characters ONLY — absolutely no English sentences or apologies.`
@@ -218,7 +223,7 @@ ABSOLUTE OUTPUT RULES:
       // that follow — alignment errors stay local instead of cascading. Prefill
       // "{" forces the model straight into the JSON object.
       const response = await client.messages.create({
-        model: 'claude-haiku-4-5-20251001',
+        model: MODEL,
         max_tokens: 8192,
         system: `You are a professional literary translator (English → Korean) working on a children's novel. Translate the numbered English sentences into natural Korean.
 
@@ -233,8 +238,6 @@ RULES:
             role: 'user',
             content: `Translate these ${sentences.length} English sentences into Korean.\n\n${numbered}`,
           },
-          // Prefill forces the response to start as a JSON object
-          { role: 'assistant', content: '{' },
         ],
       });
 
@@ -247,13 +250,14 @@ RULES:
         });
       }
 
-      // The model continues from "{", so prepend it back before parsing
-      const continuation = response.content[0].type === 'text' ? response.content[0].text : '}';
-      const raw = '{' + continuation;
+      // No prefill (not every model accepts a prefilled turn), so find the object
+      // in the reply instead of assuming the reply IS the object.
+      const raw = response.content[0].type === 'text' ? response.content[0].text : '{}';
       let obj: Record<string, unknown> = {};
       try {
+        const start = raw.indexOf('{');
         const end = raw.lastIndexOf('}');
-        obj = JSON.parse(end >= 0 ? raw.slice(0, end + 1) : raw + '}');
+        obj = JSON.parse(start >= 0 && end > start ? raw.slice(start, end + 1) : '{}');
       } catch { obj = {}; }
 
       // Build an exactly-length, index-aligned array by reading each sentence's
@@ -273,7 +277,7 @@ RULES:
     if (mode === 'translate') {
       const inputText = body.text ?? '';
       const response = await client.messages.create({
-        model: 'claude-haiku-4-5-20251001',
+        model: MODEL,
         max_tokens: 8192,
         messages: [{
           role: 'user',
@@ -313,7 +317,7 @@ RULES:
       });
       content.push({ type: 'text', text: 'These four images are the SAME photo of a printed page, each turned a different way. In exactly one of them the text reads upright: horizontal lines, read left-to-right and top-to-bottom, letters not rotated or upside down. In the others the text is sideways or upside down.\n\nWhich image has the upright text? Answer with exactly one digit: 1, 2, 3 or 4.' });
       const resp = await client.messages.create({
-        model: 'claude-sonnet-5-5',
+        model: MODEL,
         max_tokens: 16,
         // deno-lint-ignore no-explicit-any
         messages: [{ role: 'user', content: content as any }],
@@ -349,7 +353,7 @@ RULES:
         // few times a week, not per sentence. No prefill: the parser below
         // already copes with stray prose around the array.
         const resp = await client.messages.create({
-          model: 'claude-sonnet-5-5',
+          model: MODEL,
           max_tokens: 4096,
           messages: [
             { role: 'user', content: [img, { type: 'text', text: VOCAB_PROMPT }] },
@@ -395,7 +399,7 @@ RULES:
     const prompt = `Extract all English text from these images in reading order.\nIf multiple images, combine in order.\nReturn only the extracted English text with no commentary.`;
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-5-5',
+      model: MODEL,
       max_tokens: 4096,
       messages: [{ role: 'user', content: [...imageContent, { type: 'text', text: prompt }] }],
     });
