@@ -68,6 +68,7 @@
       "src_lib_chapterstorage_loadchapteren",
       "src_lib_chapterstorage_loadchapterko",
       "src_lib_chapterstorage_loadchaptertimings",
+      "src_lib_chapterstorage_loadchaptervocab",
       "src_lib_chapterstorage_loadknowledgemap",
       "src_lib_chapterstorage_loadlisteningaudio",
       "src_lib_chapterstorage_loadlisteningen",
@@ -100,7 +101,7 @@
       "src_lib_cloudstorage_row"
     ],
     "1": [
-      "ref_react_dom",
+      "ref_react",
       "src_app",
       "src_app_app",
       "src_app_bookreader",
@@ -151,7 +152,6 @@
       "src_data_syllabus_writing_prompts",
       "src_data_syllabus_writingprompt",
       "src_index",
-      "src_lib_chapterstorage_loadchaptervocab",
       "src_lib_cloudstorage_csgetappstate",
       "src_lib_tracker_sessionflush",
       "src_lib_tracker_sessionpause",
@@ -161,7 +161,6 @@
       "src_main"
     ],
     "2": [
-      "ref_react",
       "src_components_gamespanel",
       "src_components_gamespanel_gamespanel",
       "src_components_gamespanel_gametype",
@@ -217,6 +216,57 @@
       "src_utils_textutils_vocabword"
     ],
     "3": [
+      "eslint_config",
+      "package",
+      "package_dependencies",
+      "package_dependencies_huggingface_transformers",
+      "package_dependencies_pdfjs_dist",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_supabase_supabase_js",
+      "package_devdependencies",
+      "package_devdependencies_eslint",
+      "package_devdependencies_eslint_js",
+      "package_devdependencies_eslint_plugin_react_hooks",
+      "package_devdependencies_eslint_plugin_react_refresh",
+      "package_devdependencies_globals",
+      "package_devdependencies_tailwindcss",
+      "package_devdependencies_tailwindcss_vite",
+      "package_devdependencies_types_node",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_typescript",
+      "package_devdependencies_typescript_eslint",
+      "package_devdependencies_vite",
+      "package_devdependencies_vitejs_plugin_react",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_lint",
+      "package_scripts_preview",
+      "package_type",
+      "package_version",
+      "ref_eslint",
+      "ref_eslint_js",
+      "ref_eslint_plugin_react_hooks",
+      "ref_eslint_plugin_react_refresh",
+      "ref_globals",
+      "ref_pdfjs_dist",
+      "ref_react_dom",
+      "ref_tailwindcss",
+      "ref_tailwindcss_vite",
+      "ref_types_node",
+      "ref_types_react",
+      "ref_types_react_dom",
+      "ref_typescript",
+      "ref_typescript_eslint",
+      "ref_vite",
+      "ref_vitejs_plugin_react",
+      "vite_config"
+    ],
+    "4": [
       "ref_node_child_process",
       "ref_node_fs",
       "scripts_inspect_audio",
@@ -255,7 +305,7 @@
       "scripts_trim_audio_head_sbheaders",
       "scripts_trim_audio_head_targetch"
     ],
-    "4": [
+    "5": [
       "ref_supabase_supabase_js",
       "src_components_progressdashboard",
       "src_components_progressdashboard_book_labels",
@@ -291,41 +341,6 @@
       "src_lib_tracker_tracksession",
       "src_lib_tracker_vocablocks",
       "src_lib_tracker_vocabprogress"
-    ],
-    "5": [
-      "eslint_config",
-      "package",
-      "package_dependencies",
-      "package_dependencies_huggingface_transformers",
-      "package_dependencies_pdfjs_dist",
-      "package_dependencies_react",
-      "package_dependencies_react_dom",
-      "package_dependencies_supabase_supabase_js",
-      "package_name",
-      "package_private",
-      "package_scripts",
-      "package_scripts_build",
-      "package_scripts_dev",
-      "package_scripts_lint",
-      "package_scripts_preview",
-      "package_type",
-      "package_version",
-      "ref_eslint",
-      "ref_eslint_js",
-      "ref_eslint_plugin_react_hooks",
-      "ref_eslint_plugin_react_refresh",
-      "ref_globals",
-      "ref_pdfjs_dist",
-      "ref_tailwindcss",
-      "ref_tailwindcss_vite",
-      "ref_types_node",
-      "ref_types_react",
-      "ref_types_react_dom",
-      "ref_typescript",
-      "ref_typescript_eslint",
-      "ref_vite",
-      "ref_vitejs_plugin_react",
-      "vite_config"
     ],
     "6": [
       "tsconfig_app",
@@ -369,23 +384,6 @@
       "tsconfig_node_include"
     ],
     "8": [
-      "package_devdependencies",
-      "package_devdependencies_eslint",
-      "package_devdependencies_eslint_js",
-      "package_devdependencies_eslint_plugin_react_hooks",
-      "package_devdependencies_eslint_plugin_react_refresh",
-      "package_devdependencies_globals",
-      "package_devdependencies_tailwindcss",
-      "package_devdependencies_tailwindcss_vite",
-      "package_devdependencies_types_node",
-      "package_devdependencies_types_react",
-      "package_devdependencies_types_react_dom",
-      "package_devdependencies_typescript",
-      "package_devdependencies_typescript_eslint",
-      "package_devdependencies_vite",
-      "package_devdependencies_vitejs_plugin_react"
-    ],
-    "9": [
       "ref_huggingface_transformers",
       "src_lib_audioalign",
       "src_lib_audioalign_alignbynw",
@@ -399,10 +397,9 @@
       "src_lib_audioalign_enforcemonotone",
       "src_lib_audioalign_gettranscriber",
       "src_lib_audioalign_normword",
-      "src_lib_audioalign_wordtimestamp",
-      "transformers"
+      "src_lib_audioalign_wordtimestamp"
     ],
-    "10": [
+    "9": [
       "ref_node_path",
       "scripts_upload_bridge_audio",
       "scripts_upload_bridge_audio_books",
@@ -417,6 +414,21 @@
       "scripts_upload_bridge_audio_sbheaders",
       "scripts_upload_bridge_audio_seen",
       "scripts_upload_bridge_audio_slot"
+    ],
+    "10": [
+      "ref_jsr_supabase",
+      "ref_npm_anthropic_ai",
+      "supabase_functions_merge_audio_index",
+      "supabase_functions_merge_audio_index_bytespersec",
+      "supabase_functions_merge_audio_index_cors",
+      "supabase_functions_merge_audio_index_findsync",
+      "supabase_functions_merge_audio_index_skipid3v2",
+      "supabase_functions_merge_audio_index_trimid3v1",
+      "supabase_functions_ocr_extract_index",
+      "supabase_functions_ocr_extract_index_cors",
+      "supabase_functions_ocr_extract_index_lookslikemetareply",
+      "supabase_functions_ocr_extract_index_parsevocabrows",
+      "supabase_functions_ocr_extract_index_vocabrow"
     ],
     "11": [
       "scripts_split_book_chapters",
@@ -433,19 +445,6 @@
       "scripts_split_book_chapters_upserts"
     ],
     "12": [
-      "ref_jsr_supabase",
-      "ref_npm_anthropic_ai",
-      "supabase_functions_merge_audio_index",
-      "supabase_functions_merge_audio_index_bytespersec",
-      "supabase_functions_merge_audio_index_cors",
-      "supabase_functions_merge_audio_index_findsync",
-      "supabase_functions_merge_audio_index_skipid3v2",
-      "supabase_functions_merge_audio_index_trimid3v1",
-      "supabase_functions_ocr_extract_index",
-      "supabase_functions_ocr_extract_index_cors",
-      "supabase_functions_ocr_extract_index_lookslikemetareply"
-    ],
-    "13": [
       "scripts_generate_listening_scripts",
       "scripts_generate_listening_scripts_done",
       "scripts_generate_listening_scripts_fail",
@@ -458,7 +457,7 @@
       "scripts_generate_listening_scripts_sbheaders",
       "scripts_generate_listening_scripts_targets"
     ],
-    "14": [
+    "13": [
       "scripts_fix_dropcaps",
       "scripts_fix_dropcaps_count",
       "scripts_fix_dropcaps_fail",
@@ -469,7 +468,7 @@
       "scripts_fix_dropcaps_sentencecasetoken",
       "scripts_fix_dropcaps_upserts"
     ],
-    "15": [
+    "14": [
       "scripts_realign_ch03_ko",
       "scripts_realign_ch03_ko_alignkoreantoenglish",
       "scripts_realign_ch03_ko_main",
@@ -478,48 +477,47 @@
       "scripts_realign_ch03_ko_splittosentences",
       "scripts_realign_ch03_ko_translatebatch"
     ],
-    "16": [
+    "15": [
       "supabase_functions_deepgram_listen_index",
       "supabase_functions_deepgram_listen_index_corsheaders",
       "supabase_functions_deepgram_listen_index_deepgramword",
       "supabase_functions_deepgram_listen_index_extract",
       "supabase_functions_deepgram_listen_index_json"
     ],
-    "17": [
+    "16": [
       "tsconfig",
       "tsconfig_files",
       "tsconfig_references"
     ],
-    "18": [
+    "17": [
       "githooks_post_commit",
       "githooks_post_commit__entry"
     ],
-    "19": [
+    "18": [
       "githooks_pre_push",
       "githooks_pre_push__entry"
     ]
   },
   "cohesion": {
-    "0": 0.05412371134020619,
-    "1": 0.07071887784921099,
-    "2": 0.07407407407407407,
-    "3": 0.05855855855855856,
-    "4": 0.09243697478991597,
-    "5": 0.07386363636363637,
+    "0": 0.053860719545550176,
+    "1": 0.07380520266182698,
+    "2": 0.07329462989840348,
+    "3": 0.0467687074829932,
+    "4": 0.05855855855855856,
+    "5": 0.09243697478991597,
     "6": 0.10526315789473684,
     "7": 0.1111111111111111,
-    "8": 0.13333333333333333,
-    "9": 0.21904761904761905,
+    "8": 0.24175824175824176,
+    "9": 0.15384615384615385,
     "10": 0.15384615384615385,
     "11": 0.16666666666666666,
-    "12": 0.18181818181818182,
-    "13": 0.2,
-    "14": 0.2777777777777778,
-    "15": 0.5238095238095238,
-    "16": 0.4,
-    "17": 0.6666666666666666,
-    "18": 1.0,
-    "19": 1.0
+    "12": 0.2,
+    "13": 0.2777777777777778,
+    "14": 0.5238095238095238,
+    "15": 0.4,
+    "16": 0.6666666666666666,
+    "17": 1.0,
+    "18": 1.0
   },
   "gods": [
     {
@@ -633,38 +631,38 @@
   "questions": [
     {
       "type": "bridge_node",
-      "question": "Why does `react` connect `Community 2` to `Community 0`, `Community 1`, `Community 4`, `Community 5`?",
-      "why": "High betweenness centrality (0.112) - this node is a cross-community bridge."
+      "question": "Why does `react` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 5`?",
+      "why": "High betweenness centrality (0.111) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
-      "question": "Why does `devDependencies` connect `Community 8` to `Community 5`?",
-      "why": "High betweenness centrality (0.040) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `pdfjs-dist` connect `Community 5` to `Community 0`?",
+      "question": "Why does `pdfjs-dist` connect `Community 3` to `Community 0`?",
       "why": "High betweenness centrality (0.023) - this node is a cross-community bridge."
     },
     {
       "type": "isolated_nodes",
       "question": "What connects `InitState`, `MobileRowProps`, `RowProps` to the rest of the system?",
-      "why": "179 weakly-connected nodes found - possible documentation gaps or missing edges."
+      "why": "180 weakly-connected nodes found - possible documentation gaps or missing edges."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.05412371134020619 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.053860719545550176 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 1` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.07071887784921099 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.07380520266182698 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 2` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.07407407407407407 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.07329462989840348 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 3` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.0467687074829932 - nodes in this community are weakly interconnected."
     }
   ]
 }
