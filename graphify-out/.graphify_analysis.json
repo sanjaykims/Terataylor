@@ -19,8 +19,10 @@
       "src_components_bookreader_initstate",
       "src_components_bookreader_isxingframe",
       "src_components_bookreader_knowledgemapview",
+      "src_components_bookreader_koswitch",
       "src_components_bookreader_lessonchapterrangesfor",
       "src_components_bookreader_listeningpanel",
+      "src_components_bookreader_loadshowko",
       "src_components_bookreader_lookslikemetareply",
       "src_components_bookreader_mapbox",
       "src_components_bookreader_mergemp3files",
@@ -33,6 +35,7 @@
       "src_components_bookreader_roman_numerals",
       "src_components_bookreader_row",
       "src_components_bookreader_rowprops",
+      "src_components_bookreader_saveshowko",
       "src_components_bookreader_sentencerows",
       "src_components_bookreader_sentencerowsprops",
       "src_components_bookreader_skipid3v2",
@@ -45,11 +48,9 @@
       "src_components_bookreader_translatesentences",
       "src_components_bookreader_trimid3v1",
       "src_components_bookreader_trimmp3bodyattime",
-      "src_components_icon_icon",
       "src_components_imageuploadinput_imageuploadinput",
-      "src_components_passageeditor",
       "src_components_passageeditor_passageeditor",
-      "src_components_passageeditor_passageeditorprops",
+      "src_data_syllabus_currentlessonnumberfor",
       "src_lib_chapterstorage",
       "src_lib_chapterstorage_audiopath",
       "src_lib_chapterstorage_clearbook",
@@ -73,7 +74,6 @@
       "src_lib_chapterstorage_loadlisteningen",
       "src_lib_chapterstorage_loadlisteningensrc",
       "src_lib_chapterstorage_loadlisteningko",
-      "src_lib_chapterstorage_loadlisteningtimings",
       "src_lib_chapterstorage_savebookchapters",
       "src_lib_chapterstorage_savechapteraudio",
       "src_lib_chapterstorage_savechaptercount",
@@ -88,24 +88,14 @@
       "src_lib_chapterstorage_savelisteningtimings",
       "src_lib_cloudstorage_csdel",
       "src_lib_cloudstorage_csdelpattern",
-      "src_lib_cloudstorage_cskeyexists",
-      "src_lib_cloudstorage_csset",
-      "src_lib_cloudstorage_cssetjson"
+      "src_lib_cloudstorage_csset"
     ],
     "1": [
       "ref_react",
-      "src_app",
-      "src_app_app",
-      "src_app_bookreader",
       "src_app_gamespanel",
-      "src_app_imageuploadinput",
-      "src_app_maintab",
-      "src_app_migratefromlocalstorage",
-      "src_app_progressdashboard",
-      "src_app_tabspinner",
-      "src_app_v1tab",
       "src_app_vocabularypanel",
       "src_components_gamespanel",
+      "src_components_gamespanel_gamespanel",
       "src_components_gamespanel_gametype",
       "src_components_gamespanel_props",
       "src_components_gamespanel_tabs",
@@ -114,51 +104,11 @@
       "src_components_icon_paths",
       "src_components_icon_solid",
       "src_components_icon_stroke",
-      "src_components_imageuploadinput",
-      "src_components_imageuploadinput_baseprops",
-      "src_components_imageuploadinput_compressimage",
-      "src_components_imageuploadinput_imageentry",
-      "src_components_imageuploadinput_props",
-      "src_components_imageuploadinput_textprops",
-      "src_components_imageuploadinput_vocabprops",
-      "src_components_lessonschedulewidget_lessonschedulewidget",
-      "src_components_sentencescramble_props",
-      "src_components_vocabularypanel",
-      "src_components_vocabularypanel_cardstate",
-      "src_components_vocabularypanel_defentry",
-      "src_components_vocabularypanel_iskorean",
-      "src_components_vocabularypanel_props",
-      "src_components_vocabularypanel_sessioncache",
-      "src_components_vocabularypanel_vocabularypanel",
-      "src_data_syllabus_activebookids",
-      "src_data_syllabus_currentlesson",
-      "src_data_syllabus_currentlessonnumberfor",
-      "src_data_syllabus_defaultbookid",
-      "src_data_syllabus_ksttoday",
-      "src_index",
-      "src_lib_chapterstorage_loadchaptercount",
-      "src_lib_chapterstorage_loadchaptervocab",
-      "src_lib_chapterstorage_migratechaptersfromlocalstorage",
-      "src_lib_cloudstorage",
-      "src_lib_cloudstorage_csget",
-      "src_lib_cloudstorage_csgetappstate",
-      "src_lib_cloudstorage_csgetjson",
-      "src_lib_cloudstorage_csgetkeysbypattern",
-      "src_lib_cloudstorage_cssetbatch",
-      "src_lib_cloudstorage_row",
-      "src_lib_tracker_sessionflush",
-      "src_lib_tracker_sessionpause",
-      "src_lib_tracker_sessionresume",
-      "src_lib_tracker_sessionsetdetail",
-      "src_lib_tracker_sessionswitch",
-      "src_lib_types",
-      "src_lib_types_vocabitem",
-      "src_main"
-    ],
-    "2": [
-      "src_components_gamespanel_gamespanel",
+      "src_components_passageeditor",
+      "src_components_passageeditor_passageeditorprops",
       "src_components_sentencescramble",
       "src_components_sentencescramble_iskorean",
+      "src_components_sentencescramble_props",
       "src_components_sentencescramble_sentencescramble",
       "src_components_sentencescramble_shuffle",
       "src_components_sentencescramble_vocabpuzzle",
@@ -188,13 +138,72 @@
       "src_components_vocabquizgame_shuffle",
       "src_components_vocabquizgame_vocabquizgame",
       "src_components_vocabquizgame_worddef",
+      "src_components_vocabularypanel",
+      "src_components_vocabularypanel_cardstate",
+      "src_components_vocabularypanel_defentry",
+      "src_components_vocabularypanel_iskorean",
+      "src_components_vocabularypanel_props",
+      "src_components_vocabularypanel_sessioncache",
+      "src_components_vocabularypanel_vocabularypanel",
       "src_lib_tracker_trackgamescore",
       "src_lib_tracker_trackvocabresult",
+      "src_lib_types",
+      "src_lib_types_vocabitem",
       "src_utils_textutils",
       "src_utils_textutils_extractvocabulary",
       "src_utils_textutils_parsesentences",
       "src_utils_textutils_stopwords",
       "src_utils_textutils_vocabword"
+    ],
+    "2": [
+      "eslint_config",
+      "package",
+      "package_dependencies",
+      "package_dependencies_huggingface_transformers",
+      "package_dependencies_pdfjs_dist",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_supabase_supabase_js",
+      "package_devdependencies",
+      "package_devdependencies_eslint",
+      "package_devdependencies_eslint_js",
+      "package_devdependencies_eslint_plugin_react_hooks",
+      "package_devdependencies_eslint_plugin_react_refresh",
+      "package_devdependencies_globals",
+      "package_devdependencies_tailwindcss",
+      "package_devdependencies_tailwindcss_vite",
+      "package_devdependencies_types_node",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_typescript",
+      "package_devdependencies_typescript_eslint",
+      "package_devdependencies_vite",
+      "package_devdependencies_vitejs_plugin_react",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_lint",
+      "package_scripts_preview",
+      "package_type",
+      "package_version",
+      "ref_eslint",
+      "ref_eslint_js",
+      "ref_eslint_plugin_react_hooks",
+      "ref_eslint_plugin_react_refresh",
+      "ref_globals",
+      "ref_pdfjs_dist",
+      "ref_tailwindcss",
+      "ref_tailwindcss_vite",
+      "ref_types_node",
+      "ref_types_react",
+      "ref_types_react_dom",
+      "ref_typescript",
+      "ref_typescript_eslint",
+      "ref_vite",
+      "ref_vitejs_plugin_react",
+      "vite_config"
     ],
     "3": [
       "ref_node_child_process",
@@ -236,6 +245,44 @@
       "scripts_trim_audio_head_targetch"
     ],
     "4": [
+      "ref_react_dom",
+      "src_app",
+      "src_app_app",
+      "src_app_bookreader",
+      "src_app_imageuploadinput",
+      "src_app_maintab",
+      "src_app_migratefromlocalstorage",
+      "src_app_progressdashboard",
+      "src_app_tabspinner",
+      "src_app_v1tab",
+      "src_components_imageuploadinput",
+      "src_components_imageuploadinput_baseprops",
+      "src_components_imageuploadinput_compressimage",
+      "src_components_imageuploadinput_imageentry",
+      "src_components_imageuploadinput_props",
+      "src_components_imageuploadinput_textprops",
+      "src_components_imageuploadinput_vocabprops",
+      "src_index",
+      "src_lib_chapterstorage_loadchaptercount",
+      "src_lib_chapterstorage_loadchaptervocab",
+      "src_lib_chapterstorage_loadlisteningtimings",
+      "src_lib_chapterstorage_migratechaptersfromlocalstorage",
+      "src_lib_cloudstorage",
+      "src_lib_cloudstorage_csget",
+      "src_lib_cloudstorage_csgetappstate",
+      "src_lib_cloudstorage_csgetjson",
+      "src_lib_cloudstorage_csgetkeysbypattern",
+      "src_lib_cloudstorage_cskeyexists",
+      "src_lib_cloudstorage_cssetbatch",
+      "src_lib_cloudstorage_cssetjson",
+      "src_lib_cloudstorage_row",
+      "src_lib_tracker_sessionflush",
+      "src_lib_tracker_sessionpause",
+      "src_lib_tracker_sessionsetdetail",
+      "src_lib_tracker_sessionswitch",
+      "src_main"
+    ],
+    "5": [
       "ref_supabase_supabase_js",
       "src_components_progressdashboard",
       "src_components_progressdashboard_book_labels",
@@ -267,49 +314,34 @@
       "src_lib_tracker_fetchvocabprogress",
       "src_lib_tracker_gamescore",
       "src_lib_tracker_segstart",
+      "src_lib_tracker_sessionresume",
       "src_lib_tracker_studysession",
       "src_lib_tracker_tracksession",
       "src_lib_tracker_vocablocks",
       "src_lib_tracker_vocabprogress"
     ],
-    "5": [
-      "eslint_config",
-      "package",
-      "package_name",
-      "package_private",
-      "package_type",
-      "package_version",
-      "ref_eslint",
-      "ref_eslint_js",
-      "ref_eslint_plugin_react_hooks",
-      "ref_eslint_plugin_react_refresh",
-      "ref_globals",
-      "ref_huggingface_transformers",
-      "ref_pdfjs_dist",
-      "ref_react_dom",
-      "ref_tailwindcss",
-      "ref_types_node",
-      "ref_types_react",
-      "ref_types_react_dom",
-      "ref_typescript",
-      "ref_typescript_eslint"
-    ],
     "6": [
       "src_components_bookreader_listeningpanelprops",
+      "src_components_icon_icon",
       "src_components_lessonschedulewidget",
       "src_components_lessonschedulewidget_bookschedulesection",
       "src_components_lessonschedulewidget_daysdiff",
       "src_components_lessonschedulewidget_fmtdate",
       "src_components_lessonschedulewidget_lessoncard",
+      "src_components_lessonschedulewidget_lessonschedulewidget",
       "src_components_lessonschedulewidget_utcdays",
       "src_data_syllabus",
+      "src_data_syllabus_activebookids",
       "src_data_syllabus_bookid",
       "src_data_syllabus_bookinfo",
       "src_data_syllabus_books",
       "src_data_syllabus_bridge_c1_topics",
       "src_data_syllabus_bridge_c2_topics",
+      "src_data_syllabus_currentlesson",
+      "src_data_syllabus_defaultbookid",
       "src_data_syllabus_essaysection",
       "src_data_syllabus_holiday",
+      "src_data_syllabus_ksttoday",
       "src_data_syllabus_lessonentry",
       "src_data_syllabus_schedule",
       "src_data_syllabus_writing_prompts",
@@ -357,21 +389,21 @@
       "tsconfig_node_include"
     ],
     "9": [
-      "package_devdependencies",
-      "package_devdependencies_eslint",
-      "package_devdependencies_eslint_js",
-      "package_devdependencies_eslint_plugin_react_hooks",
-      "package_devdependencies_eslint_plugin_react_refresh",
-      "package_devdependencies_globals",
-      "package_devdependencies_tailwindcss",
-      "package_devdependencies_tailwindcss_vite",
-      "package_devdependencies_types_node",
-      "package_devdependencies_types_react",
-      "package_devdependencies_types_react_dom",
-      "package_devdependencies_typescript",
-      "package_devdependencies_typescript_eslint",
-      "package_devdependencies_vite",
-      "package_devdependencies_vitejs_plugin_react"
+      "ref_huggingface_transformers",
+      "src_lib_audioalign",
+      "src_lib_audioalign_alignbynw",
+      "src_lib_audioalign_alignchapteraudio",
+      "src_lib_audioalign_alignfromwordtimestamps",
+      "src_lib_audioalign_alignphase",
+      "src_lib_audioalign_alignprogress",
+      "src_lib_audioalign_buildaudiowordlist",
+      "src_lib_audioalign_chunk",
+      "src_lib_audioalign_decodeto16kmono",
+      "src_lib_audioalign_enforcemonotone",
+      "src_lib_audioalign_gettranscriber",
+      "src_lib_audioalign_normword",
+      "src_lib_audioalign_wordtimestamp",
+      "transformers"
     ],
     "10": [
       "ref_node_path",
@@ -405,21 +437,6 @@
       "supabase_functions_ocr_extract_index_vocabrow"
     ],
     "12": [
-      "src_lib_audioalign",
-      "src_lib_audioalign_alignbynw",
-      "src_lib_audioalign_alignchapteraudio",
-      "src_lib_audioalign_alignfromwordtimestamps",
-      "src_lib_audioalign_alignphase",
-      "src_lib_audioalign_alignprogress",
-      "src_lib_audioalign_buildaudiowordlist",
-      "src_lib_audioalign_chunk",
-      "src_lib_audioalign_decodeto16kmono",
-      "src_lib_audioalign_enforcemonotone",
-      "src_lib_audioalign_gettranscriber",
-      "src_lib_audioalign_normword",
-      "src_lib_audioalign_wordtimestamp"
-    ],
-    "13": [
       "scripts_split_book_chapters",
       "scripts_split_book_chapters_chapters",
       "scripts_split_book_chapters_fail",
@@ -433,7 +450,7 @@
       "scripts_split_book_chapters_roman",
       "scripts_split_book_chapters_upserts"
     ],
-    "14": [
+    "13": [
       "scripts_generate_listening_scripts",
       "scripts_generate_listening_scripts_done",
       "scripts_generate_listening_scripts_fail",
@@ -446,7 +463,7 @@
       "scripts_generate_listening_scripts_sbheaders",
       "scripts_generate_listening_scripts_targets"
     ],
-    "15": [
+    "14": [
       "scripts_translate_reading",
       "scripts_translate_reading_book",
       "scripts_translate_reading_fail",
@@ -459,7 +476,7 @@
       "scripts_translate_reading_targets",
       "scripts_translate_reading_translateone"
     ],
-    "16": [
+    "15": [
       "scripts_fix_dropcaps",
       "scripts_fix_dropcaps_count",
       "scripts_fix_dropcaps_fail",
@@ -470,7 +487,7 @@
       "scripts_fix_dropcaps_sentencecasetoken",
       "scripts_fix_dropcaps_upserts"
     ],
-    "17": [
+    "16": [
       "scripts_realign_ch03_ko",
       "scripts_realign_ch03_ko_alignkoreantoenglish",
       "scripts_realign_ch03_ko_main",
@@ -479,80 +496,55 @@
       "scripts_realign_ch03_ko_splittosentences",
       "scripts_realign_ch03_ko_translatebatch"
     ],
-    "18": [
-      "package_dependencies",
-      "package_dependencies_huggingface_transformers",
-      "package_dependencies_pdfjs_dist",
-      "package_dependencies_react",
-      "package_dependencies_react_dom",
-      "package_dependencies_supabase_supabase_js"
-    ],
-    "19": [
-      "package_scripts",
-      "package_scripts_build",
-      "package_scripts_dev",
-      "package_scripts_lint",
-      "package_scripts_preview"
-    ],
-    "20": [
+    "17": [
       "supabase_functions_deepgram_listen_index",
       "supabase_functions_deepgram_listen_index_corsheaders",
       "supabase_functions_deepgram_listen_index_deepgramword",
       "supabase_functions_deepgram_listen_index_extract",
       "supabase_functions_deepgram_listen_index_json"
     ],
-    "21": [
-      "ref_tailwindcss_vite",
-      "ref_vite",
-      "ref_vitejs_plugin_react",
-      "vite_config"
-    ],
-    "22": [
+    "18": [
       "tsconfig",
       "tsconfig_files",
       "tsconfig_references"
     ],
-    "23": [
+    "19": [
       "githooks_post_commit",
       "githooks_post_commit__entry"
     ],
-    "24": [
+    "20": [
       "githooks_pre_push",
       "githooks_pre_push__entry"
     ]
   },
   "cohesion": {
-    "0": 0.056679151061173536,
-    "1": 0.06994535519125683,
-    "2": 0.08906882591093117,
+    "0": 0.05799373040752351,
+    "1": 0.059907834101382486,
+    "2": 0.047872340425531915,
     "3": 0.05855855855855856,
-    "4": 0.09243697478991597,
-    "5": 0.12631578947368421,
-    "6": 0.16374269005847952,
+    "4": 0.10476190476190476,
+    "5": 0.08888888888888889,
+    "6": 0.15,
     "7": 0.10526315789473684,
     "8": 0.1111111111111111,
-    "9": 0.13333333333333333,
+    "9": 0.21904761904761905,
     "10": 0.15384615384615385,
     "11": 0.15384615384615385,
-    "12": 0.2692307692307692,
-    "13": 0.16666666666666666,
-    "14": 0.2,
-    "15": 0.21818181818181817,
-    "16": 0.2777777777777778,
-    "17": 0.5238095238095238,
-    "18": 0.3333333333333333,
-    "19": 0.4,
-    "20": 0.4,
-    "21": 0.5,
-    "22": 0.6666666666666666,
-    "23": 1.0,
-    "24": 1.0
+    "12": 0.16666666666666666,
+    "13": 0.2,
+    "14": 0.21818181818181817,
+    "15": 0.2777777777777778,
+    "16": 0.5238095238095238,
+    "17": 0.4,
+    "18": 0.6666666666666666,
+    "19": 1.0,
+    "20": 1.0
   },
   "gods": [
     {
       "id": "src_components_bookreader_bookreader",
       "label": "BookReader()",
-      "degree": 58
+      "degree": 61
     },
     {
       "id": "src_app_app",
@@ -560,13 +552,13 @@
       "degree": 28
     },
     {
-      "id": "src_components_icon_icon",
-      "label": "Icon()",
+      "id": "src_lib_cloudstorage_csset",
+      "label": "csSet()",
       "degree": 19
     },
     {
-      "id": "src_lib_cloudstorage_csset",
-      "label": "csSet()",
+      "id": "src_components_icon_icon",
+      "label": "Icon()",
       "degree": 19
     },
     {
@@ -602,17 +594,6 @@
   ],
   "surprises": [
     {
-      "source": "loadListeningTimings()",
-      "target": "csGet()",
-      "source_files": [
-        "src/lib/chapterStorage.ts",
-        "src/lib/cloudStorage.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "bridges separate communities; peripheral node `loadListeningTimings()` unexpectedly reaches hub `csGet()`"
-    },
-    {
       "source": "Props",
       "target": "VocabItem",
       "source_files": [
@@ -646,6 +627,17 @@
       "why": "peripheral node `Props` unexpectedly reaches hub `VocabItem`"
     },
     {
+      "source": "VocabProps",
+      "target": "VocabItem",
+      "source_files": [
+        "src/components/ImageUploadInput.tsx",
+        "src/lib/types.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "bridges separate communities"
+    },
+    {
       "source": "ListeningPanelProps",
       "target": "BookId",
       "source_files": [
@@ -664,16 +656,6 @@
       "why": "High betweenness centrality (0.106) - this node is a cross-community bridge."
     },
     {
-      "type": "bridge_node",
-      "question": "Why does `devDependencies` connect `Community 9` to `Community 5`?",
-      "why": "High betweenness centrality (0.038) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `pdfjs-dist` connect `Community 5` to `Community 0`?",
-      "why": "High betweenness centrality (0.022) - this node is a cross-community bridge."
-    },
-    {
       "type": "isolated_nodes",
       "question": "What connects `InitState`, `MobileRowProps`, `RowProps` to the rest of the system?",
       "why": "185 weakly-connected nodes found - possible documentation gaps or missing edges."
@@ -681,17 +663,27 @@
     {
       "type": "low_cohesion",
       "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.056679151061173536 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.05799373040752351 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `pdfjs-dist` connect `Community 2` to `Community 0`?",
+      "why": "High betweenness centrality (0.022) - this node is a cross-community bridge."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 1` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.06994535519125683 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.059907834101382486 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 2` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.08906882591093117 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.047872340425531915 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 3` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05855855855855856 - nodes in this community are weakly interconnected."
     }
   ]
 }
