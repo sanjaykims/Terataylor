@@ -76,7 +76,7 @@ export default function ImageUploadInput(props: Props) {
   // In-flight orientation checks by photo url, so extract() can wait for them.
   const detecting = useRef(new Map<string, Promise<void>>());
 
-  // Ask the server which way up the page is, using a small copy of the photo
+  // Ask the server which way up the page is, using small copies of the photo
   // (a few hundred px is plenty to tell, and keeps this check quick and cheap).
   // The answer is degrees clockwise to turn the photo; a photo the user has
   // already turned by hand is left alone.
@@ -85,9 +85,11 @@ export default function ImageUploadInput(props: Props) {
       let rotation = 0;
       let ok = true;
       try {
-        const small = await compressImage(entry.file, 0, 640);
+        // Four small copies, turned 0/90/180/270 clockwise; the server picks the
+        // one whose text reads upright and answers with that turn.
+        const candidates = await Promise.all([0, 90, 180, 270].map(r => compressImage(entry.file, r, 512)));
         const { data, error: fnErr } = await supabase.functions.invoke('ocr-extract', {
-          body: { images: [small], mode: 'detect_orientation' },
+          body: { images: candidates, mode: 'detect_orientation' },
         });
         if (fnErr) throw new Error(fnErr.message);
         const n = Number(data?.rotation);

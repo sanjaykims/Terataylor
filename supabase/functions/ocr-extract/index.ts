@@ -288,38 +288,40 @@ RULES:
 
     // ── Photo orientation ────────────────────────────────────────────────────
     // A phone photo of a page often arrives on its side or upside down, and text
-    // read sideways is read worse. The client sends ONE small copy of the photo
-    // here first and turns the full image by the answer before the real OCR.
+    // read sideways is read worse. Before the real OCR the client sends FOUR small
+    // copies of the photo — turned 0, 90, 180 and 270 degrees clockwise, in that
+    // order — and this picks the one whose text reads upright. The client then
+    // turns the full photo by that many degrees.
     //
-    // The model is asked WHERE the top of the page is (up / right / down / left),
-    // not "how many degrees clockwise" — asked for the angle it answered 0 for
-    // every photo, however it was turned, because turning a mental image by a
-    // signed angle is the part it gets wrong; naming a side is not. The side is
-    // converted to the clockwise turn here. Anything unclear answers 0 ("leave
-    // it").
+    // Why four images instead of asking about one: asked "how many degrees must
+    // this be turned" the model answered 0 for every photo; asked "which side is
+    // the top on" it caught upside-down but called every sideways page upright.
+    // Judging one rotated page against an imagined upright one is the weak spot;
+    // choosing the upright one out of four is easy. An unclear answer is 0
+    // ("leave it").
     if (mode === 'detect_orientation') {
-      const img = (body.images ?? [])[0];
-      if (!img) {
+      const imgs = body.images ?? [];
+      if (imgs.length !== 4) {
         return new Response(JSON.stringify({ rotation: 0 }), {
           headers: { ...cors, 'Content-Type': 'application/json' },
         });
       }
+      const content: Array<Record<string, unknown>> = [];
+      imgs.forEach((img, i) => {
+        content.push({ type: 'text', text: `Image ${i + 1}:` });
+        content.push({ type: 'image', source: { type: 'base64', media_type: img.type, data: img.data } });
+      });
+      content.push({ type: 'text', text: 'These four images are the SAME photo of a printed page, each turned a different way. In exactly one of them the text reads upright: horizontal lines, read left-to-right and top-to-bottom, letters not rotated or upside down. In the others the text is sideways or upside down.\n\nWhich image has the upright text? Answer with exactly one digit: 1, 2, 3 or 4.' });
       const resp = await client.messages.create({
         model: 'claude-sonnet-5-5',
         max_tokens: 16,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: img.type as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp', data: img.data } },
-            { type: 'text', text: 'This is a photo of a printed page. Find the TOP EDGE of the page — the side where a reader holding it the right way up would see the page header and the first line of text.\n\nWhich side of THIS PHOTO is that top edge on?\n- up: the page is already the right way up\n- right: the page is turned so its top edge is on the right side of the photo (text runs vertically, letter tops pointing right)\n- down: the page is upside down\n- left: the page is turned so its top edge is on the left side of the photo (letter tops pointing left)\n\nAnswer with exactly one word: up, right, down or left.' },
-          ],
-        }],
+        // deno-lint-ignore no-explicit-any
+        messages: [{ role: 'user', content: content as any }],
       });
-      const raw = (resp.content[0].type === 'text' ? resp.content[0].text : '').toLowerCase();
-      const side = raw.match(/\b(up|right|down|left)\b/)?.[1] ?? 'up';
-      // Where the top edge sits -> degrees CLOCKWISE to bring it back to the top.
-      const rotation = ({ up: 0, right: 270, down: 180, left: 90 } as const)[side as 'up' | 'right' | 'down' | 'left'];
-      return new Response(JSON.stringify({ rotation, side }), {
+      const raw = resp.content[0].type === 'text' ? resp.content[0].text : '';
+      const pick = parseInt(raw.match(/[1-4]/)?.[0] ?? '1', 10);
+      const rotation = [0, 90, 180, 270][pick - 1];
+      return new Response(JSON.stringify({ rotation, pick }), {
         headers: { ...cors, 'Content-Type': 'application/json' },
       });
     }
