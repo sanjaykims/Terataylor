@@ -94,7 +94,7 @@ Deno.serve(async (req: Request) => {
       prev?: string;
       next?: string;
       word?: string;
-      mode: 'text' | 'vocab' | 'translate' | 'translate_sentences' | 'translate_one' | 'define_word';
+      mode: 'text' | 'vocab' | 'detect_orientation' | 'translate' | 'translate_sentences' | 'translate_one' | 'define_word';
     };
     const { mode } = body;
 
@@ -286,6 +286,37 @@ RULES:
       });
     }
 
+    // ── Photo orientation ────────────────────────────────────────────────────
+    // A phone photo of a page often arrives on its side or upside down, and text
+    // read sideways is read worse. The client sends ONE small copy of the photo
+    // here first and turns the full image by the answer before the real OCR.
+    // Answer = degrees CLOCKWISE the image must be turned for the text to read
+    // upright (0, 90, 180 or 270). Anything unclear answers 0, i.e. "leave it".
+    if (mode === 'detect_orientation') {
+      const img = (body.images ?? [])[0];
+      if (!img) {
+        return new Response(JSON.stringify({ rotation: 0 }), {
+          headers: { ...cors, 'Content-Type': 'application/json' },
+        });
+      }
+      const resp = await client.messages.create({
+        model: 'claude-sonnet-5-5',
+        max_tokens: 16,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: img.type as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp', data: img.data } },
+            { type: 'text', text: 'Look at the printed text in this photo. By how many degrees CLOCKWISE must the image be rotated so that the text reads upright, left-to-right and top-to-bottom?\n\nIf the text is already upright, answer 0. If the top of the letters points to the right (the image is turned a quarter-turn clockwise), the answer is 270. If the top of the letters points to the left, the answer is 90. If the text is upside down, the answer is 180.\n\nAnswer with exactly one number: 0, 90, 180 or 270. Nothing else.' },
+          ],
+        }],
+      });
+      const raw = resp.content[0].type === 'text' ? resp.content[0].text : '';
+      const n = parseInt(raw.match(/\b(0|90|180|270)\b/)?.[1] ?? '0', 10);
+      return new Response(JSON.stringify({ rotation: n }), {
+        headers: { ...cors, 'Content-Type': 'application/json' },
+      });
+    }
+
     // ── OCR modes (text / vocab) ───────────────────────────────────────────
     const images = body.images ?? [];
     const imageContent = images.map(img => ({
@@ -355,7 +386,7 @@ RULES:
     const prompt = `Extract all English text from these images in reading order.\nIf multiple images, combine in order.\nReturn only the extracted English text with no commentary.`;
 
     const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-sonnet-5-5',
       max_tokens: 4096,
       messages: [{ role: 'user', content: [...imageContent, { type: 'text', text: prompt }] }],
     });

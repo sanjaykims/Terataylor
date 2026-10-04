@@ -15,7 +15,15 @@ type Props = TextProps | VocabProps;
 
 // rot is the quarter-turns the user applied, in degrees clockwise (0/90/180/270).
 // It is applied when the image is flattened for OCR, not to the original file.
-interface ImageEntry { file: File; url: string; rot: number; }
+// auto: where automatic orientation detection stands for this photo.
+//   'pending' = asking the server, 'turned' = it turned the photo, 'upright' =
+//   it was already upright, 'failed' = detection didn't work (photo left as is).
+// manual flips to true the moment the user turns it themselves, after which
+// automatic detection never touches that photo again.
+interface ImageEntry {
+  file: File; url: string; rot: number;
+  auto: 'pending' | 'turned' | 'upright' | 'failed'; manual: boolean;
+}
 
 // Resize + compress to JPEG (keeps Claude API payload small), turning the image
 // by `rot` degrees clockwise on the way. Photos from a phone often arrive on
@@ -65,11 +73,43 @@ export default function ImageUploadInput(props: Props) {
   const [notice, setNotice]     = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
+  // In-flight orientation checks by photo url, so extract() can wait for them.
+  const detecting = useRef(new Map<string, Promise<void>>());
+
+  // Ask the server which way up the page is, using a small copy of the photo
+  // (a few hundred px is plenty to tell, and keeps this check quick and cheap).
+  // The answer is degrees clockwise to turn the photo; a photo the user has
+  // already turned by hand is left alone.
+  const detectOrientation = (entry: ImageEntry) => {
+    const run = async () => {
+      let rotation = 0;
+      let ok = true;
+      try {
+        const small = await compressImage(entry.file, 0, 640);
+        const { data, error: fnErr } = await supabase.functions.invoke('ocr-extract', {
+          body: { images: [small], mode: 'detect_orientation' },
+        });
+        if (fnErr) throw new Error(fnErr.message);
+        const n = Number(data?.rotation);
+        rotation = [0, 90, 180, 270].includes(n) ? n : 0;
+      } catch { ok = false; }
+      setImages(prev => prev.map(e => {
+        if (e.url !== entry.url) return e;
+        if (e.manual) return e;                       // the user got there first
+        return { ...e, rot: rotation, auto: !ok ? 'failed' : rotation === 0 ? 'upright' : 'turned' };
+      }));
+    };
+    const p = run().finally(() => detecting.current.delete(entry.url));
+    detecting.current.set(entry.url, p);
+  };
 
   const addFiles = (files: FileList | null) => {
     if (!files) return;
-    const entries: ImageEntry[] = Array.from(files).map(f => ({ file: f, url: URL.createObjectURL(f), rot: 0 }));
+    const entries: ImageEntry[] = Array.from(files).map(f => ({
+      file: f, url: URL.createObjectURL(f), rot: 0, auto: 'pending' as const, manual: false,
+    }));
     setImages(prev => [...prev, ...entries]);
+    entries.forEach(detectOrientation);
     if (status === 'done') setStatus('idle');
   };
 
@@ -82,7 +122,7 @@ export default function ImageUploadInput(props: Props) {
 
   const rotateImage = (i: number, delta: 90 | -90) => {
     setImages(prev => prev.map((img, j) =>
-      j === i ? { ...img, rot: (img.rot + delta + 360) % 360 } : img));
+      j === i ? { ...img, rot: (img.rot + delta + 360) % 360, manual: true } : img));
   };
 
   const extract = async () => {
@@ -91,7 +131,11 @@ export default function ImageUploadInput(props: Props) {
     setError('');
     setNotice('');
     try {
-      const compressed = await Promise.all(images.map(img => compressImage(img.file, img.rot)));
+      // Let any orientation check still running finish, then read the photos'
+      // CURRENT rotation from state (the closure's copy predates the result).
+      await Promise.all([...detecting.current.values()]);
+      const latest = await new Promise<ImageEntry[]>(resolve => setImages(prev => { resolve(prev); return prev; }));
+      const compressed = await Promise.all(latest.map(img => compressImage(img.file, img.rot)));
       const { data, error: fnErr } = await supabase.functions.invoke('ocr-extract', {
         body: { images: compressed, mode },
       });
@@ -195,7 +239,7 @@ export default function ImageUploadInput(props: Props) {
           which a phone never produces. */}
       {images.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs text-muted">사진이 옆으로 누워 있으면 돌려 주세요. 글자가 바로 서야 더 정확하게 읽혀요.</p>
+          <p className="text-xs text-muted">사진은 자동으로 바로 세워 줘요. 그래도 틀리면 직접 돌려 주세요.</p>
           <div className="grid grid-cols-2 gap-3">
             {images.map((img, i) => (
               <div key={i} className="surface-soft p-2 space-y-2">
@@ -207,6 +251,13 @@ export default function ImageUploadInput(props: Props) {
                     className="w-full h-full object-contain transition-transform duration-200"
                     style={{ transform: `rotate(${img.rot}deg)` }} />
                 </div>
+                <p className="text-[11px] text-muted min-h-[1rem] text-center">
+                  {img.manual ? '직접 돌렸어요'
+                    : img.auto === 'pending' ? '방향 확인 중…'
+                    : img.auto === 'turned' ? '자동으로 바로 세웠어요'
+                    : img.auto === 'upright' ? '방향 확인 완료'
+                    : '자동 인식 실패 · 직접 돌려 주세요'}
+                </p>
                 <div className="flex items-center justify-between gap-1">
                   <button type="button" onClick={() => rotateImage(i, -90)}
                     aria-label={`사진 ${i + 1} 왼쪽으로 돌리기`}
