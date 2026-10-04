@@ -46,6 +46,7 @@
       "src_components_bookreader_translatesentences",
       "src_components_bookreader_trimid3v1",
       "src_components_bookreader_trimmp3bodyattime",
+      "src_components_passageeditor_passageeditor",
       "src_lib_chapterstorage",
       "src_lib_chapterstorage_audiopath",
       "src_lib_chapterstorage_clearbook",
@@ -61,11 +62,9 @@
       "src_lib_chapterstorage_listeningaudiopath",
       "src_lib_chapterstorage_listeningensrckey",
       "src_lib_chapterstorage_loadchapteraudio",
-      "src_lib_chapterstorage_loadchaptercount",
       "src_lib_chapterstorage_loadchapteren",
       "src_lib_chapterstorage_loadchapterko",
       "src_lib_chapterstorage_loadchaptertimings",
-      "src_lib_chapterstorage_loadchaptervocab",
       "src_lib_chapterstorage_loadknowledgemap",
       "src_lib_chapterstorage_loadlisteningaudio",
       "src_lib_chapterstorage_loadlisteningen",
@@ -89,7 +88,6 @@
       "src_lib_cloudstorage_csdel",
       "src_lib_cloudstorage_csdelpattern",
       "src_lib_cloudstorage_csget",
-      "src_lib_cloudstorage_csgetappstate",
       "src_lib_cloudstorage_csgetjson",
       "src_lib_cloudstorage_csgetkeysbypattern",
       "src_lib_cloudstorage_cskeyexists",
@@ -100,14 +98,17 @@
     ],
     "1": [
       "ref_react",
+      "ref_react_dom",
       "src_app",
       "src_app_app",
       "src_app_bookreader",
+      "src_app_gamespanel",
       "src_app_imageuploadinput",
       "src_app_maintab",
       "src_app_progressdashboard",
       "src_app_tabspinner",
       "src_app_v1tab",
+      "src_app_vocabularypanel",
       "src_components_bookreader_listeningpanelprops",
       "src_components_icon",
       "src_components_icon_icon",
@@ -131,7 +132,6 @@
       "src_components_lessonschedulewidget_lessonschedulewidget",
       "src_components_lessonschedulewidget_utcdays",
       "src_components_passageeditor",
-      "src_components_passageeditor_passageeditor",
       "src_components_passageeditor_passageeditorprops",
       "src_data_syllabus",
       "src_data_syllabus_activebookids",
@@ -150,15 +150,18 @@
       "src_data_syllabus_schedule",
       "src_data_syllabus_writing_prompts",
       "src_data_syllabus_writingprompt",
+      "src_index",
+      "src_lib_chapterstorage_loadchaptercount",
+      "src_lib_chapterstorage_loadchaptervocab",
+      "src_lib_cloudstorage_csgetappstate",
       "src_lib_tracker_sessionflush",
       "src_lib_tracker_sessionpause",
+      "src_lib_tracker_sessionresume",
       "src_lib_tracker_sessionsetdetail",
       "src_lib_tracker_sessionswitch",
       "src_main"
     ],
     "2": [
-      "src_app_gamespanel",
-      "src_app_vocabularypanel",
       "src_components_gamespanel",
       "src_components_gamespanel_gamespanel",
       "src_components_gamespanel_gametype",
@@ -214,6 +217,95 @@
       "src_utils_textutils_vocabword"
     ],
     "3": [
+      "eslint_config",
+      "package",
+      "package_dependencies",
+      "package_dependencies_huggingface_transformers",
+      "package_dependencies_pdfjs_dist",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_supabase_supabase_js",
+      "package_devdependencies",
+      "package_devdependencies_eslint",
+      "package_devdependencies_eslint_js",
+      "package_devdependencies_eslint_plugin_react_hooks",
+      "package_devdependencies_eslint_plugin_react_refresh",
+      "package_devdependencies_globals",
+      "package_devdependencies_tailwindcss",
+      "package_devdependencies_tailwindcss_vite",
+      "package_devdependencies_types_node",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_typescript",
+      "package_devdependencies_typescript_eslint",
+      "package_devdependencies_vite",
+      "package_devdependencies_vitejs_plugin_react",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_lint",
+      "package_scripts_preview",
+      "package_type",
+      "package_version",
+      "ref_eslint",
+      "ref_eslint_js",
+      "ref_eslint_plugin_react_hooks",
+      "ref_eslint_plugin_react_refresh",
+      "ref_globals",
+      "ref_pdfjs_dist",
+      "ref_tailwindcss",
+      "ref_tailwindcss_vite",
+      "ref_types_node",
+      "ref_types_react",
+      "ref_types_react_dom",
+      "ref_typescript",
+      "ref_typescript_eslint",
+      "ref_vite",
+      "ref_vitejs_plugin_react",
+      "vite_config"
+    ],
+    "4": [
+      "ref_node_child_process",
+      "ref_node_fs",
+      "scripts_inspect_audio",
+      "scripts_inspect_audio_count",
+      "scripts_inspect_audio_cutdur",
+      "scripts_inspect_audio_headers",
+      "scripts_inspect_audio_mmss",
+      "scripts_split_audiobook",
+      "scripts_split_audiobook_boundaries",
+      "scripts_split_audiobook_buf",
+      "scripts_split_audiobook_candidates",
+      "scripts_split_audiobook_cuts",
+      "scripts_split_audiobook_directdownloadurl",
+      "scripts_split_audiobook_ends",
+      "scripts_split_audiobook_fail",
+      "scripts_split_audiobook_kv",
+      "scripts_split_audiobook_mmss",
+      "scripts_split_audiobook_ones",
+      "scripts_split_audiobook_publicurlof",
+      "scripts_split_audiobook_sbheaders",
+      "scripts_split_audiobook_srcurlraw",
+      "scripts_split_audiobook_starts",
+      "scripts_split_audiobook_teens",
+      "scripts_split_audiobook_tok",
+      "scripts_split_audiobook_total",
+      "scripts_split_audiobook_word2num",
+      "scripts_trim_audio_head",
+      "scripts_trim_audio_head_cut",
+      "scripts_trim_audio_head_dur",
+      "scripts_trim_audio_head_fail",
+      "scripts_trim_audio_head_findannouncement",
+      "scripts_trim_audio_head_inbuf",
+      "scripts_trim_audio_head_lesson",
+      "scripts_trim_audio_head_mmss",
+      "scripts_trim_audio_head_numberforms",
+      "scripts_trim_audio_head_sbheaders",
+      "scripts_trim_audio_head_targetch"
+    ],
+    "5": [
       "ref_supabase_supabase_js",
       "src_components_progressdashboard",
       "src_components_progressdashboard_book_labels",
@@ -245,34 +337,12 @@
       "src_lib_tracker_fetchvocabprogress",
       "src_lib_tracker_gamescore",
       "src_lib_tracker_segstart",
-      "src_lib_tracker_sessionresume",
       "src_lib_tracker_studysession",
       "src_lib_tracker_tracksession",
       "src_lib_tracker_vocablocks",
       "src_lib_tracker_vocabprogress"
     ],
-    "4": [
-      "scripts_split_audiobook",
-      "scripts_split_audiobook_boundaries",
-      "scripts_split_audiobook_buf",
-      "scripts_split_audiobook_candidates",
-      "scripts_split_audiobook_cuts",
-      "scripts_split_audiobook_directdownloadurl",
-      "scripts_split_audiobook_ends",
-      "scripts_split_audiobook_fail",
-      "scripts_split_audiobook_kv",
-      "scripts_split_audiobook_mmss",
-      "scripts_split_audiobook_ones",
-      "scripts_split_audiobook_publicurlof",
-      "scripts_split_audiobook_sbheaders",
-      "scripts_split_audiobook_srcurlraw",
-      "scripts_split_audiobook_starts",
-      "scripts_split_audiobook_teens",
-      "scripts_split_audiobook_tok",
-      "scripts_split_audiobook_total",
-      "scripts_split_audiobook_word2num"
-    ],
-    "5": [
+    "6": [
       "tsconfig_app",
       "tsconfig_app_compileroptions",
       "tsconfig_app_compileroptions_allowimportingtsextensions",
@@ -293,7 +363,7 @@
       "tsconfig_app_compileroptions_verbatimmodulesyntax",
       "tsconfig_app_include"
     ],
-    "6": [
+    "7": [
       "tsconfig_node",
       "tsconfig_node_compileroptions",
       "tsconfig_node_compileroptions_allowimportingtsextensions",
@@ -313,40 +383,8 @@
       "tsconfig_node_compileroptions_verbatimmodulesyntax",
       "tsconfig_node_include"
     ],
-    "7": [
-      "package_devdependencies",
-      "package_devdependencies_eslint",
-      "package_devdependencies_eslint_js",
-      "package_devdependencies_eslint_plugin_react_hooks",
-      "package_devdependencies_eslint_plugin_react_refresh",
-      "package_devdependencies_globals",
-      "package_devdependencies_tailwindcss",
-      "package_devdependencies_tailwindcss_vite",
-      "package_devdependencies_types_node",
-      "package_devdependencies_types_react",
-      "package_devdependencies_types_react_dom",
-      "package_devdependencies_typescript",
-      "package_devdependencies_typescript_eslint",
-      "package_devdependencies_vite",
-      "package_devdependencies_vitejs_plugin_react"
-    ],
     "8": [
-      "package",
-      "package_name",
-      "package_private",
-      "package_type",
-      "package_version",
-      "ref_eslint",
       "ref_huggingface_transformers",
-      "ref_pdfjs_dist",
-      "ref_react_dom",
-      "ref_tailwindcss",
-      "ref_types_node",
-      "ref_types_react",
-      "ref_types_react_dom",
-      "ref_typescript"
-    ],
-    "9": [
       "src_lib_audioalign",
       "src_lib_audioalign_alignbynw",
       "src_lib_audioalign_alignchapteraudio",
@@ -359,10 +397,10 @@
       "src_lib_audioalign_enforcemonotone",
       "src_lib_audioalign_gettranscriber",
       "src_lib_audioalign_normword",
-      "src_lib_audioalign_wordtimestamp",
-      "transformers"
+      "src_lib_audioalign_wordtimestamp"
     ],
-    "10": [
+    "9": [
+      "ref_node_path",
       "scripts_upload_bridge_audio",
       "scripts_upload_bridge_audio_books",
       "scripts_upload_bridge_audio_fail",
@@ -377,7 +415,7 @@
       "scripts_upload_bridge_audio_seen",
       "scripts_upload_bridge_audio_slot"
     ],
-    "11": [
+    "10": [
       "scripts_split_book_chapters",
       "scripts_split_book_chapters_chapters",
       "scripts_split_book_chapters_fail",
@@ -390,6 +428,19 @@
       "scripts_split_book_chapters_ranges",
       "scripts_split_book_chapters_roman",
       "scripts_split_book_chapters_upserts"
+    ],
+    "11": [
+      "ref_jsr_supabase",
+      "ref_npm_anthropic_ai",
+      "supabase_functions_merge_audio_index",
+      "supabase_functions_merge_audio_index_bytespersec",
+      "supabase_functions_merge_audio_index_cors",
+      "supabase_functions_merge_audio_index_findsync",
+      "supabase_functions_merge_audio_index_skipid3v2",
+      "supabase_functions_merge_audio_index_trimid3v1",
+      "supabase_functions_ocr_extract_index",
+      "supabase_functions_ocr_extract_index_cors",
+      "supabase_functions_ocr_extract_index_lookslikemetareply"
     ],
     "12": [
       "scripts_generate_listening_scripts",
@@ -405,19 +456,6 @@
       "scripts_generate_listening_scripts_targets"
     ],
     "13": [
-      "scripts_trim_audio_head",
-      "scripts_trim_audio_head_cut",
-      "scripts_trim_audio_head_dur",
-      "scripts_trim_audio_head_fail",
-      "scripts_trim_audio_head_findannouncement",
-      "scripts_trim_audio_head_inbuf",
-      "scripts_trim_audio_head_lesson",
-      "scripts_trim_audio_head_mmss",
-      "scripts_trim_audio_head_numberforms",
-      "scripts_trim_audio_head_sbheaders",
-      "scripts_trim_audio_head_targetch"
-    ],
-    "14": [
       "scripts_fix_dropcaps",
       "scripts_fix_dropcaps_count",
       "scripts_fix_dropcaps_fail",
@@ -428,7 +466,7 @@
       "scripts_fix_dropcaps_sentencecasetoken",
       "scripts_fix_dropcaps_upserts"
     ],
-    "15": [
+    "14": [
       "scripts_realign_ch03_ko",
       "scripts_realign_ch03_ko_alignkoreantoenglish",
       "scripts_realign_ch03_ko_main",
@@ -437,119 +475,67 @@
       "scripts_realign_ch03_ko_splittosentences",
       "scripts_realign_ch03_ko_translatebatch"
     ],
-    "16": [
-      "eslint_config",
-      "ref_eslint_js",
-      "ref_eslint_plugin_react_hooks",
-      "ref_eslint_plugin_react_refresh",
-      "ref_globals",
-      "ref_typescript_eslint"
-    ],
-    "17": [
-      "package_dependencies",
-      "package_dependencies_huggingface_transformers",
-      "package_dependencies_pdfjs_dist",
-      "package_dependencies_react",
-      "package_dependencies_react_dom",
-      "package_dependencies_supabase_supabase_js"
-    ],
-    "18": [
-      "supabase_functions_merge_audio_index",
-      "supabase_functions_merge_audio_index_bytespersec",
-      "supabase_functions_merge_audio_index_cors",
-      "supabase_functions_merge_audio_index_findsync",
-      "supabase_functions_merge_audio_index_skipid3v2",
-      "supabase_functions_merge_audio_index_trimid3v1"
-    ],
-    "19": [
-      "package_scripts",
-      "package_scripts_build",
-      "package_scripts_dev",
-      "package_scripts_lint",
-      "package_scripts_preview"
-    ],
-    "20": [
-      "scripts_inspect_audio",
-      "scripts_inspect_audio_count",
-      "scripts_inspect_audio_cutdur",
-      "scripts_inspect_audio_headers",
-      "scripts_inspect_audio_mmss"
-    ],
-    "21": [
+    "15": [
       "supabase_functions_deepgram_listen_index",
       "supabase_functions_deepgram_listen_index_corsheaders",
       "supabase_functions_deepgram_listen_index_deepgramword",
       "supabase_functions_deepgram_listen_index_extract",
       "supabase_functions_deepgram_listen_index_json"
     ],
-    "22": [
-      "ref_tailwindcss_vite",
-      "ref_vite",
-      "ref_vitejs_plugin_react",
-      "vite_config"
-    ],
-    "23": [
-      "supabase_functions_ocr_extract_index",
-      "supabase_functions_ocr_extract_index_cors",
-      "supabase_functions_ocr_extract_index_lookslikemetareply"
-    ],
-    "24": [
+    "16": [
       "tsconfig",
       "tsconfig_files",
       "tsconfig_references"
     ],
-    "25": [
+    "17": [
       "githooks_post_commit",
       "githooks_post_commit__entry"
     ],
-    "26": [
+    "18": [
       "githooks_pre_push",
       "githooks_pre_push__entry"
     ]
   },
   "cohesion": {
-    "0": 0.05350877192982456,
-    "1": 0.06883116883116883,
-    "2": 0.06666666666666667,
-    "3": 0.0873015873015873,
-    "4": 0.10526315789473684,
-    "5": 0.10526315789473684,
-    "6": 0.1111111111111111,
-    "7": 0.13333333333333333,
-    "8": 0.14285714285714285,
-    "9": 0.24175824175824176,
+    "0": 0.055822466254861584,
+    "1": 0.0670762928827445,
+    "2": 0.07329462989840348,
+    "3": 0.047872340425531915,
+    "4": 0.05855855855855856,
+    "5": 0.09243697478991597,
+    "6": 0.10526315789473684,
+    "7": 0.1111111111111111,
+    "8": 0.24175824175824176,
+    "9": 0.15384615384615385,
     "10": 0.16666666666666666,
-    "11": 0.16666666666666666,
+    "11": 0.18181818181818182,
     "12": 0.2,
-    "13": 0.2,
-    "14": 0.2777777777777778,
-    "15": 0.5238095238095238,
-    "16": 0.3333333333333333,
-    "17": 0.3333333333333333,
-    "18": 0.3333333333333333,
-    "19": 0.4,
-    "20": 0.4,
-    "21": 0.4,
-    "22": 0.5,
-    "23": 0.6666666666666666,
-    "24": 0.6666666666666666,
-    "25": 1.0,
-    "26": 1.0
+    "13": 0.2777777777777778,
+    "14": 0.5238095238095238,
+    "15": 0.4,
+    "16": 0.6666666666666666,
+    "17": 1.0,
+    "18": 1.0
   },
   "gods": [
     {
       "id": "src_components_bookreader_bookreader",
       "label": "BookReader()",
-      "degree": 52
+      "degree": 58
     },
     {
       "id": "src_app_app",
       "label": "App()",
-      "degree": 20
+      "degree": 28
     },
     {
       "id": "src_lib_cloudstorage_csset",
       "label": "csSet()",
+      "degree": 19
+    },
+    {
+      "id": "src_components_icon_icon",
+      "label": "Icon()",
       "degree": 19
     },
     {
@@ -568,6 +554,11 @@
       "degree": 15
     },
     {
+      "id": "src_components_progressdashboard_progressdashboard",
+      "label": "ProgressDashboard()",
+      "degree": 14
+    },
+    {
       "id": "src_lib_types_vocabitem",
       "label": "VocabItem",
       "degree": 13
@@ -576,16 +567,6 @@
       "id": "ref_react",
       "label": "react",
       "degree": 13
-    },
-    {
-      "id": "src_lib_cloudstorage_csdel",
-      "label": "csDel()",
-      "degree": 12
-    },
-    {
-      "id": "src_components_progressdashboard_progressdashboard",
-      "label": "ProgressDashboard()",
-      "degree": 12
     }
   ],
   "surprises": [
@@ -648,38 +629,38 @@
   "questions": [
     {
       "type": "bridge_node",
-      "question": "Why does `react` connect `Community 1` to `Community 8`, `Community 0`, `Community 2`, `Community 3`?",
-      "why": "High betweenness centrality (0.117) - this node is a cross-community bridge."
+      "question": "Why does `react` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 5`?",
+      "why": "High betweenness centrality (0.112) - this node is a cross-community bridge."
     },
     {
       "type": "bridge_node",
-      "question": "Why does `devDependencies` connect `Community 7` to `Community 8`?",
-      "why": "High betweenness centrality (0.041) - this node is a cross-community bridge."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `pdfjs-dist` connect `Community 8` to `Community 0`?",
-      "why": "High betweenness centrality (0.024) - this node is a cross-community bridge."
+      "question": "Why does `pdfjs-dist` connect `Community 3` to `Community 0`?",
+      "why": "High betweenness centrality (0.023) - this node is a cross-community bridge."
     },
     {
       "type": "isolated_nodes",
       "question": "What connects `InitState`, `MobileRowProps`, `RowProps` to the rest of the system?",
-      "why": "182 weakly-connected nodes found - possible documentation gaps or missing edges."
+      "why": "179 weakly-connected nodes found - possible documentation gaps or missing edges."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.05350877192982456 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.055822466254861584 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 1` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.06883116883116883 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.0670762928827445 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
       "question": "Should `Community 2` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.07329462989840348 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 3` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.047872340425531915 - nodes in this community are weakly interconnected."
     }
   ]
 }
