@@ -1,0 +1,36 @@
+name: Translate Reading Passages
+
+# Fills the Korean column for reading passages that have English but no Korean
+# (default book: bridge_c1). Never overwrites an existing translation.
+# Trigger: push a branch named translate-reading/** (dispatching needs a token
+# the automation here doesn't have), or run it by hand from the Actions tab.
+
+on:
+  push:
+    branches: ['translate-reading/**']
+  workflow_dispatch:
+    inputs:
+      book:        { description: 'Book id', default: 'bridge_c1' }
+      only_lesson: { description: 'One lesson number (empty = all)', default: '' }
+      force:       { description: 'Re-translate even if Korean exists', type: boolean, default: false }
+      dry_run:     { description: 'List only', type: boolean, default: false }
+
+concurrency:
+  group: translate-reading
+  cancel-in-progress: false
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Translate
+        env:
+          BOOK: ${{ inputs.book || 'bridge_c1' }}
+          ONLY_LESSON: ${{ inputs.only_lesson }}
+          FORCE: ${{ inputs.force && '1' || '0' }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+        run: node scripts/translate-reading.mjs

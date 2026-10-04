@@ -83,7 +83,8 @@ export const BOOKS: Record<BookId, BookInfo> = {
     badgeAbbr: 'C1',
     scheduleColor: 'var(--danger, #db2777)',
     lessonCount: 13, // 13-week Bridge C1 syllabus (see BRIDGE_C1_TOPICS below)
-    hideTranslation: true, // C1 trains analytical reading in English — no Korean crutch
+    // C1's reading shows the Korean translation beside the English like every
+    // other book (hideTranslation was previously on, for English-only reading).
   },
   bridge_c2: {
     id: 'bridge_c2',

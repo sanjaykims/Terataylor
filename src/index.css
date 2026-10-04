@@ -609,3 +609,10 @@ h1, h2, h3, h4 { margin: 0; }
 .sentence-active { animation: sentence-pulse 1.6s ease-in-out infinite; }
 .animate-rise { animation: rise-in .4s var(--ease-out) both; }
 @keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* `.seg` sets display itself, and it is declared after Tailwind's utilities, so
+   `sm:hidden` on a .seg never took effect: the phone-only EN/KO switch showed on
+   a computer too, next to the two-column view it exists to replace. */
+@media (min-width: 640px) {
+  .seg.sm\:hidden { display: none; }
+}
