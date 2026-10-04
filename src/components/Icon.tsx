@@ -12,7 +12,7 @@ export type IconName =
   | 'trash' | 'copy' | 'refresh'
   | 'headphones' | 'book' | 'chart'
   | 'moon' | 'camera' | 'document' | 'globe' | 'mic' | 'repeat' | 'target'
-  | 'calendar' | 'pin' | 'check';
+  | 'calendar' | 'pin' | 'check' | 'rotate' | 'image';
 
 const STROKE: SVGProps<SVGSVGElement> = {
   fill: 'none',
@@ -46,6 +46,9 @@ const PATHS: Record<IconName, { solid?: boolean; el: React.ReactNode }> = {
   calendar:{ el: <><rect x="4" y="5.5" width="16" height="15" rx="2.2" /><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" /></> },
   pin:    { el: <><path d="M12 21s6.5-5.8 6.5-11a6.5 6.5 0 1 0-13 0C5.5 15.2 12 21 12 21Z" /><circle cx="12" cy="10" r="2.4" /></> },
   check:  { el: <path d="m5 12.5 4.5 4.5L19 7" /> },
+  // Clockwise quarter-turn: an open circle with an arrowhead at the top right.
+  rotate: { el: <><path d="M20 12.5a8 8 0 1 1-2.7-6" /><path d="M20.5 3.8v4.7H15.8" /></> },
+  image:  { el: <><rect x="3.5" y="4.5" width="17" height="15" rx="2.2" /><circle cx="9" cy="10" r="1.7" /><path d="m4.5 18 4.8-4.8 3.2 3.2 2.6-2.6 4.4 4.4" /></> },
 };
 
 export default function Icon({

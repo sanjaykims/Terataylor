@@ -13,24 +13,42 @@ interface TextProps  extends BaseProps { mode: 'text';  onExtracted: (text: stri
 interface VocabProps extends BaseProps { mode: 'vocab'; onExtracted: (items: VocabItem[]) => void; }
 type Props = TextProps | VocabProps;
 
-interface ImageEntry { file: File; url: string; }
+// rot is the quarter-turns the user applied, in degrees clockwise (0/90/180/270).
+// It is applied when the image is flattened for OCR, not to the original file.
+interface ImageEntry { file: File; url: string; rot: number; }
 
-// Resize + compress to JPEG (keeps Claude API payload small)
-function compressImage(file: File, maxPx = 1400): Promise<{ data: string; type: string }> {
-  return new Promise(resolve => {
+// Resize + compress to JPEG (keeps Claude API payload small), turning the image
+// by `rot` degrees clockwise on the way. Photos from a phone often arrive on
+// their side; OCR reads a sideways page far worse than an upright one, so the
+// rotation has to be baked into the pixels that get sent, not just the preview.
+function compressImage(file: File, rot = 0, maxPx = 1400): Promise<{ data: string; type: string }> {
+  return new Promise((resolve, reject) => {
     const img = new Image();
     const blobUrl = URL.createObjectURL(file);
     img.onload = () => {
       const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const w = Math.round(img.width  * scale);
+      const h = Math.round(img.height * scale);
+      // A quarter-turn swaps the canvas's width and height.
+      const sideways = rot % 180 !== 0;
       const canvas = document.createElement('canvas');
-      canvas.width  = Math.round(img.width  * scale);
-      canvas.height = Math.round(img.height * scale);
-      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.width  = sideways ? h : w;
+      canvas.height = sideways ? w : h;
+      const ctx = canvas.getContext('2d')!;
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((rot * Math.PI) / 180);
+      ctx.drawImage(img, -w / 2, -h / 2, w, h);
       URL.revokeObjectURL(blobUrl);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
       const [header, data] = dataUrl.split(',');
       const type = header.match(/data:([^;]+)/)?.[1] ?? 'image/jpeg';
       resolve({ data, type });
+    };
+    // Without this, a file the browser can't decode (some phone formats such as
+    // HEIC) left the promise pending forever and the button stuck on "분석 중".
+    img.onerror = () => {
+      URL.revokeObjectURL(blobUrl);
+      reject(new Error('이 사진을 열 수 없어요. JPG 또는 PNG 사진으로 다시 시도해 주세요.'));
     };
     img.src = blobUrl;
   });
@@ -44,10 +62,11 @@ export default function ImageUploadInput(props: Props) {
   const [vocabRows, setVocabRows] = useState<VocabItem[]>([]);
   const [error, setError]       = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const addFiles = (files: FileList | null) => {
     if (!files) return;
-    const entries: ImageEntry[] = Array.from(files).map(f => ({ file: f, url: URL.createObjectURL(f) }));
+    const entries: ImageEntry[] = Array.from(files).map(f => ({ file: f, url: URL.createObjectURL(f), rot: 0 }));
     setImages(prev => [...prev, ...entries]);
     if (status === 'done') setStatus('idle');
   };
@@ -59,12 +78,17 @@ export default function ImageUploadInput(props: Props) {
     });
   };
 
+  const rotateImage = (i: number, delta: 90 | -90) => {
+    setImages(prev => prev.map((img, j) =>
+      j === i ? { ...img, rot: (img.rot + delta + 360) % 360 } : img));
+  };
+
   const extract = async () => {
     if (!images.length) return;
     setStatus('extracting');
     setError('');
     try {
-      const compressed = await Promise.all(images.map(img => compressImage(img.file)));
+      const compressed = await Promise.all(images.map(img => compressImage(img.file, img.rot)));
       const { data, error: fnErr } = await supabase.functions.invoke('ocr-extract', {
         body: { images: compressed, mode },
       });
@@ -125,38 +149,72 @@ export default function ImageUploadInput(props: Props) {
       </div>
       {hint && <p className="text-xs text-muted">{hint}</p>}
 
-      {/* Drop zone — a real keyboard-operable control (role=button + Enter/Space) */}
+      {/* Picker. Tapping the zone opens the phone's photo gallery (multiple
+          selection); a drag-and-drop still works on a computer. A second,
+          separate button opens the camera directly, since "choose from gallery"
+          and "take one now" are different intents on a phone. */}
       <div
         role="button" tabIndex={0}
-        aria-label={`${label} 업로드`}
+        aria-label={`${label} 사진 선택`}
         onClick={() => fileRef.current?.click()}
         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileRef.current?.click(); } }}
         onDragOver={e => e.preventDefault()}
         onDrop={e => { e.preventDefault(); addFiles(e.dataTransfer.files); }}
         className="border-2 border-dashed border-violet-200 rounded-xl p-5 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50/60 transition-[border-color,background-color] select-none"
       >
-        <Icon name={mode === 'text' ? 'document' : 'camera'} className="h-8 w-8 mx-auto mb-1.5 text-violet-400" />
-        <div className="text-sm text-gray-500 font-medium">클릭하거나 사진을 드래그</div>
-        <div className="text-xs text-muted mt-0.5">여러 장 선택 가능</div>
+        <Icon name="image" className="h-8 w-8 mx-auto mb-1.5 text-violet-400" />
+        <div className="text-sm text-gray-600 font-semibold">갤러리에서 사진 선택</div>
+        <div className="text-xs text-muted mt-0.5">여러 장 선택할 수 있어요 · 컴퓨터에서는 끌어다 놓아도 돼요</div>
         <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
-          onChange={e => addFiles(e.target.files)} />
+          onChange={e => { addFiles(e.target.files); e.target.value = ''; }} />
       </div>
+      <button type="button" onClick={() => cameraRef.current?.click()}
+        className="btn-soft w-full min-h-[44px] text-sm inline-flex items-center justify-center gap-2">
+        <Icon name="camera" className="h-4 w-4" /> 카메라로 바로 찍기
+      </button>
+      <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
+        onChange={e => { addFiles(e.target.files); e.target.value = ''; }} />
 
-      {/* Thumbnails */}
+      {/* Thumbnails — each can be turned before it is read. The controls are
+          always visible: the old remove button only appeared on mouse hover,
+          which a phone never produces. */}
       {images.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {images.map((img, i) => (
-            <div key={i} className="relative group">
-              <img src={img.url} alt="" className="w-20 h-20 object-cover rounded-xl border-2 border-violet-200" />
-              <button onClick={() => removeImage(i)}
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                ×
-              </button>
-            </div>
-          ))}
-          <button onClick={() => fileRef.current?.click()}
-            className="w-20 h-20 border-2 border-dashed border-violet-200 rounded-xl flex items-center justify-center text-violet-300 hover:border-violet-400 hover:text-violet-500 text-2xl">
-            +
+        <div className="space-y-2">
+          <p className="text-xs text-muted">사진이 옆으로 누워 있으면 돌려 주세요. 글자가 바로 서야 더 정확하게 읽혀요.</p>
+          <div className="grid grid-cols-2 gap-3">
+            {images.map((img, i) => (
+              <div key={i} className="surface-soft p-2 space-y-2">
+                {/* Square stage so a turned image never overflows its card;
+                    object-contain shows the whole page rather than a crop. */}
+                <div className="aspect-square w-full overflow-hidden rounded-lg flex items-center justify-center"
+                  style={{ background: 'var(--paper-3)' }}>
+                  <img src={img.url} alt={`사진 ${i + 1}`}
+                    className="w-full h-full object-contain transition-transform duration-200"
+                    style={{ transform: `rotate(${img.rot}deg)` }} />
+                </div>
+                <div className="flex items-center justify-between gap-1">
+                  <button type="button" onClick={() => rotateImage(i, -90)}
+                    aria-label={`사진 ${i + 1} 왼쪽으로 돌리기`}
+                    className="btn-soft min-w-[44px] min-h-[44px] inline-flex items-center justify-center">
+                    <Icon name="rotate" className="h-5 w-5" style={{ transform: 'scaleX(-1)' }} />
+                  </button>
+                  <button type="button" onClick={() => rotateImage(i, 90)}
+                    aria-label={`사진 ${i + 1} 오른쪽으로 돌리기`}
+                    className="btn-soft min-w-[44px] min-h-[44px] inline-flex items-center justify-center">
+                    <Icon name="rotate" className="h-5 w-5" />
+                  </button>
+                  <button type="button" onClick={() => removeImage(i)}
+                    aria-label={`사진 ${i + 1} 삭제`}
+                    className="btn-soft min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-red-600">
+                    <Icon name="trash" className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <button type="button" onClick={() => fileRef.current?.click()}
+            className="btn-soft w-full min-h-[44px] text-sm">
+            + 사진 더 추가
           </button>
         </div>
       )}
